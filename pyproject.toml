@@ -1,6 +1,7 @@
 [build-system]
 # One pinned build tool (the same version claim-seal pins). Composer itself has one runtime
-# dependency: claim-seal, pinned to an exact commit below.
+# dependency: claim-seal, pinned to an exact commit below. It is fetched as GitHub's archive of
+# that commit (so no git is needed on your machine), and pip checks the archive's SHA-256.
 requires = ["setuptools==84.2.1"]
 build-backend = "setuptools.build_meta"
 
@@ -13,7 +14,7 @@ license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.10"
 dependencies = [
-  "claim-seal @ git+https://github.com/lensmith-ai/claim-seal@f0e0a90ab62532a498f63bb7887e079bd0dc8641",
+  "claim-seal @ https://github.com/lensmith-ai/claim-seal/archive/f0e0a90ab62532a498f63bb7887e079bd0dc8641.tar.gz#sha256=d8b1884a5927d01915b0057b5994884385d33665d370e3229258deea13b559c5",
 ]
 
 [project.scripts]

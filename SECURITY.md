@@ -69,3 +69,6 @@ each attack run on the reviewer's own machine. Fixed, each with a regression tes
 - Smaller hardening: the pages print only http(s) addresses as links; a feed can no longer
   write the prompt's own source markers; and a model endpoint that echoes your key back in an
   error message no longer gets it printed or sent to the page.
+- claim-seal, the one dependency, was installed with git from a pinned commit, so nothing
+  checked the download (and `pip install .` failed on a machine without git). It is now GitHub's
+  archive of the same commit, and pip refuses it unless its SHA-256 matches.

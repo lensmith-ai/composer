@@ -378,6 +378,23 @@ class LinkSchemeTests(unittest.TestCase):
         self.assertIn(r"/^https?:\/\//i.test(x.url)", js)
 
 
+class SupplyChainTests(unittest.TestCase):
+    """L5: claim-seal was a git+https dependency, so `pip install .` failed on a machine without git
+    (most fresh laptops) and nothing checked what was downloaded. It is now the commit's archive
+    with its SHA-256, and the build tool is pinned to one version."""
+
+    def test_dependencies_are_pinned_by_commit_and_hash(self):
+        import re
+        text = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+        self.assertRegex(text, r'requires = \["setuptools==\d+\.\d+\.\d+"\]')
+        deps = re.search(r"dependencies = \[(.*?)\]", text, re.S).group(1)
+        lines = [x.strip().strip(",").strip('"') for x in deps.strip().splitlines() if x.strip()]
+        self.assertEqual(len(lines), 1)
+        self.assertRegex(lines[0], r"^claim-seal @ https://github\.com/lensmith-ai/claim-seal/archive/[0-9a-f]{40}\.tar\.gz"
+                                   r"#sha256=[0-9a-f]{64}$")
+        self.assertNotIn("git+", text)
+
+
 class DemoPageLayoutTests(unittest.TestCase):
     """The demo page on a laptop: the phone stands centred with the title, a note and the links;
     the window is a fixed 390 px phone screen; a wide browser opening the window alone is sent to
