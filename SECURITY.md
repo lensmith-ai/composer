@@ -15,11 +15,14 @@ What Composer does to stay safe, and where its limits are:
 - **Fetching.** Only `https://` sources can be registered, and every fetch stays on https (a
   redirect to `http://` is refused; at most 5 redirects). Composer will not connect to this
   machine or a private network (loopback, `10.x`, `192.168.x`, link-local such as
-  `169.254.169.254` where cloud servers keep credentials): the address the connection actually
-  reached is checked before anything is sent, so a redirect or a name that changes its address
-  (DNS rebinding) cannot get there either. `COMPOSER_ALLOW_PRIVATE_FETCH=1` turns this off, for
-  a feed on your own network. Feed and page bodies over 2 MB are refused, and a fetch stops
-  after 60 seconds in total however slowly the bytes arrive (handshake, headers or body).
+  `169.254.169.254` where cloud servers keep credentials): a name is resolved once, every
+  address it gives must be public, and Composer connects only to those addresses, so a redirect
+  or a name that changes its answer (DNS rebinding) cannot get there either. Proxy settings
+  (`HTTPS_PROXY` and the like) are not used for feeds, because a proxy resolves names itself.
+  `COMPOSER_ALLOW_PRIVATE_FETCH=1` turns the address rule off, for a feed on your own network.
+  Feed and page bodies over 2 MB are refused, as are bodies shorter than they said and gzip
+  streams that stop early, and a fetch stops after 60 seconds in total however slowly anything
+  arrives (name lookup, connecting, handshake, headers or body).
   Feeds that declare XML entities are refused, in any encoding. Markup is read with scans that
   take time in proportion to its size, so a page full of unclosed tags cannot stall a brief. An
   `html-index` source only follows links on the hosts and paths you list.
@@ -72,3 +75,14 @@ each attack run on the reviewer's own machine. Fixed, each with a regression tes
 - claim-seal, the one dependency, was installed with git from a pinned commit, so nothing
   checked the download (and `pip install .` failed on a machine without git). It is now GitHub's
   archive of the same commit, and pip refuses it unless its SHA-256 matches.
+
+**2026-11-01, second opinion** (an independent reviewer attacking the fixes above). Fixed, with
+tests: a configured proxy could resolve a name to a private address after Composer had checked
+it (proxies are now not used for feeds); the meta-description scan was still quadratic for one
+tag with many repeated attributes (tags are now read by a one-pass scanner, no regex); slow name
+lookups and connection attempts could outlast the total time limit (both now get only the time
+left, and every address is checked before any connection); a body shorter than its
+Content-Length or a cut-off gzip stream was accepted (now refused); a key echoed exactly at the
+200-character cut of an error message could leave a prefix (it is now removed before the cut);
+and the server's Host check accepted text after an IPv6 address in brackets, and duplicate
+headers (it now accepts exactly one local authority and one of each header).

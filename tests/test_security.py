@@ -45,11 +45,11 @@ class PublicAddressTests(unittest.TestCase):
             with self.subTest(addr=addr):
                 self.assertTrue(fetch.is_public_address(addr))
 
-    def _listener(self):
+    def _listener(self, wait=5):
         sock = socket.socket()
         sock.bind(("127.0.0.1", 0))
         sock.listen(4)
-        sock.settimeout(5)
+        sock.settimeout(wait)
         self.addCleanup(sock.close)
         received = []
 
@@ -72,12 +72,43 @@ class PublicAddressTests(unittest.TestCase):
     def test_a_connection_to_this_machine_is_refused_before_anything_is_sent(self):
         for host in ("127.0.0.1", "localhost"):
             with self.subTest(host=host):
-                port, received, t = self._listener()
+                port, received, t = self._listener(wait=1)
                 with self.assertRaises(fetch.FetchError) as ctx:
                     fetch.http_get(f"https://{host}:{port}/feed.xml", 5)
                 self.assertIn("this machine or a private network", str(ctx.exception))
-                t.join(5)
-                self.assertEqual(received, [b""], "no TLS hello or request may reach a private address")
+                t.join(3)
+                self.assertEqual(received, [], "not even a TCP connection may reach a private address")
+
+    def test_one_private_answer_refuses_the_name_and_nothing_connects(self):
+        port, received, t = self._listener(wait=1)
+        answers = [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("8.8.8.8", port)),
+                   (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("127.0.0.1", port))]
+        with mock.patch("socket.getaddrinfo", return_value=answers):
+            with self.assertRaises(fetch.FetchError) as ctx:
+                fetch.http_get(f"https://mixed.invalid:{port}/", 5)
+        self.assertIn("private network", str(ctx.exception))
+        t.join(3)
+        self.assertEqual(received, [])
+
+    def test_proxy_settings_are_ignored(self):
+        # A proxy resolves names itself and could reach what the address check refused (found by
+        # the second-opinion review). HTTPS_PROXY must not be used: the "proxy" here would record
+        # a CONNECT; instead the fetch goes direct and is refused as private.
+        proxy_port, proxied, pt = self._listener(wait=1)
+        with mock.patch.dict(os.environ, {"HTTPS_PROXY": f"http://127.0.0.1:{proxy_port}",
+                                          "https_proxy": f"http://127.0.0.1:{proxy_port}"}):
+            with self.assertRaises(fetch.FetchError) as ctx:
+                fetch.http_get("https://127.0.0.1:9/feed.xml", 3)
+        self.assertIn("private network", str(ctx.exception))
+        pt.join(3)
+        self.assertEqual(proxied, [], "the proxy must not be contacted")
+        self.assertFalse(any(isinstance(h, urllib.request.ProxyHandler) and h.proxies
+                             for h in fetch._OPENER.handlers))
+
+    def test_ipv4_compatible_forms_are_not_public(self):
+        for addr in ("::127.0.0.1", "::7f00:1", "::a9fe:a9fe", "::10.0.0.1"):
+            with self.subTest(addr=addr):
+                self.assertFalse(fetch.is_public_address(addr))
 
     def test_the_opt_in_lets_a_private_address_through(self):
         port, received, t = self._listener()
@@ -158,6 +189,64 @@ class TotalTimeTests(unittest.TestCase):
         for conn, _ in held:
             conn.close()
 
+    def test_name_lookup_and_connect_attempts_share_the_total_limit(self):
+        # Found by the second-opinion review: a slow resolver, or many addresses that never accept,
+        # ran past the total limit because the watchdog only saw sockets once connected.
+        def slow_lookup(*a, **k):
+            time.sleep(1.5)
+            return [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("8.8.8.8", 443))]
+
+        started = time.monotonic()
+        with mock.patch("socket.getaddrinfo", side_effect=slow_lookup):
+            with self.assertRaises(fetch.FetchTimeout):
+                fetch.http_get("https://slow-dns.invalid/", 30, total_s=0.3)
+        self.assertLess(time.monotonic() - started, 1.2)
+
+        full = socket.socket()  # a listener whose backlog is full: connects hang, never refused
+        full.bind(("127.0.0.1", 0))
+        full.listen(0)
+        self.addCleanup(full.close)
+        fillers = []
+        for _ in range(4):
+            c = socket.socket()
+            c.setblocking(False)
+            try:
+                c.connect(full.getsockname())
+            except OSError:
+                pass
+            fillers.append(c)
+        for c in fillers:
+            self.addCleanup(c.close)
+        answers = [(socket.AF_INET, socket.SOCK_STREAM, 6, "", full.getsockname())] * 6
+        started = time.monotonic()
+        with mock.patch.dict(os.environ, {fetch.ALLOW_PRIVATE_ENV: "1"}), \
+                mock.patch("socket.getaddrinfo", return_value=answers):
+            with self.assertRaises(fetch.FetchError):
+                fetch.http_get("https://six-addresses.invalid/", 2, total_s=0.5)
+        self.assertLess(time.monotonic() - started, 1.5)
+
+    def test_a_body_shorter_than_its_length_is_refused(self):
+        ours, theirs = socket.socketpair()
+        self.addCleanup(ours.close)
+        theirs.sendall(b"HTTP/1.1 200 OK\r\nContent-Length: 100\r\n\r\nshort")
+        theirs.close()
+        resp = http.client.HTTPResponse(ours)
+        resp.begin()
+        with self.assertRaises(fetch.FetchError):
+            fetch._read_capped(resp, time.monotonic() + 5)
+
+    def test_truncated_gzip_and_unknown_encodings_are_refused(self):
+        import gzip
+        raw = b"<rss><channel><item><title>t</title></item></channel></rss>"
+        for cut in (8, 15):
+            with self.subTest(cut=cut):
+                with self.assertRaises(fetch.FetchError):
+                    fetch.decode_body(gzip.compress(raw)[:-cut], "gzip")
+        self.assertEqual(fetch.decode_body(gzip.compress(raw), "gzip"), raw)
+        with self.assertRaises(fetch.FetchError):
+            fetch.decode_body(raw, "br")
+        self.assertEqual(fetch.decode_body(raw, "identity"), raw)
+
     def test_a_body_over_the_ceiling_is_read_no_further(self):
         class Endless:
             reads = 0
@@ -187,6 +276,16 @@ class LinearScanTests(unittest.TestCase):
             "extract, unclosed <script>": (html_index.extract, "<p>x" + "<script>" * 100_000),
             "extract, unclosed <meta": (html_index.extract, '<meta name="description" ' * 50_000),
             "extract, many closed <script> blocks": (html_index.extract, "<p>x" + "<script></script>" * 30_000),
+            # Found by the second-opinion review: repeated attributes inside ONE tag (quadratic in the
+            # first fix's two-wildcard meta regex: 2.8 s at 76 KB). These fill the 512 KB cap.
+            "extract, one meta tag of repeated name=": (html_index.extract, "<meta " + 'name="description" ' * 30_000 + ">"),
+            "extract, one meta tag, repeated name= no close": (html_index.extract, "<meta " + 'name="description" ' * 30_000),
+            "extract, meta with an unclosed quote": (html_index.extract, '<meta name="description" content="' + "a" * 600_000),
+            "extract, one meta tag of a long bare name": (html_index.extract, "<meta " + "a" * 600_000 + ">"),
+            "links, one tag of repeated attributes": (lambda m: html_index.links(m, "https://example.org/news/", self.src),
+                                                      "<a " + 'x="1" hreff="2" ' * 60_000 + ">"),
+            "links, unclosed quotes": (lambda m: html_index.links(m, "https://example.org/news/", self.src),
+                                       "<a href='" * 200_000),
         }
         for name, (fn, payload) in cases.items():
             with self.subTest(case=name):
@@ -208,6 +307,14 @@ class LinearScanTests(unittest.TestCase):
             self.assertNotIn(gone, desc)
         self.assertEqual(html_index.extract("<h1>Only a heading</h1><p>x</p>")[0], "Only a heading")
         self.assertEqual(strip_html("a <b>bold</b> and 1 < 2 > 0"), "a bold and 1 0")
+
+    def test_meta_description_and_links_are_read_in_any_attribute_order(self):
+        page = ('<html><head><meta content="Second &amp; last" name="Description"><title>T</title></head>'
+                '<body><a class="x" href="/news/a.html">a</a><A HREF=/news/b.html>b</A>'
+                '<a href="/elsewhere/c.html">c</a><a name="no-href">d</a></body></html>')
+        self.assertEqual(html_index.extract(page), ("T", "Second & last"))
+        self.assertEqual(html_index.links(page, "https://example.org/news/", self.src),
+                         ["https://example.org/news/a.html", "https://example.org/news/b.html"])
 
 
 def _utf16(text: str) -> bytes:
@@ -299,6 +406,27 @@ class ServeCrossSiteTests(unittest.TestCase):
                 self.assertEqual(self.request(port, "GET", path, {"Host": f"rebind.evil.example:{port}"})[0], 403)
         self.assertEqual(self.calls, [])
 
+    def test_host_must_be_exactly_one_local_authority(self):
+        for host, ok in (("127.0.0.1", True), ("127.0.0.1:8765", True), ("LOCALHOST:1", True), ("[::1]", True),
+                         ("[::1]:8765", True), ("[::1]evil.invalid", False), ("[::1]:80x", False),
+                         ("127.0.0.1:", False), ("127.0.0.1:8765:1", False), ("localhost.", False),
+                         ("127.0.0.1.evil.invalid", False), ("", False), ("[::1", False)):
+            with self.subTest(host=host):
+                self.assertEqual(server.host_name(host) in server.LOOPBACK_NAMES, ok)
+        port = self.serve()
+        c = http.client.HTTPConnection("127.0.0.1", port, timeout=5)
+        c.putrequest("POST", "/api/compose", skip_host=True)
+        c.putheader("Host", f"127.0.0.1:{port}")
+        c.putheader("Host", "evil.invalid")
+        c.putheader("Content-Type", "application/json")
+        c.putheader("Content-Length", str(len(self.BODY)))
+        c.endheaders(self.BODY.encode())
+        r = c.getresponse()
+        r.read()
+        c.close()
+        self.assertEqual(r.status, 403)
+        self.assertEqual(self.calls, [])
+
     def test_the_page_own_request_still_works(self):
         port = self.serve()
         for host in (f"127.0.0.1:{port}", f"localhost:{port}"):
@@ -358,6 +486,17 @@ class KeyEchoTests(unittest.TestCase):
                         provider("hello")
                     self.assertNotIn("canary", str(ctx.exception))
                     self.assertIn("HTTP 401 authentication_error", str(ctx.exception))
+
+    def test_a_key_at_the_length_cut_leaves_no_prefix(self):
+        from composer.providers import _error_text
+        key = "test-canary-" + "0123456789ABCDEFGHIJKLMNOP"
+        for pad in range(150, 205, 5):
+            for form in (key, "Bearer " + key):
+                with self.subTest(pad=pad, form=form[:6]):
+                    data = json.dumps({"error": {"type": "x", "message": "x" * pad + form}}).encode()
+                    out = _error_text(401, data, key)
+                    self.assertNotIn("test-cana", out)
+                    self.assertNotIn("0123456789", out)
 
 
 class LinkSchemeTests(unittest.TestCase):

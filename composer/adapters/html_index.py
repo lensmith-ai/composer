@@ -13,18 +13,71 @@ The page text is only sent to the model for this brief. It is never written to d
 from __future__ import annotations
 
 import html
-import re
 from urllib.parse import urljoin, urlsplit, urlunsplit
 
 from ..sanitize import clean_text, clean_url
 from .common import DESC_CAP, TIMEOUT_S, TITLE_CAP, new_receipt, strip_html
 
-# Hostile pages are expected here. Every scan below is linear in the page size: a tag's
-# attributes stop at the next "<" or ">", and the title and the dropped blocks are found with
-# str.find, so thousands of unclosed tags cannot make it quadratic (see the tests).
-_HREF = re.compile(r"<a\b[^<>]*?\bhref\s*=\s*[\"']([^\"'<>]{1,2000})[\"']", re.I)
-_META_DESC = re.compile(r"<meta\b[^<>]*?\bname\s*=\s*[\"']description[\"'][^<>]*?\bcontent\s*=\s*[\"']([^\"']{0,2000})",
-                        re.I)
+# Hostile pages are expected here. Nothing below is a backtracking regex: tags and their
+# attributes are read in one pass with str.find and a small scanner, so the work grows with the
+# page size and no arrangement of tags or attributes can make it quadratic (see the tests).
+ATTR_CAP = 2000  # the longest attribute value kept (an address or a description)
+_SPACE = " \t\n\r\f"
+
+
+def _attrs(tag: str) -> dict[str, str]:
+    """The attributes of one tag's inside (after its name, before ">"), read in one pass; the
+    first of a repeated attribute wins, names are lower-cased, values capped (not unescaped)."""
+    out: dict[str, str] = {}
+    i, n = 0, len(tag)
+    while i < n:
+        while i < n and (tag[i] in _SPACE or tag[i] == "/"):
+            i += 1
+        start = i
+        while i < n and tag[i] not in _SPACE and tag[i] not in "=/":
+            i += 1
+        name = tag[start:i].lower()
+        while i < n and tag[i] in _SPACE:
+            i += 1
+        value = ""
+        if i < n and tag[i] == "=":
+            i += 1
+            while i < n and tag[i] in _SPACE:
+                i += 1
+            if i < n and tag[i] in "\"'":
+                end = tag.find(tag[i], i + 1)
+                end = n if end < 0 else end
+                value = tag[i + 1:end]
+                i = end + 1
+            else:
+                start = i
+                while i < n and tag[i] not in _SPACE:
+                    i += 1
+                value = tag[start:i]
+        elif i == start:
+            i += 1  # a stray character: step over it
+        if name and name not in out:
+            out[name] = value[:ATTR_CAP]
+    return out
+
+
+def _tags(markup: str, lower: str, name: str):
+    """The attributes of every <name ...> tag, in order. A tag ends at the next ">" or "<"."""
+    opener = "<" + name
+    at = lower.find(opener)
+    while at >= 0:
+        after = at + len(opener)
+        if after < len(lower) and (lower[after] in _SPACE or lower[after] in "/>"):
+            next_lt = lower.find("<", after)  # the ">" is looked for only up to here, so each
+            limit = len(lower) if next_lt < 0 else next_lt  # character is scanned once
+            gt = lower.find(">", after, limit)
+            end = limit if gt < 0 else gt
+            yield _attrs(markup[after:end])
+            at = lower.find(opener, end)
+        else:
+            at = lower.find(opener, after)
+
+
 _DROPPED = ("script", "style", "noscript")
 MARKUP_CAP = 512 * 1024  # an article page is read for its title and first lines, not in full
 
@@ -96,7 +149,11 @@ def eligible(url: str, source) -> str | None:
 
 def links(markup: str, page_url: str, source) -> list[str]:
     found: list[str] = []
-    for href in _HREF.findall(markup[:MARKUP_CAP * 4]):
+    markup = markup[:MARKUP_CAP * 4]
+    for attrs in _tags(markup, markup.lower(), "a"):
+        href = attrs.get("href", "").strip()
+        if not href:
+            continue
         url = eligible(urljoin(page_url, html.unescape(href)), source)
         if url and url not in found and url != canonical(page_url):
             found.append(url)
@@ -112,9 +169,10 @@ def extract(markup: str) -> tuple[str, str]:
     if not (raw_title or "").strip():
         raw_title = _between(markup, lower, "h1")
     title = strip_html(raw_title or "")
-    d = _META_DESC.search(markup)
-    if d and d.group(1).strip():
-        desc = strip_html(d.group(1))
+    meta = next((a.get("content", "") for a in _tags(markup, lower, "meta")
+                 if a.get("name", "").strip().lower() == "description" and a.get("content", "").strip()), "")
+    if meta:
+        desc = strip_html(meta)
     else:
         desc = strip_html(_drop_blocks(markup))
     return title[:TITLE_CAP], desc[:DESC_CAP]

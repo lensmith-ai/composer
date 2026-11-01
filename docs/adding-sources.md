@@ -74,6 +74,7 @@ The rules each entry must meet (Composer refuses the file and says why otherwise
 
 Every fetch is https only (a redirect to `http://` is refused), follows at most 5 redirects,
 reads at most 2 MB and stops after 60 seconds in total, however slowly the answer arrives.
+Proxy settings such as `HTTPS_PROXY` are not used for these fetches.
 - `note` (optional): your own reminder of what the source is.
 
 ## What Composer keeps from a source

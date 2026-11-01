@@ -113,10 +113,12 @@ def _error_text(status: int, data: bytes, secret: str = "") -> str:
     try:
         err = json.loads(data.decode("utf-8")).get("error")
         if isinstance(err, dict):
-            kind = str(err.get("type") or err.get("code") or "error")[:60]
-            msg = str(err.get("message") or "")[:200]
-            text = _BEARER.sub(r"\1 [hidden]", f"HTTP {status} {kind}: {msg}")
-            return text.replace(secret, "[your key]") if secret else text
+            def scrub(value) -> str:  # before any cut, so a key at the cut cannot leave a prefix
+                text = _BEARER.sub(r"\1 [hidden]", str(value or ""))
+                return text.replace(secret, "[your key]") if secret else text
+            kind = scrub(err.get("type") or err.get("code") or "error")[:60]
+            msg = scrub(err.get("message"))[:200]
+            return f"HTTP {status} {kind}: {msg}"
     except Exception:
         pass
     return f"HTTP {status}"

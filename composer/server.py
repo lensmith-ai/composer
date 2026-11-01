@@ -21,6 +21,7 @@ from __future__ import annotations
 import hmac
 import json
 import os
+import re
 import threading
 from urllib.parse import urlsplit
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -36,12 +37,26 @@ LOOPBACK = {"127.0.0.1", "::1", "localhost"}
 LOOPBACK_NAMES = {"127.0.0.1", "localhost", "::1"}
 
 
+_PORT = re.compile(r"[0-9]{1,5}")
+
+
 def host_name(host_header: str) -> str:
-    """The name part of a Host header: no port, no brackets, lower case."""
+    """The name part of a Host header (no port, no brackets, lower case), or "" when the header
+    is not exactly one authority: name[:port] or [ipv6][:port], nothing before or after."""
     value = (host_header or "").strip().lower()
     if value.startswith("["):
-        return value[1:value.find("]")] if "]" in value else ""
-    return value.rsplit(":", 1)[0] if value.count(":") == 1 else value
+        close = value.find("]")
+        if close < 0:
+            return ""
+        name, rest = value[1:close], value[close + 1:]
+    elif value.count(":") == 1:
+        name, rest = value.split(":", 1)
+        rest = ":" + rest
+    else:
+        name, rest = value, ""
+    if rest and not (rest.startswith(":") and _PORT.fullmatch(rest[1:])):
+        return ""
+    return name
 
 
 def request_problem(method: str, headers, *, local_only: bool) -> str | None:
@@ -53,6 +68,11 @@ def request_problem(method: str, headers, *, local_only: bool) -> str | None:
     be this server's own and a browser's Sec-Fetch-Site (if sent) same-origin. Beyond this machine
     the pass phrase header does that job (a custom header also needs a preflight), and a TLS
     proxy in front may rewrite Host, so those two checks are not made there."""
+    get_all = getattr(headers, "get_all", None)
+    if get_all is not None:
+        for name in ("Host", "Origin", "Content-Type", "Sec-Fetch-Site"):
+            if len(get_all(name) or []) > 1:
+                return f"send one {name} header"
     host = headers.get("Host", "")
     if local_only and host_name(host) not in LOOPBACK_NAMES:
         return "this server only answers requests addressed to 127.0.0.1 or localhost"
