@@ -6,6 +6,11 @@ Safe defaults:
   - On any other address it refuses to start without COMPOSER_SERVER_PASS set; every compose
     request must then send that phrase in the X-Composer-Pass header. Anyone who can compose
     spends your API credit, so do not skip this.
+  - On this machine (the default), it answers only requests addressed to this machine by name
+    (Host 127.0.0.1, localhost or [::1]), so a web site that points its own name at 127.0.0.1
+    (DNS rebinding) is refused. A compose request must be sent as application/json from the
+    page's own origin: a browser cannot send that from another site without asking first, and
+    this server never says yes, so another site you visit cannot compose and spend your credit.
   - One brief at a time; a second request while one runs gets 429.
   - Request bodies over 16 KB, unknown sources and long lenses are refused before any fetch.
   - It is a plain standard-library server: put a TLS-terminating proxy in front of it before
@@ -17,6 +22,7 @@ import hmac
 import json
 import os
 import threading
+from urllib.parse import urlsplit
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -27,6 +33,45 @@ from .registry import RegistryError
 
 MAX_BODY = 16 * 1024
 LOOPBACK = {"127.0.0.1", "::1", "localhost"}
+LOOPBACK_NAMES = {"127.0.0.1", "localhost", "::1"}
+
+
+def host_name(host_header: str) -> str:
+    """The name part of a Host header: no port, no brackets, lower case."""
+    value = (host_header or "").strip().lower()
+    if value.startswith("["):
+        return value[1:value.find("]")] if "]" in value else ""
+    return value.rsplit(":", 1)[0] if value.count(":") == 1 else value
+
+
+def request_problem(method: str, headers, *, local_only: bool) -> str | None:
+    """Why a request must be refused before it is handled, or None.
+
+    A compose POST must always declare its body as JSON (a cross-site page cannot send that
+    without a CORS preflight, which this server never answers). When the server listens on this
+    machine (local_only), the Host must also name this machine, and a POST's Origin (if sent) must
+    be this server's own and a browser's Sec-Fetch-Site (if sent) same-origin. Beyond this machine
+    the pass phrase header does that job (a custom header also needs a preflight), and a TLS
+    proxy in front may rewrite Host, so those two checks are not made there."""
+    host = headers.get("Host", "")
+    if local_only and host_name(host) not in LOOPBACK_NAMES:
+        return "this server only answers requests addressed to 127.0.0.1 or localhost"
+    if method != "POST":
+        return None
+    ctype = (headers.get("Content-Type") or "").split(";", 1)[0].strip().lower()
+    if ctype != "application/json":
+        return "send the request as application/json"
+    if not local_only:
+        return None
+    origin = headers.get("Origin")
+    if origin is not None:
+        o = urlsplit(origin)
+        if origin == "null" or o.scheme not in ("http", "https") or o.netloc.lower() != host.strip().lower():
+            return "compose requests are only accepted from this server's own page"
+    site = (headers.get("Sec-Fetch-Site") or "").strip().lower()
+    if site and site not in ("same-origin", "none"):
+        return "compose requests are only accepted from this server's own page"
+    return None
 
 
 class App:
@@ -90,10 +135,18 @@ class App:
         return 200, self.latest
 
 
-def handler_for(app: App):
+def handler_for(app: App, *, local_only: bool = True):
     class Handler(BaseHTTPRequestHandler):
         server_version = "composer"
         sys_version = ""
+        timeout = 30  # a client that stops sending is dropped, not waited on forever
+
+        def _refused(self, method: str) -> bool:
+            problem = request_problem(method, self.headers, local_only=local_only)
+            if problem:
+                self._json(403, {"error": problem})
+                return True
+            return False
 
         def _send(self, status: int, body: bytes, ctype: str) -> None:
             self.send_response(status)
@@ -110,6 +163,8 @@ def handler_for(app: App):
             self._send(status, json.dumps(obj, ensure_ascii=False).encode("utf-8"), "application/json")
 
         def do_GET(self):  # noqa: N802
+            if self._refused("GET"):
+                return
             if self.path in ("/", "/index.html"):
                 self._send(200, app.page(), "text/html; charset=utf-8")
             elif self.path == "/api/latest":
@@ -118,6 +173,8 @@ def handler_for(app: App):
                 self._json(404, {"error": "not found"})
 
         def do_POST(self):  # noqa: N802
+            if self._refused("POST"):
+                return
             if self.path != "/api/compose":
                 return self._json(404, {"error": "not found"})
             try:
@@ -130,7 +187,8 @@ def handler_for(app: App):
             self._json(status, obj)
 
         def log_message(self, fmt, *args):  # one short line per request, no headers or bodies
-            print(f"{self.address_string()} {self.command} {self.path} {args[1] if len(args) > 1 else ''}")
+            print(f"{self.address_string()} {self.command} {self.path[:200]} {args[1] if len(args) > 1 else ''}",
+                  flush=True)
 
     return Handler
 
@@ -143,8 +201,9 @@ def check_bind(host: str, passphrase: str) -> None:
 
 def serve(app: App, host: str, port: int) -> None:
     check_bind(host, app.passphrase)
-    httpd = ThreadingHTTPServer((host, port), handler_for(app))
-    print(f"composer serving on http://{host}:{port}/  (Ctrl+C to stop)")
+    httpd = ThreadingHTTPServer((host, port), handler_for(app, local_only=host in LOOPBACK))
+    shown = "127.0.0.1" if host == "localhost" else (f"[{host}]" if ":" in host else host)
+    print(f"composer serving on http://{shown}:{port}/  (Ctrl+C to stop)", flush=True)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

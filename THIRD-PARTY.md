@@ -21,7 +21,8 @@ Everything else Composer runs on is the Python standard library (Python 3.10 or 
 `composer/web/window/` (the scripts and styles of the replay window) comes from Composer's own
 app screen, by the same authors, under this repository's MIT licence. Its comments, including
 those inside an embedded stylesheet, were removed for publication; otherwise the code is
-unchanged apart from renamed element ids.
+unchanged apart from renamed element ids. The page around the window (`docs/demo/index.html`,
+`site.css`, `frame.js`) and `window/standalone.js` were written for this repository.
 
 ## The README screenshots
 

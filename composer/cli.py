@@ -123,7 +123,7 @@ def cmd_serve(args) -> int:
     try:
         from_env(args.provider, args.model).ready()  # the key itself is read again on every call
     except ProviderError as exc:
-        print(f"note: {exc}. The page will show the recorded brief; Compose will fail until a key is set.")
+        print(f"note: {exc}. The page will show the recorded brief; Compose will fail until a key is set.", flush=True)
     app = server.App(reg, lambda: from_env(args.provider, args.model),
                      out_dir=Path(args.out) if args.out else None, passphrase=passphrase)
     server.serve(app, args.host, args.port)

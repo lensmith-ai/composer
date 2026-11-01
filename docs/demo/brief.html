@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src &#x27;none&#x27;; style-src &#x27;sha256-50KNc2e8n4LHSQd6c9V7KQBwksrEX3ShQiLXB+4kpCo=&#x27;; script-src &#x27;sha256-rY0O8cwF3c89vLEqe/og3rDxFHb2bHz7Sm03rlV/Sls=&#x27;; img-src &#x27;none&#x27;; form-action &#x27;none&#x27;; base-uri &#x27;none&#x27;">
+<meta http-equiv="Content-Security-Policy" content="default-src &#x27;none&#x27;; style-src &#x27;sha256-50KNc2e8n4LHSQd6c9V7KQBwksrEX3ShQiLXB+4kpCo=&#x27;; script-src &#x27;sha256-TCEVPIKTWpAEa2phDjswW0O9wp27FMInmfSQJQAMScg=&#x27;; img-src &#x27;none&#x27;; form-action &#x27;none&#x27;; base-uri &#x27;none&#x27;">
 <meta name="referrer" content="no-referrer">
 <title>Composer, replayed</title>
 <style>:root{--ground:#0b0e13;--panel:#10141b;--panel2:#151a23;--ink:rgba(255,255,255,.92);--ink2:rgba(255,255,255,.64);--line:rgba(255,255,255,.1);--amber:#ffb020;--green:#48d1a0;--red:#ff6b6b;--mark:rgba(255,176,32,.16)}
@@ -149,7 +149,7 @@ form fieldset{border:0;padding:0;margin:0 0 10px;display:flex;flex-wrap:wrap;gap
     c.citations.forEach(function (x) {
       var li = el('li');
       li.appendChild(el('span', '', x.label + (x.relation ? ' ' + x.relation + ' this' : '') + ': '));
-      if (x.url) {
+      if (x.url && /^https?:\/\//i.test(x.url)) {
         var a = el('a', '', x.title || x.url);
         a.href = x.url;
         a.rel = 'noreferrer noopener';

@@ -38,6 +38,8 @@ _THREAT_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"\byou'?re\s+now\b", re.IGNORECASE),
     re.compile(r"<!--\s*(?:system|assistant|user)\s*[:：]", re.IGNORECASE),
     re.compile(r"(?im)^\s*(system|assistant|user)\s*：\s*"),
+    # The prompt's own source markers: a feed must not be able to write one and seem to end its section.
+    re.compile(r"\[\s*(?:END\s+)?SOURCE\b", re.IGNORECASE),
 )
 
 URL_CAP = 400

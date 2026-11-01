@@ -2,11 +2,14 @@
 
 Elements are matched by their local name, so namespaced feeds parse. A feed that declares
 entities (<!ENTITY) is refused before parsing: no feed needs them, and they are how XML
-expansion attacks work.
+expansion attacks work. The check is made by the XML parser itself, in whatever encoding the
+feed is written (a byte search for "<!ENTITY" misses a UTF-16 feed), and it stops at the first
+declaration, before any entity can be expanded.
 """
 from __future__ import annotations
 
 import xml.etree.ElementTree as ET
+from xml.parsers import expat
 
 from ..sanitize import clean_text, clean_url
 from .common import DESC_CAP, PUB_CAP, TIMEOUT_S, TITLE_CAP, new_receipt, strip_html
@@ -53,10 +56,31 @@ def _link(el) -> str:
     return best
 
 
+class EntityDeclared(ValueError):
+    """The feed declares an XML entity."""
+
+
+def _refuse_entities(raw: bytes) -> None:
+    """Raise EntityDeclared if the document declares any entity, in any encoding."""
+    if b"<!ENTITY" in raw:
+        raise EntityDeclared("feed declares XML entities; refused")
+
+    def declared(*_args):
+        raise EntityDeclared("feed declares XML entities; refused")
+
+    p = expat.ParserCreate()
+    p.SetParamEntityParsing(expat.XML_PARAM_ENTITY_PARSING_NEVER)
+    p.EntityDeclHandler = declared
+    p.UnparsedEntityDeclHandler = declared
+    try:
+        p.Parse(raw, True)
+    except expat.ExpatError:
+        pass  # not well-formed: ElementTree reports it below
+
+
 def parse(raw: bytes, max_items: int) -> tuple[list[dict], int]:
     """(items, cleaned-count) from feed bytes. Raises ValueError for a feed that cannot be read."""
-    if b"<!ENTITY" in raw:
-        raise ValueError("feed declares XML entities; refused")
+    _refuse_entities(raw)
     root = ET.fromstring(raw)
     items: list[dict] = []
     cleaned = 0

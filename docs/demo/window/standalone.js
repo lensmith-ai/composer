@@ -1,0 +1,1 @@
+(function(){'use strict';try{if(window.top===window&&window.matchMedia&&window.matchMedia('(min-width: 600px)').matches&&!/[?&]standalone\b/.test(location.search)){location.replace('../index.html');}}catch(e){}})();

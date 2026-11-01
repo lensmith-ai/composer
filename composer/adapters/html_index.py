@@ -19,10 +19,58 @@ from urllib.parse import urljoin, urlsplit, urlunsplit
 from ..sanitize import clean_text, clean_url
 from .common import DESC_CAP, TIMEOUT_S, TITLE_CAP, new_receipt, strip_html
 
-_HREF = re.compile(r"<a\b[^>]*\bhref\s*=\s*[\"']([^\"']+)[\"']", re.I)
-_TITLE = re.compile(r"<title[^>]*>(.*?)</title>|<h1[^>]*>(.*?)</h1>", re.I | re.S)
-_META_DESC = re.compile(r"<meta\b[^>]*\bname\s*=\s*[\"']description[\"'][^>]*\bcontent\s*=\s*[\"']([^\"']*)", re.I)
-_DROP = re.compile(r"<(script|style|noscript)\b.*?</\1>", re.I | re.S)
+# Hostile pages are expected here. Every scan below is linear in the page size: a tag's
+# attributes stop at the next "<" or ">", and the title and the dropped blocks are found with
+# str.find, so thousands of unclosed tags cannot make it quadratic (see the tests).
+_HREF = re.compile(r"<a\b[^<>]*?\bhref\s*=\s*[\"']([^\"'<>]{1,2000})[\"']", re.I)
+_META_DESC = re.compile(r"<meta\b[^<>]*?\bname\s*=\s*[\"']description[\"'][^<>]*?\bcontent\s*=\s*[\"']([^\"']{0,2000})",
+                        re.I)
+_DROPPED = ("script", "style", "noscript")
+MARKUP_CAP = 512 * 1024  # an article page is read for its title and first lines, not in full
+
+
+def _between(markup: str, lower: str, tag: str) -> str | None:
+    """The text inside the first <tag ...>...</tag>, or None."""
+    start = lower.find("<" + tag)
+    while start >= 0:
+        after = lower[start + 1 + len(tag):start + 2 + len(tag)]
+        if after in (">", " ", "\t", "\n", "\r", "/"):
+            break
+        start = lower.find("<" + tag, start + 1)
+    if start < 0:
+        return None
+    open_end = lower.find(">", start)
+    if open_end < 0:
+        return None
+    close = lower.find("</" + tag, open_end)
+    if close < 0:
+        return None
+    return markup[open_end + 1:close]
+
+
+def _drop_blocks(markup: str) -> str:
+    """The markup without <script>, <style> and <noscript> blocks; an unclosed one runs to the end."""
+    lower = markup.lower()
+    out: list[str] = []
+    at = 0
+    nxt = {t: lower.find("<" + t) for t in _DROPPED}  # each tag's next opening; -1 once there is none
+    while True:
+        for t in _DROPPED:
+            if 0 <= nxt[t] < at:
+                nxt[t] = lower.find("<" + t, at)
+        hits = [(i, t) for t, i in nxt.items() if i >= 0]
+        if not hits:
+            out.append(markup[at:])
+            break
+        start, tag = min(hits)
+        out.append(markup[at:start])
+        close = lower.find("</" + tag, start)
+        if close < 0:
+            break
+        end = lower.find(">", close)
+        at = len(markup) if end < 0 else end + 1
+        out.append(" ")
+    return "".join(out)
 
 
 def canonical(url: str) -> str | None:
@@ -48,7 +96,7 @@ def eligible(url: str, source) -> str | None:
 
 def links(markup: str, page_url: str, source) -> list[str]:
     found: list[str] = []
-    for href in _HREF.findall(markup):
+    for href in _HREF.findall(markup[:MARKUP_CAP * 4]):
         url = eligible(urljoin(page_url, html.unescape(href)), source)
         if url and url not in found and url != canonical(page_url):
             found.append(url)
@@ -58,13 +106,17 @@ def links(markup: str, page_url: str, source) -> list[str]:
 
 
 def extract(markup: str) -> tuple[str, str]:
-    m = _TITLE.search(markup)
-    title = strip_html(next((g for g in m.groups() if g), "")) if m else ""
+    markup = markup[:MARKUP_CAP]
+    lower = markup.lower()
+    raw_title = _between(markup, lower, "title")
+    if not (raw_title or "").strip():
+        raw_title = _between(markup, lower, "h1")
+    title = strip_html(raw_title or "")
     d = _META_DESC.search(markup)
     if d and d.group(1).strip():
         desc = strip_html(d.group(1))
     else:
-        desc = strip_html(_DROP.sub(" ", markup))
+        desc = strip_html(_drop_blocks(markup))
     return title[:TITLE_CAP], desc[:DESC_CAP]
 
 

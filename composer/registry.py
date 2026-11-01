@@ -14,12 +14,15 @@ See docs/adding-sources.md.
 """
 from __future__ import annotations
 
+import ipaddress
 import json
 import os
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from urllib.parse import urlsplit
+
+from . import fetch
 
 SCHEMA = "composer-sources/v1"
 BUNDLED = Path(__file__).with_name("sources.json")
@@ -61,7 +64,23 @@ def _https(value, name: str) -> str:
     p = urlsplit(value)
     if p.scheme != "https" or not p.hostname or p.username or p.password:
         raise RegistryError(f"{name} must be an https address with a host and no user:password part")
+    if not fetch.private_allowed() and _names_this_machine_or_private(p.hostname):
+        raise RegistryError(f"{name} names this machine or a private network address; sources must be "
+                            f"public web sites (set {fetch.ALLOW_PRIVATE_ENV}=1 to allow it on purpose)")
     return value
+
+
+def _names_this_machine_or_private(hostname: str) -> bool:
+    """A literal non-public IP address, or a localhost name. Other names are checked again at
+    fetch time, on the address actually connected to (composer.fetch)."""
+    h = hostname.lower().rstrip(".")
+    if h == "localhost" or h.endswith(".localhost"):
+        return True
+    try:
+        ipaddress.ip_address(h)
+    except ValueError:
+        return False
+    return not fetch.is_public_address(h)
 
 
 def parse_entry(raw) -> Source:

@@ -18,7 +18,7 @@
 > **AI;DR (AI, didn't read)**
 > Claude wrote this code and this README. I haven't read either line by line.
 > What people have checked: the private version of Composer writes briefs I read, and I click through to the cited articles to see that what a claim says is really there.
-> What tools have checked, for this repository: 87 offline tests pass on Python 3.10 and 3.13 in clean containers; the commands in this README were run there (the compose command, which needs a key, on 3.13 only); a secret scanner (gitleaks) found nothing in any commit; and one test fails if private names, server paths or key shapes appear anywhere in the files or the history.
+> What tools have checked, for this repository: 109 offline tests pass on Python 3.10 and 3.13 in clean containers; the commands in this README were run there (the compose command, which needs a key, on 3.13 only); a secret scanner (gitleaks) found nothing in any commit; one test fails if private names, server paths or key shapes appear anywhere in the files or the history; and a security review on 2026-11-01 attacked it as a hostile feed, a hostile web page and a hostile network would, and fixed what it found (see [SECURITY.md](SECURITY.md)).
 > What was checked live: one brief, written from a fresh install in a clean Python 3.13 container with a real Anthropic key and the default model. It made 7 calls in 29 seconds and cost about 8 cents; every insight got a claim-seal verdict and the seal verified. The OpenAI-compatible path has not been run live; it is tested against the documented request and reply shapes only. Treat it as a working experiment, and open an issue if something's off. (Arya)
 
 **Composer reads a few feeds, writes a short brief through a lens you choose, and checks every
@@ -98,17 +98,28 @@ The key is read when each call is made. It is never stored, logged or written to
    Composer's own screen: the compose sentence, the sources being read, the sand-and-words
    animation through each step, the weave, then the finished edition, where each card opens to
    show which of its words each article backs. `docs/demo/brief.html` is the same brief as a plain
-   page. Host the `docs/` folder on any static host (GitHub Pages works) or open
-   `docs/demo/index.html` from disk. It makes no outside request and calls no model; with reduced
-   motion it shows the finished edition. Rebuild the folder with:
+   page. Host the `docs/` folder on any static host (GitHub Pages works), open
+   `docs/demo/index.html` from disk, or serve it on your own computer and open
+   http://127.0.0.1:8000/ :
+
+   ```sh
+   python3 -m http.server 8000 --bind 127.0.0.1 --directory docs/demo
+   ```
+
+   On a laptop the phone stands in the middle of the page, with what you are looking at beside
+   it; on a phone it fills the screen. It makes no outside request and calls no model; with
+   reduced motion it shows the finished edition. Rebuild the folder with:
 
    ```sh
    composer demo --site docs/demo
    ```
 
 3. **Always-on server (your key, your machine or server).** `composer serve` shows the latest
-   brief and a form to compose a new one. It listens on 127.0.0.1:8765 by default. Without a
-   key it still shows the recorded brief, and Compose says that a key is needed.
+   brief as a plain page (the one `docs/demo/brief.html` shows, not the phone replay) and a form
+   to compose a new one. It listens on 127.0.0.1:8765 by default; open http://127.0.0.1:8765/ .
+   Without a key it still shows the recorded brief, and Compose says that a key is needed.
+   Other web sites open in your browser cannot use it: it answers only requests addressed to
+   127.0.0.1 or localhost, and only its own page can start a brief.
 
    ```sh
    composer serve

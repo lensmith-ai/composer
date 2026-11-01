@@ -4,9 +4,11 @@
 
   DIR/index.html          a page that frames the window and has a Replay button
   DIR/frame.js            the Replay button (reloads the window)
+  DIR/site.css            the page around the window: on a laptop the phone stands centred in it
   DIR/brief.html          the same brief as a plain, readable page (composer.page)
   DIR/window/index.html   the window: the compose screen, then the finished edition
   DIR/window/*.js, *.css  the window's own scripts and styles (composer/web/window/)
+  DIR/window/standalone.js  sends a wide browser that opens the window on its own to DIR/index.html
 
 The window shows the compose sentence, ticks the sources the brief read, runs the sand and
 word animation through each recorded step, weaves the sources into the brief, and settles on
@@ -47,6 +49,11 @@ GEAR_SVG = ('<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke=
             '1.7 0 0 0-1.51 1z"></path></svg>')
 
 e = html.escape
+
+
+def web_link(url) -> bool:
+    """Only an http(s) address becomes a link; anything else (javascript:, data:) is not printed."""
+    return isinstance(url, str) and url.lower().startswith(("https://", "http://"))
 
 
 def plural(n: int, word: str) -> str:
@@ -180,9 +187,10 @@ def insight_detail_html(ed: dict, i: int, card: dict) -> str:
         fp = f'fingerprint {c["window_sha256"][:12]}' if c.get("window_sha256") else "no passage located"
         receipts += (f'<li class="rcp"><b>{number[id(c)]} · ' + e(c["label"]) + " " + e(c.get("relation") or "cites")
                      + ' this</b><span class="cmq">' + e(words[c["start"]:c["end"]]) + '</span><span class="rcpmeta">'
-                     + ("claim-seal re-check: agrees · " if each else "") + fp + '</span><a class="rcplink" href="'
-                     + e(c["url"], quote=True) + '" target="_blank" rel="noopener noreferrer">Open the '
-                     + e(c["label"]) + " article</a></li>")
+                     + ("claim-seal re-check: agrees · " if each else "") + fp + "</span>"
+                     + (('<a class="rcplink" href="' + e(c["url"], quote=True) + '" target="_blank" '
+                         'rel="noopener noreferrer">Open the ' + e(c["label"]) + " article</a>")
+                        if web_link(c.get("url")) else "") + "</li>")
     stamp = (f"claim-seal · run again on the recorded answers · {agree} of {rows} checks agree" if ed.get("recorded")
              else f"claim-seal · {plural(rows, 'sealed row')}")
     return (f'<div class="lw-detail" id="lwDetail{i}" hidden><div class="desk">{name} · {CARD_STATES[card["state"]]} · '
@@ -269,6 +277,7 @@ def window_html(ed: dict, picker_rows: list[str]) -> str:
             '<meta http-equiv="Content-Security-Policy" content="' + e(CSP, quote=True) + '"><title>Composer, replayed</title>'
             '<link rel="stylesheet" href="surface.css"><link rel="stylesheet" href="entry-transition.css" '
             'id="composerEntryTransitionStyles"><link rel="stylesheet" href="window.css">'
+            + '<script src="standalone.js"></script>'
             + "".join(f'<script src="{x}" defer></script>' for x in WINDOW_SCRIPTS) + "</head>"
             '<body class="composing done" data-choreo-state="settled"><div id="lwView" aria-hidden="true"></div><div class="col">'
             '<section class="cmp on" id="cmp" data-state="settled" aria-label="Composer, a recorded composition" data-lw="'
@@ -280,18 +289,63 @@ def window_html(ed: dict, picker_rows: list[str]) -> str:
             "</div></body></html>\n")
 
 
-SITE_CSS = ("body{margin:0;background:#0b0e13;color:rgba(255,255,255,.92);font:16px/1.5 system-ui,sans-serif}"
-            "main{max-width:760px;margin:0 auto;padding:24px 16px 48px}h1{font:400 28px/1.2 Georgia,serif;margin:0 0 6px}"
-            "p{color:rgba(255,255,255,.7);max-width:62ch}a{color:#ffb020}"
-            ".phone{box-sizing:border-box;width:392px;max-width:100%;margin:18px 0 10px;border:1px solid #485161;"
-            "border-radius:28px;overflow:hidden;background:#0b0e13}"
-            "iframe{display:block;width:100%;height:660px;border:0;background:#0b0e13;color-scheme:dark}"
-            "button{font:inherit;color:#e9ebef;background:#151a23;border:1px solid #485161;border-radius:8px;padding:8px 16px;"
-            "cursor:pointer}button:focus-visible,a:focus-visible{outline:2px solid #ffb020;outline-offset:2px}")
+# The page around the window. On a laptop the phone stands in the middle of the page, with the title
+# on its left and a short note on its right; below 1024 px they stack, centred; on a phone the window
+# fills the width. The window itself is always 390 px wide (it is a phone screen), so it never
+# changes width when the replay ends. Colours and type follow Composer's own screen.
+SITE_CSS = (
+    ":root{--ground:#0b0e13;--panel:#10141b;--ink:rgba(255,255,255,.92);--ink2:#b4bac4;--ink3:#7a8392;"
+    "--line:#485161;--amber:#ffb020;color-scheme:dark}"
+    "*{box-sizing:border-box}"
+    "html,body{margin:0;background:var(--ground);color:var(--ink)}"
+    "body{font:16px/1.6 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased}"
+    ".top,.demo{max-width:80rem;margin:0 auto;padding:0 16px}"
+    ".top{padding-top:12px}"
+    ".mark{font-weight:700;color:var(--amber)}"
+    ".demo{display:grid;grid-template-columns:minmax(0,1fr);justify-items:center;gap:20px;padding-bottom:48px}"
+    ".head,.about{width:100%;max-width:40rem;text-align:center}"
+    ".tag{display:inline-block;margin:18px 0 0;padding:3px 8px;border-radius:4px;background:var(--amber);color:var(--ground);"
+    "font-size:12px;font-weight:700;line-height:16px;letter-spacing:.13em;text-transform:uppercase}"
+    "h1{margin:.375rem 0 .25rem;font-size:2rem;line-height:1.25}"
+    ".dek{margin:0;font-size:1.1rem;line-height:1.45;color:var(--ink2)}"
+    ".stage{width:100%;display:flex;flex-direction:column;align-items:center}"
+    ".phone{width:390px;max-width:100%}"
+    ".screen{position:relative;height:660px;overflow:hidden;background:var(--ground);isolation:isolate}"
+    "iframe{display:block;width:390px;max-width:100%;height:660px;border:0;background:var(--ground)}"
+    ".bar{display:flex;justify-content:center;margin:12px 0 0}"
+    ".play{min-width:44px;min-height:44px;padding:0 22px;border:0;border-radius:999px;background:var(--amber);color:var(--ground);"
+    "font:700 15px/1 system-ui,sans-serif;cursor:pointer}"
+    ".play:active{background:#d98f00}"
+    ".play:focus-visible,a:focus-visible{outline:2px solid var(--amber);outline-offset:3px}"
+    ".about h2{margin:0 0 .5rem;font-size:1.15rem;line-height:1.3}"
+    ".about p{margin:0 0 .75rem;color:var(--ink2)}"
+    ".links{list-style:none;margin:1rem 0 0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:4px 20px}"
+    ".links a{display:inline-flex;align-items:center;min-height:44px;color:var(--amber)}"
+    "@media (min-width:600px){.phone{width:414px;padding:11px;border:1px solid var(--line);border-radius:44px;background:var(--panel);"
+    "box-shadow:0 18px 48px rgba(0,0,0,.45)}.screen{border-radius:32px}}"
+    "@media (max-width:599px){.demo{padding:0}.head,.about{padding:0 16px}.stage{width:100vw;max-width:100%}"
+    ".phone,iframe{width:100%}}"
+    "@media (min-width:1024px){.demo{grid-template-columns:minmax(0,1fr) 414px minmax(0,1fr);align-items:start;"
+    "column-gap:48px;padding-top:4px}"
+    ".head{grid-column:1;grid-row:1;text-align:left;justify-self:end;max-width:22rem;padding-top:32px}"
+    ".stage{grid-column:2;grid-row:1}"
+    ".about{grid-column:3;grid-row:1;text-align:left;justify-self:start;max-width:22rem;padding-top:48px}"
+    ".links{flex-direction:column;justify-content:flex-start;gap:0}}"
+    "@media (prefers-reduced-motion:reduce){.bar{display:none}}"
+    "@media (scripting:none){.bar{display:none}}"
+)
 
 FRAME_JS = ("(function(){'use strict';var b=document.getElementById('replay'),f=document.getElementById('cw');"
-            "if(!b||!f)return;b.hidden=false;b.addEventListener('click',function(){"
+            "if(!b||!f)return;if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;"
+            "b.hidden=false;b.addEventListener('click',function(){"
             "f.src='window/index.html?r='+Date.now()+'#replay';});})();\n")
+
+# Loaded first by the window. Opened on its own in a wide browser window (not inside the demo page,
+# not on a phone), the window would stretch across the screen while it plays; this sends the reader to
+# the demo page, where it sits in its phone frame. Add ?standalone to the address to stay.
+STANDALONE_JS = ("(function(){'use strict';try{if(window.top===window&&window.matchMedia"
+                 "&&window.matchMedia('(min-width: 600px)').matches&&!/[?&]standalone\\b/.test(location.search))"
+                 "{location.replace('../index.html');}}catch(e){}})();\n")
 
 
 def site_index_html() -> str:
@@ -299,15 +353,25 @@ def site_index_html() -> str:
             '<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer">'
             '<meta http-equiv="Content-Security-Policy" content="' + e(SITE_CSP, quote=True) + '">'
             '<title>Composer, replayed</title><link rel="stylesheet" href="site.css">'
-            '<script src="frame.js" defer></script></head><body><main>'
-            '<h1>Composer, replayed</h1>'
-            '<p>A brief Composer wrote on 25 October 2026 from two public feeds, played back in a window onto its own '
-            'screen. Nothing is composed here and no model is called. Open a card to see which words each article backs.</p>'
-            f'<div class="phone"><iframe id="cw" src="window/index.html#replay" title="Composer replaying one recorded brief" '
+            '<script src="frame.js" defer></script></head><body>'
+            '<header class="top"><span class="mark">lensmith</span></header>'
+            '<main class="demo">'
+            '<div class="head"><p class="tag">Recorded demo</p><h1>Composer</h1>'
+            '<p class="dek">Composer reads a few feeds, writes a short brief through a lens you choose, and checks every '
+            'claim against the article it cites before you read it.</p></div>'
+            '<section class="stage" aria-label="Composer, replaying one recorded brief"><div class="phone"><div class="screen">'
+            f'<iframe id="cw" src="window/index.html#replay" title="Composer replaying one recorded brief" '
             f'width="{WINDOW_SIZE[0]}" height="{WINDOW_SIZE[1]}"></iframe></div>'
-            '<p><button type="button" id="replay" hidden>Replay</button></p>'
-            '<p>The same brief as a plain page: <a href="brief.html">read it line by line</a>.</p>'
-            "</main></body></html>\n")
+            '<div class="bar"><button type="button" class="play" id="replay" hidden>Replay</button></div></div></section>'
+            '<section class="about" aria-labelledby="about-h"><h2 id="about-h">What you are looking at</h2>'
+            '<p>Composer\'s own phone screen, replaying a brief it wrote on 25 October 2026 from two public feeds, the '
+            'Google AI blog and the Google DeepMind blog, read through the lens “system improvements”.</p>'
+            '<p>Nothing is composed here: no model is called and the page makes no outside request. When the replay '
+            'ends, open a card to see which of its words each article backs, and the checker\'s verdict.</p>'
+            '<ul class="links"><li><a href="brief.html">The same brief as a plain page</a></li>'
+            '<li><a href="https://github.com/lensmith-ai/composer" rel="noreferrer">Run it yourself</a></li>'
+            '<li><a href="https://github.com/lensmith-ai/claim-seal" rel="noreferrer">claim-seal, the checker</a></li>'
+            '</ul></section></main></body></html>\n')
 
 
 def write_site(directory, ed: dict, picker_rows: list[str] | None = None) -> list[Path]:
@@ -322,7 +386,8 @@ def write_site(directory, ed: dict, picker_rows: list[str] | None = None) -> lis
         shutil.copyfile(WINDOW_ASSETS / name, win / name)
         written.append(win / name)
     files = {win / "index.html": window_html(ed, picker_rows), out / "index.html": site_index_html(),
-             out / "site.css": SITE_CSS, out / "frame.js": FRAME_JS, out / "brief.html": page.build(ed)}
+             out / "site.css": SITE_CSS, out / "frame.js": FRAME_JS, out / "brief.html": page.build(ed),
+             win / "standalone.js": STANDALONE_JS}
     for path, text in files.items():
         path.write_text(text, encoding="utf-8")
         written.append(path)
