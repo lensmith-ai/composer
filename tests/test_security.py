@@ -410,7 +410,8 @@ class ServeCrossSiteTests(unittest.TestCase):
         for host, ok in (("127.0.0.1", True), ("127.0.0.1:8765", True), ("LOCALHOST:1", True), ("[::1]", True),
                          ("[::1]:8765", True), ("[::1]evil.invalid", False), ("[::1]:80x", False),
                          ("127.0.0.1:", False), ("127.0.0.1:8765:1", False), ("localhost.", False),
-                         ("127.0.0.1.evil.invalid", False), ("", False), ("[::1", False)):
+                         ("127.0.0.1.evil.invalid", False), ("", False), ("[::1", False), ("::1", False),
+                         ("[::1]:99999", False), ("127.0.0.1:0", False), ("localhost:65535", True)):
             with self.subTest(host=host):
                 self.assertEqual(server.host_name(host) in server.LOOPBACK_NAMES, ok)
         port = self.serve()

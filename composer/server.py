@@ -52,9 +52,11 @@ def host_name(host_header: str) -> str:
     elif value.count(":") == 1:
         name, rest = value.split(":", 1)
         rest = ":" + rest
+    elif ":" in value:
+        return ""  # an IPv6 address must be in brackets
     else:
         name, rest = value, ""
-    if rest and not (rest.startswith(":") and _PORT.fullmatch(rest[1:])):
+    if rest and not (rest.startswith(":") and _PORT.fullmatch(rest[1:]) and 1 <= int(rest[1:]) <= 65535):
         return ""
     return name
 
