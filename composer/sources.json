@@ -1,0 +1,21 @@
+{
+  "schema": "composer-sources/v1",
+  "sources": [
+    {
+      "id": "google-ai",
+      "label": "Google AI blog",
+      "kind": "rss-or-atom",
+      "url": "https://blog.google/technology/ai/rss/",
+      "max_items": 5,
+      "note": "The public RSS feed of Google's AI blog."
+    },
+    {
+      "id": "deepmind",
+      "label": "Google DeepMind blog",
+      "kind": "rss-or-atom",
+      "url": "https://deepmind.google/blog/rss.xml",
+      "max_items": 5,
+      "note": "The public RSS feed of the Google DeepMind blog."
+    }
+  ]
+}

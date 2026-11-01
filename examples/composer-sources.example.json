@@ -1,0 +1,34 @@
+{
+  "schema": "composer-sources/v1",
+  "sources": [
+    {
+      "id": "my-blog",
+      "label": "My favourite blog",
+      "kind": "rss-or-atom",
+      "url": "https://example.org/feed.xml",
+      "max_items": 5,
+      "note": "Any RSS or Atom feed. Replace the url with the feed address (often /feed, /rss or /atom.xml)."
+    },
+    {
+      "id": "hn",
+      "label": "Hacker News",
+      "kind": "hn-json-api",
+      "url": "https://hacker-news.firebaseio.com/v0/topstories.json",
+      "max_items": 10,
+      "note": "The Hacker News front page through its public API: titles, links and points only."
+    },
+    {
+      "id": "example-news",
+      "label": "Example newsroom",
+      "kind": "html-index",
+      "url": "https://example.org/news/",
+      "max_items": 5,
+      "discovery": {
+        "allowed_hosts": ["example.org"],
+        "allowed_path_prefixes": ["/news/"],
+        "max_candidates": 20
+      },
+      "note": "A news page with no feed. Only links on the allowed hosts and under the allowed paths are followed."
+    }
+  ]
+}

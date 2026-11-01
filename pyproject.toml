@@ -1,0 +1,26 @@
+[build-system]
+# One pinned build tool (the same version claim-seal pins). Composer itself has one runtime
+# dependency: claim-seal, pinned to an exact commit below.
+requires = ["setuptools==84.2.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lensmith-composer"
+version = "0.1.0"
+description = "Read a few feeds, write a short brief through a lens you choose, and check every claim against the article it cites."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+dependencies = [
+  "claim-seal @ git+https://github.com/lensmith-ai/claim-seal@f0e0a90ab62532a498f63bb7887e079bd0dc8641",
+]
+
+[project.scripts]
+composer = "composer.cli:main"
+
+[tool.setuptools]
+packages = ["composer", "composer.adapters"]
+
+[tool.setuptools.package-data]
+composer = ["sources.json", "data/*.json", "web/*.css", "web/*.js", "web/window/*.css", "web/window/*.js"]

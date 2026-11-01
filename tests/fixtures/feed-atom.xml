@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+<title>Quarry Street Studio</title>
+<id>urn:example:quarry</id>
+<updated>2025-03-05T10:00:00Z</updated>
+<entry>
+<title>Quarry Street Studio ships a smaller model for phones</title>
+<link rel="related" href="https://example.org/quarry/related"/>
+<link rel="alternate" href="https://example.org/quarry/small-model"/>
+<id>urn:example:quarry:1</id>
+<updated>2025-03-05T10:00:00Z</updated>
+<summary type="html">The model runs on the phone, so &lt;em&gt;no text leaves the device&lt;/em&gt;.</summary>
+</entry>
+</feed>
