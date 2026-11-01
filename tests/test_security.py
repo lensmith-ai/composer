@@ -141,6 +141,23 @@ class TotalTimeTests(unittest.TestCase):
             fetch._read_capped(resp, time.monotonic() + 0.5, 0.5)
         self.assertLess(time.monotonic() - started, 2)
 
+    def test_a_server_that_never_answers_the_handshake_is_cut_at_the_total_limit(self):
+        # The per-read timeout is 30 s here; the total limit of 1 s must still end the fetch, so a
+        # server cannot stretch the TLS handshake or the headers a byte at a time either.
+        mute = socket.socket()
+        mute.bind(("127.0.0.1", 0))
+        mute.listen(4)
+        self.addCleanup(mute.close)
+        held = []
+        threading.Thread(target=lambda: held.append(mute.accept()), daemon=True).start()
+        started = time.monotonic()
+        with mock.patch.dict(os.environ, {fetch.ALLOW_PRIVATE_ENV: "1"}):
+            with self.assertRaises(fetch.FetchTimeout):
+                fetch.http_get(f"https://127.0.0.1:{mute.getsockname()[1]}/", 30, total_s=1)
+        self.assertLess(time.monotonic() - started, 5)
+        for conn, _ in held:
+            conn.close()
+
     def test_a_body_over_the_ceiling_is_read_no_further(self):
         class Endless:
             reads = 0
@@ -321,6 +338,26 @@ class SourceMarkerTests(unittest.TestCase):
                 c = clean_text(text)
                 self.assertGreater(c.changes, 0)
                 self.assertNotRegex(c.text, r"(?i)\[\s*(end\s+)?source\b")
+
+
+class KeyEchoTests(unittest.TestCase):
+    """L4: an endpoint that echoed the key in its error message had it printed in the terminal and,
+    under `composer serve`, returned to the page that asked for the brief."""
+
+    def test_an_echoed_key_is_not_repeated(self):
+        from composer.providers import Anthropic, OpenAICompatible, ProviderError
+        from helpers import ScriptedTransport
+        canary = "test-canary-" + "0123456789abcdef"
+        echo = {"error": {"type": "authentication_error", "message": f"bad key {canary} / Bearer {canary}x"}}
+        with mock.patch.dict(os.environ, {"COMPOSER_TEST_KEY": canary}):
+            for provider in (Anthropic(api_key_env="COMPOSER_TEST_KEY", transport=ScriptedTransport([(401, echo)])),
+                             OpenAICompatible(model="m", base_url="https://example.org/v1", api_key_env="COMPOSER_TEST_KEY",
+                                              transport=ScriptedTransport([(401, echo)]))):
+                with self.subTest(provider=provider.name):
+                    with self.assertRaises(ProviderError) as ctx:
+                        provider("hello")
+                    self.assertNotIn("canary", str(ctx.exception))
+                    self.assertIn("HTTP 401 authentication_error", str(ctx.exception))
 
 
 class LinkSchemeTests(unittest.TestCase):

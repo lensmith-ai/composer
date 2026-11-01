@@ -6,8 +6,9 @@ this repository, not in a public issue.
 What Composer does to stay safe, and where its limits are:
 
 - **Your key.** The API key is read from the environment when each call is made. It is never
-  stored, logged or written to a file. A call that carries the key refuses redirects and refuses
-  a plain `http://` endpoint unless it is this machine.
+  stored, logged or written to a file, and an error message that repeats it is cut before it is
+  shown. A call that carries the key refuses redirects and refuses a plain `http://` endpoint
+  unless it is this machine.
 - **Feed text is untrusted.** Every string from a feed is cleaned (hidden characters removed,
   instruction-like phrases broken up) and placed between source markers that the prompt says are
   data. This lowers the odds that a feed can steer the model. It does not rule it out.
@@ -18,10 +19,10 @@ What Composer does to stay safe, and where its limits are:
   reached is checked before anything is sent, so a redirect or a name that changes its address
   (DNS rebinding) cannot get there either. `COMPOSER_ALLOW_PRIVATE_FETCH=1` turns this off, for
   a feed on your own network. Feed and page bodies over 2 MB are refused, and a fetch stops
-  after 60 seconds in total however slowly the bytes arrive. Feeds that declare XML entities
-  are refused, in any encoding. Markup is read with scans that take time in proportion to its
-  size, so a page full of unclosed tags cannot stall a brief. An `html-index` source only follows
-  links on the hosts and paths you list.
+  after 60 seconds in total however slowly the bytes arrive (handshake, headers or body).
+  Feeds that declare XML entities are refused, in any encoding. Markup is read with scans that
+  take time in proportion to its size, so a page full of unclosed tags cannot stall a brief. An
+  `html-index` source only follows links on the hosts and paths you list.
 - **Output.** The brief file and the page keep the brief's own words, the cited titles and links,
   the verdicts and SHA-256 digests. They do not store the articles' text (a sentence may quote a
   few words, as any summary does). `check.json` also holds the judge's one-line reasons, which
@@ -60,9 +61,11 @@ each attack run on the reviewer's own machine. Fixed, each with a regression tes
   are now https only and refused for non-public addresses, checked on the connected socket.
 - Several markup scans took time in proportion to the square of the page size: a 2 MB page of
   unclosed tags could stall a brief for hours. They are now linear.
-- The time limit was per read, so a server sending one byte at a time could hold a brief open
-  indefinitely. A fetch now stops after 60 seconds in total.
+- The time limit was per read, so a server sending one byte at a time (in the handshake, the
+  headers or the body) could hold a brief open indefinitely. A fetch now stops after 60 seconds
+  in total.
 - The refusal of XML entity declarations was a byte search that a UTF-16 feed passed (the XML
   parser's own expansion limit still stopped an entity bomb). The parser itself now refuses them.
-- Smaller hardening: the pages print only http(s) addresses as links, and a feed can no longer
-  write the prompt's own source markers.
+- Smaller hardening: the pages print only http(s) addresses as links; a feed can no longer
+  write the prompt's own source markers; and a model endpoint that echoes your key back in an
+  error message no longer gets it printed or sent to the page.

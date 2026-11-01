@@ -12,7 +12,9 @@ What a fetch will not do:
     to a public address first and a private one later (DNS rebinding) is refused too. To read a
     feed on your own network on purpose, set COMPOSER_ALLOW_PRIVATE_FETCH=1;
   - follow more than 5 redirects;
-  - read more than 2 MB, or keep reading past TOTAL_S seconds however slowly the bytes arrive.
+  - read more than 2 MB, or take more than TOTAL_S seconds in all: a watchdog shuts the sockets
+    of a fetch when its time is up, so no stage (connect, TLS handshake, headers, body, redirects)
+    can be stretched by a server that sends a byte at a time.
 """
 from __future__ import annotations
 
@@ -20,6 +22,7 @@ import http.client
 import ipaddress
 import os
 import socket
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -92,6 +95,62 @@ def check_host(host: str) -> None:
         check_address(info[4][0], host[:80])
 
 
+_local = threading.local()
+
+
+class _Watchdog:
+    """Shuts every socket opened for one fetch once its total time is up. It holds a duplicate
+    of each socket (shutdown acts on the socket, not the descriptor), so it also cuts a TLS
+    handshake in progress."""
+
+    def __init__(self, deadline: float):
+        self.fired = False
+        self._socks: list[socket.socket] = []
+        self._lock = threading.Lock()
+        self._timer = threading.Timer(max(0.0, deadline - time.monotonic()), self._fire)
+        self._timer.daemon = True
+
+    def start(self) -> None:
+        self._timer.start()
+
+    def watch(self, sock: socket.socket) -> None:
+        try:
+            dup = sock.dup()
+        except OSError:
+            return
+        with self._lock:
+            self._socks.append(dup)
+            if self.fired:
+                self._shut(dup)
+
+    @staticmethod
+    def _shut(sock: socket.socket) -> None:
+        try:
+            sock.shutdown(socket.SHUT_RDWR)
+        except OSError:
+            pass
+
+    def _fire(self) -> None:
+        with self._lock:
+            self.fired = True
+            for sock in self._socks:
+                self._shut(sock)
+
+    def stop(self) -> None:
+        self._timer.cancel()
+        with self._lock:
+            for sock in self._socks:
+                sock.close()
+            self._socks.clear()
+
+
+def _watch(sock: socket.socket) -> socket.socket:
+    dog = getattr(_local, "watchdog", None)
+    if dog is not None:
+        dog.watch(sock)
+    return sock
+
+
 class _GuardedHTTPSConnection(http.client.HTTPSConnection):
     """An HTTPS connection that checks the address it really connected to before TLS starts."""
 
@@ -102,14 +161,14 @@ class _GuardedHTTPSConnection(http.client.HTTPSConnection):
     def _guarded_create(self, address, *args, **kwargs):
         if getattr(self, "_tunnel_host", None):
             check_host(self._tunnel_host)  # through a proxy: the peer is the proxy, so check the name
-            return socket.create_connection(address, *args, **kwargs)
+            return _watch(socket.create_connection(address, *args, **kwargs))
         sock = socket.create_connection(address, *args, **kwargs)
         try:
             check_address(sock.getpeername()[0], str(self.host)[:80])
         except BaseException:
             sock.close()
             raise
-        return sock
+        return _watch(sock)
 
 
 class _GuardedHTTPSHandler(urllib.request.HTTPSHandler):
@@ -162,29 +221,47 @@ def http_get(url: str, timeout: float, user_agent: str = USER_AGENT, *, opener=N
                                                "Accept": "application/rss+xml, application/atom+xml, "
                                                          "application/xml, text/xml, text/html, application/json, */*"})
     deadline = time.monotonic() + total_s
+    too_long = f"the answer took longer than {total_s:g} s in total; refused"
+    dog = _Watchdog(deadline)
+    _local.watchdog = dog
+    dog.start()
     try:
         with (opener or _OPENER).open(req, timeout=timeout) as resp:
             body = _read_capped(resp, deadline, total_s)
             status = resp.status
             final = resp.geturl()
             encoding = (resp.headers.get("Content-Encoding") or "").strip().lower()
+        if dog.fired:  # the socket was cut: what was read may be a truncated body
+            raise FetchTimeout(too_long)
     except FetchError:
         raise
-    except urllib.error.HTTPError as exc:
-        raise FetchError(f"HTTP {exc.code}: {exc.reason}") from None
-    except TimeoutError:
-        raise FetchTimeout(f"timed out after {timeout} s") from None
-    except urllib.error.URLError as exc:
-        if isinstance(exc.reason, FetchError):
-            raise exc.reason from None
-        if isinstance(exc.reason, TimeoutError):
-            raise FetchTimeout(f"timed out after {timeout} s") from None
-        raise FetchError(f"URLError: {exc.reason}") from None
-    except OSError as exc:
-        raise FetchError(f"{type(exc).__name__}: {getattr(exc, 'reason', exc)}") from None
+    except Exception as exc:
+        if dog.fired:
+            raise FetchTimeout(too_long) from None
+        raise _fetch_error(exc, timeout) from None
+    finally:
+        _local.watchdog = None
+        dog.stop()
     if len(body) > BYTE_CEILING:
         raise FetchError(f"body over the {BYTE_CEILING}-byte ceiling; refused, not truncated")
     return Response(final, status, decode_body(body, encoding))
+
+
+def _fetch_error(exc: Exception, timeout: float) -> FetchError:
+    """The FetchError (or FetchTimeout) that says what went wrong, without a traceback."""
+    if isinstance(exc, urllib.error.HTTPError):
+        return FetchError(f"HTTP {exc.code}: {exc.reason}")
+    if isinstance(exc, TimeoutError):
+        return FetchTimeout(f"timed out after {timeout} s")
+    if isinstance(exc, urllib.error.URLError):
+        if isinstance(exc.reason, FetchError):
+            return exc.reason
+        if isinstance(exc.reason, TimeoutError):
+            return FetchTimeout(f"timed out after {timeout} s")
+        return FetchError(f"URLError: {exc.reason}")
+    if isinstance(exc, (OSError, http.client.HTTPException)):
+        return FetchError(f"{type(exc).__name__}: {getattr(exc, 'reason', exc)}")
+    return FetchError(f"{type(exc).__name__}: {str(exc)[:200]}")
 
 
 def decode_body(body: bytes, encoding: str = "") -> bytes:

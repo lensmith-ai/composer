@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import threading
 import time
 import urllib.error
@@ -103,13 +104,19 @@ def checked_endpoint(url: str) -> str:
                         "or http only to this machine")
 
 
-def _error_text(status: int, data: bytes) -> str:
+_BEARER = re.compile(r"(?i)\b(bearer)\s+\S+")
+
+
+def _error_text(status: int, data: bytes, secret: str = "") -> str:
+    """The endpoint's error, short. An endpoint that echoes the key back (some proxies do) does
+    not get it printed or sent on: the key, and anything after "Bearer", is replaced."""
     try:
         err = json.loads(data.decode("utf-8")).get("error")
         if isinstance(err, dict):
-            kind = err.get("type") or err.get("code") or "error"
+            kind = str(err.get("type") or err.get("code") or "error")[:60]
             msg = str(err.get("message") or "")[:200]
-            return f"HTTP {status} {kind}: {msg}"
+            text = _BEARER.sub(r"\1 [hidden]", f"HTTP {status} {kind}: {msg}")
+            return text.replace(secret, "[your key]") if secret else text
     except Exception:
         pass
     return f"HTTP {status}"
@@ -152,14 +159,15 @@ class Anthropic:
     def __call__(self, prompt: str, timeout: float | None = None) -> Reply:
         url = checked_endpoint(self.url)
         body = self.request_body(prompt)
+        key = _key(self.api_key_env)
         headers = {"content-type": "application/json", "anthropic-version": ANTHROPIC_VERSION,
-                   "x-api-key": _key(self.api_key_env)}
+                   "x-api-key": key}
         if "fallbacks" in body:
             headers["anthropic-beta"] = FALLBACK_BETA
         status, data = self.transport(url, headers, json.dumps(body).encode("utf-8"),
                                       timeout or DEFAULT_TIMEOUT_S)
         if status != 200:
-            raise ProviderError(_error_text(status, data))
+            raise ProviderError(_error_text(status, data, key))
         try:
             doc = json.loads(data.decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError):
@@ -202,11 +210,12 @@ class OpenAICompatible:
         base = checked_endpoint(self.base_url).rstrip("/")
         body = {"model": self.model, "max_tokens": self.max_tokens,
                 "messages": [{"role": "user", "content": prompt}]}
-        headers = {"content-type": "application/json", "authorization": f"Bearer {_key(self.api_key_env)}"}
+        key = _key(self.api_key_env)
+        headers = {"content-type": "application/json", "authorization": f"Bearer {key}"}
         status, data = self.transport(base + "/chat/completions", headers, json.dumps(body).encode("utf-8"),
                                       timeout or DEFAULT_TIMEOUT_S)
         if status != 200:
-            raise ProviderError(_error_text(status, data))
+            raise ProviderError(_error_text(status, data, key))
         try:
             doc = json.loads(data.decode("utf-8"))
             choice = doc["choices"][0]
