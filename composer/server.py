@@ -23,11 +23,13 @@ import json
 import os
 import re
 import threading
+import tempfile
 from urllib.parse import urlsplit
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from . import demo, page, pipeline
+from .job_store import JobStore, StoreError
 from .prompt import DEFAULT_INSIGHTS, LENS_MAX_CHARS
 from .providers import ProviderError
 from .registry import RegistryError
@@ -35,6 +37,8 @@ from .registry import RegistryError
 MAX_BODY = 16 * 1024
 LOOPBACK = {"127.0.0.1", "::1", "localhost"}
 LOOPBACK_NAMES = {"127.0.0.1", "localhost", "::1"}
+CSRF_HEADER = "X-Composer-CSRF"
+CSRF_VALUE = "same-origin"
 
 
 _PORT = re.compile(r"[0-9]{1,5}")
@@ -83,6 +87,8 @@ def request_problem(method: str, headers, *, local_only: bool) -> str | None:
     ctype = (headers.get("Content-Type") or "").split(";", 1)[0].strip().lower()
     if ctype != "application/json":
         return "send the request as application/json"
+    if not hmac.compare_digest(headers.get(CSRF_HEADER, ""), CSRF_VALUE):
+        return "send the same-origin anti-forgery header"
     if not local_only:
         return None
     origin = headers.get("Origin")
@@ -98,7 +104,7 @@ def request_problem(method: str, headers, *, local_only: bool) -> str | None:
 
 class App:
     def __init__(self, registry, make_model, *, out_dir: Path | None = None, passphrase: str = "",
-                 compose=pipeline.compose):
+                 compose=pipeline.compose, data_root: Path | str | None = None, job_worker=None):
         self.registry = registry
         self.make_model = make_model
         self.out_dir = out_dir
@@ -106,6 +112,77 @@ class App:
         self.compose = compose
         self.lock = threading.Lock()
         self.latest = demo.load()
+        root = Path(data_root) if data_root is not None else ((out_dir or Path(tempfile.mkdtemp(prefix="composer-data-"))) / "composer-data")
+        self.jobs = JobStore(root, worker=job_worker or self._job_worker)
+
+    def _job_worker(self, job: dict, draft_ready) -> dict:
+        request = job["request"]
+        sources = self.registry.pick(request["sources"])
+        model = self.make_model()
+        if hasattr(model, "ready"):
+            model.ready()
+        run = self.compose(lens=request["lens"], sources=sources, model=model,
+                           count=request.get("insights", DEFAULT_INSIGHTS))
+        draft_ready(run["edition"])
+        return {"status": "ok", "claim_evidence": {"job": job["job"],
+                                                        "draft_sha256": job["draft_sha256"]}}
+
+    def submit_job(self, headers, body: bytes) -> tuple[int, dict]:
+        if self.passphrase:
+            sent = headers.get("X-Composer-Pass", "")
+            if not hmac.compare_digest(sent.encode("utf-8"), self.passphrase.encode("utf-8")):
+                return 403, {"error": "wrong or missing pass phrase"}
+        try:
+            req = json.loads(body.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            return 400, {"error": "send a JSON object"}
+        if not isinstance(req, dict) or set(req) - {"sources", "lens", "insights"}:
+            return 400, {"error": "send {\"sources\": [...], \"lens\": \"...\"}"}
+        lens, ids = req.get("lens"), req.get("sources")
+        count = req.get("insights", DEFAULT_INSIGHTS)
+        if not isinstance(lens, str) or not lens.strip() or len(lens) > LENS_MAX_CHARS:
+            return 400, {"error": f"the lens must be 1 to {LENS_MAX_CHARS} characters"}
+        if not isinstance(ids, list) or not ids or len(ids) > 8 or not all(isinstance(x, str) for x in ids):
+            return 400, {"error": "name 1 to 8 sources"}
+        if not isinstance(count, int) or isinstance(count, bool) or not 3 <= count <= 8:
+            return 400, {"error": "insights must be from 3 to 8"}
+        try:
+            self.registry.pick(ids)
+            return 202, self.jobs.submit({"sources": ids, "lens": lens.strip(), "insights": count})
+        except RegistryError as exc:
+            return 400, {"error": str(exc)}
+        except RuntimeError:
+            return 409, {"error": "compose capacity is full"}
+
+    def change_job(self, headers, path: str, request: object) -> tuple[int, dict]:
+        if self.passphrase:
+            sent = headers.get("X-Composer-Pass", "")
+            if not hmac.compare_digest(sent.encode("utf-8"), self.passphrase.encode("utf-8")):
+                return 403, {"error": "wrong or missing pass phrase"}
+        if not isinstance(request, dict):
+            return 400, {"error": "send a JSON object"}
+        try:
+            if path.startswith("/save/") and request == {}:
+                return 200, self.jobs.save(path.removeprefix("/save/"))
+            if path.startswith("/delete/") and request == {}:
+                self.jobs.delete(path.removeprefix("/delete/"))
+                return 200, {"deleted": path.removeprefix("/delete/")}
+            if path.startswith("/restore/") and request == {}:
+                return 200, self.jobs.restore(path.removeprefix("/restore/"))
+            if path == "/retention" and set(request) <= {"apply"} and isinstance(request.get("apply", False), bool):
+                return 200, self.jobs.retention(apply=request.get("apply", False))
+            if path == "/update/migrate" and request == {"schema": "2"}:
+                self.jobs.migrate_copy("2")
+                return 200, {"generation": self.jobs.current_generation(), "migration": "ready"}
+            if path == "/update/switch" and set(request) == {"target"} and isinstance(request["target"], str):
+                self.jobs.switch(request["target"])
+                return 200, {"generation": self.jobs.current_generation()}
+            if path == "/update/rollback" and request == {}:
+                result = self.jobs.rollback()
+                return 200, {"exported_jobs": result["exported_jobs"]}
+        except StoreError as exc:
+            return 409 if "active jobs" in str(exc) else 400, {"error": str(exc)}
+        return 400, {"error": "request does not match this change route"}
 
     def page(self) -> bytes:
         return page.build(self.latest, live=True, sources=self.registry.entries(),
@@ -191,21 +268,47 @@ def handler_for(app: App, *, local_only: bool = True):
                 self._send(200, app.page(), "text/html; charset=utf-8")
             elif self.path == "/api/latest":
                 self._json(200, app.latest)
+            elif self.path == "/health":
+                self._json(200, app.jobs.health())
+            elif self.path == "/shelf":
+                self._json(200, app.jobs.index())
+            elif self.path == "/latest":
+                latest = app.jobs.latest()
+                self._json(200, latest) if latest else self._json(404, {"error": "not found"})
+            elif self.path.startswith("/status/"):
+                try:
+                    self._json(200, app.jobs.status(self.path.removeprefix("/status/")))
+                except (OSError, ValueError, StoreError):
+                    self._json(404, {"error": "not found"})
             else:
                 self._json(404, {"error": "not found"})
 
         def do_POST(self):  # noqa: N802
             if self._refused("POST"):
                 return
-            if self.path != "/api/compose":
+            routes = {"/api/compose", "/compose", "/retention", "/update/migrate", "/update/switch", "/update/rollback"}
+            if self.path not in routes and not any(self.path.startswith(prefix) for prefix in ("/save/", "/delete/", "/restore/")):
                 return self._json(404, {"error": "not found"})
+            if self.path == "/compose" and not self.headers.get("Origin"):
+                return self._json(403, {"error": "compose requests need a same-origin Origin header"})
             try:
                 length = int(self.headers.get("Content-Length") or 0)
             except ValueError:
                 length = -1
             if length <= 0 or length > MAX_BODY:
                 return self._json(413 if length > MAX_BODY else 400, {"error": "body missing or over 16 KB"})
-            status, obj = app.handle_compose(self.headers, self.rfile.read(length))
+            body = self.rfile.read(length)
+            if self.path == "/compose":
+                status, obj = app.submit_job(self.headers, body)
+            elif self.path == "/api/compose":
+                status, obj = app.handle_compose(self.headers, body)
+            else:
+                try:
+                    request = json.loads(body.decode("utf-8"))
+                except (UnicodeDecodeError, json.JSONDecodeError):
+                    status, obj = 400, {"error": "send a JSON object"}
+                else:
+                    status, obj = app.change_job(self.headers, self.path, request)
             self._json(status, obj)
 
         def log_message(self, fmt, *args):  # one short line per request, no headers or bodies

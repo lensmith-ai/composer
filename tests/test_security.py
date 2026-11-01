@@ -433,10 +433,11 @@ class ServeCrossSiteTests(unittest.TestCase):
         for host in (f"127.0.0.1:{port}", f"localhost:{port}"):
             with self.subTest(host=host):
                 headers = {"Content-Type": "application/json", "Host": host, "Origin": f"http://{host}",
-                           "Sec-Fetch-Site": "same-origin"}
+                           "Sec-Fetch-Site": "same-origin", "X-Composer-CSRF": server.CSRF_VALUE}
                 self.assertEqual(self.request(port, "POST", "/api/compose", headers, self.BODY)[0], 200)
                 self.assertEqual(self.request(port, "GET", "/", {"Host": host})[0], 200)
-        self.assertEqual(self.request(port, "POST", "/api/compose", {"Content-Type": "application/json"}, self.BODY)[0],
+        self.assertEqual(self.request(port, "POST", "/api/compose", {"Content-Type": "application/json",
+                                                                        "X-Composer-CSRF": server.CSRF_VALUE}, self.BODY)[0],
                          200)  # a command-line client sends no Origin
         self.assertEqual(len(self.calls), 3)
 
@@ -447,12 +448,14 @@ class ServeCrossSiteTests(unittest.TestCase):
         self.assertEqual(self.request(port, "POST", "/api/compose", {**base, "Content-Type": "text/plain"}, self.BODY)[0], 403)
         self.assertEqual(self.request(port, "POST", "/api/compose", {**base, "Content-Type": "application/json"},
                                       self.BODY)[0], 403)  # no pass phrase
-        ok = {**base, "Content-Type": "application/json", "X-Composer-Pass": "a long pass phrase"}
+        ok = {**base, "Content-Type": "application/json", "X-Composer-Pass": "a long pass phrase",
+              "X-Composer-CSRF": server.CSRF_VALUE}
         self.assertEqual(self.request(port, "POST", "/api/compose", ok, self.BODY)[0], 200)
 
     def test_the_page_sends_json_to_its_own_origin(self):
         js = (page.WEB / "page.js").read_text(encoding="utf-8")
         self.assertIn("'content-type': 'application/json'", js)
+        self.assertIn("'x-composer-csrf': 'same-origin'", js)
         self.assertIn("fetch('/api/compose'", js)
 
 

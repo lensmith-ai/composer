@@ -172,7 +172,7 @@
       var btn = form.querySelector('button');
       btn.disabled = true;
       document.getElementById('log').textContent = 'composing (this takes a minute or two)...';
-      var headers = { 'content-type': 'application/json' };
+      var headers = { 'content-type': 'application/json', 'x-composer-csrf': 'same-origin' };
       if (form.elements.pass && form.elements.pass.value) headers['x-composer-pass'] = form.elements.pass.value;
       fetch('/api/compose', { method: 'POST', headers: headers, body: JSON.stringify(body) })
         .then(function (r) { return r.json().then(function (j) { return [r.ok, j]; }); })
