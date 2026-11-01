@@ -3,6 +3,29 @@
 Please report a security problem privately through GitHub's "Report a vulnerability" button on
 this repository, not in a public issue.
 
+## Reporting
+
+- **Where:** the "Report a vulnerability" button (Security tab), which opens a private advisory only the
+  maintainers can read. Please include the version (`composer --version`), how you run it (command line, page,
+  Docker Compose with Caddy) and the steps that show the problem.
+- **When you will hear back:** an acknowledgement within 3 days, and a fix or a plan with a date within 14 days.
+  We credit reporters in the advisory and the changelog unless you ask us not to.
+- **Supported versions:** the latest release gets security fixes. Before 1.0, that is the latest 0.y release only.
+
+  | version | security fixes |
+  |---|---|
+  | latest 0.y release | yes |
+  | anything older | no; please update |
+
+- **In scope:** the `composer` package and command, its web page and server, the container image, `compose.yaml`
+  and the `Caddyfile` as shipped, the deploy guide as written (docs/deploy-vps.md), and the release workflow and
+  its artifacts (checksums, SBOM, attestations).
+- **Out of scope:** problems that need someone who can already run commands on your machine or server; your own
+  changes to the shipped files; the model provider's or a feed's own service; a brief that says what a hostile feed
+  wanted (see "What a hostile feed can still do" below: that is a known limit, not a bug).
+- **Safe harbour:** research done in good faith, on your own install, that avoids other people's data and
+  services, and that you report to us privately first, is welcome; we will not pursue it.
+
 What Composer does to stay safe, and where its limits are:
 
 - **Your key.** The API key is read from the environment when each call is made. It is never
@@ -39,6 +62,16 @@ What Composer does to stay safe, and where its limits are:
   spend your credit. It will not listen on another address unless `COMPOSER_SERVER_PASS` is set,
   and every compose request must then send that phrase. It serves two fixed paths and no files
   from disk. It is a plain standard-library server: put it behind a TLS proxy before exposing it.
+- **Running it on a server** (compose.yaml, docs/deploy-vps.md). Composer has no accounts: the login is Caddy's
+  (HTTP basic authentication over HTTPS, with a bcrypt hash of one password), on every path, and Caddy never passes
+  it to the app. The app's container publishes no port; only Caddy's 80 and 443 are open, and the app runs as an
+  unprivileged user on a read-only filesystem with no extra privileges. Your model key is never a container
+  environment variable. One login for one person: sharing it shares your API credit. Caddy does not slow down
+  repeated wrong passwords, so use a long random one. Exposing the app without Caddy and the login is not supported.
+- **Release integrity.** From the first release on, every file attached to a GitHub Release and the container image
+  carry GitHub artifact attestations (build provenance and SBOM) made by this repository's release workflow, and
+  SHA256SUMS lists every file. `gh attestation verify` checks where a file came from; a checksum alone only shows the
+  download is complete.
 - **The seal is not a signature.** It is an unkeyed SHA-256 chain. It shows a later edit only
   when compared with a copy you kept. See claim-seal's README.
 - **What a hostile feed can still do.** It cannot run code on your machine or in the page, it

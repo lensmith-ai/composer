@@ -1,0 +1,50 @@
+{
+ "about": "Like answers-supported.json, but the judge finds the second line unsupported.",
+ "answers": {
+  "The container image runs as an unprivileged user.": {
+   "verdict": "supported",
+   "why": "The changelog says the image runs as an unprivileged user.",
+   "relation": "says",
+   "strength": 95,
+   "citation_spans": [
+    {
+     "citation_index": 0,
+     "span_quote": "runs as an unprivileged user",
+     "span_relation": "says"
+    }
+   ],
+   "evidence_spans": [
+    {
+     "citation_index": 0,
+     "support_span": "A container image that runs as an unprivileged user"
+    }
+   ],
+   "citation_bears": [
+    {
+     "citation_index": 0,
+     "how_it_bears": "It is the changelog line itself."
+    }
+   ]
+  },
+  "All 12 offline tests passed on Linux.": {
+   "verdict": "unsupported",
+   "why": "Invented for the test.",
+   "relation": "says",
+   "strength": 95,
+   "citation_spans": [
+    {
+     "citation_index": 0,
+     "span_quote": "All 12 offline tests passed on Linux",
+     "span_relation": "says"
+    }
+   ],
+   "evidence_spans": [],
+   "citation_bears": [
+    {
+     "citation_index": 0,
+     "how_it_bears": "It gives the counts."
+    }
+   ]
+  }
+ }
+}

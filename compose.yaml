@@ -1,0 +1,79 @@
+# Lensmith Composer, always on: the app plus Caddy in front of it.
+#
+#   composer  the app. It publishes NO port: it is reachable only on the `front` network, from Caddy.
+#   caddy     HTTPS (automatic certificates) and the login (Composer has no accounts of its own).
+#
+# Settings come from a `.env` file next to this one (copy .env.example). Step by step: docs/deploy-vps.md.
+
+name: composer
+
+services:
+  composer:
+    # Until the first release is published, `docker compose build` builds this image from this folder.
+    image: ghcr.io/lensmith-ai/composer:${COMPOSER_VERSION:-0.2.0}
+    build:
+      context: .
+      target: default
+    command: ["up", "--host", "0.0.0.0", "--port", "8765"]
+    environment:
+      # The app refuses to listen beyond loopback unless the proxy network is named here (plan section 6).
+      COMPOSER_TRUSTED_PROXY: ${COMPOSER_FRONT_SUBNET:-172.30.65.0/24}
+      # The one origin the page is served from, for the app's Origin and Host checks (plan section 6).
+      # The variable's final name is set by phase P1, which adds those checks.
+      COMPOSER_PUBLIC_ORIGIN: https://${COMPOSER_DOMAIN:?set COMPOSER_DOMAIN in .env}
+    # No `ports:` on purpose. Your model key is NOT passed as an environment variable either
+    # (`docker inspect` shows those); it is stored inside the data volume, mode 0600.
+    volumes:
+      - composer-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    networks: [front]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8765/health', timeout=5).status == 200 else 1)"]
+      interval: 30s
+      timeout: 10s
+      start_period: 20s
+      retries: 3
+
+  caddy:
+    image: caddy:2.11.7@sha256:36c24ad91a7ff7bc4c87fe22bfa8df3c4b18da0773d73fc12ee2c52b98c0bb7e
+    command: ["caddy", "run", "--config", "/caddy/Caddyfile", "--adapter", "caddyfile"]
+    environment:
+      COMPOSER_DOMAIN: ${COMPOSER_DOMAIN:?set COMPOSER_DOMAIN in .env}
+      COMPOSER_TLS: ${COMPOSER_TLS:?set COMPOSER_TLS in .env to your email address, or to internal}
+      COMPOSER_LOGIN_USER: ${COMPOSER_LOGIN_USER:?set COMPOSER_LOGIN_USER in .env}
+      COMPOSER_LOGIN_HASH: ${COMPOSER_LOGIN_HASH:?set COMPOSER_LOGIN_HASH in .env (docs/deploy-vps.md step 5)}
+    ports:
+      - "${COMPOSER_HTTP_PORT:-80}:80"
+      - "${COMPOSER_HTTPS_PORT:-443}:443"
+      - "${COMPOSER_HTTPS_PORT:-443}:443/udp"
+    volumes:
+      - ./Caddyfile:/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    security_opt: ["no-new-privileges:true"]
+    networks: [front]
+    depends_on: [composer]
+    restart: unless-stopped
+
+networks:
+  front:
+    # Not `internal`: Composer must reach your feeds and your model provider, and Caddy its certificate
+    # authority. Only Caddy publishes ports. The subnet is fixed so the app can trust exactly this network.
+    ipam:
+      config:
+        - subnet: ${COMPOSER_FRONT_SUBNET:-172.30.65.0/24}
+
+volumes:
+  composer-data:   # /data in the app: the persistent data root (current pointer, generations, backups)
+  caddy-data:      # certificates, kept so a restart does not ask for new ones
+  caddy-config:

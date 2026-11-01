@@ -1,0 +1,34 @@
+# Caddy in front of Composer: HTTPS and one login. Values come from .env through compose.yaml.
+#
+#   COMPOSER_DOMAIN      the name people type, for example brief.example.com
+#   COMPOSER_TLS         your email address (automatic public certificates), or `internal` (a local CA, for a
+#                        trial on your own machine; browsers will warn until you trust that CA)
+#   COMPOSER_LOGIN_USER  the login name
+#   COMPOSER_LOGIN_HASH  the bcrypt hash of the password, from `caddy hash-password` (never the password itself)
+
+{$COMPOSER_DOMAIN} {
+	tls {$COMPOSER_TLS}
+
+	# Every path asks for the login, the page and its data alike. Composer has no accounts of its own.
+	basic_auth {
+		{$COMPOSER_LOGIN_USER} {$COMPOSER_LOGIN_HASH}
+	}
+
+	# Composer's own limit is 16 KB per request; refuse bigger bodies here already.
+	request_body {
+		max_size 64KB
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		X-Frame-Options "DENY"
+		-Server
+	}
+
+	reverse_proxy composer:8765 {
+		# The app never sees the login header.
+		header_up -Authorization
+	}
+}

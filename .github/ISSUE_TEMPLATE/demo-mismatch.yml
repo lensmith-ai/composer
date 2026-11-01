@@ -1,0 +1,24 @@
+name: I could not get what the demo shows
+description: You followed the README or a guide and did not get the brief, the cards or the checks the demo shows.
+labels: [parity]
+body:
+  - type: textarea
+    id: steps
+    attributes:
+      label: The steps you followed
+      description: Which guide, and each command or click, in order.
+    validations:
+      required: true
+  - type: textarea
+    id: difference
+    attributes:
+      label: What you got instead
+      description: A screenshot helps. Crop out anything private.
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Version and checks
+      description: Paste `composer --version` (from 0.2 on, `composer doctor`). Never paste a key or your login.
+      render: text

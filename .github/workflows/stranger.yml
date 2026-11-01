@@ -1,0 +1,82 @@
+# Nightly (and on demand, and on pull requests that touch the always-on files): the parts of the stranger test
+# (test-plan sections 4 and 10) that exist so far.
+#   deploy-proof  tests/deploy/proof.sh: build the image, compose.yaml + Caddy on a local CA, HTTPS with the login,
+#                 the app port unreachable directly, backup / destroy / restore of the data volume
+#   browser       tests/stranger/browser_smoke.mjs: the demo pages and the served page in Chromium and WebKit at
+#                 390, 1280 and 1600 px: 0 console errors, 0 failed requests, 0 outside requests
+# The rest of the stranger test (setup, coexistence, the full page flow, update and recovery) is pending phases
+# P2 and P3; it joins this workflow as those land.
+name: stranger
+
+on:
+  schedule:
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - Dockerfile
+      - .dockerignore
+      - compose.yaml
+      - Caddyfile
+      - tests/deploy/**
+      - tests/stranger/**
+      - .github/workflows/stranger.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stranger-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy-proof:
+    name: always-on proof (Docker Compose + Caddy, tls internal)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Versions
+        run: docker version --format '{{.Server.Version}}' && docker compose version
+      - name: Proof
+        run: bash tests/deploy/proof.sh
+
+  browser:
+    name: browser smoke (Chromium + WebKit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PLAYWRIGHT_VERSION: 1.64.1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+      - name: Install Composer
+        run: python -m pip install .
+      - name: Install Playwright (pinned) and its two browsers
+        run: |
+          mkdir -p "$RUNNER_TEMP/pw"
+          npm install --prefix "$RUNNER_TEMP/pw" --no-save --no-audit --no-fund "playwright@${PLAYWRIGHT_VERSION}"
+          "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium webkit
+      - name: Serve the demo and the app on this machine
+        run: |
+          python -m http.server 8000 --bind 127.0.0.1 --directory docs/demo > "$RUNNER_TEMP/demo.log" 2>&1 &
+          composer serve --port 8765 > "$RUNNER_TEMP/serve.log" 2>&1 &
+          for _ in $(seq 1 30); do
+            curl -sf -o /dev/null http://127.0.0.1:8000/index.html && curl -sf -o /dev/null http://127.0.0.1:8765/ && exit 0
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/demo.log" "$RUNNER_TEMP/serve.log"
+          exit 1
+      - name: Browser smoke
+        run: |
+          PLAYWRIGHT_MODULE="$RUNNER_TEMP/pw/node_modules/playwright/index.mjs" node tests/stranger/browser_smoke.mjs \
+            http://127.0.0.1:8000/index.html http://127.0.0.1:8000/brief.html http://127.0.0.1:8765/

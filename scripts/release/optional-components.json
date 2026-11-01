@@ -1,0 +1,62 @@
+{
+  "about": "Parts of OPTIONAL narration. None of them is in the wheel, the sdist or the default container image. build.py adds them to every release SBOM with scope 'excluded' (not in this artifact) so their licences are on record. eSpeak NG is GPL-3.0: any published image that includes it must ship the licence text and a source offer (see the narration target in the Dockerfile). Pins and hashes are from the narration spike's hash-locked install; phase P3 owns them and updates this file with its lock.",
+  "components": [
+    {
+      "type": "library",
+      "name": "kokoro-onnx",
+      "version": "0.5.0",
+      "purl": "pkg:pypi/kokoro-onnx@0.5.0",
+      "licenses": [{"license": {"id": "MIT"}}],
+      "delivery": "installed only when narration is chosen (native setup) or in the opt-in narration image"
+    },
+    {
+      "type": "library",
+      "name": "espeakng-loader",
+      "version": "0.2.4",
+      "purl": "pkg:pypi/espeakng-loader@0.2.4",
+      "licenses": [{"license": {"id": "MIT"}}],
+      "delivery": "installed only with narration; it bundles the eSpeak NG library listed next"
+    },
+    {
+      "type": "library",
+      "name": "espeak-ng",
+      "version": "1.52.0",
+      "licenses": [{"license": {"id": "GPL-3.0-or-later"}}],
+      "delivery": "native library inside the espeakng-loader wheel; GPL-3.0 licence text and a source offer ship with any image that includes it"
+    },
+    {
+      "type": "library",
+      "name": "onnxruntime",
+      "version": "1.31.1",
+      "purl": "pkg:pypi/onnxruntime@1.31.1",
+      "licenses": [{"license": {"id": "MIT"}}],
+      "delivery": "installed only with narration (CPU build)"
+    },
+    {
+      "type": "library",
+      "name": "soundfile",
+      "version": "0.13.1",
+      "purl": "pkg:pypi/soundfile@0.13.1",
+      "licenses": [{"license": {"id": "BSD-3-Clause"}}],
+      "delivery": "installed only with narration"
+    },
+    {
+      "type": "data",
+      "name": "kokoro-v1.0.onnx",
+      "version": "model-files-v1.0",
+      "licenses": [{"license": {"id": "Apache-2.0"}}],
+      "hashes": [{"alg": "SHA-256", "content": "7d5df8ecf7d4b1878015a32686053fd0eebe2bc377234608764cc0ef3636a6c5"}],
+      "externalReferences": [{"type": "distribution", "url": "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx"}],
+      "delivery": "downloaded into your data folder only when you turn narration on (325,532,387 bytes)"
+    },
+    {
+      "type": "data",
+      "name": "voices-v1.0.bin",
+      "version": "model-files-v1.0",
+      "licenses": [{"license": {"id": "Apache-2.0"}}],
+      "hashes": [{"alg": "SHA-256", "content": "bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d"}],
+      "externalReferences": [{"type": "distribution", "url": "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin"}],
+      "delivery": "downloaded into your data folder only when you turn narration on (28,214,398 bytes)"
+    }
+  ]
+}

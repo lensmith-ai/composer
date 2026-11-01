@@ -1,0 +1,213 @@
+# A tag v<version> (equal to pyproject.toml's version) builds and publishes a release:
+#   test          the offline suite on Linux, recorded as test-results.json (the release note's second source)
+#   build         sdist + wheel with hash-locked tools; the wheel installed into an empty venv and run;
+#                 a CycloneDX SBOM of that venv (+ the optional narration parts, scope "excluded"); SHA256SUMS
+#   release-note  the note, every line checked by claim-seal against CHANGELOG.md and test-results.json;
+#                 any line that is not supported stops the release
+#   image         the default image (no narration) for linux/amd64 and linux/arm64 to ghcr.io, its SBOM (syft,
+#                 CycloneDX) and both attested to the image digest
+#   publish       GitHub artifact attestations (build provenance + SBOM) for every file, then the GitHub Release
+# Nothing is published unless every job before it is green. Write permissions exist only in the jobs that need them.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions: {}
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - run: python -m pip install .
+      - name: Offline tests, recorded
+        run: python scripts/release/test_results.py --out test-results.json
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-results
+          path: test-results.json
+          if-no-files-found: error
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Release tools (hash-locked)
+        run: python -m pip install --require-hashes -r scripts/release/release-tools.txt
+      - name: Build, install, run, SBOM, checksums
+        run: python scripts/release/build.py --out dist --tag "$GITHUB_REF_NAME"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  release-note:
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # The model key for the claim-seal judge lives in this environment's secrets, nowhere else.
+    environment: release
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - run: python -m pip install .
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: test-results
+      - name: Claim-sealed release note
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          python scripts/release/release_note.py --version "$version" --draft "release-notes/$version.json" \
+            --tests test-results.json --out-dir note
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: note
+          path: note/
+          if-no-files-found: error
+
+  image:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+        with:
+          platforms: arm64
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Image name and tag
+        id: name
+        run: |
+          echo "ref=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+          echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+      - name: Build and push the default image (no narration)
+        id: push
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          target: default
+          platforms: linux/amd64,linux/arm64
+          build-args: COMPOSER_VERSION=${{ steps.name.outputs.version }}
+          tags: ${{ steps.name.outputs.ref }}:${{ steps.name.outputs.version }}
+          push: true
+      - name: Image SBOM (syft, CycloneDX)
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        with:
+          image: ${{ steps.name.outputs.ref }}@${{ steps.push.outputs.digest }}
+          format: cyclonedx-json
+          output-file: image.cdx.json
+          upload-artifact: false
+          upload-release-assets: false
+          dependency-snapshot: false
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-name: ${{ steps.name.outputs.ref }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+      - uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4.1.0
+        with:
+          subject-name: ${{ steps.name.outputs.ref }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          sbom-path: image.cdx.json
+          push-to-registry: true
+      - name: Keep the image digest and SBOM for the release
+        env:
+          DIGEST: ${{ steps.push.outputs.digest }}
+          REF: ${{ steps.name.outputs.ref }}
+        run: |
+          mkdir -p image
+          mv image.cdx.json "image/lensmith_composer-${GITHUB_REF_NAME#v}-image.cdx.json"
+          echo "$REF@$DIGEST" > "image/lensmith_composer-${GITHUB_REF_NAME#v}-image-digest.txt"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: image
+          path: image/
+          if-no-files-found: error
+
+  publish:
+    needs: [build, release-note, image]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: "{dist,note,image}"
+          path: release
+          merge-multiple: true
+      - name: Version
+        id: v
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+      - name: SHA256SUMS over every file attached to the release
+        working-directory: release
+        run: |
+          rm -f SHA256SUMS
+          sha256sum -- * > SHA256SUMS
+          cat SHA256SUMS
+      - name: Build provenance for every release file
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: release/*
+      - name: SBOM attestation for the wheel and the sdist
+        uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4.1.0
+        with:
+          subject-path: |
+            release/*.whl
+            release/*.tar.gz
+          sbom-path: release/lensmith_composer-${{ steps.v.outputs.version }}.cdx.json
+      - name: GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          pre=""
+          case "$version" in *a*|*b*|*rc*) pre="--prerelease" ;; esac
+          gh release create "$GITHUB_REF_NAME" release/* --repo "$GITHUB_REPOSITORY" --verify-tag $pre \
+            --title "Lensmith Composer $version" --notes-file release/release-note.md

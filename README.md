@@ -130,6 +130,10 @@ The key is read when each call is made. It is never stored, logged or written to
    anyone who can compose spends your API credit. Put a TLS proxy in front of it. One brief runs
    at a time.
 
+   To run it on a server with HTTPS and a login, use the container image with Docker Compose and Caddy:
+   [docs/deploy-vps.md](docs/deploy-vps.md) walks through it step by step, with a trial on your own computer first.
+   Parts of that guide wait for Composer 0.2 and say so.
+
 ## What a brief costs
 
 **7 model calls** with the default settings: 1 to write the brief, 1 to check each of the 5
@@ -190,6 +194,24 @@ composer sources list
 | `composer/data/recorded-run.json` | the recorded brief the demo replays |
 | `docs/demo/` | the static demo: the animated replay (`index.html`) and the plain page (`brief.html`) |
 | `tests/` | offline tests: fixtures only, no network, no key |
+| `Dockerfile`, `compose.yaml`, `Caddyfile` | the container image and the always-on setup ([docs/deploy-vps.md](docs/deploy-vps.md)) |
+| `tests/deploy/proof.sh` | the always-on proof: HTTPS through Caddy with the login, the app port closed, a backup restored |
+| `scripts/release/` | the release build (sdist, wheel, SBOM, checksums) and the claim-sealed release note |
+| `.github/workflows/` | tests on Linux, macOS and Windows, the scans, the nightly proof, and the release |
+
+## Privacy
+
+Composer has no telemetry: no analytics, no crash reports, no update checks. It talks to the feeds you chose and
+the model provider you chose, with your key, and nothing else. On a server, Caddy also talks to its certificate
+authority.
+
+## Releases you can check
+
+Each release lists SHA256SUMS for its files, a CycloneDX SBOM of what the package installs (optional narration
+parts listed with their licences), and GitHub artifact attestations for every file and the container image, so
+`gh attestation verify` can show which workflow and commit built it. The release note's factual lines are checked by
+claim-seal against CHANGELOG.md and the recorded test results before it is published. See
+[docs/releasing.md](docs/releasing.md).
 
 ## Tests
 

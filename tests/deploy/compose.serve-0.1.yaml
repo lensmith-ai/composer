@@ -1,0 +1,19 @@
+# Test-only override for tests/deploy/proof.sh, used until phase P1 adds `composer up`.
+#
+# The shipped compose.yaml runs the planned `composer up --host 0.0.0.0 --port 8765`. This branch's CLI still has
+# the 0.1 `composer serve`, which refuses a non-loopback bind unless COMPOSER_SERVER_PASS is set and has no
+# /health route. This file swaps in those two 0.1 details and nothing else: same image, same volume, same read-only
+# root, same network, Caddy unchanged. Delete it when `composer up` lands.
+
+services:
+  composer:
+    image: lensmith-composer:proof
+    command: ["serve", "--host", "0.0.0.0", "--port", "8765", "--out", "/data/latest"]
+    environment:
+      COMPOSER_SERVER_PASS: ${COMPOSER_SERVER_PASS:?the proof script sets this}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8765/api/latest', timeout=5).status == 200 else 1)"]
+      interval: 5s
+      timeout: 5s
+      start_period: 5s
+      retries: 12

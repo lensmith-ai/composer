@@ -1,0 +1,11 @@
+{
+ "about": "Invented release-note draft for the offline tests of scripts/release/release_note.py.",
+ "version": "9.9.0",
+ "lede": "A fixture release.",
+ "items": [
+  {"insight": "The container image runs as an unprivileged user.",
+   "sources": [{"id": "changelog", "ref": "Changelog 9.9.0"}]},
+  {"insight": "All 12 offline tests passed on Linux.",
+   "sources": [{"id": "tests", "ref": "Test results 9.9.0"}]}
+ ]
+}

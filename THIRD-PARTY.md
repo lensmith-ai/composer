@@ -16,6 +16,27 @@ Everything else Composer runs on is the Python standard library (Python 3.10 or 
 |---|---|---|---|
 | [setuptools](https://github.com/pypa/setuptools) | 84.2.1 (pinned in `pyproject.toml`) | MIT | Builds the package when you run `pip install .`. Not used at run time. |
 
+## The container image and the always-on setup
+
+| name | version | licence | how it is used |
+|---|---|---|---|
+| [Python](https://www.python.org/) official image | `python:3.13.18-slim-trixie`, pinned by digest in `Dockerfile` | PSF-2.0 (Python); Debian packages under their own licences | The base of Composer's image. The release's image SBOM lists every package in it. |
+| [Caddy](https://caddyserver.com/) official image | 2.11.7, pinned by digest in `compose.yaml` | Apache-2.0 | HTTPS and the login in front of Composer. Pulled by Docker from Docker Hub; not part of Composer's image. |
+
+Optional narration (not in the package or the default image; pending phase P3) uses kokoro-onnx (MIT),
+espeakng-loader (MIT) with the eSpeak NG library it bundles (GPL-3.0-or-later), onnxruntime (MIT), soundfile
+(BSD-3-Clause) and the Kokoro model and voices (Apache-2.0). They are listed, with versions and hashes, in
+`scripts/release/optional-components.json` and in every release SBOM.
+
+## Release and CI tools (not part of Composer)
+
+| name | version | licence | how it is used |
+|---|---|---|---|
+| [build](https://github.com/pypa/build), [cyclonedx-bom](https://github.com/CycloneDX/cyclonedx-python) and their dependencies | hash-locked in `scripts/release/release-tools.txt` | MIT, Apache-2.0 and others (see that file's packages) | Build the sdist and wheel, and the SBOM, in the release workflow. |
+| [gitleaks](https://github.com/gitleaks/gitleaks) | 8.30.1, checked by SHA-256 | MIT | Secret scan in CI. |
+| [actionlint](https://github.com/rhysd/actionlint) | 1.7.12, checked by SHA-256 | MIT | Lints the workflows in CI. |
+| GitHub Actions in `.github/workflows/` | pinned by full commit SHA | MIT and Apache-2.0 | CI and releases. |
+
 ## The animated replay
 
 `composer/web/window/` (the scripts and styles of the replay window) comes from Composer's own
