@@ -24,4 +24,5 @@ composer = "composer.cli:main"
 packages = ["composer", "composer.adapters"]
 
 [tool.setuptools.package-data]
-composer = ["sources.json", "data/*.json", "web/*.css", "web/*.js", "web/window/*.css", "web/window/*.js"]
+composer = ["sources.json", "data/*.json", "web/*.css", "web/*.js", "web/window/*.css", "web/window/*.js",
+            "web/app/*.html", "web/app/*.css", "web/app/*.js"]

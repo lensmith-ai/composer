@@ -28,7 +28,7 @@ from urllib.parse import urlsplit
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from . import demo, page, pipeline
+from . import app_static, demo, page, pipeline
 from .job_store import JobStore, StoreError
 from .prompt import DEFAULT_INSIGHTS, LENS_MAX_CHARS
 from .providers import ProviderError
@@ -263,6 +263,8 @@ def handler_for(app: App, *, local_only: bool = True):
 
         def do_GET(self):  # noqa: N802
             if self._refused("GET"):
+                return
+            if app_static.send(self, self.path):
                 return
             if self.path in ("/", "/index.html"):
                 self._send(200, app.page(), "text/html; charset=utf-8")
