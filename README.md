@@ -1,6 +1,19 @@
 # Lensmith Composer
 
-<p align="center"><img src="docs/readme/how-it-works.png" width="860" alt="Drawing: how Composer works, as five stations on one bench. 1 Feeds: your chosen sources, titles, links and short descriptions only. 2 Screen: plain code removes hidden characters and breaks up text that reads like an instruction. 3 Your lens: one model call writes the brief through your words, and each claim must cite a title it was shown. 4 Check: claim-seal, a cited title must exist, then one model call per claim judges support. 5 Seal: each checked citation becomes a row in a SHA-256 chain; the brief keeps titles and links, never the articles. The recorded brief took 7 model calls and has 6 sealed checks."></p>
+<table>
+<tr>
+<td width="33%"><img src="docs/readme/brief.png" alt="Phone screen of a finished brief. The top insight, Model capability and safety need paired release tracks, sits above a drawing of two feeds, Google AI blog and Google DeepMind blog, 5 items each, woven through a screen and the system improvements lens. Below it: Checked 6/6."></td>
+<td width="33%"><img src="docs/readme/cards.png" alt="Phone screen further down the same brief: a row of insight cards. The first card says partly supported, 2 sources, then its title and why it matters. Below the row: 1 of 5, the two sources with 5 items each, and claim-seal, run again on the recorded answers: 6 of 6 checks agree."></td>
+<td width="33%"><img src="docs/readme/card-open.png" alt="The first insight card, opened. It says partly supported, 2 sources. The words each article backs are underlined and numbered. Under Sources and seals, each article gets a row: what it says, claim-seal re-check: agrees, a fingerprint, and a link to open the article."></td>
+</tr>
+<tr>
+<td>The finished brief: five insights from two feeds, read through one lens. "Checked 6/6" means every check was made.</td>
+<td>Each insight is a card you can tap. Its label says how well the cited articles back it.</td>
+<td>A card, opened. Underlined words are the ones an article backs, and each source shows claim-seal's verdict.</td>
+</tr>
+</table>
+
+<sub>Screenshots of the demo in <code>docs/demo</code>, which replays a brief recorded on 2026-10-25. Every word in them is from that brief.</sub>
 
 > **AI;DR (AI, didn't read)**
 > Claude wrote this code and this README. I haven't read either line by line.
@@ -185,6 +198,5 @@ repository, one regular expression per line.
 
 ## Licence
 
-MIT, see [LICENSE](LICENSE). claim-seal is MIT. The README figure was drawn with the
-[Anatomy](https://github.com/wheresryan22/anatomy) figure kit (MIT). See
-[THIRD-PARTY.md](THIRD-PARTY.md) for every dependency, its version and its licence.
+MIT, see [LICENSE](LICENSE). claim-seal is MIT. See [THIRD-PARTY.md](THIRD-PARTY.md) for every
+dependency, its version and its licence.

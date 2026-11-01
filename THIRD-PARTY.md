@@ -23,15 +23,11 @@ app screen, by the same authors, under this repository's MIT licence. Its commen
 those inside an embedded stylesheet, were removed for publication; otherwise the code is
 unchanged apart from renamed element ids.
 
-## The README figure
+## The README screenshots
 
 | name | version | licence | how it is used |
 |---|---|---|---|
-| [Anatomy](https://github.com/wheresryan22/anatomy) figure kit | commit `689dcf966e63d92be10a5d593c6e19e10acd4422` | MIT | Drew `docs/readme/how-it-works.png` (`docs/readme/src/`). Not part of the package and not needed to run Composer. |
-| [Playwright](https://github.com/microsoft/playwright) | any recent version | Apache-2.0 | Took the still picture of the figure. Not part of the package. |
-
-The figure's source files in `docs/readme/src/` were adapted from claim-seal's README figure
-(same kit, MIT).
+| [Playwright](https://github.com/microsoft/playwright) | any recent version | Apache-2.0 | Took the screenshots in `docs/readme/` from the static demo (`docs/readme/capture.mjs`). Not part of the package and not needed to run Composer. |
 
 ## Audit note
 
