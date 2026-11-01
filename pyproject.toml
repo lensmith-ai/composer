@@ -14,7 +14,7 @@ license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.10"
 dependencies = [
-  "claim-seal @ https://github.com/lensmith-ai/claim-seal/archive/f0e0a90ab62532a498f63bb7887e079bd0dc8641.tar.gz#sha256=d8b1884a5927d01915b0057b5994884385d33665d370e3229258deea13b559c5",
+  "claim-seal @ https://github.com/lensmith-ai/claim-seal/archive/331d6a06a223c145e286a861c7f568cdb23cbefe.tar.gz#sha256=8d54d04b9bf1d93bc523f4dbef8500a090f826b531630081e0ec03f939319732",
 ]
 
 [project.scripts]

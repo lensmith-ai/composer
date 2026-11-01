@@ -6,7 +6,7 @@ Composer's own code is MIT licensed (see LICENSE). This file lists everything el
 
 | name | version | licence | how it is used |
 |---|---|---|---|
-| [claim-seal](https://github.com/lensmith-ai/claim-seal) | 0.2.0, commit `f0e0a90ab62532a498f63bb7887e079bd0dc8641` | MIT | The checking and sealing step. Installed by `pip install .` from GitHub's archive of that exact commit, whose SHA-256 pip checks; not copied into this repository. It has no dependencies of its own. |
+| [claim-seal](https://github.com/lensmith-ai/claim-seal) | 0.2.0, commit `331d6a06a223c145e286a861c7f568cdb23cbefe` | MIT | The checking and sealing step. Installed by `pip install .` from GitHub's archive of that exact commit, whose SHA-256 pip checks; not copied into this repository. It has no dependencies of its own. |
 
 Everything else Composer runs on is the Python standard library (Python 3.10 or newer).
 
