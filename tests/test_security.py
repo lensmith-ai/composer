@@ -512,7 +512,8 @@ class LinkSchemeTests(unittest.TestCase):
         for card in ed["cards"]:
             for c in card["citations"]:
                 c["url"] = "javascript:alert(1)"
-        out = window.window_html(ed, ["Google AI blog", "Google DeepMind blog"])
+        sheet = [s["label"] for s in json.loads((ROOT / "composer" / "sources.json").read_text("utf-8"))["sources"]]
+        out = window.window_html(ed, sheet)
         self.assertNotIn("javascript:", out)
         self.assertNotIn('class="rcplink"', out)
 

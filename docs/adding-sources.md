@@ -29,8 +29,9 @@ candidate articles) is held to 60 seconds, 24 requests and 8 MB read in all.
 ## Packages
 
 The source picker also shows packages: a named starting set of sources you can tap to tick them all, then change.
-Composer ships one, **AI labs** (the two bundled feeds). Add your own in `composer-packages.json` next to your sources
-file (with `composer up`, `packages.json` in the data folder's current generation), in this shape:
+Composer ships one, **AI labs** (two of the bundled feeds: the Google AI and Google DeepMind blogs). Add your own in
+`composer-packages.json` next to your sources file (with `composer up`, `packages.json` in the data folder's current
+generation), in this shape:
 
 ```json
 {

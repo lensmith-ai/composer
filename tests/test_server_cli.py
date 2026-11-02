@@ -75,7 +75,7 @@ class ServerTests(unittest.TestCase):
 
     def test_page_starts_with_the_recorded_brief(self):
         html = app().page().decode()
-        self.assertIn("Model capability and safety need paired release tracks", html)
+        self.assertIn("Safety decisions need policy-relevant evidence, not believable forecasts.", html)
 
 
 class CliTests(unittest.TestCase):

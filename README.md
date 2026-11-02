@@ -2,23 +2,23 @@
 
 <table>
 <tr>
-<td width="33%"><img src="docs/readme/brief.png" alt="Phone screen of a finished brief. The top insight, Model capability and safety need paired release tracks, sits above a drawing of two feeds, Google AI blog and Google DeepMind blog, 5 items each, woven through a screen and the system improvements lens. Below it: Checked 6/6."></td>
-<td width="33%"><img src="docs/readme/cards.png" alt="Phone screen further down the same brief: a row of insight cards. The first card says partly supported, 2 sources, then its title and why it matters. Below the row: 1 of 5, the two sources with 5 items each, and claim-seal, run again on the recorded answers: 6 of 6 checks agree."></td>
-<td width="33%"><img src="docs/readme/card-open.png" alt="The first insight card, opened. It says partly supported, 2 sources. The words each article backs are underlined and numbered. Under Sources and seals, each article gets a row: what it says, claim-seal re-check: agrees, a fingerprint, and a link to open the article."></td>
+<td width="33%"><img src="docs/readme/brief.png" alt="Phone screen of a finished brief. The top insight, Safety decisions need policy-relevant evidence, sits above a drawing of six feeds (Google AI, Google DeepMind, Hugging Face, Microsoft Research, PyTorch and arXiv cs.AI), 5 items each, woven through a screen and the system improvements lens. Below it: Checked 6/6."></td>
+<td width="33%"><img src="docs/readme/cards.png" alt="Phone screen further down the same brief: a row of insight cards. The first card says supported, 2 sources, then its title and why it matters. Below the row: 1 of 5, the six sources with 5 items each, and claim-seal, run again on the recorded answers: 6 of 6 checks agree."></td>
+<td width="33%"><img src="docs/readme/card-open.png" alt="The first insight card, opened. It says supported, 2 sources. The words each article backs are underlined and numbered. Under Sources and seals, each article gets a row: the marked words, a fingerprint of the passage checked (or no passage located), and a link to open the article."></td>
 </tr>
 <tr>
-<td>The finished brief: five insights from two feeds, read through one lens. "Checked 6/6" means every check was made.</td>
+<td>The finished brief: five insights from six feeds, read through one lens. "Checked 6/6" means every check was made.</td>
 <td>Each insight is a card you can tap. Its label says how well the cited articles back it.</td>
 <td>A card, opened. Underlined words are the ones an article backs, and each source shows claim-seal's verdict.</td>
 </tr>
 </table>
 
-<sub>Screenshots of the demo in <code>docs/demo</code>, which replays a brief recorded on 2026-10-25. Every word in them is from that brief.</sub>
+<sub>Screenshots of the demo in <code>docs/demo</code>, which replays a brief recorded on 2026-11-02. Every word in them is from that brief.</sub>
 
 > **AI;DR (AI, didn't read)**
 > Claude wrote this code and this README. I haven't read either line by line.
 > What people have checked: the private version of Composer writes briefs I read, and I click through to the cited articles to see that what a claim says is really there.
-> What tools have checked, for this repository: 121 offline tests pass on Python 3.10 and 3.13 in clean containers; the commands in this README were run there (the compose command, which needs a key, on 3.13 only); a secret scanner (gitleaks) found nothing in any commit; one test fails if private names, server paths or key shapes appear anywhere in the files or the history; and a security review on 2026-11-01 attacked it as a hostile feed, a hostile web page and a hostile network would, and fixed what it found, and a second reviewer attacked those fixes (see [SECURITY.md](SECURITY.md)).
+> What tools have checked, for this repository: 444 offline tests pass on Python 3.10 and 3.13 in clean containers; the commands in this README were run there (the compose command, which needs a key, on 3.13 only); a secret scanner (gitleaks) found nothing in any commit; one test fails if private names, server paths or key shapes appear anywhere in the files or the history; and a security review on 2026-11-01 attacked it as a hostile feed, a hostile web page and a hostile network would, and fixed what it found, and a second reviewer attacked those fixes (see [SECURITY.md](SECURITY.md)).
 > What was checked live: one brief, written from a fresh install in a clean Python 3.13 container with a real Anthropic key and the default model. It made 7 calls in 29 seconds and cost about 8 cents; every insight got a claim-seal verdict and the seal verified. The OpenAI-compatible path has not been run live; it is tested against the documented request and reply shapes only. Treat it as a working experiment, and open an issue if something's off. (Arya)
 
 **Composer reads a few feeds, writes a short brief through a lens you choose, and checks every
@@ -41,8 +41,8 @@ is "not checked", never a pass), but it cannot make the reading correct.
 
 You need Python 3.10 or newer. Download or clone this repository, then work from its folder.
 
-**See it work with no key and no install.** This replays a brief composed on 2026-10-25 from
-two of the bundled feeds. It makes no network request and no model call:
+**See it work with no key and no install.** This replays a brief composed on 2026-11-02 from
+the six bundled feeds. It makes no network request and no model call:
 
 ```sh
 python3 -m composer demo
@@ -200,8 +200,8 @@ receipts list the two models separately. A different model can catch mistakes th
 does not make the check infallible.
 
 The recorded demo brief was written and checked by gpt-5.6-terra (an OpenAI model) on a
-flat-rate plan, before this repository had its own API layer: 7 calls, 37,489 input and 4,065
-output tokens. Its token counts are not comparable with Claude's.
+flat-rate plan, with the same pipeline but not through this repository's API layer: 7 calls,
+41,111 input and 5,183 output tokens. Its token counts are not comparable with Claude's.
 
 ## Adding your own sources
 

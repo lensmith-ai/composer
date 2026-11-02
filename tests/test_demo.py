@@ -16,16 +16,39 @@ class RecordedRunTests(unittest.TestCase):
     def test_recorded_brief_is_valid(self):
         self.assertEqual(demo.validate(self.ed), [])
         self.assertTrue(self.ed["recorded"])
-        self.assertEqual([s["label"] for s in self.ed["sources"]], ["Google AI blog", "Google DeepMind blog"])
+        defaults = [s["label"] for s in json.loads((ROOT / "composer" / "sources.json").read_text("utf-8"))["sources"]]
+        self.assertEqual([s["label"] for s in self.ed["sources"]], defaults)  # all six default sources were read
         self.assertEqual(len(self.ed["cards"]), 5)
         self.assertEqual(self.ed["model"]["calls"], 7)
+        self.assertEqual((self.ed["check"]["rows"], self.ed["check"]["agree"]), (6, 6))
 
-    def test_every_citation_is_a_title_a_link_and_a_digest(self):
+    def test_every_citation_is_a_title_a_link_and_where_marked_a_digest(self):
+        hosts = ("https://blog.google/", "https://deepmind.google/", "https://huggingface.co/",
+                 "https://www.microsoft.com/en-us/research/", "https://pytorch.org/", "https://arxiv.org/")
+        marked = 0
         for card in self.ed["cards"]:
             for cit in card["citations"]:
-                self.assertEqual(set(cit), {"label", "title", "url", "field", "start", "end", "relation",
-                                            "window_sha256"})
-                self.assertTrue(cit["url"].startswith(("https://blog.google/", "https://deepmind.google/")))
+                self.assertLessEqual({"label", "title", "url", "resolution"}, set(cit))
+                self.assertLessEqual(set(cit), {"label", "title", "url", "resolution", "field", "start", "end",
+                                                "relation", "window_sha256"})
+                self.assertTrue(cit["url"].startswith(hosts), cit["url"])
+                if "field" in cit:
+                    marked += 1
+                    self.assertTrue({"start", "end"} <= set(cit))
+        self.assertGreaterEqual(marked, 7)
+
+    def test_the_recording_cites_only_default_sources(self):
+        defaults = {s["label"] for s in json.loads((ROOT / "composer" / "sources.json").read_text("utf-8"))["sources"]}
+        used = {s["label"] for s in self.ed["sources"]} | {c["label"] for card in self.ed["cards"]
+                                                            for c in card["citations"]}
+        self.assertLessEqual(used, defaults)
+
+    def test_the_recording_uses_the_bundled_ids_and_no_run_detail(self):
+        # paths, private names and key shapes are covered by test_banned for every file; here: the recording names
+        # sources only by their bundled labels, and carries no job id, session id or file path of the run it came from
+        blob = json.dumps(self.ed, ensure_ascii=False)
+        self.assertIsNone(re.search(r"\d{8}T\d{6}Z|session|\.mp3|\.json|googleai|hugging-face-blog|"
+                                    r"microsoft-research-blog", blob))
 
     def test_no_long_quotes_and_no_times_of_day(self):
         blob = json.dumps(self.ed, ensure_ascii=False)
@@ -47,8 +70,9 @@ class RecordedRunTests(unittest.TestCase):
         text = out.getvalue()
         self.assertIn("No key, no network, no model call", text)
         self.assertIn("reading Google AI blog · 5 items (ok)", text)
-        self.assertIn("checked · 4 partly supported · 1 supported", text)
-        self.assertIn("Model capability and safety need paired release tracks", text)
+        self.assertIn("reading arXiv cs.AI · 5 items (ok)", text)
+        self.assertIn("checked · 2 supported · 3 partly supported", text)
+        self.assertIn("Safety decisions need policy-relevant evidence, not believable forecasts.", text)
 
     def test_replay_pauses_between_steps(self):
         slept = []

@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import html
 import json
+import re
 import shutil
 from datetime import date
 from pathlib import Path
@@ -37,7 +38,8 @@ CSP = ("default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self';
 SITE_CSP = CSP + "; frame-src 'self'"
 CARD_STATES = {"supported": "supported", "partial": "partly supported", "unsupported": "not supported",
                "unchecked": "not checked"}
-SOURCE_HUES = ("#b98bff", "#ff6b8b", "#6e8bff", "#7fd4ff")
+SOURCE_HUES = ("#b98bff", "#ff6b8b", "#6e8bff", "#7fd4ff", "#ff9f6e", "#9ad66b")
+NAME_CHAR_W = 4.9  # a spool name's capital at 7 px monospace with .1em letter spacing, in viewBox units
 VERDICT_HUES = {"supported": "#48d1a0", "partial": "#ffb84a", "unsupported": "#ff6b6b", "unchecked": "#7a8392"}
 GEAR_SVG = ('<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" '
             'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"></circle>'
@@ -95,6 +97,27 @@ def seal_counts(ed: dict) -> tuple[int, int]:
     return agree, rows
 
 
+def shown_relation(relation) -> str:
+    """How a cited source bears on the marked words; claim-seal's "undetermined" (it could not tell) reads "cites"."""
+    return relation if isinstance(relation, str) and relation and relation != "undetermined" else "cites"
+
+
+def spool_name_lines(label: str, width: float) -> list[str]:
+    """A source's name for a narrow spool: capitals without a trailing "blog", in at most two lines that each fit
+    `width`; a word that still does not fit is cut with an ellipsis."""
+    words = re.sub(r"\s+blog$", "", label.strip(), flags=re.I).upper().split() or [label.upper()]
+    fit = max(1, int(width // NAME_CHAR_W))
+    lines: list[str] = []
+    for w in words:
+        if lines and len(lines[-1]) + 1 + len(w) <= fit:
+            lines[-1] += " " + w
+        else:
+            lines.append(w)
+    if len(lines) > 2:
+        lines = [lines[0], " ".join(lines[1:])]
+    return [t if len(t) <= fit else t[:fit - 1] + "…" for t in lines]
+
+
 def loom_svg(ed: dict) -> str:
     """The finished weave: a spool per source, a thread per item read, the SCREEN band, the LENS line, and the
     tray the cited items are woven into. An uncited thread stops at the lens (dashed); a cited one ends in its
@@ -138,10 +161,18 @@ def loom_svg(ed: dict) -> str:
                 out.append(f'<circle class="lmark" cx="{lx:.1f}" cy="246" r="3.2" fill="{VERDICT_HUES[verdict]}"></circle>')
             else:
                 out.append(f'<path class="lthread lthread-cut" d="{d}" stroke="{hue}" data-dash="1"></path>')
-        out.append(f'<g class="lspool"><rect x="{cx - 54:.1f}" y="8" width="108" height="20" rx="10" stroke="{hue}"></rect>'
-                   f'<circle cx="{cx - 42:.1f}" cy="18" r="3" fill="{hue}"></circle><text class="lcount" x="{cx + 4:.1f}" '
-                   f'y="21.5">{plural(x["items"], "item")}</text><text class="lname" x="{cx:.1f}" y="41">'
-                   + e(x["label"].upper()) + "</text></g>")
+        if gap >= 112:  # room for the full spool: "5 items" and the name on one line
+            out.append(f'<g class="lspool"><rect x="{cx - 54:.1f}" y="8" width="108" height="20" rx="10" stroke="{hue}"></rect>'
+                       f'<circle cx="{cx - 42:.1f}" cy="18" r="3" fill="{hue}"></circle><text class="lcount" x="{cx + 4:.1f}" '
+                       f'y="21.5">{plural(x["items"], "item")}</text><text class="lname" x="{cx:.1f}" y="41">'
+                       + e(x["label"].upper()) + "</text></g>")
+        else:  # many sources: a narrower spool with the count only, and the name in at most two short lines
+            w = gap - 6
+            names = "".join(f'<text class="lname" x="{cx:.1f}" y="{y}">{e(t)}</text>'
+                            for y, t in zip((37, 44), spool_name_lines(x["label"], gap - 2)))
+            out.append(f'<g class="lspool"><rect x="{cx - w / 2:.1f}" y="8" width="{w:.1f}" height="20" rx="10" '
+                       f'stroke="{hue}"></rect><circle cx="{cx - w / 2 + 9:.1f}" cy="18" r="3" fill="{hue}"></circle>'
+                       f'<text class="lcount" x="{cx + 4:.1f}" y="21.5">{x["items"]}</text>' + names + "</g>")
     out.append("</svg>")
     return "".join(out)
 
@@ -185,7 +216,7 @@ def insight_detail_html(ed: dict, i: int, card: dict) -> str:
     for c in order:
         words = _field_words(card, c["field"])
         fp = f'fingerprint {c["window_sha256"][:12]}' if c.get("window_sha256") else "no passage located"
-        receipts += (f'<li class="rcp"><b>{number[id(c)]} · ' + e(c["label"]) + " " + e(c.get("relation") or "cites")
+        receipts += (f'<li class="rcp"><b>{number[id(c)]} · ' + e(c["label"]) + " " + e(shown_relation(c.get("relation")))
                      + ' this</b><span class="cmq">' + e(words[c["start"]:c["end"]]) + '</span><span class="rcpmeta">'
                      + ("claim-seal re-check: agrees · " if each else "") + fp + "</span>"
                      + (('<a class="rcplink" href="' + e(c["url"], quote=True) + '" target="_blank" '
@@ -241,7 +272,7 @@ def window_html(ed: dict, picker_rows: list[str]) -> str:
                       + "</span>" for i in range(n)) + "</div></div>")
     went = ('<section class="ingr cmp-assembly-piece is-in"><div class="ingrlab">What went in · '
             + plural(len(labels), "source") + '</div><div class="ingrstrip">'
-            + "".join(f'<div class="ingrow"><span class="idot lw-hue-{i}"></span><span class="iname">' + e(x["label"])
+            + "".join(f'<div class="ingrow"><span class="idot lw-hue-{i % len(SOURCE_HUES)}"></span><span class="iname">' + e(x["label"])
                       + '</span><span class="ifresh">' + plural(x["items"], "item") + "</span></div>"
                       for i, x in enumerate(ed["sources"])) + "</div></section>")
     if ed.get("recorded"):

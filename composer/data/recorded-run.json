@@ -1,10 +1,10 @@
 {
  "schema": "composer-edition/v1",
  "recorded": true,
- "about": "A brief composed on 2026-10-25 from the two bundled feeds, kept so `composer demo` can replay it with no key and no network. It holds our own words, the cited article titles and links, the verdicts, and SHA-256 digests of the passages checked. It holds none of the articles' text.",
+ "about": "A brief composed on 2026-11-02 from the six bundled feeds, kept so `composer demo` can replay it with no key and no network. It holds our own words (the cards, the connection and the narration script), the cited article titles and links, the verdicts, and SHA-256 digests of the passages checked. It holds none of the articles' text.",
  "lens": "system improvements",
- "composed_on": "2026-10-25",
- "seconds": 98,
+ "composed_on": "2026-11-02",
+ "seconds": 134,
  "sources": [
   {
    "label": "Google AI blog",
@@ -15,135 +15,189 @@
    "label": "Google DeepMind blog",
    "items": 5,
    "status": "ok"
+  },
+  {
+   "label": "Hugging Face blog",
+   "items": 5,
+   "status": "ok"
+  },
+  {
+   "label": "Microsoft Research blog",
+   "items": 5,
+   "status": "ok"
+  },
+  {
+   "label": "PyTorch blog",
+   "items": 5,
+   "status": "ok"
+  },
+  {
+   "label": "arXiv cs.AI",
+   "items": 5,
+   "status": "ok"
   }
  ],
  "cards": [
   {
-   "insight": "Model capability and safety need paired release tracks",
-   "why": "Google AI presents Gemini 4 Argon as a hard-problem solver, while DeepMind separately foregrounds responsible and safe development.",
+   "insight": "Safety decisions need policy-relevant evidence, not believable forecasts.",
+   "why": "Agent teams need tests that show why an action is safe. Operators need clear paths for execute, ask, or block decisions.",
    "details": [
-    "The two posts were published on the same day and concern Gemini 4 Argon.",
-    "A capability announcement alone does not establish operational safety or deployment readiness.",
-    "A separate safety account creates a clearer review trail for system operators.",
-    "The feed descriptions do not disclose the specific evaluations, thresholds, or mitigations used."
-   ],
-   "state": "partial",
-   "citations": [
-    {
-     "label": "Google AI blog",
-     "title": "Gemini 4 Argon: Built to solve your hardest problems",
-     "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-argon/",
-     "field": "why",
-     "start": 0,
-     "end": 58,
-     "relation": "says",
-     "window_sha256": "5b69f09bc61f1be093aee6c4355d6cf9f2affbf63aa2c68545f4e79ca2efeb79"
-    },
-    {
-     "label": "Google DeepMind blog",
-     "title": "Developing Gemini 4 Argon responsibly and safely",
-     "url": "https://deepmind.google/blog/developing-gemini-4-argon-responsibly-and-safely/",
-     "field": "why",
-     "start": 66,
-     "end": 131,
-     "relation": "says",
-     "window_sha256": "f030a5c361c38615e93edc45fdf40b54badbc0ec4fd07d844882c6cee5e02e2a"
-    }
-   ]
-  },
-  {
-   "insight": "Privacy-preserving inference can reduce data-exposure risk",
-   "why": "Single source: DeepMind describes lightweight on-device scam detection with zero cloud data egress, making data location an explicit system design choice.",
-   "details": [
-    "The described system processes private-chat scam signals on the device.",
-    "Zero cloud data egress reduces one category of exposure from centralized processing.",
-    "Lightweight models indicate that privacy constraints can shape model and deployment selection.",
-    "The description does not establish accuracy, false-positive rates, or device coverage."
+    "Microsoft Research says synthetic enterprise data must capture real organizational complexity.",
+    "The SafeWebWorld paper separates plausible predictions from safety-sufficient predictions.",
+    "Its evaluation found many predictions appeared semantically plausible to human reviewers.",
+    "The paper reports weak recall for cases that should ask for clarification.",
+    "This source material does not establish that one evaluation method fits every agent workflow."
    ],
    "state": "supported",
    "citations": [
     {
-     "label": "Google DeepMind blog",
-     "title": "Google DeepMind and Singapore Government collaborate to build fine-tuned AI model for scam detection",
-     "url": "https://deepmind.google/blog/on-device-ai-scam-detection-mddi/",
-     "field": "details[1]",
-     "start": 0,
-     "end": 84,
-     "relation": "says",
-     "window_sha256": "2bdce5d08cd3ec0612d143cb568b43a949dabb4fcbeaf4cc1e791ee36e43ff93"
-    }
-   ]
-  },
-  {
-   "insight": "Automation should accelerate search, not replace validation",
-   "why": "Single source: DeepMind frames Google Antigravity as accelerating the search for antimicrobial peptides, which supports using agents to narrow costly investigation spaces.",
-   "details": [
-    "The stated role is discovery acceleration rather than confirmed scientific outcome.",
-    "Search acceleration is useful when candidate spaces are too large for manual review.",
-    "Agentic systems need explicit handoffs from generated candidates to domain validation.",
-    "The description does not state how candidates were tested or compared with non-agent methods."
-   ],
-   "state": "partial",
-   "citations": [
-    {
-     "label": "Google DeepMind blog",
-     "title": "Accelerating the search for antimicrobial peptides with Google Antigravity",
-     "url": "https://deepmind.google/blog/accelerating-antimicrobial-discovery/",
-     "field": "why",
-     "start": 15,
-     "end": 103,
-     "relation": "says",
-     "window_sha256": "d9fa6ad85e121af2b7e193cfd1da0c06a048469506eb51e601d125391b5fa7f6"
-    }
-   ]
-  },
-  {
-   "insight": "Fine-grained outputs demand equally fine-grained quality checks",
-   "why": "Single source: DeepMind's forest mapping post describes classification for every 10-meter land patch, where aggregate success can hide consequential local errors.",
-   "details": [
-    "The announced output is a global map of distinct forest types.",
-    "Ten-meter resolution creates a large number of individual classifications to govern.",
-    "Operators should validate both aggregate performance and localized edge cases.",
-    "The feed description does not provide accuracy measures, error patterns, or update procedures."
-   ],
-   "state": "partial",
-   "citations": [
-    {
-     "label": "Google DeepMind blog",
-     "title": "Beyond tree cover: mapping the world’s forest types",
-     "url": "https://deepmind.google/blog/beyond-tree-cover-mapping-the-worlds-forest-types/",
+     "label": "Microsoft Research blog",
+     "title": "From synthetic enterprise data evaluations to real Microsoft Copilot AI confidence",
+     "url": "https://www.microsoft.com/en-us/research/blog/from-synthetic-enterprise-data-evaluations-to-real-microsoft-copilot-ai-confidence/",
+     "resolution": "exact",
      "field": "details[0]",
-     "start": 26,
-     "end": 61,
-     "relation": "says",
-     "window_sha256": "5b6e82d2a96b985391c133964b5a663ab2cab5c08a35681a9668d38def6ed37c"
-    }
-   ]
-  },
-  {
-   "insight": "Experimental creation tools need clear boundary labels",
-   "why": "Single source: Google's Playground announcement calls the gaming platform experimental, a useful signal that users should distinguish exploration from production workflow.",
-   "details": [
-    "The product is presented as a way to create and play custom games.",
-    "Calling a system experimental sets expectations about maturity and operational guarantees.",
-    "Teams should avoid silently promoting exploratory tools into critical paths.",
-    "The feed description does not specify data handling, reliability targets, or export controls."
-   ],
-   "state": "partial",
-   "citations": [
+     "start": 0,
+     "end": 94,
+     "relation": "undetermined"
+    },
     {
-     "label": "Google AI blog",
-     "title": "Introducing Playground: Create and play custom games",
-     "url": "https://blog.google/innovation-and-ai/technology/ai/playground-experimental-gaming-platform/",
+     "label": "arXiv cs.AI",
+     "title": "Beyond Plausible Prediction: Safety Sufficiency in Web World Models",
+     "url": "https://arxiv.org/abs/2610.40798",
+     "resolution": "exact",
      "field": "details[1]",
      "start": 0,
      "end": 90,
-     "relation": "implies",
-     "window_sha256": "adcb7ceba70a08ecdf9a3cacfd37f50e3f6ef9272d8b86d8e3ac5aa8f93143c5"
+     "relation": "says",
+     "window_sha256": "49bd98175bc95ad1560f0b94513061d57c44c8130b0af3c7db06db9d2a8b221a"
+    }
+   ]
+  },
+  {
+   "insight": "Persistent agents must learn rules, not collect exceptions.",
+   "why": "Single source: Agent memory can become slower and less reliable over time. Builders need tests for general rules, not merely past corrections.",
+   "details": [
+    "CLR-Bench tests agents that rewrite persistent state from feedback.",
+    "Each benchmark level adds one hidden rule to earlier rules.",
+    "The paper warns that agents can store each correction as an exception.",
+    "That approach lets lists grow with every new rule.",
+    "The abstract does not show which memory design best prevents this failure in production."
+   ],
+   "state": "partial",
+   "citations": [
+    {
+     "label": "arXiv cs.AI",
+     "title": "More Rules, Longer Lists? Benchmarking Self-Evolving Agents on a Hidden-Rule Curriculum",
+     "url": "https://arxiv.org/abs/2610.40758",
+     "resolution": "exact",
+     "field": "why",
+     "start": 15,
+     "end": 74,
+     "relation": "undetermined",
+     "window_sha256": "b2a290b4afb3d9a92e9226922ddacbe0ae513c27106e1372511a8d83d2f41af4"
+    }
+   ]
+  },
+  {
+   "insight": "Model updates need software-style releases and runtime receipts.",
+   "why": "Frequent model changes can quietly alter system behavior. Operators need versioned changes and records of runtime failures.",
+   "details": [
+    "Hugging Face frames Granite Switch updates as software updates.",
+    "PyTorch 2.15 makes a rewritten NCCL backend the default.",
+    "The PyTorch release also includes a flight recorder.",
+    "A flight recorder captures events for later diagnosis.",
+    "These feed summaries do not state how Granite Switch validates updates before production use."
+   ],
+   "state": "partial",
+   "citations": [
+    {
+     "label": "Hugging Face blog",
+     "title": "Granite Switch 4.1.1 — Update models like you update software",
+     "url": "https://huggingface.co/blog/ibm-granite/granite-switch-4-1-1",
+     "resolution": "exact",
+     "field": "details[0]",
+     "start": 0,
+     "end": 63,
+     "relation": "says",
+     "window_sha256": "5e45f9194e695fe5c9148ffa605121e038a008b5fb3da28f155b17dffcd3bad0"
+    },
+    {
+     "label": "PyTorch blog",
+     "title": "PyTorch 2.15 Release Blog",
+     "url": "https://pytorch.org/blog/pytorch-2-15-release-blog/",
+     "resolution": "exact"
+    }
+   ]
+  },
+  {
+   "insight": "Faster public decisions need interactive review, not opaque automation.",
+   "why": "Speed gains can fail if reviewers cannot inspect the result. Public systems need interfaces that support checking and challenge.",
+   "details": [
+    "DeepMind says its work aims to reduce planning assessment times.",
+    "Microsoft Research describes visualizations that agents can create and people can explore.",
+    "Users can click charts, filter data, and highlight related content.",
+    "Those controls can help reviewers trace a conclusion through the available data.",
+    "Neither summary proves that interactive views improve planning decisions in practice."
+   ],
+   "state": "partial",
+   "citations": [
+    {
+     "label": "Google DeepMind blog",
+     "title": "Speeding up planning decisions with AI",
+     "url": "https://deepmind.google/blog/speeding-up-planning-decisions-with-ai/",
+     "resolution": "exact",
+     "field": "details[0]",
+     "start": 0,
+     "end": 64,
+     "relation": "says",
+     "window_sha256": "90761fc2fedc5173a672086f9b7ee040c230b9070aa4377971413ea9148af995"
+    },
+    {
+     "label": "Microsoft Research blog",
+     "title": "Flint-interactive: A language for creating interactive data visualizations",
+     "url": "https://www.microsoft.com/en-us/research/blog/flint-interactive-a-language-for-creating-interactive-data-visualizations/",
+     "resolution": "exact",
+     "field": "details[2]",
+     "start": 0,
+     "end": 67,
+     "relation": "says",
+     "window_sha256": "06fe0058739088538781c09f37017b43da2e81a149265bf55b2d57a03788a960"
+    }
+   ]
+  },
+  {
+   "insight": "Model routing can become a direct cost-control layer.",
+   "why": "Single source: Teams using many model providers need deliberate routing rules. Cost savings depend on cheap routing decisions, not just cheaper models.",
+   "details": [
+    "The paper describes model marketplaces with different costs and capabilities.",
+    "It calls provider selection computational arbitrage.",
+    "The authors say large marketplaces need tractable and inexpensive strategies.",
+    "The proposed value depends on serving users through a portfolio of models.",
+    "The abstract does not provide a deployment recipe or realized savings figure."
+   ],
+   "state": "supported",
+   "citations": [
+    {
+     "label": "arXiv cs.AI",
+     "title": "Circumventing the Computational Hardness of Computational Arbitrage",
+     "url": "https://arxiv.org/abs/2610.40831",
+     "resolution": "exact",
+     "field": "details[0]",
+     "start": 0,
+     "end": 77,
+     "relation": "says",
+     "window_sha256": "6b8c96fe81e71cbe8cbb39e81c3d63c768e2c024509ae89a0ac36a9197fbef52"
     }
    ]
   }
  ],
+ "connection": {
+  "headline": "Reliable agent systems need explicit rules, inspectable evidence, and recorded runtime behavior.",
+  "confidence": "plausible",
+  "why": "The sources point to related operating needs from different angles. They do not provide one shared production study, so the connection remains plausible.",
+  "state": "partial"
+ },
+ "transcript": "The main lesson is simple. Reliable agent systems need evidence that matches the decision they make. Microsoft Research says enterprise evaluations need realistic organizational complexity. An arXiv paper makes a related warning. A believable forecast may still hide the facts needed for a safe decision. Agent systems should show whether they can execute, ask, or block.\n\nAnother arXiv paper raises a memory problem. Persistent agents can appear to learn by saving every correction as an exception. That list grows whenever a new rule appears. The better test is whether an agent learns the underlying rule. This matters for any long-running system with stored feedback.\n\nOn Hugging Face, Granite Switch is framed as updating models like software. PyTorch offers a practical companion signal. Its 2.15 release includes a flight recorder and changes a default backend. Together, those items suggest a useful operating rule. Treat model changes as releases, then keep receipts for runtime failures.\n\nDeepMind says AI can reduce planning assessment times. Microsoft Research describes interactive views that let people click, filter, and inspect data. Speed alone is not enough for public or high-stakes workflows. Reviewers need a way to inspect the path behind a result.\n\nFinally, an arXiv paper describes routing work across providers with different costs and capabilities. That makes model selection an operating policy, not a background detail. The connection across this brief is plausible, not proven by one study. Build agents around clear rules, decision evidence, inspectable interfaces, and runtime records. Then use routing rules to control cost without losing those safeguards.",
  "check": {
   "tool": "claim-seal",
   "status": "ok",
@@ -155,20 +209,20 @@
   "name": "gpt-5.6-terra",
   "provider": "written and checked by gpt-5.6-terra (OpenAI)",
   "calls": 7,
-  "input_tokens": 37489,
-  "output_tokens": 4065,
+  "input_tokens": 41111,
+  "output_tokens": 5183,
   "split": {
    "write": {
     "calls": 1,
-    "input_tokens": 5144,
-    "output_tokens": 1627
+    "input_tokens": 8424,
+    "output_tokens": 2097
    },
    "check": {
     "calls": 6,
-    "input_tokens": 32345,
-    "output_tokens": 2438
+    "input_tokens": 32687,
+    "output_tokens": 3086
    }
   },
-  "note": "Run on a flat-rate plan before this repository had its own API-key layer; token counts are that model's."
+  "note": "Run on a flat-rate plan with the same pipeline, not through this repository's API-key layer; token counts are that model's."
  }
 }

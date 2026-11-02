@@ -1,6 +1,6 @@
 """The no-key demo: replay the recorded brief in the terminal, or write it as a page.
 
-The recorded brief (composer/data/recorded-run.json) was composed on 2026-10-25 from the two
+The recorded brief (composer/data/recorded-run.json) was composed on 2026-11-02 from the six
 bundled feeds. It holds our own words, the cited titles and links, the verdicts and SHA-256
 digests of the checked passages, and none of the articles' text. The demo makes no network
 request and no model call.

@@ -17,7 +17,7 @@ html.lw::-webkit-scrollbar,html.lw body::-webkit-scrollbar{display:none}
 .lw .lw-aplay{cursor:default}
 .lw .crchip{display:inline-flex;align-items:center}
 .lw .crchip.on{color:#fff;border-color:rgba(255,184,74,.6);background:rgba(255,184,74,.14)}
-.lw-hue-0{background:#b98bff}.lw-hue-1{background:#ff6b8b}.lw-hue-2{background:#6e8bff}.lw-hue-3{background:#7fd4ff}
+.lw-hue-0{background:#b98bff}.lw-hue-1{background:#ff6b8b}.lw-hue-2{background:#6e8bff}.lw-hue-3{background:#7fd4ff}.lw-hue-4{background:#ff9f6e}.lw-hue-5{background:#9ad66b}
 .lw-receipt{margin:14px 0 0;padding:12px 14px;border:1px solid rgba(255,255,255,.1);border-radius:14px;font:12px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.05em;color:#8b93a1}
 .lw-loom{display:block;width:100%;height:auto;overflow:visible}
 .lw-loom .lband{font:7px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.16em;fill:rgba(255,255,255,.38)}

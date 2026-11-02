@@ -10,6 +10,7 @@ from composer import demo, window
 from helpers import ROOT
 
 SITE = ROOT / "docs" / "demo"
+SHEET = [s["label"] for s in json.loads((ROOT / "composer" / "sources.json").read_text("utf-8"))["sources"]]
 NETWORK_CALLS = re.compile(r"\bfetch\s*\(|XMLHttpRequest|WebSocket|EventSource|sendBeacon|\bimport\s*\(|importScripts")
 
 
@@ -35,7 +36,7 @@ def refs(text):
 class WindowTests(unittest.TestCase):
     def setUp(self):
         self.ed = demo.load()
-        self.html = window.window_html(self.ed, ["Google AI blog", "Google DeepMind blog"])
+        self.html = window.window_html(self.ed, SHEET)
 
     def test_committed_site_matches_a_fresh_build(self):
         with tempfile.TemporaryDirectory() as d:
@@ -74,26 +75,48 @@ class WindowTests(unittest.TestCase):
     def test_window_tells_the_recorded_run(self):
         data = json.loads(re.search(r'data-lw="([^"]+)"', self.html).group(1).replace("&quot;", '"')
                           .replace("&#x27;", "'").replace("&amp;", "&"))
-        self.assertEqual(data["sources"], ["Google AI blog", "Google DeepMind blog"])
-        self.assertEqual(data["rows"], ["Google AI blog", "Google DeepMind blog"])
-        self.assertEqual(data["steps"][0]["text"], "compose started · 2 sources · system improvements lens")
-        self.assertEqual(data["steps"][-1]["text"], "checked · 4 partly supported · 1 supported")
+        self.assertEqual(data["sources"], SHEET)
+        self.assertEqual(data["rows"], SHEET)
+        self.assertEqual(data["steps"][0]["text"], "compose started · 6 sources · system improvements lens")
+        self.assertEqual(data["steps"][-1]["text"], "checked · 2 supported · 3 partly supported")
         self.assertEqual(self.html.count('class="lw-detail"'), 5)
         self.assertIn("6 of 6 checks agree", self.html)
 
     def test_cited_phrases_are_our_words_with_links_and_fingerprints(self):
-        self.assertIn('<mark class="cmark">global map of distinct forest types</mark>', self.html)
-        self.assertIn("fingerprint 5b6e82d2a96b", self.html)
-        self.assertIn('href="https://deepmind.google/blog/beyond-tree-cover-mapping-the-worlds-forest-types/"', self.html)
+        self.assertIn('<mark class="cmark">Hugging Face frames Granite Switch updates as software updates.</mark>', self.html)
+        self.assertIn("fingerprint 5e45f9194e69", self.html)
+        self.assertIn('href="https://huggingface.co/blog/ibm-granite/granite-switch-4-1-1"', self.html)
+
+    def test_six_spools_keep_their_names_apart(self):
+        # six sources share the drawing's width: each name must fit its own share, or the names print over each other
+        names = re.findall(r'<text class="lname" x="([\d.]+)" y="(\d+)">([^<]*)</text>', self.html)
+        self.assertEqual(len({x for x, _, _ in names}), 6)
+        share = (340 - 40) / 6
+        for x, _, text in names:
+            self.assertLessEqual(len(text) * window.NAME_CHAR_W, share, text)
+        self.assertIn("MICROSOFT", [t for _, _, t in names])
+        self.assertNotIn("items</text>", self.html.split('id="loom"')[1].split("</svg>")[0])
+        # two sources keep the wide spool with the full name and "5 items"
+        two = dict(self.ed, sources=self.ed["sources"][:2],
+                   cards=[dict(c, citations=[x for x in c["citations"] if x["label"] in SHEET[:2]]) for c in self.ed["cards"]])
+        wide = window.loom_svg(two)
+        self.assertIn(">GOOGLE DEEPMIND BLOG</text>", wide)
+        self.assertIn(">5 items</text>", wide)
+
+    def test_an_undetermined_relation_reads_cites(self):
+        self.assertIn("Microsoft Research blog cites this", self.html)
+        self.assertNotIn("undetermined this", self.html)
+        self.assertEqual(window.shown_relation("says"), "says")
+        self.assertEqual(window.shown_relation(None), "cites")
 
     def test_a_source_missing_from_the_sheet_is_refused(self):
         with self.assertRaises(ValueError):
-            window.window_html(self.ed, ["Google AI blog"])
+            window.window_html(self.ed, SHEET[:-1])
 
     def test_text_is_escaped(self):
         ed = json.loads(json.dumps(self.ed))
         ed["cards"][0]["insight"] = "<script>alert(1)</script>"
-        out = window.window_html(ed, ["Google AI blog", "Google DeepMind blog"])
+        out = window.window_html(ed, SHEET)
         self.assertNotIn("<script>alert", out)
 
 

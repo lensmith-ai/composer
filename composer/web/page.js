@@ -82,7 +82,7 @@
     var ol = el('ol');
     c.citations.forEach(function (x) {
       var li = el('li');
-      li.appendChild(el('span', '', x.label + (x.relation ? ' ' + x.relation + ' this' : '') + ': '));
+      li.appendChild(el('span', '', x.label + (x.relation && x.relation !== 'undetermined' ? ' ' + x.relation + ' this' : '') + ': '));
       if (x.url && /^https?:\/\//i.test(x.url)) {
         var a = el('a', '', x.title || x.url);
         a.href = x.url;
