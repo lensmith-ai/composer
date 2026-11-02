@@ -1,0 +1,43 @@
+#!/usr/bin/expect -f
+# The interactive setup, answered like a person at a terminal, for any version of the questions.
+#   expect -f setup.exp SETUP_SH APP_FOLDER KEY MODEL_BASE_URL FEED_URL
+# It picks the OpenAI-compatible endpoint (the local fixture model), types the key at the hidden prompt, takes
+# "type another model id" from a model list when one is offered, adds the local feed, says no to narration and the
+# daily brief, and takes the default port. Every prompt it answers is logged as "EXPECT SAW <name>"; a prompt it
+# does not know is answered with its default and logged as "EXPECT UNKNOWN". The output is logged in full, so an
+# echoed key would show (the key is a made-up value for the local fixture model). Exit code: setup's own.
+set timeout 600
+lassign $argv setup home key base feed
+log_user 1
+spawn $setup --home $home
+set fed 0
+proc saw {name} { send_user "\nEXPECT SAW $name\n" }
+expect {
+  -re {Download them\? \[y/N\]: $} { saw python_download; send -- "y\r"; exp_continue }
+  -re {\n *([0-9]+)\) an OpenAI-compatible[^\n]*\n(?:[^\n]*\n)*?choose 1-[0-9]+ \[[0-9]+\]: $} {
+    saw provider; send -- "$expect_out(1,string)\r"; exp_continue }
+  -re {\n *([0-9]+)\) type another model id\n(?:[^\n]*\n)*?choose 1-[0-9]+ \[[0-9]+\]: $} {
+    saw model_list; send -- "$expect_out(1,string)\r"; exp_continue }
+  -re {Endpoint base URL \[[^\]]*\]: $} { saw endpoint; send -- "$base\r"; exp_continue }
+  -re {[Mm]odel id \[[^\]]*\]: $} { saw model_id; send -- "fixture-model\r"; exp_continue }
+  -re {(?:^|\n)[^\n]*key: $} {
+    saw key; send -- "$key\r"; exp_continue }
+  -re {Enter the model and key again\? \[Y/n\]: $} { saw test_call_failed; send -- "n\r"; exp_continue }
+  -re {Check claims with the same model\? \[Y/n\]: $} { saw checker; send -- "\r"; exp_continue }
+  -re {article parser\? \[y/N\]: $} { saw parser; send -- "n\r"; exp_continue }
+  -re {Add Hacker News as a source too\? \[y/N\]: $} { saw sources; send -- "n\r"; exp_continue }
+  -re {Add your own feed\?[^\n]*\[\]: $} {
+    if {$fed == 0} { saw own_feed; set fed 1; send -- "$feed\r" } else { send -- "\r" }; exp_continue }
+  -re {Add [^\n]* as a source\? \[Y/n\]: $} { saw feed_confirm; send -- "y\r"; exp_continue }
+  -re {Add narration\? \[y/N\]: $} { saw narration; send -- "n\r"; exp_continue }
+  -re {\(while Composer runs\)\? \[y/N\]: $} { saw schedule; send -- "n\r"; exp_continue }
+  -re {Port on this computer \[[0-9]+\]: $} { saw port; send -- "\r"; exp_continue }
+  -re {\[y/N\]: $} { send_user "\nEXPECT UNKNOWN yes/no prompt, answered no\n"; send -- "n\r"; exp_continue }
+  -re {\[Y/n\]: $} { send_user "\nEXPECT UNKNOWN yes/no prompt, took the default\n"; send -- "\r"; exp_continue }
+  -re {\[[^\]\n]*\]: $} { send_user "\nEXPECT UNKNOWN prompt, took the default\n"; send -- "\r"; exp_continue }
+  timeout { send_user "\nEXPECT FAIL: no progress for $timeout s\n"; exit 1 }
+  eof { }
+}
+lassign [wait] pid spawnid os_error value
+send_user "\nEXPECT EXIT $value\n"
+exit $value
