@@ -42,14 +42,15 @@ COPY --from=build /venv /venv
 ENV PATH=/venv/bin:$PATH \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    TMPDIR=/tmp
+    TMPDIR=/tmp \
+    COMPOSER_DATA=/data
 USER composer
 WORKDIR /data
 VOLUME ["/data"]
 # Documentation only: compose.yaml publishes no app port; Caddy reaches it on the private Compose network.
 EXPOSE 8765
 ENTRYPOINT ["composer"]
-# The planned 0.2 command (plan section 7): bind inside the container only, behind Caddy.
+# Listen inside the container only, behind Caddy (compose.yaml names the proxy network and the public address).
 CMD ["up", "--host", "0.0.0.0", "--port", "8765"]
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -57,19 +58,32 @@ CMD ["up", "--host", "0.0.0.0", "--port", "8765"]
 #
 # Optional narration uses kokoro-onnx (MIT) and espeakng-loader (MIT), and espeakng-loader bundles the eSpeak NG
 # library, which is GPL-3.0. The Kokoro model and voices (Apache-2.0, about 354 MB) are downloaded into the /data
-# volume only when you turn narration on; they are never baked into an image.
+# volume only when you turn narration on (`composer setup --data-only`); they are never baked into an image.
 #
-# A narration image is a separate, opt-in target and tag (`docker build --target narration`, published as
-# `<version>-narration`). It is pending phase P3, which adds the narration engine. When it is built, it MUST:
-#   - install the narration runtime from a hash-locked requirements file;
-#   - ship eSpeak NG's GPL-3.0 licence text in the image;
-#   - carry a written source offer: the exact eSpeak NG source and the espeakng-loader sdist that built it are
-#     attached to the same GitHub Release for as long as that image is offered (image label + release note);
-#   - have its own SBOM listing every one of those components with its licence.
-# Until then this target refuses to build, so nobody can publish a narration image by accident.
+# The narration image is a separate, opt-in target and tag (`docker build --target narration`, published as
+# `<version>-narration`). It:
+#   - installs the narration runtime from the hash-locked composer/narration/requirements.lock (wheels only);
+#   - ships eSpeak NG's GPL-3.0 licence text (fetched from the eSpeak NG 1.52.0 tag and checked by SHA-256);
+#   - carries a written source offer (composer/narration/SOURCE-OFFER.txt): the exact eSpeak NG source and the
+#     espeakng-loader sdist are attached to the same GitHub Release for as long as that image is offered.
+FROM ${PYTHON_IMAGE} AS narration_build
+ENV PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PYTHONDONTWRITEBYTECODE=1
+COPY --from=build /venv /venv
+COPY composer/narration/requirements.lock /tmp/narration-requirements.lock
+RUN /venv/bin/pip install --require-hashes --no-deps --only-binary :all: -r /tmp/narration-requirements.lock \
+ && /venv/bin/python -c "import kokoro_onnx, soundfile, onnxruntime; print('narration runtime', kokoro_onnx.__name__)"
+ADD --chmod=644 --checksum=sha256:8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903 \
+    https://raw.githubusercontent.com/espeak-ng/espeak-ng/1.52.0/COPYING /licenses/eSpeak-NG-1.52.0-COPYING.txt
+
 FROM runtime AS narration
-RUN echo "The narration image is pending phase P3 (narration engine). See the notes above this target." >&2 \
- && exit 1
+LABEL org.opencontainers.image.title="Lensmith Composer with narration" \
+      org.opencontainers.image.licenses="MIT AND GPL-3.0-or-later AND BSD-3-Clause AND LGPL-2.1-or-later" \
+      org.opencontainers.image.documentation="https://github.com/lensmith-ai/composer/blob/main/THIRD-PARTY.md"
+COPY --from=narration_build /venv /venv
+COPY --from=narration_build /licenses/ /usr/share/doc/composer-narration/
+COPY --chmod=644 composer/narration/SOURCE-OFFER.txt /usr/share/doc/composer-narration/SOURCE-OFFER.txt
 
 # The default image is the LAST stage, so a plain `docker build .` builds it and never the narration target.
 FROM runtime AS default

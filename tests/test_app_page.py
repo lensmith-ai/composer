@@ -115,6 +115,7 @@ class AppFilesTests(unittest.TestCase):
         self.assertEqual(js.count("headers:cwHeaders()"), len(posts))
         boot = text("boot.js")
         self.assertIn("'X-Composer-Pass'", boot)
+        self.assertIn("'X-Composer-CSRF': 'same-origin'", boot)  # the engine's anti-forgery header
         self.assertIn("'Content-Type': 'application/json'", boot)
 
     def test_escape_helpers_cover_quotes(self):
@@ -201,8 +202,11 @@ class AppServingTests(unittest.TestCase):
     def test_rebinding_host_is_refused_for_the_app_too(self):
         self.assertEqual(self.get("/app/", host=f"rebind.example:{self.port}")[0], 403)
 
-    def test_existing_page_is_untouched(self):
+    def test_root_opens_the_app_and_the_classic_page_stays(self):
         status, headers, body = self.get("/")
+        self.assertEqual(status, 302)
+        self.assertEqual(headers.get("Location"), "/app/")
+        status, headers, body = self.get("/classic")
         self.assertEqual(status, 200)
         self.assertIn(b"<html", body)
 

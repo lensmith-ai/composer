@@ -10,7 +10,7 @@ Each release note is written from this file and checked against it by claim-seal
 ### Added
 
 - A container image (`Dockerfile`): a pinned Python base, an unprivileged user, a read-only root filesystem and one
-  data volume at /data. Optional narration is not in it; a narration image will be a separate opt-in tag.
+  data volume at /data. Optional narration is not in it; the narration image is a separate opt-in target.
 - Always-on setup (`compose.yaml` and `Caddyfile`): Caddy in front for HTTPS and one login; the app publishes no port
   of its own.
 - A step-by-step guide for running Composer on a server (`docs/deploy-vps.md`), with a local trial that uses a local
@@ -22,6 +22,18 @@ Each release note is written from this file and checked against it by claim-seal
 - A release workflow: the sdist and wheel, a CycloneDX SBOM, SHA256SUMS, GitHub artifact attestations for every
   file and the container image, and a release note checked by claim-seal.
 - Issue and pull request templates, Dependabot for the pinned actions, Python build tools and base images.
+- `./setup.sh` and `composer setup`: the full app in one folder (`~/.lensmith-composer`) with a private environment,
+  questions one at a time or an answers file, every check before any write, the key stored 0600, and an install
+  manifest. No shell profile, PATH, sudo or global Python changes.
+- `composer up`: the app page at `/` with its engine, the daily brief (once per slot, late by up to 6 hours, never
+  stacked) and a weekly backup; behind a proxy it answers only the proxy network and its public address.
+- Optional narration: the model writes a short spoken script with each brief; Composer reads exactly that script
+  aloud with Kokoro after the text is final, and the transcript sheet shows the same words. An existing Kokoro is
+  reused read-only after a hash and three-voice check; any failure leaves the brief text-only. A separate
+  `narration` image ships the eSpeak NG GPL-3.0 licence text and a source offer.
+- `composer doctor` (`--online`, `--parity`, `--seals`), `composer backup` / `restore`, `composer update` / `rollback`
+  (a migrated copy, a journaled switch, undone on failure or after an interruption) and `composer uninstall`
+  (only what setup made; your data only with `--delete-data`).
 
 ## [0.1.0] - 2026-11-01
 

@@ -64,7 +64,9 @@ class ComposeTests(unittest.TestCase):
     def test_trusted_proxy_is_the_front_subnet(self):
         text = (ROOT / "compose.yaml").read_text(encoding="utf-8")
         default = "${COMPOSER_FRONT_SUBNET:-172.30.65.0/24}"
-        self.assertIn(f"COMPOSER_TRUSTED_PROXY: {default}", text)
+        # only Caddy's fixed address is trusted, never the whole network (the host reaches it via the gateway)
+        self.assertIn("COMPOSER_TRUSTED_PROXY: ${COMPOSER_CADDY_IP:-172.30.65.10}/32", text)
+        self.assertIn("ipv4_address: ${COMPOSER_CADDY_IP:-172.30.65.10}", compose_services()["caddy"])
         self.assertIn(f"- subnet: {default}", text)
 
     def test_env_file_is_ignored_by_git_and_docker(self):
@@ -108,8 +110,29 @@ class DockerfileTests(unittest.TestCase):
         install = self.text.split("FROM ${PYTHON_IMAGE} AS runtime", 1)[0]
         for name in ("kokoro", "espeak", "onnxruntime"):
             self.assertNotIn(name, install.lower().split("#")[0])
-        narration = self.text.split("FROM runtime AS narration", 1)[1].split("FROM runtime AS default", 1)[0]
-        self.assertIn("exit 1", narration)
+        runtime = self.text.split("FROM ${PYTHON_IMAGE} AS runtime", 1)[1].split("FROM ${PYTHON_IMAGE} AS narration_build", 1)[0]
+        default = self.text.split("FROM runtime AS default", 1)[1]
+        for part in (runtime, default):
+            code = "\n".join(ln for ln in part.splitlines() if not ln.lstrip().startswith("#")).lower()
+            for name in ("kokoro", "espeak", "onnxruntime", "narration"):
+                self.assertNotIn(name, code)
+
+    def test_narration_image_is_hash_locked_with_licence_and_source_offer(self):
+        build = self.text.split("AS narration_build", 1)[1].split("FROM runtime AS narration", 1)[0]
+        self.assertIn("--require-hashes --no-deps --only-binary :all: -r /tmp/narration-requirements.lock", build)
+        self.assertRegex(build, r"ADD --chmod=644 --checksum=sha256:[0-9a-f]{64} \\\n\s+https://raw\.githubusercontent\.com/"
+                                r"espeak-ng/espeak-ng/1\.52\.0/COPYING")
+        image = self.text.split("FROM runtime AS narration", 1)[1].split("FROM runtime AS default", 1)[0]
+        self.assertIn("GPL-3.0-or-later", image)
+        self.assertIn("COPY --from=narration_build /licenses/ /usr/share/doc/composer-narration/", image)
+        self.assertIn("SOURCE-OFFER.txt", image)
+        offer = (ROOT / "composer" / "narration" / "SOURCE-OFFER.txt").read_text(encoding="utf-8")
+        for needle in ("GNU", "version 3", "espeak-ng/archive/refs/tags/1.52.0.tar.gz", "GitHub"):
+            self.assertIn(needle, offer)
+        lock = (ROOT / "composer" / "narration" / "requirements.lock").read_text(encoding="utf-8")
+        pins = [ln for ln in lock.splitlines() if ln and not ln.startswith((" ", "#"))]
+        self.assertTrue(pins and all("==" in ln for ln in pins))
+        self.assertTrue(all(ln.rstrip().endswith("\\") for ln in pins))  # every pin is followed by its hashes
 
     def test_compose_caddy_image_pinned_by_digest(self):
         self.assertRegex(compose_services()["caddy"], r"image: caddy:[\w.-]+@sha256:[0-9a-f]{64}\n")
@@ -147,26 +170,37 @@ class WorkflowTests(unittest.TestCase):
                 self.assertIn(f'$RUNNER_TEMP/{m.group(1)}" | sha256sum -c -', text, f"{name}: {m.group(1)}")
 
 
-class PendingTests(unittest.TestCase):
-    """Parts of the guide that wait for later phases. Each skips with its reason until that phase lands; then it
-    checks that the command the guide and compose.yaml use parses."""
-
-    def commands(self) -> set:
-        sub = next(a for a in cli.parser()._actions if a.dest == "command")
-        return set(sub.choices)
+class GuideCommandTests(unittest.TestCase):
+    """The commands the guide, compose.yaml and the Dockerfile use exist and parse."""
 
     def test_composer_up(self):
-        if "up" not in self.commands():
-            self.skipTest("pending phase P1: `composer up` (the compose.yaml command); the proof uses `serve`")
-        # It exists: the exact command compose.yaml runs must parse.
+        # The exact command compose.yaml and the Dockerfile run must parse.
         args = cli.parser().parse_args(["up", "--host", "0.0.0.0", "--port", "8765"])
         self.assertEqual(args.command, "up")
+        self.assertIn('CMD ["up", "--host", "0.0.0.0", "--port", "8765"]', (ROOT / "Dockerfile").read_text())
 
-    def test_composer_backup_and_restore(self):
-        if not {"backup", "restore"} & self.commands():
-            self.skipTest("pending phases P1/P3: `composer backup` / `composer restore` (deploy guide step 9)")
-        # They exist: the guide's commands must parse.
-        self.assertEqual(cli.parser().parse_args(["backup"]).command, "backup")
+    def test_the_guides_commands_parse(self):
+        for argv in (["backup"], ["backup", "--include-secrets"], ["restore", "x.tar.gz"], ["rollback", "--data-only"],
+                     ["setup", "--data-only"], ["setup", "--data-only", "--reconfigure", "narration"],
+                     ["doctor", "--online"], ["uninstall", "--delete-data"]):
+            with self.subTest(argv=argv):
+                self.assertEqual(cli.parser().parse_args(argv).command, argv[0])
+
+    def test_data_root_and_public_origin_are_the_names_the_code_reads(self):
+        text = (ROOT / "compose.yaml").read_text(encoding="utf-8")
+        self.assertIn("COMPOSER_DATA: /data", text)
+        self.assertIn("COMPOSER_PUBLIC_ORIGIN: ${COMPOSER_PUBLIC_ORIGIN:-https://${COMPOSER_DOMAIN", text)
+        self.assertIn("COMPOSER_DATA=/data", (ROOT / "Dockerfile").read_text(encoding="utf-8"))
+        from composer import home, server
+        self.assertEqual(home.DATA_ENV, "COMPOSER_DATA")
+        src = (ROOT / "composer" / "cli.py").read_text(encoding="utf-8")
+        for name in ("COMPOSER_TRUSTED_PROXY", "COMPOSER_PUBLIC_ORIGIN"):
+            self.assertIn(name, src)
+        self.assertTrue(callable(server.check_public_origin))
+        guide = (ROOT / "docs" / "deploy-vps.md").read_text(encoding="utf-8")
+        for name in ("COMPOSER_PUBLIC_ORIGIN", "composer setup --data-only", "composer backup", "composer restore"):
+            self.assertIn(name, guide)
+        self.assertNotIn("compose.serve-0.1.yaml", guide)
 
 
 @unittest.skipUnless(os.environ.get("COMPOSER_DOCKER_PROOF") == "1" and shutil.which("docker")

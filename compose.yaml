@@ -13,16 +13,21 @@ services:
     image: ghcr.io/lensmith-ai/composer:${COMPOSER_VERSION:-0.2.0}
     build:
       context: .
-      target: default
+      # `narration` builds the opt-in image with the narration runtime (docs/deploy-vps.md, Narration).
+      target: ${COMPOSER_TARGET:-default}
     command: ["up", "--host", "0.0.0.0", "--port", "8765"]
     environment:
-      # The app refuses to listen beyond loopback unless the proxy network is named here (plan section 6).
-      COMPOSER_TRUSTED_PROXY: ${COMPOSER_FRONT_SUBNET:-172.30.65.0/24}
-      # The one origin the page is served from, for the app's Origin and Host checks (plan section 6).
-      # The variable's final name is set by phase P1, which adds those checks.
-      COMPOSER_PUBLIC_ORIGIN: https://${COMPOSER_DOMAIN:?set COMPOSER_DOMAIN in .env}
+      # The persistent data root inside the container: the composer-data volume below.
+      COMPOSER_DATA: /data
+      # The app refuses to listen beyond loopback unless its proxy is named here; it then answers only Caddy's own
+      # fixed address (not the whole network: the Docker host itself reaches the network through its gateway)
+      # and its own health check from inside the container.
+      COMPOSER_TRUSTED_PROXY: ${COMPOSER_CADDY_IP:-172.30.65.10}/32
+      # The one address the page is opened at; the app checks Host and Origin against it. Set
+      # COMPOSER_PUBLIC_ORIGIN in .env when you use a port other than 443 (for example https://composer.localhost:8443).
+      COMPOSER_PUBLIC_ORIGIN: ${COMPOSER_PUBLIC_ORIGIN:-https://${COMPOSER_DOMAIN:?set COMPOSER_DOMAIN in .env}}
     # No `ports:` on purpose. Your model key is NOT passed as an environment variable either
-    # (`docker inspect` shows those); it is stored inside the data volume, mode 0600.
+    # (`docker inspect` shows those): `composer setup --data-only` stores it inside the data volume, mode 0600.
     volumes:
       - composer-data:/data
     read_only: true
@@ -61,7 +66,9 @@ services:
     cap_drop: [ALL]
     cap_add: [NET_BIND_SERVICE]
     security_opt: ["no-new-privileges:true"]
-    networks: [front]
+    networks:
+      front:
+        ipv4_address: ${COMPOSER_CADDY_IP:-172.30.65.10}
     depends_on: [composer]
     restart: unless-stopped
 

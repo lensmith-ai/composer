@@ -19,6 +19,7 @@ Safe defaults:
 from __future__ import annotations
 
 import hmac
+import ipaddress
 import json
 import os
 import re
@@ -28,8 +29,9 @@ from urllib.parse import urlsplit
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from . import app_static, demo, page, pipeline
+from . import app_static, demo, live_files, page, pipeline
 from .job_store import JobStore, StoreError
+from .narration import options_fragment
 from .prompt import DEFAULT_INSIGHTS, LENS_MAX_CHARS
 from .providers import ProviderError
 from .registry import RegistryError
@@ -104,16 +106,34 @@ def request_problem(method: str, headers, *, local_only: bool) -> str | None:
 
 class App:
     def __init__(self, registry, make_model, *, out_dir: Path | None = None, passphrase: str = "",
-                 compose=pipeline.compose, data_root: Path | str | None = None, job_worker=None):
+                 compose=pipeline.compose, data_root: Path | str | None = None, job_worker=None,
+                 settings: dict | None = None, on_finished=None):
         self.registry = registry
         self.make_model = make_model
         self.out_dir = out_dir
         self.passphrase = passphrase
         self.compose = compose
+        self.settings = settings or {}
+        self.scheduler = None
         self.lock = threading.Lock()
         self.latest = demo.load()
         root = Path(data_root) if data_root is not None else ((out_dir or Path(tempfile.mkdtemp(prefix="composer-data-"))) / "composer-data")
-        self.jobs = JobStore(root, worker=job_worker or self._job_worker)
+        self.jobs = JobStore(root, worker=job_worker or self._job_worker, on_finished=on_finished)
+
+    def narration_voices(self) -> list:
+        return options_fragment(self.settings)["voices"]
+
+    def options(self) -> dict:
+        """data/options.json: what the page offers. The narration part follows the settings: voices [] and
+        narration.enabled false when narration is off, so the page shows no voice picker and no player."""
+        entries = self.registry.entries()
+        out = {"sources": [e.id for e in entries], "source_meta": {e.id: {"label": e.label} for e in entries},
+               "insights": {"minimum": 3, "maximum": 8, "default": DEFAULT_INSIGHTS}}
+        out.update(options_fragment(self.settings))
+        return out
+
+    def source_ids(self) -> dict:
+        return {e.label: e.id for e in self.registry.entries()}
 
     def _job_worker(self, job: dict, draft_ready) -> dict:
         request = job["request"]
@@ -124,6 +144,9 @@ class App:
         run = self.compose(lens=request["lens"], sources=sources, model=model,
                            count=request.get("insights", DEFAULT_INSIGHTS))
         draft_ready(run["edition"])
+        evidence = (run.get("result") or {}).get("claim_evidence")
+        if isinstance(evidence, dict):  # kept so `composer doctor --seals` can re-verify the seal later
+            self.jobs.write_artifact(job["job"], "check.json", {"claim_evidence": evidence})
         return {"status": "ok", "claim_evidence": {"job": job["job"],
                                                         "draft_sha256": job["draft_sha256"]}}
 
@@ -136,8 +159,11 @@ class App:
             req = json.loads(body.decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError):
             return 400, {"error": "send a JSON object"}
-        if not isinstance(req, dict) or set(req) - {"sources", "lens", "insights"}:
+        if not isinstance(req, dict) or set(req) - {"sources", "lens", "insights", "voice"}:
             return 400, {"error": "send {\"sources\": [...], \"lens\": \"...\"}"}
+        voice = req.get("voice")
+        if voice is not None and voice not in self.narration_voices():
+            return 400, {"error": "that voice is not available; narration may be off"}
         lens, ids = req.get("lens"), req.get("sources")
         count = req.get("insights", DEFAULT_INSIGHTS)
         if not isinstance(lens, str) or not lens.strip() or len(lens) > LENS_MAX_CHARS:
@@ -148,7 +174,10 @@ class App:
             return 400, {"error": "insights must be from 3 to 8"}
         try:
             self.registry.pick(ids)
-            return 202, self.jobs.submit({"sources": ids, "lens": lens.strip(), "insights": count})
+            request = {"sources": ids, "lens": lens.strip(), "insights": count}
+            if voice is not None:
+                request["voice"] = voice
+            return 202, self.jobs.submit(request)
         except RegistryError as exc:
             return 400, {"error": str(exc)}
         except RuntimeError:
@@ -234,7 +263,51 @@ class App:
         return 200, self.latest
 
 
-def handler_for(app: App, *, local_only: bool = True):
+def proxy_problem(client_ip: str, method: str, headers, trusted, public_origin: str) -> str | None:
+    """Behind a reverse proxy (`composer up` in the container): only the proxy's network may connect, the
+    Host must be the public origin's, and a POST's Origin (when sent) must be exactly the public origin."""
+    try:
+        if ipaddress.ip_address(client_ip.split("%", 1)[0]) not in trusted:
+            return "this server only answers its proxy"
+    except ValueError:
+        return "this server only answers its proxy"
+    want = urlsplit(public_origin)
+    host = (headers.get("Host") or "").strip().lower()
+    if host_name(host) != (want.hostname or "") or (want.port and host != want.netloc.lower()):
+        return "this server only answers requests for its public address"
+    if method == "POST":
+        origin = headers.get("Origin")
+        if origin is not None and origin.rstrip("/").lower() != public_origin.rstrip("/").lower():
+            return "change requests are only accepted from this server's own page"
+        site = (headers.get("Sec-Fetch-Site") or "").strip().lower()
+        if site and site not in ("same-origin", "none"):
+            return "change requests are only accepted from this server's own page"
+    return None
+
+
+def _is_loopback(ip: str) -> bool:
+    try:
+        return ipaddress.ip_address(ip.split("%", 1)[0]).is_loopback
+    except ValueError:
+        return False
+
+
+def parse_trusted(value: str):
+    try:
+        return ipaddress.ip_network(value.strip(), strict=False)
+    except ValueError:
+        raise SystemExit(f"refused: COMPOSER_TRUSTED_PROXY must be a network such as 172.30.65.0/24, not {value!r}")
+
+
+def check_public_origin(value: str) -> str:
+    o = urlsplit((value or "").strip())
+    if o.scheme not in ("http", "https") or not o.hostname or o.path not in ("", "/") or o.query or o.username:
+        raise SystemExit("refused: COMPOSER_PUBLIC_ORIGIN must be the address people open, such as "
+                         "https://brief.example.com (with :port if it is not the default)")
+    return f"{o.scheme}://{o.netloc}".lower()
+
+
+def handler_for(app: App, *, local_only: bool = True, trusted=None, public_origin: str = ""):
     class Handler(BaseHTTPRequestHandler):
         server_version = "composer"
         sys_version = ""
@@ -242,6 +315,13 @@ def handler_for(app: App, *, local_only: bool = True):
 
         def _refused(self, method: str) -> bool:
             problem = request_problem(method, self.headers, local_only=local_only)
+            if not problem and trusted is not None:
+                if (method == "GET" and self.path == "/health" and _is_loopback(self.client_address[0])
+                        and host_name(self.headers.get("Host", "")) in LOOPBACK_NAMES):
+                    # the container's own health check: only /health, only from inside, only by a local name
+                    problem = None
+                else:
+                    problem = proxy_problem(self.client_address[0], method, self.headers, trusted, public_origin)
             if problem:
                 self._json(403, {"error": problem})
                 return True
@@ -258,6 +338,57 @@ def handler_for(app: App, *, local_only: bool = True):
             self.end_headers()
             self.wfile.write(body)
 
+        def _live_file(self) -> None:
+            found = live_files.parse(self.path)
+            got = live_files.read(app.jobs, *found, source_ids=app.source_ids()) if found else None
+            if got is None:
+                return self._json(404, {"error": "not found"})
+            body, ctype = got
+            if not ctype.startswith("audio/"):
+                return self._send(200, body, ctype)
+            try:
+                handle = open(body, "rb")
+            except OSError:
+                return self._json(404, {"error": "not found"})
+            with handle:
+                self._send_audio(handle, os.fstat(handle.fileno()).st_size, ctype)
+
+        def _send_audio(self, handle, size: int, ctype: str) -> None:
+            start, end, status = 0, size - 1, 200
+            rng = (self.headers.get("Range") or "").strip()
+            m = re.fullmatch(r"bytes=(\d{0,15})-(\d{0,15})", rng)
+            if m and (m.group(1) or m.group(2)):
+                if m.group(1):
+                    start = int(m.group(1))
+                    end = min(int(m.group(2)), end) if m.group(2) else end
+                else:
+                    start = max(0, size - int(m.group(2)))
+                if start > end:
+                    self.send_response(416)
+                    self.send_header("Content-Range", f"bytes */{size}")
+                    self.send_header("Content-Length", "0")
+                    self.end_headers()
+                    return
+                status = 206
+            length = max(0, end - start + 1)
+            self.send_response(status)
+            self.send_header("Content-Type", ctype)
+            self.send_header("Content-Length", str(length))
+            self.send_header("Accept-Ranges", "bytes")
+            if status == 206:
+                self.send_header("Content-Range", f"bytes {start}-{end}/{size}")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("Cross-Origin-Resource-Policy", "same-origin")
+            self.end_headers()
+            handle.seek(start)
+            while length > 0:
+                block = handle.read(min(length, 1 << 16))
+                if not block:
+                    break
+                self.wfile.write(block)
+                length -= len(block)
+
         def _json(self, status: int, obj: dict) -> None:
             self._send(status, json.dumps(obj, ensure_ascii=False).encode("utf-8"), "application/json")
 
@@ -266,8 +397,19 @@ def handler_for(app: App, *, local_only: bool = True):
                 return
             if app_static.send(self, self.path):
                 return
-            if self.path in ("/", "/index.html"):
+            if self.path == "/":
+                self.send_response(302)  # the app page; the 0.1 page with its compose form stays at /classic
+                self.send_header("Location", app_static.PREFIX)
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+            elif self.path in ("/classic", "/index.html"):
                 self._send(200, app.page(), "text/html; charset=utf-8")
+            elif self.path == "/data/options.json":
+                self._json(200, app.options())
+            elif self.path.startswith(live_files.PREFIX):
+                self._live_file()
+            elif self.path == "/schedule":
+                self._json(200, app.scheduler.status() if app.scheduler else {"enabled": False})
             elif self.path == "/api/latest":
                 self._json(200, app.latest)
             elif self.path == "/health":
@@ -320,15 +462,20 @@ def handler_for(app: App, *, local_only: bool = True):
     return Handler
 
 
-def check_bind(host: str, passphrase: str) -> None:
-    if host not in LOOPBACK and not passphrase:
-        raise SystemExit("refused: to listen on a non-local address, set COMPOSER_SERVER_PASS first "
+def check_bind(host: str, passphrase: str, trusted=None) -> None:
+    if host not in LOOPBACK and not passphrase and trusted is None:
+        raise SystemExit("refused: to listen on a non-local address, name the proxy in front of it "
+                         "(COMPOSER_TRUSTED_PROXY and COMPOSER_PUBLIC_ORIGIN) or set COMPOSER_SERVER_PASS "
                          "(anyone who can compose spends your API credit)")
 
 
-def serve(app: App, host: str, port: int) -> None:
-    check_bind(host, app.passphrase)
-    httpd = ThreadingHTTPServer((host, port), handler_for(app, local_only=host in LOOPBACK))
+def serve(app: App, host: str, port: int, *, trusted=None, public_origin: str = "", on_ready=None) -> None:
+    check_bind(host, app.passphrase, trusted)
+    httpd = ThreadingHTTPServer((host, port), handler_for(app, local_only=host in LOOPBACK, trusted=trusted,
+                                                          public_origin=public_origin))
+    if on_ready is not None:
+        on_ready(httpd)
+    _stop_on_sigterm()
     shown = "127.0.0.1" if host == "localhost" else (f"[{host}]" if ":" in host else host)
     print(f"composer serving on http://{shown}:{port}/  (Ctrl+C to stop)", flush=True)
     try:
@@ -337,6 +484,19 @@ def serve(app: App, host: str, port: int) -> None:
         pass
     finally:
         httpd.server_close()
+
+
+def _stop_on_sigterm() -> None:
+    """`docker compose stop` and service managers send SIGTERM: stop the same clean way as Ctrl+C (a container's
+    first process would otherwise ignore it until it is killed)."""
+    import signal
+
+    def stop(_signum, _frame):
+        raise KeyboardInterrupt
+    try:
+        signal.signal(signal.SIGTERM, stop)
+    except (ValueError, OSError, AttributeError):  # not the main thread, or no SIGTERM on this platform
+        pass
 
 
 def passphrase_from_env() -> str:

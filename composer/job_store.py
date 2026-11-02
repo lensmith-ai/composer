@@ -13,6 +13,11 @@ import time
 import uuid
 
 
+DATA_SCHEMA = "1"  # the data schema this code reads and writes; a newer generation is refused at start
+AUDIO_STATES = ("off", "generating", "ready", "failed")
+ARTIFACTS = ("check.json",)
+
+
 class StoreError(RuntimeError):
     pass
 
@@ -27,9 +32,11 @@ class JobStore:
     TERMINAL = {"verified", "verification_failed", "compose_failed"}
     MEMO_CAP = 20
 
-    def __init__(self, root: Path | str, *, worker, capacity: int = 2, wall_cap_s: float = 600) -> None:
+    def __init__(self, root: Path | str, *, worker, capacity: int = 2, wall_cap_s: float = 600,
+                 on_finished=None) -> None:
         self.root = Path(root)
         self.worker = worker
+        self.on_finished = on_finished  # called with the job id after a job reaches a final phase
         self.capacity = capacity
         self.wall_cap_s = wall_cap_s
         self.lock = threading.RLock()
@@ -102,8 +109,8 @@ class JobStore:
         with self.changed:
             while True:
                 job = self._read_job(job_id)
-                if job["phase"] in self.TERMINAL:
-                    return job
+                if job["phase"] in self.TERMINAL and job_id not in self.active:
+                    return job  # final, and the job's own thread has finished writing the shelf files too
                 remaining = deadline - time.monotonic()
                 if remaining <= 0:
                     raise TimeoutError("job did not finish")
@@ -319,6 +326,7 @@ class JobStore:
                 self._memoize(job_id)
                 self._project()
                 self.changed.notify_all()
+            self._finished(job_id)
 
     def _expire(self, job_id: str) -> None:
         with self.changed:
@@ -339,6 +347,49 @@ class JobStore:
             self._memoize(job_id)
             self._project()
             self.changed.notify_all()
+        self._finished(job_id)
+
+    def _finished(self, job_id: str) -> None:
+        if self.on_finished is None:
+            return
+        try:
+            self.on_finished(job_id)
+        except Exception:  # a follow-up (narration, auto-save) must never break the job itself
+            pass
+
+    def set_audio(self, job_id: str, audio: dict) -> dict:
+        """Record the narration state of a finished brief: {"state": off|generating|ready|failed, ...}.
+        The page reads `audio_state` from job.json; `audio` carries the voice, file, format and reason."""
+        if audio.get("state") not in AUDIO_STATES:
+            raise StoreError("unknown audio state")
+        with self.lock:
+            job = self._read_job(job_id)
+            job["audio"] = dict(audio)
+            job["audio_state"] = audio["state"]
+            self._write_job(job)
+            if job_id in self.memo:
+                self.memo[job_id] = job
+            return job
+
+    def job_dir(self, job_id: str) -> Path:
+        return self.job_path(job_id)
+
+    def write_artifact(self, job_id: str, name: str, value: object) -> None:
+        if name not in ARTIFACTS:
+            raise StoreError("unknown artifact")
+        with self.lock:
+            self._atomic_json(self.job_path(job_id) / name, value)
+
+    def record(self, operation: str, stage: str, **fields) -> None:
+        """Append one step of a lifecycle operation (update, code switch) to the recovery journal."""
+        self._journal(operation, stage, **fields)
+
+    def last(self, operation: str) -> dict | None:
+        return self._last(operation)
+
+    def generation_schema(self, generation: str | None = None) -> str:
+        path = self.generation_path(generation or self.current_generation()) / "VERSION"
+        return path.read_text(encoding="utf-8").strip()
 
     def _memoize(self, job_id: str) -> None:
         try:
@@ -374,6 +425,10 @@ class JobStore:
                 job.update({"state": "failed", "phase": "compose_failed", "finished_at": self._now(), "error": "interrupted restart",
                             "verification": {"status": "verifier-error", "wall_s": None}})
                 job.setdefault("receipts", {})["verification"] = job["verification"]
+                self._atomic_json(path, job)
+            elif job.get("audio_state") == "generating":
+                job["audio"] = dict(job.get("audio") or {}, state="failed", reason="interrupted by a restart")
+                job["audio_state"] = "failed"
                 self._atomic_json(path, job)
         self._project()
 

@@ -3,7 +3,8 @@
 The lens is your own words: what to look for and who the brief is for. The prompt around it is
 fixed. It asks for strict JSON, says that source text is data and never instructions, asks the
 model to cite only titles it was shown, and asks it to label a one-source item "Single source:"
-so a summary never passes as a connection.
+so a summary never passes as a connection. With the brief it asks for a short spoken script
+(`transcript`): narration reads exactly that script, and the page's transcript sheet shows it.
 """
 from __future__ import annotations
 
@@ -17,6 +18,7 @@ SINGLE_SOURCE = "Single source:"
 CONFIDENCE = ("plausible", "corroborated", "weak")
 DETAIL_MAX = 6
 MATERIAL_MARKER = "\n\nSOURCE MATERIAL FOLLOWS.\n\n"
+TRANSCRIPT_MIN_WORDS = 50  # the narration script: what the Listen button reads and the transcript sheet shows
 
 TEMPLATE = """You write a short, sourced brief from a few news feeds, read through one lens.
 
@@ -46,7 +48,8 @@ object. Exact shape:
     "confidence": "plausible|corroborated|weak",
     "why": "one or two sentences of reasoning",
     "sources": [{{"id": "{id_example}", "ref": "exact title"}}]
-  }}
+  }},
+  "transcript": "a 250-350 word spoken-style briefing script covering the items and the connection, written to be READ ALOUD - no URLs, no markdown, no headings, no bullet symbols"
 }}
 
 RULES:
@@ -166,6 +169,9 @@ def check_shape(obj: dict, valid_ids: set[str], count: int) -> list[str]:
             errs.append(f"connection: confidence must be one of {', '.join(CONFIDENCE)}")
         else:
             errs += _check_sources(conn.get("sources"), valid_ids, "connection")
+    transcript = obj.get("transcript")
+    if not isinstance(transcript, str) or len(transcript.split()) < TRANSCRIPT_MIN_WORDS:
+        errs.append("transcript missing or implausibly short")
     return errs
 
 

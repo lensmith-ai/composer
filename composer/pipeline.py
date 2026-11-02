@@ -166,6 +166,8 @@ def edition(*, lens: str, sources: list, fetched: dict, result: dict, model: Cou
                              "state": cv.get("verdict") if cv.get("verdict") in STATE_LABELS else "unchecked"}
     if brief.get("honest_note"):
         out["honest_note"] = str(brief["honest_note"])
+    if isinstance(brief.get("transcript"), str) and brief["transcript"].strip():
+        out["transcript"] = brief["transcript"].strip()  # the narration script, in our own words
     ce = result.get("claim_evidence") or {}
     out["check"] = {"tool": f"claim-seal {claim_seal.__version__}", "status": result.get("status"),
                     "rows": len(ce.get("outcomes") or []),

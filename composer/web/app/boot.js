@@ -12,7 +12,7 @@
       pass = window.prompt('Pass phrase for this Composer server') || '';
       try { if (pass) sessionStorage.setItem(PASS_KEY, pass); } catch (e) {}
     }
-    return { 'Content-Type': 'application/json', 'X-Composer-Pass': pass || 'local' };
+    return { 'Content-Type': 'application/json', 'X-Composer-CSRF': 'same-origin', 'X-Composer-Pass': pass || 'local' };
   };
   window.cwNarrationOn = function (o) {
     o = o || {};

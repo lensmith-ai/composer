@@ -65,6 +65,14 @@ class PromptTests(unittest.TestCase):
         with self.assertRaises(P.ShapeError):
             P.parse_reply("no json here")
 
+    def test_the_narration_script_is_required(self):
+        short = dict(brief_for_fixtures(), transcript="Too short to read aloud.")
+        self.assertIn("transcript missing or implausibly short", P.check_shape(short, {"harbor", "quarry"}, 3))
+        missing = brief_for_fixtures()
+        missing.pop("transcript")
+        self.assertIn("transcript missing or implausibly short", P.check_shape(missing, {"harbor", "quarry"}, 3))
+        self.assertIn('"transcript": "a 250-350 word spoken-style briefing script', P.TEMPLATE)
+
     def test_single_source_label_is_added_once(self):
         obj = brief_for_fixtures()
         self.assertEqual(P.label_single_source(obj), 2)

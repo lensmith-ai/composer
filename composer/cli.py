@@ -6,7 +6,17 @@
   composer sources list [--sources-file FILE]
   composer sources add --id ID --label LABEL --kind rss-or-atom --url URL [--file FILE]
   composer sources check ID [--sources-file FILE]
-  composer serve [--host 127.0.0.1] [--port 8765] [--out DIR]
+  composer serve [--host 127.0.0.1] [--port 8765] [--out DIR]        (0.1: the classic page and form)
+
+  composer setup [--answers FILE | --yes] [--reconfigure PART] [--home DIR] [--data-only]
+  composer up [--host 127.0.0.1] [--port N]       the app, its engine, narration and daily brief
+  composer doctor [--online] [--parity] [--seals]
+  composer backup [--include-secrets] [--out DIR]    composer restore FILE [--include-secrets]
+  composer update --from-file RELEASE [--sha256 HEX]    composer rollback [--data-only]
+  composer uninstall [--delete-data]
+
+Every install command takes --home DIR (default COMPOSER_HOME or ~/.lensmith-composer) and --data DIR
+(default COMPOSER_DATA, or <home>/data).
 
 Exit codes: 0 done, 1 the brief could not be composed, 2 a usage or input problem.
 """
@@ -131,6 +141,141 @@ def cmd_serve(args) -> int:
     return 0
 
 
+def _where(args):
+    from . import home as H
+    home = H.resolve_home(getattr(args, "home", None))
+    return home, H.data_root(home, getattr(args, "data", None))
+
+
+def cmd_setup(args) -> int:
+    from . import installer
+    home, _ = _where(args)
+    data = Path(args.data).resolve() if args.data else None
+    return installer.run(home=home, data=data, answers_file=args.answers, assume_yes=args.yes,
+                         reconfigure=args.reconfigure or [], data_only=args.data_only,
+                         home_created_by_bootstrap=args.home_created, check_only=args.check_only)
+
+
+def cmd_up(args) -> int:
+    import os
+    from . import home as H, lifecycle, narration, server, settings as S
+    from .providers import use_key_file
+    from .scheduler import Scheduler, chain
+    home, data = _where(args)
+    container = bool(os.environ.get(H.DATA_ENV)) and not (home / H.MANIFEST).exists()
+    if not (data / "current").exists() and not container:
+        print(f"composer: no Composer data at {data}; run setup.sh (or `composer setup`) first", file=sys.stderr)
+        return 2
+    data.mkdir(parents=True, exist_ok=True)
+    lock = lifecycle.hold_run_lock(data)  # noqa: F841  (held for as long as the server runs, taken before recovery)
+    lifecycle.recover(home if (home / "app").is_dir() else None, data)
+    S.generation_dir(data)
+    lifecycle.migrate_on_start(data)
+    lifecycle.check_data_schema(data)
+    cfg = S.load(data)
+    use_key_file(S.secrets_path(data))
+    env = dict(os.environ)
+    env.update(S.provider_env(cfg))
+    sf = S.sources_file(data)
+    reg = registry.Registry.load(str(sf) if sf.exists() else None)
+    base = H.runtime_base(home, data)
+    narrator = narration.Narrator(cfg["narration"], base)
+    sched = Scheduler(data, cfg, None, backup=lambda keep: lifecycle.backup(data, keep=keep, tag="weekly"))
+    app = server.App(reg, lambda: from_env(args.provider, args.model, env=env), data_root=data, settings=cfg,
+                     on_finished=chain(lambda j: narrator.on_finished(j), lambda j: sched.on_finished(j)))
+    narrator.attach(app.jobs)
+    sched.store = app.jobs
+    app.scheduler = sched.start()
+    trusted, origin = None, ""
+    if os.environ.get("COMPOSER_TRUSTED_PROXY"):
+        trusted = server.parse_trusted(os.environ["COMPOSER_TRUSTED_PROXY"])
+        origin = server.check_public_origin(os.environ.get("COMPOSER_PUBLIC_ORIGIN", ""))
+    passphrase = server.passphrase_from_env()
+    app.passphrase = passphrase
+    try:
+        from_env(args.provider, args.model, env=env).ready()
+    except ProviderError as exc:
+        print(f"note: {exc}. The page shows the recorded brief; composing needs a key.", flush=True)
+    print(f"narration: {'on (' + cfg['narration']['engine'] + ')' if narrator.enabled else 'off (text-only)'}; "
+          f"daily brief: {'at ' + cfg['schedule']['time'] if cfg['schedule']['enabled'] else 'off'}", flush=True)
+    server.serve(app, args.host, args.port or cfg["server"]["port"], trusted=trusted, public_origin=origin)
+    return 0
+
+
+def cmd_doctor(args) -> int:
+    from . import doctor
+    home, data = _where(args)
+    return doctor.run(home, data, online=args.online, parity=args.parity, seals=args.seals,
+                      integrity_only=args.integrity_only)
+
+
+def cmd_backup(args) -> int:
+    from . import lifecycle
+    _, data = _where(args)
+    path = lifecycle.backup(data, include_secrets=args.include_secrets, out_dir=Path(args.out) if args.out else None)
+    print(f"wrote {path}" + ("  (it includes your key: keep it private)" if args.include_secrets else
+                             "  (your key is not in it)"))
+    print("Copy it somewhere else too: a backup that only lives next to your data is lost with it.")
+    return 0
+
+
+def cmd_restore(args) -> int:
+    from . import lifecycle
+    _, data = _where(args)
+    result = lifecycle.restore(data, Path(args.file), include_secrets=args.include_secrets)
+    print(f"restored {result['restored_files']} files. What was there before is backed up at "
+          f"{result['safety_backup']} and kept at {result['replaced_kept_at']}.")
+    return 0
+
+
+def cmd_update(args) -> int:
+    from . import lifecycle
+    home, data = _where(args)
+    result = lifecycle.update(home, data, Path(args.from_file), sha256=args.sha256)
+    print(f"updated {result['from']} -> {result['to']}"
+          + (" (your data was migrated as a copy; the original is kept)" if result["data_migrated"] else ""))
+    print("To go back: composer rollback")
+    return 0
+
+
+def cmd_rollback(args) -> int:
+    from . import lifecycle
+    home, data = _where(args)
+    result = lifecycle.rollback(home, data, data_only=args.data_only)
+    if result["export_directory"]:
+        print(f"briefs made since the update were exported to {result['export_directory']}: "
+              + (", ".join(result["exported_jobs"]) or "none"))
+    print("rolled back" + (f" to {result['code']}" if result["code"] else " the data (now start the previous image)"))
+    return 0
+
+
+def cmd_uninstall(args) -> int:
+    from . import home as H, lifecycle
+    home, data = _where(args)
+
+    def confirm(question: str) -> bool:
+        if args.yes:
+            return True
+        if not sys.stdin.isatty():
+            return False
+        return input(question).strip() == "DELETE"
+
+    if args.delete_data:
+        print("Before you delete your data, you can keep a copy: composer backup --out <a folder outside "
+              f"{home}>")
+    result = lifecycle.uninstall(home, data, delete_data=args.delete_data, confirm=confirm)
+    print("removed: " + (", ".join(result["removed"]) or "nothing"))
+    if result["kept_data"]:
+        print(f"kept your data: {result['kept_data']} (remove it with `composer uninstall --delete-data`, or "
+              "run setup again to pick it up)")
+    for path in result["reused_untouched"]:
+        print(f"left untouched (reused read-only): {path}")
+    for name in result["not_ours_left_alone"]:
+        print(f"left alone (not created by Composer): {home / name}")
+    print("If you added the alias line to your shell profile, remove it yourself.")
+    return 0
+
+
 def parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="composer", description="Read feeds, write a brief through your lens, "
                                                              "check every claim against its source.")
@@ -179,6 +324,59 @@ def parser() -> argparse.ArgumentParser:
     v.add_argument("--model")
     v.add_argument("--sources-file")
     v.set_defaults(func=cmd_serve)
+
+    def where(sp):
+        sp.add_argument("--home", help="the app folder (default COMPOSER_HOME or ~/.lensmith-composer)")
+        sp.add_argument("--data", help="the data folder (default COMPOSER_DATA or <home>/data)")
+        return sp
+
+    st = where(sub.add_parser("setup", help="set Composer up: provider and key, sources, narration, schedule, port"))
+    st.add_argument("--answers", metavar="FILE", help="answers file (.toml or .json): no questions")
+    st.add_argument("--yes", action="store_true", help="no questions: every default")
+    st.add_argument("--reconfigure", action="append", metavar="PART",
+                    help="ask one part again: provider, sources, narration, schedule or port")
+    st.add_argument("--data-only", action="store_true", help="settings and key in the data folder only (container)")
+    st.add_argument("--home-created", action="store_true", help=argparse.SUPPRESS)
+    st.add_argument("--check-only", action="store_true", help="run every check, ask nothing, write nothing")
+    st.set_defaults(func=cmd_setup)
+
+    u = where(sub.add_parser("up", help="run the app (page, engine, narration, daily brief)"))
+    u.add_argument("--host", default="127.0.0.1")
+    u.add_argument("--port", type=int, help="default: the port chosen at setup (8765)")
+    u.add_argument("--provider", choices=["anthropic", "openai"], help=argparse.SUPPRESS)
+    u.add_argument("--model", help=argparse.SUPPRESS)
+    u.set_defaults(func=cmd_up)
+
+    dr = where(sub.add_parser("doctor", help="check this install, one line per check"))
+    dr.add_argument("--online", action="store_true", help="also call the model, read each source, render a sentence")
+    dr.add_argument("--parity", action="store_true", help="also run a fixture brief through the real routes")
+    dr.add_argument("--seals", action="store_true", help="also re-verify the seal of every saved brief")
+    dr.add_argument("--integrity-only", action="store_true", help=argparse.SUPPRESS)
+    dr.set_defaults(func=cmd_doctor)
+
+    b = where(sub.add_parser("backup", help="archive your current data (not your key unless asked)"))
+    b.add_argument("--include-secrets", action="store_true")
+    b.add_argument("--out", metavar="DIR", help="default <data>/backups")
+    b.set_defaults(func=cmd_backup)
+
+    rs = where(sub.add_parser("restore", help="bring a backup back (checked first; what is there now is kept)"))
+    rs.add_argument("file")
+    rs.add_argument("--include-secrets", action="store_true")
+    rs.set_defaults(func=cmd_restore)
+
+    up = where(sub.add_parser("update", help="install a release file as a checked, undoable update"))
+    up.add_argument("--from-file", required=True, metavar="RELEASE")
+    up.add_argument("--sha256", help="the release file's SHA-256 (or put SHA256SUMS next to it)")
+    up.set_defaults(func=cmd_update)
+
+    rb = where(sub.add_parser("rollback", help="go back to the version and data before the last update"))
+    rb.add_argument("--data-only", action="store_true", help="only point the data back (Docker)")
+    rb.set_defaults(func=cmd_rollback)
+
+    un = where(sub.add_parser("uninstall", help="remove what setup created; your data only with --delete-data"))
+    un.add_argument("--delete-data", action="store_true", help="also delete your data folder (asks first)")
+    un.add_argument("--yes", action="store_true", help="do not ask before deleting data")
+    un.set_defaults(func=cmd_uninstall)
     return p
 
 
@@ -194,8 +392,17 @@ def main(argv: list[str] | None = None) -> int:
         elif args.action == "check" and not args.id:
             print("composer sources check needs a source id", file=sys.stderr)
             return 2
+    from .answers import AnswersError
+    from .home import HomeError
+    from .installer import SetupError
+    from .lifecycle import LifecycleError
+    from .settings import SettingsError
     try:
         return args.func(args)
-    except (registry.RegistryError, ProviderError, ValueError) as exc:
+    except (registry.RegistryError, ProviderError, ValueError, HomeError, SetupError, LifecycleError,
+            SettingsError, AnswersError) as exc:
         print(f"composer: {exc}", file=sys.stderr)
         return 2
+    except KeyboardInterrupt:
+        print("\nstopped; nothing more was written", file=sys.stderr)
+        return 130

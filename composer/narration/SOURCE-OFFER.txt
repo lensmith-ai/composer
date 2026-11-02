@@ -1,0 +1,21 @@
+Lensmith Composer narration image: licences and source offer
+=============================================================
+
+This image adds optional narration to Lensmith Composer. Most of it is under permissive licences:
+kokoro-onnx, onnxruntime and espeakng-loader (MIT), soundfile (BSD-3-Clause) with libsndfile (LGPL-2.1).
+The Kokoro-82M model and voices (Apache-2.0) are NOT in this image; Composer downloads them into your data
+volume only when you turn narration on.
+
+espeakng-loader 0.2.4 bundles the eSpeak NG speech library, version 1.52.0, which is licensed under the GNU
+General Public License, version 3 or later. Its licence text is in this folder:
+eSpeak-NG-1.52.0-COPYING.txt.
+
+Source offer. For as long as we offer this image, the complete corresponding source of eSpeak NG 1.52.0 and the
+espeakng-loader 0.2.4 source distribution that built the bundled library are attached to the same GitHub
+Release as the image (https://github.com/lensmith-ai/composer/releases), at no charge. They are also available
+from their projects:
+  - eSpeak NG 1.52.0: https://github.com/espeak-ng/espeak-ng/archive/refs/tags/1.52.0.tar.gz
+    (SHA-256 bb4338102ff3b49a81423da8a1a158b420124b055b60fa76cfb4b18677130a23)
+  - espeakng-loader 0.2.4: https://pypi.org/project/espeakng-loader/0.2.4/#files
+If you cannot get them from either place, open an issue at https://github.com/lensmith-ai/composer/issues
+and we will send them to you.

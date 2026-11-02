@@ -19,7 +19,7 @@ claim-seal expects for its judge, so the same object writes the brief and checks
 is a str that also carries `.model` (the model that answered) and `.usage` (token counts, when
 the endpoint reports them).
 
-The key is read from the environment at call time. It is never stored on the object, never
+The key is read from the environment (or the 0600 key file `composer setup` writes) at call time. It is never stored on the object, never
 logged, and never written to any output file. Redirects are refused on any call that carries a
 key, and a plain http:// endpoint is refused unless it is this machine (127.0.0.1, ::1,
 localhost), for a local model server.
@@ -124,10 +124,31 @@ def _error_text(status: int, data: bytes, secret: str = "") -> str:
     return f"HTTP {status}"
 
 
+_KEY_FILE = None  # set by `composer up` to <data>/secrets.env; read at call time, never copied into os.environ
+
+
+def use_key_file(path) -> None:
+    """Also look for keys in this file (NAME=value lines, mode 0600) when the environment has none."""
+    global _KEY_FILE
+    _KEY_FILE = path
+
+
+def _key_from_file(env_name: str) -> str:
+    if _KEY_FILE is None:
+        return ""
+    from pathlib import Path
+    from .settings import SettingsError, read_secrets
+    try:
+        return read_secrets(Path(_KEY_FILE).parent).get(env_name, "")
+    except (OSError, SettingsError) as exc:
+        raise ProviderError(str(exc)) from None
+
+
 def _key(env_name: str) -> str:
-    value = os.environ.get(env_name, "").strip()
+    value = os.environ.get(env_name, "").strip() or _key_from_file(env_name)
     if not value:
-        raise ProviderError(f"no API key: set {env_name} (or run `composer demo`, which needs no key)")
+        raise ProviderError(f"no API key: set {env_name} or run `composer setup` "
+                            "(or run `composer demo`, which needs no key)")
     return value
 
 

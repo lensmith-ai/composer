@@ -75,6 +75,25 @@ try `--lens "what this means for small teams"`. All the options:
 composer compose --help
 ```
 
+## Install the app (setup.sh)
+
+The full app (the phone-width page, saved briefs, a daily brief, optional narration) installs into ONE folder,
+`~/.lensmith-composer`, and touches nothing else: no shell profile, no PATH, no sudo, no global Python.
+
+```sh
+./setup.sh
+~/.lensmith-composer/bin/composer up        # then open http://127.0.0.1:8765/
+```
+
+`./setup.sh` checks everything first and writes nothing until every check passes. It uses your Python 3.10+ (or,
+only if you say yes, downloads a pinned, checksum-verified uv into that folder, which brings its own Python), makes
+a private environment there, and asks, one question at a time: your model provider and key (typed without being
+shown, stored in a file only you can read), starting sources, optional narration (it shows the size and the
+licences first, and reuses a Kokoro you already have, read-only, when it passes a check), a daily brief, and a
+port. `./setup.sh --answers answers.toml` asks nothing. `composer doctor` checks the install one line at a time;
+`composer uninstall` removes what setup made and keeps your briefs unless you add `--delete-data`. Everything,
+including updates, backups and what each command may touch: [docs/setup.md](docs/setup.md).
+
 ## Bring your own model
 
 Composer calls the model with your own key. Nothing goes through any other service.
@@ -89,7 +108,8 @@ Composer calls the model with your own key. Nothing goes through any other servi
 | `COMPOSER_MAX_TOKENS` | the reply ceiling per call (default 16000) |
 | `COMPOSER_ANTHROPIC_FALLBACK` | `off` turns off the API's server-side refusal fallback, which is on by default for the models that accept it |
 
-The key is read when each call is made. It is never stored, logged or written to a file.
+The key is read when each call is made. It is never logged or printed. The command line never stores it; the
+installed app stores it only if you give it to `composer setup`, in a file only you can read (mode 0600).
 
 ## Three ways to run it
 
@@ -114,7 +134,9 @@ The key is read when each call is made. It is never stored, logged or written to
    composer demo --site docs/demo
    ```
 
-3. **Always-on server (your key, your machine or server).** `composer serve` shows the latest
+3. **The app, always on (your key, your machine or server).** `composer up` (after `./setup.sh`, above) runs the
+   full app on 127.0.0.1:8765 with its engine, optional narration and the daily brief. The 0.1 `composer serve`
+   below still works: it shows the latest
    brief as a plain page (the one `docs/demo/brief.html` shows, not the phone replay) and a form
    to compose a new one. It listens on 127.0.0.1:8765 by default; open http://127.0.0.1:8765/ .
    Without a key it still shows the recorded brief, and Compose says that a key is needed.
@@ -132,7 +154,6 @@ The key is read when each call is made. It is never stored, logged or written to
 
    To run it on a server with HTTPS and a login, use the container image with Docker Compose and Caddy:
    [docs/deploy-vps.md](docs/deploy-vps.md) walks through it step by step, with a trial on your own computer first.
-   Parts of that guide wait for Composer 0.2 and say so.
 
 ## What a brief costs
 
@@ -187,7 +208,10 @@ composer sources list
 | `composer/prompt.py` | the writing prompt and the check on the model's answer |
 | `composer/providers.py` | the model layer: Anthropic Messages API and OpenAI-compatible endpoints |
 | `composer/pipeline.py` | one brief from start to finish |
-| `composer/cli.py`, `composer/server.py` | the `composer` command and `composer serve` |
+| `composer/cli.py`, `composer/server.py` | the `composer` command, `composer up` and `composer serve` |
+| `setup.sh`, `composer/installer.py`, `composer/home.py` | the install: its checks, its questions, the app folder and its manifest |
+| `composer/narration/` | optional narration: detection, the read-only reuse check, the hash-locked runtime, the worker |
+| `composer/doctor.py`, `composer/lifecycle.py`, `composer/scheduler.py` | doctor; backup, restore, update, rollback, uninstall; the daily brief |
 | `composer/page.py`, `composer/web/` | the one-file brief page |
 | `composer/window.py`, `composer/web/window/` | the animated replay window and its scripts and styles |
 | `composer/sources.json` | the two bundled feeds |

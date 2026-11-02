@@ -23,9 +23,12 @@ Everything else Composer runs on is the Python standard library (Python 3.10 or 
 | [Python](https://www.python.org/) official image | `python:3.13.18-slim-trixie`, pinned by digest in `Dockerfile` | PSF-2.0 (Python); Debian packages under their own licences | The base of Composer's image. The release's image SBOM lists every package in it. |
 | [Caddy](https://caddyserver.com/) official image | 2.11.7, pinned by digest in `compose.yaml` | Apache-2.0 | HTTPS and the login in front of Composer. Pulled by Docker from Docker Hub; not part of Composer's image. |
 
-Optional narration (not in the package or the default image; pending phase P3) uses kokoro-onnx (MIT),
-espeakng-loader (MIT) with the eSpeak NG library it bundles (GPL-3.0-or-later), onnxruntime (MIT), soundfile
-(BSD-3-Clause) and the Kokoro model and voices (Apache-2.0). They are listed, with versions and hashes, in
+Optional narration (not in the package or the default image) uses kokoro-onnx (MIT), espeakng-loader (MIT) with
+the eSpeak NG library it bundles (GPL-3.0-or-later), onnxruntime (MIT), soundfile (BSD-3-Clause, with libsndfile,
+LGPL-2.1) and the Kokoro model and voices (Apache-2.0). The runtime is installed only when you choose narration, from
+the hash-locked `composer/narration/requirements.lock`; the model files are downloaded only then, checked against
+their pinned SHA-256 (`composer/narration/__init__.py`). The opt-in narration image ships eSpeak NG's licence text
+and a source offer (`composer/narration/SOURCE-OFFER.txt`). They are also listed in
 `scripts/release/optional-components.json` and in every release SBOM.
 
 ## Release and CI tools (not part of Composer)

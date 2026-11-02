@@ -1,0 +1,34 @@
+#!/usr/bin/expect -f
+# Interactive `composer setup`, answered like a person at a terminal.
+#   expect tests/setup/interactive.exp PYTHON APP_FOLDER KEY
+# The key is typed at a prompt that does not echo; the script fails if any prompt does not appear.
+set timeout 60
+set python [lindex $argv 0]
+set target [lindex $argv 1]
+set key [lindex $argv 2]
+log_user 1
+spawn $python -m composer setup --home $target
+proc step {prompt reply} {
+  expect {
+    -exact $prompt { send -- "$reply\r" }
+    timeout { puts "\nEXPECT FAIL: no prompt: $prompt"; exit 1 }
+    eof { puts "\nEXPECT FAIL: setup ended before: $prompt"; exit 1 }
+  }
+}
+step "choose 1-3 \[1\]:" "1"
+step "Model \[claude-sonnet-5-5\]:" ""
+log_user 0
+step "key:" $key
+log_user 1
+step "Add Hacker News as a source too? \[y/N\]:" "n"
+step "press Enter to skip \[\]:" ""
+step "Add narration? \[y/N\]:" "n"
+step "(while Composer runs)? \[y/N\]:" "n"
+step "Port on this computer \[" ""
+expect {
+  -exact "Check it:" { }
+  timeout { puts "\nEXPECT FAIL: no summary"; exit 1 }
+}
+expect eof
+lassign [wait] pid spawnid os_error value
+exit $value

@@ -95,7 +95,17 @@ def brief_for_fixtures(n_items: int = 3) -> dict:
             "connection": {"headline": "Both sources keep data close to where it is made.",
                            "confidence": "plausible", "why": "Sensors and phones both process locally.",
                            "sources": [{"id": "harbor", "ref": "Harbor Lab opens a tide-sensor map"},
-                                       {"id": "quarry", "ref": "Quarry Street Studio ships a smaller model for phones"}]}}
+                                       {"id": "quarry", "ref": "Quarry Street Studio ships a smaller model for phones"}]},
+            "transcript": FIXTURE_TRANSCRIPT}
+
+
+FIXTURE_TRANSCRIPT = (
+    "Here is your brief for today. Harbor Lab has opened a public map of its tide sensors, so anyone can now "
+    "see readings from forty sensors along the bay, and the map updates every hour. Over at Quarry Street "
+    "Studio, a smaller model now runs on phones, which means the text you type never has to leave the "
+    "device.\n\nThe sensors sit on old piers, and that is no accident: the piers give a stable mount, and "
+    "nearby lamp posts give them electricity. What links these stories is simple. Both teams keep "
+    "data close to where it is made, on the pier and on the phone. That is the brief.")
 
 
 JUDGE_ANSWERS = {

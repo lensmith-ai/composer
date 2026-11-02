@@ -435,7 +435,7 @@ class ServeCrossSiteTests(unittest.TestCase):
                 headers = {"Content-Type": "application/json", "Host": host, "Origin": f"http://{host}",
                            "Sec-Fetch-Site": "same-origin", "X-Composer-CSRF": server.CSRF_VALUE}
                 self.assertEqual(self.request(port, "POST", "/api/compose", headers, self.BODY)[0], 200)
-                self.assertEqual(self.request(port, "GET", "/", {"Host": host})[0], 200)
+                self.assertEqual(self.request(port, "GET", "/classic", {"Host": host})[0], 200)
         self.assertEqual(self.request(port, "POST", "/api/compose", {"Content-Type": "application/json",
                                                                         "X-Composer-CSRF": server.CSRF_VALUE}, self.BODY)[0],
                          200)  # a command-line client sends no Origin

@@ -45,9 +45,10 @@ model files as `data` components with their download address and SHA-256. Both f
 SBOM attestations; one format for the package and the image keeps them comparable.
 
 **Narration and the GPL.** Optional narration uses espeakng-loader, which bundles eSpeak NG (GPL-3.0). It is never
-in the default image or the package. A narration image, when phase P3 adds one, is a separate tag, and must ship
-eSpeak NG's licence text and a source offer, with the exact eSpeak NG source attached to the same release for as
-long as that image is offered (see the `narration` target in the Dockerfile).
+in the default image or the package. The narration image (the Dockerfile's `narration` target) is a separate tag; it
+ships eSpeak NG's licence text and a source offer (`composer/narration/SOURCE-OFFER.txt`), and the exact eSpeak NG
+source must be attached to the same release for as long as that image is offered. The release workflow does not
+build or publish the narration image yet; adding it there must add that source attachment in the same change.
 
 ## Checking a release
 

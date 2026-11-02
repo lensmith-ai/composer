@@ -1,5 +1,5 @@
 {
-  "about": "Parts of OPTIONAL narration. None of them is in the wheel, the sdist or the default container image. build.py adds them to every release SBOM with scope 'excluded' (not in this artifact) so their licences are on record. eSpeak NG is GPL-3.0: any published image that includes it must ship the licence text and a source offer (see the narration target in the Dockerfile). Pins and hashes are from the narration spike's hash-locked install; phase P3 owns them and updates this file with its lock.",
+  "about": "Parts of OPTIONAL narration. None of them is in the wheel, the sdist or the default container image. build.py adds them to every release SBOM with scope 'excluded' (not in this artifact) so their licences are on record. eSpeak NG is GPL-3.0: any published image that includes it must ship the licence text and a source offer (see the narration target in the Dockerfile). The install pins are composer/narration/requirements.lock (universal, hash-locked; on Python 3.10 it resolves onnxruntime 1.24.3 and numpy 2.2.6, from 3.11 the versions below).",
   "components": [
     {
       "type": "library",

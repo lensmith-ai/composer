@@ -21,8 +21,9 @@ dependencies = [
 composer = "composer.cli:main"
 
 [tool.setuptools]
-packages = ["composer", "composer.adapters"]
+packages = ["composer", "composer.adapters", "composer.narration"]
 
 [tool.setuptools.package-data]
 composer = ["sources.json", "data/*.json", "web/*.css", "web/*.js", "web/window/*.css", "web/window/*.js",
             "web/app/*.html", "web/app/*.css", "web/app/*.js"]
+"composer.narration" = ["requirements.lock"]
