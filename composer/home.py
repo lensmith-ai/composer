@@ -76,6 +76,57 @@ def now() -> str:
 
 # ------------------------------------------------------------------------------------------------ guards
 
+# ------------------------------------------------------------------------------------------------ the trust contract
+# Composer trusts your own account and root, and nothing else. Before it sets up, updates, rolls back, recovers or
+# works in its folder (narration included), the folder and every folder above it, up to /, must be owned by you or
+# root and writable by no one else (no group or other write bit), checked on the path as given and on its real path
+# (links resolved). This is the rule OpenSSH applies to ~/.ssh ("StrictModes"). With it, only your own account (or
+# root) can change anything under Composer's folder, so a race between a check and a use there is a race against
+# yourself: no other account can redirect a write, a removal, or what a program Composer starts reads or writes.
+# What is not defended: a process already running as you (it can change your files directly), root, and systems
+# without POSIX owners and permission bits (on Windows this check does not run).
+_OTHERS_WRITE = stat.S_IWGRP | stat.S_IWOTH
+
+
+def check_trust(path: Path) -> None:
+    """Refuse when `path` (or, if it does not exist yet, its nearest existing folder) or any folder above it is owned
+    by another account or writable by group or others. Only reads."""
+    if os.name != "posix" or not hasattr(os, "getuid"):
+        return
+    uid = os.getuid()
+    path = Path(os.path.normpath(str(path)))
+    start = path
+    while not os.path.lexists(start) and start != start.parent:
+        start = start.parent
+    chains = [start, *start.parents]
+    real = Path(os.path.realpath(start))
+    chains += [real, *real.parents]
+    seen = set()
+    for folder in chains:
+        if folder in seen:
+            continue
+        seen.add(folder)
+        try:
+            st = os.stat(folder)
+        except OSError as exc:
+            raise HomeError(f"refused: cannot check {folder} ({exc.strerror or exc})") from None
+        if st.st_uid not in (uid, 0):
+            raise HomeError(f"refused: {folder} belongs to another account (uid {st.st_uid}). Composer's folder and "
+                            "every folder above it must belong to you or root, so no other account can change what "
+                            f"it runs. Fix: chown $(id -un) {folder}, or put the app folder somewhere else (the "
+                            "default is ~/.lensmith-composer)")
+        if st.st_mode & _OTHERS_WRITE and st.st_mode & stat.S_ISVTX:
+            raise HomeError(f"refused: {folder} is a folder shared by every account (mode {stat.S_IMODE(st.st_mode):04o},"
+                            " like /tmp). Composer's folder and every folder above it must be writable only by you "
+                            "or root, so no other account can change what it runs. Put the app folder under your own "
+                            "home instead (the default is ~/.lensmith-composer)")
+        if st.st_mode & _OTHERS_WRITE:
+            raise HomeError(f"refused: {folder} can be written by other accounts (mode "
+                            f"{stat.S_IMODE(st.st_mode):04o}). Composer's folder and every folder above it must be "
+                            f"writable only by you or root, so no other account can change what it runs. Fix: chmod "
+                            f"go-w {folder}, or put the app folder somewhere else (the default is ~/.lensmith-composer)")
+
+
 def guard(home: Path, *, need_bytes: int = MIN_FREE_BYTES) -> str:
     """Every check that must pass BEFORE setup writes anything. Returns "new" (the folder does not exist yet),
     "empty" (it exists and is empty) or "ours" (it is already a Composer install). Raises HomeError otherwise.
@@ -89,6 +140,7 @@ def guard(home: Path, *, need_bytes: int = MIN_FREE_BYTES) -> str:
                         "such as ~/.lensmith-composer")
     if os.path.islink(home):
         raise HomeError(f"refused: {home} is a symbolic link; give the real folder")
+    check_trust(home)
     if home.exists():
         if not home.is_dir():
             raise HomeError(f"refused: {home} exists and is not a folder")
@@ -130,6 +182,7 @@ def owned_dir(base: Path, *parts: str, create: bool = True) -> Path:
     path = Path(os.path.normpath(str(base)))
     if os.path.islink(path):
         raise HomeError(f"refused: {path} is a symbolic link; Composer works only in its own real folders")
+    check_trust(path)
     if create and parts and not os.path.lexists(path):
         os.makedirs(path, mode=0o700, exist_ok=True)
     for part in parts:
@@ -249,6 +302,7 @@ def open_home(home: Path) -> Owned:
         raise HomeError("refused: this system cannot open folders without following links, which Composer needs "
                         "to write and remove safely in its own folder; nothing was written or removed")
     home = Path(os.path.normpath(str(home)))
+    check_trust(home)
     try:
         return Owned(os.open(home, _DIR_FLAGS), home)
     except OSError:
@@ -277,6 +331,7 @@ def check_owned(home: Path) -> None:
     home = Path(os.path.normpath(str(home)))
     if os.path.islink(home):
         raise HomeError(f"refused: {home} is a symbolic link; give the real folder")
+    check_trust(home)
     if not home.exists():
         return
     for name in OWNED_DIRS:

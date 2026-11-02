@@ -52,6 +52,36 @@ owned_ok() {
 check_owned() {
   why=$(owned_ok) || die "refused: $why; setup works only in its own real folders, so nothing was written or removed. Remove the link (or the file) and run it again."
 }
+# The trust contract (SECURITY.md): the app folder and every folder above it, up to /, on the path as given and on
+# its real path, must belong to you or root and be writable by no one else. Checks the nearest existing folder.
+trust_one() {  # trust_one FOLDER: prints why not, returns 1
+  set -- "$1" "$(ls -ldn -- "$1" 2>/dev/null)"
+  [ -n "$2" ] || { say "$1 cannot be checked"; return 1; }
+  mode=$(printf '%s' "$2" | awk '{print $1}'); owner=$(printf '%s' "$2" | awk '{print $3}')
+  if [ "$owner" != "$(id -u)" ] && [ "$owner" != 0 ]; then say "$1 belongs to another account (uid $owner); fix: chown $(id -un) $1"; return 1; fi
+  case "$mode" in
+    *[tT]) case "$mode" in ?????w*|????????w*) say "$1 is a folder shared by every account ($mode); put the app folder under your own home instead"; return 1 ;; esac ;;
+    ?????w*|????????w*) say "$1 can be written by other accounts ($mode); fix: chmod go-w $1"; return 1 ;;
+  esac
+  return 0
+}
+trust_ok() {
+  d=$H
+  while [ ! -e "$d" ] && [ "$d" != / ]; do d=$(dirname "$d"); done
+  for start in "$d" "$(cd "$d" 2>/dev/null && pwd -P)"; do
+    [ -n "$start" ] || continue
+    p=$start
+    while :; do
+      trust_one "$p" || return 1
+      [ "$p" = / ] && break
+      p=$(dirname "$p")
+    done
+  done
+  return 0
+}
+check_trust() {
+  why=$(trust_ok) || die "refused: $why. Composer's folder and every folder above it must be writable only by you (or root), so no other account can change what it runs; or put the app folder somewhere else (the default is ~/.lensmith-composer). Nothing was written."
+}
 
 H=${COMPOSER_HOME:-${HOME:-}/.lensmith-composer}
 ANSWERS=""
@@ -101,6 +131,7 @@ if [ -n "${HOME:-}" ]; then
   case "${HOME%/}/" in "$H"/*) die "refused: $H contains your home folder" ;; esac
 fi
 [ ! -L "$H" ] || die "refused: $H is a symbolic link; give the real folder"
+check_trust
 if [ -e "$H" ]; then
   [ -d "$H" ] || die "refused: $H exists and is not a folder"
   [ -r "$H" ] || die "refused: you cannot read $H"
@@ -215,6 +246,7 @@ MADE_VERSION=0
 trap cleanup EXIT
 
 umask 077
+check_trust
 mkdir -p -- "$H"
 check_owned  # again at the writes: the checks above may have taken a while
 [ -e "$H/.composer-home" ] || printf 'lensmith-composer home v1\n' > "$H/.composer-home"

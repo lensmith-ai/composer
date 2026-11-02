@@ -2,13 +2,42 @@
 from __future__ import annotations
 
 import json
+import os
+import tempfile
 from pathlib import Path
 
 from composer.fetch import Response
+from composer.home import HomeError, check_trust
 from composer.registry import parse_entry
 
 ROOT = Path(__file__).resolve().parent.parent
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
+
+
+def _trusted_temp() -> None:
+    """Composer refuses to work in a folder that another account could change (home.check_trust), and the system's
+    temporary folder (/tmp) is writable by every account. So the tests' temporary folders go under a private folder
+    in your own home (or COMPOSER_TEST_TMP), for this process and the programs it starts."""
+    if os.name != "posix":
+        return
+    # folders the tests make must not be group-writable either (some systems give every account umask 002)
+    os.umask(0o022)
+    try:
+        check_trust(Path(tempfile.gettempdir()) / "probe")
+        return
+    except HomeError:
+        pass
+    # one level under your home, made private here: a parent made with a permissive umask (such as ~/.cache at 0775)
+    # would itself be refused
+    base = Path(os.environ.get("COMPOSER_TEST_TMP") or Path.home() / ".composer-tests")
+    base.mkdir(mode=0o700, exist_ok=True)
+    os.chmod(base, 0o700)
+    check_trust(base / "probe")  # if your home itself is open to others, say so here rather than in every test
+    tempfile.tempdir = str(base)
+    os.environ["TMPDIR"] = str(base)
+
+
+_trusted_temp()
 
 
 def fixture(name: str) -> bytes:

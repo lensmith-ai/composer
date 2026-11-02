@@ -563,6 +563,13 @@ def _update(home: Path, data: Path, release: Path, *, sha256, run, crash_after, 
         raise LifecycleError(f"refused: {folder} already exists (an earlier, unfinished try at {new_version}?); "
                              "nothing was installed or removed. If no version runs from it, remove it yourself "
                              "and update again")
+    # the version's folder is made here, private (0700), whatever the umask: the trust contract checks it from now
+    # on, and a folder made by `python -m venv` under a permissive umask (such as 002) would fail that check
+    if home_at is not None:
+        with home_at.child("app", create=False) as app_dir:
+            os.mkdir(new_version, 0o700, dir_fd=app_dir.fd)  # a umask only takes bits away: 0700 stays 0700
+    else:
+        folder.mkdir(mode=0o700)
     venv = folder / "venv"
     base = Path(os.path.realpath(_venv_python(home / "app" / old_version / "venv")))
     if not base.is_file():  # the Python the old environment was made from is gone: use the one running this

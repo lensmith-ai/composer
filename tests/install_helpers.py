@@ -9,6 +9,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from unittest import mock
 
+import helpers  # noqa: F401  (temporary folders the app folder checks can trust)
+
 CLEAR = ("COMPOSER_HOME", "COMPOSER_DATA", "KOKORO_MODEL_PATH", "KOKORO_VOICES_PATH", "ANTHROPIC_API_KEY",
          "OPENAI_API_KEY", "COMPOSER_PROVIDER", "COMPOSER_MODEL", "COMPOSER_SOURCES", "COMPOSER_TRUSTED_PROXY",
          "COMPOSER_PUBLIC_ORIGIN", "COMPOSER_SERVER_PASS", "COMPOSER_CHECKER_API_KEY", "COMPOSER_CHECKER_PROVIDER",
@@ -21,7 +23,7 @@ def fake_home(**extra_env):
     """A temporary HOME (and nothing from the real one): yields its Path."""
     root = Path(tempfile.mkdtemp(prefix="composer-home-"))
     home = root / "home"
-    home.mkdir()
+    home.mkdir(mode=0o700)
     env = {k: v for k, v in os.environ.items() if k not in CLEAR}
     # test mode: a `composer setup` started here makes no test call to a model service
     env.update({"HOME": str(home), "COMPOSER_NO_TEST_CALL": "1"}, **extra_env)

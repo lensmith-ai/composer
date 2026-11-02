@@ -28,6 +28,23 @@ this repository, not in a public issue.
 
 What Composer does to stay safe, and where its limits are:
 
+- **Where Composer works (the trust contract).** Composer trusts your own account and root, and no other account.
+  Before setup (`./setup.sh` and `composer setup`), update, rollback, recovery after an interrupted update, and
+  narration's downloads and clean-ups write or remove anything, the app folder and every folder above it, up to `/`
+  (on the path as given and on its real path, links resolved), must belong to you or root and be writable by no one
+  else: no group or other write bit. Otherwise Composer refuses, names the folder and says how to fix it (`chmod
+  go-w`, `chown`, or put the app folder under your own home; a folder every account can write, such as `/tmp`, is
+  always refused). This is the rule OpenSSH applies to `~/.ssh`. Inside the folder, Composer writes and removes
+  through open folder descriptors, never follows a link where it keeps its own folders (only `app/current` is a
+  link) and writes temporary files as fresh files. An update never removes a version folder it did not make itself
+  in that run (rollback, the explicit command, removes the version it rolled back from).
+  *Defended:* another account on the same machine changing, swapping or linking anything under the app folder or
+  above it to make Composer write, remove or run something else. *Not defended:* a program already running as
+  you (it can change your files and Composer's directly, so a race against it crosses no boundary), root, and
+  systems without POSIX owners and permission bits (on Windows the check does not run and a version or narration
+  folder that cannot be removed through a folder descriptor is left in place with a note). The programs Composer
+  starts (venv, pip, the narration runtime) are given ordinary paths inside the checked folder; the contract is
+  what keeps those paths yours.
 - **Your key.** The API key is read from the environment when each call is made. It is never
   stored, logged or written to a file, and an error message that repeats it is cut before it is
   shown. A call that carries the key refuses redirects and refuses a plain `http://` endpoint
