@@ -31,7 +31,12 @@ What Composer does to stay safe, and where its limits are:
 - **Your key.** The API key is read from the environment when each call is made. It is never
   stored, logged or written to a file, and an error message that repeats it is cut before it is
   shown. A call that carries the key refuses redirects and refuses a plain `http://` endpoint
-  unless it is this machine.
+  unless it is this machine. A successful reply is checked too, against this policy: it "holds the
+  key" when it contains the whole key or any run of 12 or more of its characters (its start, its
+  end or anywhere inside; a key's published prefix such as `sk-ant-api03-` alone does not count).
+  A reported model id that holds the key is replaced by the configured one, and a reply whose text
+  holds it is refused, so neither reaches a brief or its receipts. The check reads the reply as
+  sent: it does not look for a key the endpoint has re-encoded.
 - **Feed text is untrusted.** Every string from a feed is cleaned (hidden characters removed,
   instruction-like phrases broken up) and placed between source markers that the prompt says are
   data. This lowers the odds that a feed can steer the model. It does not rule it out.

@@ -131,16 +131,42 @@ def _token_count(value):
     return value if isinstance(value, int) and not isinstance(value, bool) and 0 <= value < 10**12 else None
 
 
+# The reflection policy. A reply "holds the key" when it contains the whole key or ANY run of KEY_FRAGMENT (12) or
+# more characters copied from it: its start, its end or anywhere inside. A key's public, fixed prefix (for example
+# "sk-ant-api03-") is not by itself a fragment; a run that reaches one character past it is. This is checked on the
+# text exactly as the endpoint sent it: it does not catch a key the endpoint has re-encoded (reversed, spaced out,
+# base64 and so on), and it does not claim to.
+KEY_FRAGMENT = 12
+_PUBLIC_KEY_PREFIX = re.compile(r"^(?:sk-ant-[a-z]+\d*-|sk-proj-|sk-or-v\d+-|sk-)")
+
+
+def holds_key(text: str, key: str) -> bool:
+    """True when text holds the key, or a run of KEY_FRAGMENT or more of its characters (see the policy above)."""
+    if not key or not isinstance(text, str) or not text:
+        return False
+    if key in text:
+        return True
+    if len(key) < KEY_FRAGMENT:
+        return False
+    public = len(_PUBLIC_KEY_PREFIX.match(key).group(0)) if _PUBLIC_KEY_PREFIX.match(key) else 0
+    for start in range(len(key) - KEY_FRAGMENT + 1):
+        if start + KEY_FRAGMENT <= public:
+            continue  # wholly inside the published prefix every key of this kind starts with
+        if key[start:start + KEY_FRAGMENT] in text:
+            return True
+    return False
+
+
 def _checked_reply(text: str, reported_model, usage: dict, configured_model: str, key: str) -> Reply:
     """A success reply, made safe to record: what the endpoint says about itself (the model id, the token counts)
-    is kept only when it has the right shape and does not hold the key the call was made with; otherwise the
-    configured model id stands in and the count is unknown. A reply whose text holds the key is refused, so the key
-    can never reach a brief, its receipts or anything served."""
-    if key and key in text:
-        raise ProviderError("the reply contains the key the call was made with; it was not used (check the "
-                            "endpoint: it echoes what it is sent)")
+    is kept only when it has the right shape and does not hold the key the call was made with (holds_key); otherwise
+    the configured model id stands in and the count is unknown. A reply whose text holds the key is refused, so the
+    key, or a long piece of it, never reaches a brief, its receipts or anything served."""
+    if holds_key(text, key):
+        raise ProviderError("the reply contains the key the call was made with, or a long piece of it; it was not "
+                            "used (check the endpoint: it echoes what it is sent)")
     model = reported_model if (isinstance(reported_model, str) and _MODEL_ID.fullmatch(reported_model)
-                               and not (key and key in reported_model)) else configured_model
+                               and not holds_key(reported_model, key)) else configured_model
     return Reply(text, model=model, usage={"input_tokens": _token_count(usage.get("input_tokens")),
                                            "output_tokens": _token_count(usage.get("output_tokens"))})
 

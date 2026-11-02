@@ -87,5 +87,53 @@ class ReplyMetadataTests(unittest.TestCase):
                                                   else "claude-sonnet-5-5-20261001"])
 
 
+
+LONG_KEY = "FAKE-KEY-0309-0123456789-abcdefghijk"
+FRAGMENTS = {"prefix": LONG_KEY[:24], "suffix": LONG_KEY[-12:], "inner": LONG_KEY[7:19], "whole": LONG_KEY}
+
+
+class KeyFragmentTests(unittest.TestCase):
+    """A reflecting endpoint that echoes only part of the key: any run of 12 or more of its characters (start, end
+    or inside) counts as the key, for the model id and for the text, writer and checker."""
+
+    def setUp(self):
+        env = mock.patch.dict(os.environ, {"OPENAI_API_KEY": LONG_KEY, "ANTHROPIC_API_KEY": LONG_KEY,
+                                           "COMPOSER_CHECKER_API_KEY": LONG_KEY})
+        env.start()
+        self.addCleanup(env.stop)
+
+    def test_a_fragment_as_the_model_never_reaches_the_receipt(self):
+        for part, fragment in FRAGMENTS.items():
+            for name, provider in providers(openai_reply(model=fragment), anthropic_reply(model=fragment)):
+                with self.subTest(fragment=part, provider=name):
+                    writer = Counted(provider)
+                    writer("hello")
+                    checker = Counted(providers(openai_reply(model=fragment),
+                                                anthropic_reply(model=fragment))[0 if name == "openai" else 1][1])
+                    checker("check")
+                    served = json.dumps(receipts.build_receipt({"receipt": writer.receipt(), "edition": {},
+                                                                "checker_receipt": checker.receipt()}))
+                    self.assertNotIn(fragment, served)
+                    self.assertEqual(writer.models, [provider.model])
+
+    def test_a_fragment_in_the_text_is_refused(self):
+        for part, fragment in FRAGMENTS.items():
+            for name, provider in providers(openai_reply(model="gpt-ok", content=f"here: {fragment}"),
+                                            anthropic_reply(model="claude-ok", text=f"here: {fragment}")):
+                with self.subTest(fragment=part, provider=name):
+                    counted = Counted(provider)
+                    with self.assertRaises(ProviderError) as ctx:
+                        counted("hello")
+                    self.assertNotIn(fragment, str(ctx.exception))
+
+    def test_short_overlaps_and_the_public_prefix_are_not_a_key(self):
+        from composer.providers import holds_key
+        self.assertFalse(holds_key(LONG_KEY[:11], LONG_KEY))          # 11 characters: below the policy
+        self.assertFalse(holds_key("claude-sonnet-5-5", LONG_KEY))
+        anthropic_style = "sk-ant-api03-" + "Qx7" * 30
+        self.assertFalse(holds_key("keys look like sk-ant-api03-", anthropic_style))  # the published prefix alone
+        self.assertTrue(holds_key("sk-ant-api03-Q", anthropic_style))  # one character past it
+
+
 if __name__ == "__main__":
     unittest.main()
