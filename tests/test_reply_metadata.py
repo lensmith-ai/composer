@@ -135,5 +135,59 @@ class KeyFragmentTests(unittest.TestCase):
         self.assertTrue(holds_key("sk-ant-api03-Q", anthropic_style))  # one character past it
 
 
+PROJ_KEY = "sk" + "-proj-" + "FAKEab" + "123456789012" + "cdEFghIJklMN"  # built in parts: not a real key's shape
+
+
+class PrefixAndCountTests(unittest.TestCase):
+    """Only the exact published prefixes are exempt, and a token count whose digits hold a piece of the key is unknown."""
+
+    def env(self, key):
+        env = mock.patch.dict(os.environ, {"OPENAI_API_KEY": key, "ANTHROPIC_API_KEY": key,
+                                           "COMPOSER_CHECKER_API_KEY": key})
+        env.start()
+        self.addCleanup(env.stop)
+
+    def test_a_custom_key_shaped_like_a_published_one_is_protected_from_its_start(self):
+        key = "sk" + "-ant-" + "abcdefghijklmnop" + "-0123456789XYZ"  # not a published prefix: the middle is private
+        self.env(key)
+        for name, provider in providers(openai_reply(model="abcdefghijklmnop"),
+                                        anthropic_reply(model="abcdefghijklmnop")):
+            with self.subTest(provider=name):
+                counted = Counted(provider)
+                counted("hello")
+                self.assertNotIn("abcdefghijklmnop", json.dumps(receipts.build_receipt(
+                    {"receipt": counted.receipt(), "edition": {}})))
+        for name, provider in providers(openai_reply(model="gpt-ok", content="see abcdefghijklmnop"),
+                                        anthropic_reply(model="claude-ok", text="see abcdefghijklmnop")):
+            with self.subTest(provider=name, field="text"):
+                with self.assertRaises(ProviderError):
+                    Counted(provider)("hello")
+
+    def test_a_count_made_of_the_key_digits_is_not_recorded(self):
+        key = PROJ_KEY
+        self.env(key)
+        usage_openai = {"prompt_tokens": 123456789012, "completion_tokens": 3}
+        usage_anthropic = {"input_tokens": 123456789012, "output_tokens": 3}
+        for name, provider in providers(openai_reply(model="gpt-ok", usage=usage_openai),
+                                        anthropic_reply(model="claude-ok", usage=usage_anthropic)):
+            with self.subTest(provider=name):
+                writer = Counted(provider)
+                writer("hello")
+                checker = Counted(providers(openai_reply(model="gpt-ok", usage=usage_openai),
+                                            anthropic_reply(model="claude-ok", usage=usage_anthropic))[
+                    0 if name == "openai" else 1][1])
+                checker("check")
+                served = json.dumps(receipts.build_receipt({"receipt": writer.receipt(), "edition": {},
+                                                            "checker_receipt": checker.receipt()}))
+                self.assertNotIn("123456789012", served)
+                self.assertIsNone(writer.summary()["input_tokens"])  # unknown, as for a count that was not sent
+
+    def test_ordinary_counts_are_kept(self):
+        self.env(PROJ_KEY)
+        counted = Counted(providers(openai_reply(model="gpt-ok"), anthropic_reply(model="claude-ok"))[0][1])
+        counted("hello")
+        self.assertEqual((counted.input_tokens, counted.output_tokens), (12, 3))
+
+
 if __name__ == "__main__":
     unittest.main()

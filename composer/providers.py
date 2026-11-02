@@ -127,17 +127,23 @@ _BEARER = re.compile(r"(?i)\b(bearer)\s+\S+")
 _MODEL_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:/@+-]{0,127}")
 
 
-def _token_count(value):
-    return value if isinstance(value, int) and not isinstance(value, bool) and 0 <= value < 10**12 else None
+def _token_count(value, key: str = ""):
+    """A whole-number token count, or None (unknown). A count whose digits hold a piece of the key (holds_key on its
+    decimal form) is unknown too, so a key made of digits cannot be recorded as a number either."""
+    if not (isinstance(value, int) and not isinstance(value, bool) and 0 <= value < 10**12):
+        return None
+    return None if holds_key(str(value), key) else value
 
 
 # The reflection policy. A reply "holds the key" when it contains the whole key or ANY run of KEY_FRAGMENT (12) or
-# more characters copied from it: its start, its end or anywhere inside. A key's public, fixed prefix (for example
-# "sk-ant-api03-") is not by itself a fragment; a run that reaches one character past it is. This is checked on the
-# text exactly as the endpoint sent it: it does not catch a key the endpoint has re-encoded (reversed, spaced out,
-# base64 and so on), and it does not claim to.
+# more characters copied from it: its start, its end or anywhere inside. The only part of a key not protected is one
+# of these exact published prefixes at its start, which every key of that kind shares: Anthropic API and admin keys
+# (sk-ant-api03-, sk-ant-admin01-), OpenAI project and service-account keys (sk-proj-, sk-svcacct-) and OpenRouter
+# keys (sk-or-v1-). A run that reaches one character past the prefix counts. Any other key, however it starts, is
+# protected from its first character. This is checked on what the endpoint sent, as sent: it does not catch a key
+# the endpoint has re-encoded (reversed, spaced out, base64 and so on), and it does not claim to.
 KEY_FRAGMENT = 12
-_PUBLIC_KEY_PREFIX = re.compile(r"^(?:sk-ant-[a-z]+\d*-|sk-proj-|sk-or-v\d+-|sk-)")
+PUBLISHED_KEY_PREFIXES = ("sk-ant-api03-", "sk-ant-admin01-", "sk-proj-", "sk-svcacct-", "sk-or-v1-")
 
 
 def holds_key(text: str, key: str) -> bool:
@@ -148,7 +154,7 @@ def holds_key(text: str, key: str) -> bool:
         return True
     if len(key) < KEY_FRAGMENT:
         return False
-    public = len(_PUBLIC_KEY_PREFIX.match(key).group(0)) if _PUBLIC_KEY_PREFIX.match(key) else 0
+    public = next((len(p) for p in PUBLISHED_KEY_PREFIXES if key.startswith(p)), 0)
     for start in range(len(key) - KEY_FRAGMENT + 1):
         if start + KEY_FRAGMENT <= public:
             continue  # wholly inside the published prefix every key of this kind starts with
@@ -167,8 +173,8 @@ def _checked_reply(text: str, reported_model, usage: dict, configured_model: str
                             "used (check the endpoint: it echoes what it is sent)")
     model = reported_model if (isinstance(reported_model, str) and _MODEL_ID.fullmatch(reported_model)
                                and not holds_key(reported_model, key)) else configured_model
-    return Reply(text, model=model, usage={"input_tokens": _token_count(usage.get("input_tokens")),
-                                           "output_tokens": _token_count(usage.get("output_tokens"))})
+    return Reply(text, model=model, usage={"input_tokens": _token_count(usage.get("input_tokens"), key),
+                                           "output_tokens": _token_count(usage.get("output_tokens"), key)})
 
 
 def _error_text(status: int, data: bytes, secret: str = "") -> str:

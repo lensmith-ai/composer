@@ -33,10 +33,13 @@ What Composer does to stay safe, and where its limits are:
   shown. A call that carries the key refuses redirects and refuses a plain `http://` endpoint
   unless it is this machine. A successful reply is checked too, against this policy: it "holds the
   key" when it contains the whole key or any run of 12 or more of its characters (its start, its
-  end or anywhere inside; a key's published prefix such as `sk-ant-api03-` alone does not count).
-  A reported model id that holds the key is replaced by the configured one, and a reply whose text
-  holds it is refused, so neither reaches a brief or its receipts. The check reads the reply as
-  sent: it does not look for a key the endpoint has re-encoded.
+  end or anywhere inside). The only part of a key not protected is one of these exact published
+  prefixes at its start: `sk-ant-api03-`, `sk-ant-admin01-`, `sk-proj-`, `sk-svcacct-`,
+  `sk-or-v1-`; any other key is protected from its first character. A reported model id that holds
+  the key is replaced by the configured one, a token count whose digits hold it is recorded as
+  unknown, and a reply whose text holds it is refused, so none of them reaches a brief or its
+  receipts. The check reads the reply as sent: it does not look for a key the endpoint has
+  re-encoded.
 - **Feed text is untrusted.** Every string from a feed is cleaned (hidden characters removed,
   instruction-like phrases broken up) and placed between source markers that the prompt says are
   data. This lowers the odds that a feed can steer the model. It does not rule it out.
