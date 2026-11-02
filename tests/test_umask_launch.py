@@ -13,7 +13,7 @@ from helpers import ROOT
 from install_helpers import fake_home
 from test_lifecycle import install
 
-from composer import home as H, installer
+from composer import __version__, home as H, installer
 
 POSIX = os.name == "posix" and hasattr(os, "getuid")
 
@@ -52,12 +52,13 @@ class SetupShUmaskTests(unittest.TestCase):
     def test_setup_sh_runs_nothing_under_a_group_writable_umask(self):
         with fake_home() as home:
             target = install(home)
-            script = target / "app" / "0.2.0" / "venv" / "bin" / "composer"
+            # the version setup.sh reads from pyproject.toml (a release candidate stamps both with its own)
+            script = target / "app" / __version__ / "venv" / "bin" / "composer"
             script.parent.mkdir(parents=True)
             seen = home.parent / "umask-seen"
             script.write_text(f'#!/bin/sh\numask > "{seen}"\nexit 1\n', encoding="utf-8")
             os.chmod(script, 0o755)
-            os.symlink("0.2.0", target / "app" / "current")
+            os.symlink(__version__, target / "app" / "current")
             run = subprocess.run(["sh", "-c", 'umask 002; exec sh "$0" --home "$1" --yes', str(ROOT / "setup.sh"),
                                   str(target)], capture_output=True, text=True, timeout=120)
             self.assertEqual(run.returncode, 2, run.stdout + run.stderr)  # "the environment ... does not start"
