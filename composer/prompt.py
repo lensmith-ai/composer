@@ -10,9 +10,11 @@ from __future__ import annotations
 
 import json
 
+from .lenses import LENS_MAX_CHARS, validate_text
+
 DEFAULT_INSIGHTS = 5
-INSIGHT_RANGE = range(3, 9)
-LENS_MAX_CHARS = 300
+INSIGHT_RANGE = range(3, 11)
+
 PROMPT_BYTE_BUDGET = 24 * 1024  # source sections are trimmed in proportion to fit
 SINGLE_SOURCE = "Single source:"
 CONFIDENCE = ("plausible", "corroborated", "weak")
@@ -64,11 +66,39 @@ RULES:
   plausible or weak. Never invent a connection.
 - Say only what the material supports. Do not add numbers, names or dates that are not in it.
   A detail may say what the source does NOT establish.
-- Plain English for an informed general reader: short sentences, one idea each, jargon
-  explained or avoided.
+- READING LEVEL: {reading_level}. {reading_text}
+  Simpler words must never change a claim: keep every fact, number, name and source as the
+  material gives it, no stronger and no weaker.{register_rule}
 
 SOURCE ROSTER (the reader chose these {n} sources):
 {roster}"""
+
+
+# The reading level the reader chose, written into the prompt as a rule (the lens's own level unless the compose
+# request names another). lenses.check_shape then checks the plain level's word length on the answer.
+READING_LEVEL_TEXT = {
+    "plain": ("Plain language, as a firm rule for every sentence, not a style note: at most 20 words a "
+              "sentence; one idea a sentence (split a sentence that needs 'which', 'while', 'whereas' or a "
+              "semicolon to hold it together); everyday words over formal ones ('use' not 'utilise', 'shows' not "
+              "'demonstrates', 'so' not 'consequently'); a technical term explained in six words or fewer the first "
+              "time, or left out. why_it_matters is at most two short sentences: what changes, and for whom."),
+    "standard": ("Clear English for an informed general reader, like a good newspaper (about grade 12 or below): "
+                 "sentences average under 18 words and none goes over 28; short, common words when they say the "
+                 "same thing ('use' not 'utilize', 'help' not 'facilitate'); at most one subordinate clause a "
+                 "sentence; a term of art only when no plain word fits, explained in a few words the first time; "
+                 "the active voice. insight under 12 words; why_it_matters at most two sentences."),
+    "technical": ("Precise language for a practitioner: keep the field's own terms and name the mechanisms, "
+                  "still one idea a sentence and no padding."),
+}
+# The register (tone) a saved lens names, written into the prompt next to the reading level.
+REGISTER_TEXT = {
+    "earnest": "Earnest: straightforward and sincere; say what the material shows and why it matters, without irony.",
+    "sceptical": ("Sceptical: weigh each claim; say what the material does not establish and who gains from the "
+                  "claim, but add no doubt the material does not support."),
+    "deadpan": ("Deadpan: dry and understated; state things flatly and let odd details speak for themselves; no "
+                "joke may change a claim."),
+}
+DEFAULT_READING_LEVEL = "standard"
 
 
 class ShapeError(ValueError):
@@ -76,14 +106,7 @@ class ShapeError(ValueError):
 
 
 def check_lens(lens: str) -> str:
-    lens = (lens or "").strip()
-    if not lens:
-        raise ValueError("give a lens: a few words on what to look for, e.g. \"what this means for small teams\"")
-    if len(lens) > LENS_MAX_CHARS:
-        raise ValueError(f"keep the lens under {LENS_MAX_CHARS} characters")
-    if "LENS>>>" in lens or "<<<LENS" in lens:
-        raise ValueError("the lens may not contain the lens delimiters")
-    return lens
+    return validate_text(lens)
 
 
 def section(source, items: list[dict], receipt: dict) -> str:
@@ -96,19 +119,28 @@ def section(source, items: list[dict], receipt: dict) -> str:
     return f"[SOURCE {source.id}] {source.label}\n{body}\n[END SOURCE {source.id}]"
 
 
-def build(lens: str, sources: list, fetched: dict, count: int = DEFAULT_INSIGHTS) -> tuple[str, dict]:
-    """(prompt, info). `fetched` maps source id -> (items, receipt)."""
+def build(lens: str, sources: list, fetched: dict, count: int = DEFAULT_INSIGHTS, *,
+          reading_level: str = DEFAULT_READING_LEVEL, register: str = "") -> tuple[str, dict]:
+    """(prompt, info). `fetched` maps source id -> (items, receipt). The reading level (and a saved lens's
+    register) are written into the prompt as rules."""
     if count not in INSIGHT_RANGE:
         raise ValueError(f"insights must be from {INSIGHT_RANGE.start} to {INSIGHT_RANGE.stop - 1}")
+    if reading_level not in READING_LEVEL_TEXT:
+        raise ValueError("reading_level must be plain, standard, or technical")
+    if register and register not in REGISTER_TEXT:
+        raise ValueError("register must be earnest, sceptical or deadpan")
     lens = check_lens(lens)
     ids = [s.id for s in sources]
     roster = "\n".join(f"  - {s.id}: {s.label}; cite by exact title" for s in sources)
     head = TEMPLATE.format(lens=lens, count=count, ids=", ".join(ids), id_example="|".join(ids),
-                           single=SINGLE_SOURCE, n=len(ids), roster=roster)
+                           single=SINGLE_SOURCE, n=len(ids), roster=roster, reading_level=reading_level,
+                           reading_text=READING_LEVEL_TEXT[reading_level],
+                           register_rule=f"\n- REGISTER: {REGISTER_TEXT[register]}" if register else "")
     sections = {s.id: section(s, *fetched[s.id]) for s in sources}
     budget = PROMPT_BYTE_BUDGET - len(head.encode("utf-8")) - 200
     total = sum(len(v.encode("utf-8")) for v in sections.values())
-    info = {"source_bytes": total, "budget_bytes": budget, "trimmed": False}
+    info = {"source_bytes": total, "budget_bytes": budget, "trimmed": False, "reading_level": reading_level,
+            "register": register}
     if total > budget > 0:
         info["trimmed"] = True
         factor = budget / total

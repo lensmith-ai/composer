@@ -4,7 +4,8 @@ guard has passed.
   composer setup                         ask, one question at a time, with a default in [brackets]
   composer setup --answers answers.toml  no questions (see composer/answers.py for the format)
   composer setup --yes                   no questions, every default (text-only, no daily brief, no key yet)
-  composer setup --reconfigure narration re-ask one part: provider, sources, narration, schedule or port
+  composer setup --reconfigure narration re-ask one part: provider, checker, sources, parser, narration, schedule
+                                         or port
   composer setup --data-only             only settings and key, in the data folder (inside the container)
 
 What it creates lives in the app folder (default ~/.lensmith-composer) and is listed in its install manifest.
@@ -26,7 +27,7 @@ from . import home as H
 from . import narration as N
 from . import settings as S
 
-SECTIONS = ("provider", "sources", "narration", "schedule", "port")
+SECTIONS = ("provider", "checker", "sources", "parser", "narration", "schedule", "port")
 HN_ENTRY = {"id": "hn", "label": "Hacker News", "kind": "hn-json-api",
             "url": "https://hacker-news.firebaseio.com/v0/topstories.json", "max_items": 10}
 
@@ -99,7 +100,60 @@ def next_free_port(start: int = 8765) -> int:
 
 # ------------------------------------------------------------------------------------------------ questions
 
+MODELS_FILE = Path(__file__).with_name("data") / "models.json"
+
+
+def model_choices(kind: str) -> dict:
+    """The ids setup offers for a service, from composer/data/models.json (edit that file to change them)."""
+    doc = json.loads(MODELS_FILE.read_text(encoding="utf-8"))
+    entry = doc.get(kind) or {}
+    return {"default": entry.get("default") or "", "models": list(entry.get("models") or []),
+            "note": entry.get("note") or ""}
+
+
+def ask_model(q: Asker, section: str, kind: str, who: str = "") -> str:
+    """A short numbered list of common ids for the service, plus "type another"; an answers file takes any id."""
+    given = q.given(section, "model")
+    if given:
+        return given
+    choices = model_choices(kind)
+    prefix = f"{who.capitalize()} model" if who else "Model"
+    if choices["models"]:
+        options = [(m, m + (" (default)" if m == choices["default"] else "")) for m in choices["models"]]
+        picked = q.choose(f"Which {who + ' ' if who else ''}model?", options + [("other", "type another model id")],
+                          choices["default"] or choices["models"][0])
+        if picked != "other":
+            return picked
+        return q.ask(f"{prefix} id", choices["default"]).strip()
+    if q.interactive and choices["note"]:
+        q.out(f"  {choices['note']}")
+    return q.ask(f"{prefix} id", choices["default"]).strip()
+
+
+def run_test_call(q: Asker, plan: dict, cfg: dict, key: str | None, who: str) -> bool:
+    """One tiny call with the key just given. True to go on; False when the person wants to enter them again."""
+    test = plan.get("test_call")
+    if test is None or not key or cfg["kind"] not in ("anthropic", "openai"):
+        return True
+    ok, said = test(cfg["kind"], cfg["model"], cfg["base_url"], key)
+    q.out(f"  test call ({who}): {said}")
+    if ok or not q.interactive:
+        if not ok:
+            q.out("  keeping these settings; composing will fail until this is fixed")
+        return True
+    return not q.yes("Enter the model and key again?", True)
+
+
 def ask_provider(q: Asker, plan: dict) -> None:
+    while True:
+        _ask_provider_once(q, plan)
+        p = plan["provider"]
+        key = plan["secret"] or (os.environ.get(p["key_env"], "").strip() if p["key"] == "env" else "")
+        if run_test_call(q, plan, p, key, "writer"):
+            return
+
+
+def _ask_provider_once(q: Asker, plan: dict) -> None:
     kind = q.given("provider", "kind") or q.choose(
         "Which model writes and checks your briefs?",
         [("anthropic", "Anthropic (default model claude-sonnet-5-5)"),
@@ -110,10 +164,10 @@ def ask_provider(q: Asker, plan: dict) -> None:
     p = {"kind": kind, "model": "", "base_url": "", "key": "none",
          "key_env": "OPENAI_API_KEY" if kind == "openai" else "ANTHROPIC_API_KEY"}
     if kind == "anthropic":
-        p["model"] = q.given("provider", "model") or q.ask("Model", "claude-sonnet-5-5")
+        p["model"] = ask_model(q, "provider", "anthropic")
     elif kind == "openai":
         p["base_url"] = q.given("provider", "base_url") or q.ask("Endpoint base URL", "https://api.openai.com/v1")
-        p["model"] = q.given("provider", "model") or q.ask("Model id", "")
+        p["model"] = ask_model(q, "provider", "openai")
         if not p["model"]:
             raise SetupError("an OpenAI-compatible endpoint needs a model id")
         from .providers import ProviderError, checked_endpoint
@@ -126,8 +180,8 @@ def ask_provider(q: Asker, plan: dict) -> None:
         from_env = q.given("provider", "key_from_env")
         mode = q.given("provider", "key")
         if from_env:
-            if from_env not in S.KEY_NAMES:
-                raise SetupError(f"[provider] key_from_env must be one of {', '.join(S.KEY_NAMES)}")
+            if from_env not in S.WRITER_KEY_NAMES:
+                raise SetupError(f"[provider] key_from_env must be one of {', '.join(S.WRITER_KEY_NAMES)}")
             secret = os.environ.get(from_env, "").strip()
             if not secret:
                 raise SetupError(f"[provider] key_from_env names {from_env}, but it is not set")
@@ -146,6 +200,78 @@ def ask_provider(q: Asker, plan: dict) -> None:
                 if not os.environ.get(p["key_env"]):
                     q.out(f"  note: {p['key_env']} is not set now; composing will ask for it")
     plan["provider"], plan["secret"] = p, secret
+
+
+def ask_checker(q: Asker, plan: dict, writer_kind: str) -> None:
+    while True:
+        _ask_checker_once(q, plan, writer_kind)
+        c = plan["checker"]
+        if c["same"]:
+            return
+        key = plan["checker_secret"] or (os.environ.get(S.CHECKER_KEY, "").strip() if c["key"] == "env" else "")
+        if run_test_call(q, plan, c, key, "checker"):
+            return
+
+
+def _ask_checker_once(q: Asker, plan: dict, writer_kind: str) -> None:
+    """The model that checks the claims: the writer's own (the default), or a separate one with its own key, stored
+    under its own name. A different model can catch mistakes the writer would make again when checking itself."""
+    same = {"same": True, "kind": "anthropic", "model": "", "base_url": "", "key": "none", "key_env": S.CHECKER_KEY}
+    given = q.answers.get("checker")
+    if writer_kind == "none" and not given:
+        plan["checker"], plan["checker_secret"] = same, None
+        return
+    if q.answers or not q.interactive:
+        if not given or given.get("kind") in (None, "same"):
+            plan["checker"], plan["checker_secret"] = same, None
+            return
+    elif q.yes("Check claims with the same model?", True):
+        plan["checker"], plan["checker_secret"] = same, None
+        return
+    kind = q.given("checker", "kind") or q.choose(
+        "Which model checks the claims?",
+        [("anthropic", "Anthropic (default model claude-sonnet-5-5)"),
+         ("openai", "an OpenAI-compatible endpoint (OpenAI, OpenRouter, a local Ollama or LM Studio server)")],
+        "anthropic")
+    if kind not in ("anthropic", "openai"):
+        raise SetupError(f"[checker] kind must be anthropic, openai or same, not {kind!r}")
+    c = dict(same, same=False, kind=kind)
+    if kind == "anthropic":
+        c["model"] = ask_model(q, "checker", "anthropic", "checker")
+    else:
+        c["base_url"] = q.given("checker", "base_url") or q.ask("Checker endpoint base URL",
+                                                                 "https://api.openai.com/v1")
+        c["model"] = ask_model(q, "checker", "openai", "checker")
+        if not c["model"]:
+            raise SetupError("an OpenAI-compatible checker needs a model id")
+        from .providers import ProviderError, checked_endpoint
+        try:
+            checked_endpoint(c["base_url"])
+        except ProviderError as exc:
+            raise SetupError(str(exc)) from None
+    secret = None
+    from_env, mode = q.given("checker", "key_from_env"), q.given("checker", "key")
+    if from_env:
+        # only the checker's own variable: naming the writer's key here would send the writer's credential to
+        # whatever endpoint the checker names (and store it as the checker's key)
+        if from_env != S.CHECKER_KEY:
+            raise SetupError(f"[checker] key_from_env must be {S.CHECKER_KEY}; the writer's key is never sent to "
+                             "the checker")
+        secret = os.environ.get(from_env, "").strip()
+        if not secret:
+            raise SetupError(f"[checker] key_from_env names {from_env}, but it is not set")
+        c["key"] = "stored"
+    elif mode in ("env", "none"):
+        c["key"] = mode
+    elif q.interactive:
+        q.out(f"Paste the checker's key. Nothing is shown while you paste; it is stored in {plan['data']}/secrets.env "
+              f"(mode 0600) as {S.CHECKER_KEY}, apart from the writer's key.")
+        q.out(f"Press Enter instead to keep using the {S.CHECKER_KEY} environment variable.")
+        secret = q.secret("checker key: ").strip()
+        c["key"] = "stored" if secret else "env"
+        if not secret and not os.environ.get(S.CHECKER_KEY):
+            q.out(f"  note: {S.CHECKER_KEY} is not set now; composing will ask for it")
+    plan["checker"], plan["checker_secret"] = c, secret
 
 
 def ask_sources(q: Asker, plan: dict, get=None) -> None:
@@ -186,6 +312,40 @@ def probe_feed(q: Asker, url: str, get=None) -> dict:
     if not q.yes(f"Add {host} as a source?", True):
         raise SetupError("not added")
     return raw
+
+
+def ask_parser(q: Asker, plan: dict) -> None:
+    """The optional article parser (trafilatura) for news pages without a feed. Off unless asked for."""
+    want = q.given("parser", "trafilatura", None)
+    if want is None and q.interactive:
+        q.out("Optional: a better article parser for news pages that have no feed (trafilatura, Apache-2.0, with")
+        q.out("  the packages it needs, every file hash-checked). Without it Composer reads those pages")
+        q.out("  with its own built-in parser (text only); feeds are not affected.")
+    if want is None:
+        want = q.yes("Install the optional article parser?", False)
+    plan["parser"] = {"trafilatura": bool(want)}
+
+
+def setup_parser(plan: dict, base: Path, log, *, install=None) -> dict:
+    """Install the parser if it was asked for and is not there yet. Returns the extraction settings; a failed
+    install leaves the built-in parser in use and says so."""
+    from . import html_extract as X
+    if not plan["parser"]["trafilatura"]:
+        return {"trafilatura": False}
+    if X.trafilatura_installed():
+        log("  the article parser is already installed")
+        return {"trafilatura": True}
+    if plan.get("data_only") and install is None:
+        log("  article parser not installed: this image has no way to add packages; pages without a feed are read "
+            "with the built-in parser")
+        return {"trafilatura": False}
+    try:
+        (install or X.install_trafilatura)(env=H.private_env(base), log=log)
+    except X.ExtractionError as exc:
+        log(f"  {exc}; pages without a feed are read with the built-in parser")
+        log("  try again later with `composer setup --reconfigure parser`")
+        return {"trafilatura": False}
+    return {"trafilatura": True}
 
 
 def ask_narration(q: Asker, plan: dict, *, detect=N.detect) -> None:
@@ -362,7 +522,7 @@ def setup_narration(q: Asker, plan: dict, base: Path, home: Path, log, *, check=
 def run(*, home: Path, data: Path | None, answers_file: str | None, assume_yes: bool, reconfigure: list,
         data_only: bool, home_created_by_bootstrap: bool = False, check_only: bool = False, out=print, read=input,
         secret=getpass.getpass, interactive: bool | None = None, detect=N.detect, get=None, check=None,
-        install=None, download=None) -> int:
+        install=None, download=None, install_parser=None, test_call=None) -> int:
     # 1. Read-only: every guard and every answer, before anything is written.
     ans = A.load(answers_file) if answers_file else {}
     if check_only:
@@ -402,17 +562,23 @@ def run(*, home: Path, data: Path | None, answers_file: str | None, assume_yes: 
     first = existing is None or not (S.generation_dir(data, create=False) / "config.json").exists()
     todo = set(SECTIONS) if first else set(reconfigure)
     q = Asker(ans, interactive, out=out, read=read, secret=secret)
-    plan = {"home": home, "data": data, "data_only": data_only}
+    plan = {"home": home, "data": data, "data_only": data_only,
+            "test_call": test_call}  # setup's one tiny call per key; None (the default here) makes none
     if check_only and not answers_file and not assume_yes:
         return 0  # the questions come later, on the terminal; the folder guards above have passed
     out(f"Composer {__version__} setup. " + (f"App folder: {home}" if not data_only else f"Data folder: {data}"))
     if not first and not reconfigure:
         out("Composer is already set up here; your key, sources, lenses and briefs are kept.")
-        out("Change one part with --reconfigure provider|sources|narration|schedule|port.")
+        out("Change one part with --reconfigure provider|checker|sources|parser|narration|schedule|port.")
     if "provider" in todo:
         ask_provider(q, plan)
+    if "checker" in todo:
+        writer = plan["provider"]["kind"] if "provider" in plan else (existing or S.DEFAULTS)["provider"]["kind"]
+        ask_checker(q, plan, writer)
     if "sources" in todo:
         ask_sources(q, plan, get=get)
+    if "parser" in todo:
+        ask_parser(q, plan)
     if "narration" in todo:
         ask_narration(q, plan, detect=detect)
     if "schedule" in todo:
@@ -445,7 +611,14 @@ def run(*, home: Path, data: Path | None, answers_file: str | None, assume_yes: 
         if plan["secret"]:
             S.write_secret(data, plan["provider"]["key_env"], plan["secret"])
             plan["secret"] = None
+    if "checker" in plan:
+        cfg["checker"] = plan["checker"]
+        if plan["checker_secret"]:
+            S.write_secret(data, S.CHECKER_KEY, plan["checker_secret"])
+            plan["checker_secret"] = None
     reused = []
+    if "parser" in plan:
+        cfg["extraction"] = setup_parser(plan, base, out, install=install_parser)
     if "narration" in plan:
         log = out
         cfg["narration"], reused = setup_narration(q, plan, base, home, log, check=check, install=install,
@@ -471,7 +644,9 @@ def run(*, home: Path, data: Path | None, answers_file: str | None, assume_yes: 
             doc["entries"] = [e for e in doc["entries"] if e["kind"] != "reused"]
             for entry in reused:
                 H.add_entry(doc, entry["path"], "reused", sha256=entry["sha256"], size=entry["size"])
-        doc["choices"] = {"provider": cfg["provider"]["kind"], "narration": cfg["narration"]["engine"],
+        doc["choices"] = {"provider": cfg["provider"]["kind"], "checker_same": cfg["checker"]["same"],
+                          "parser": cfg["extraction"]["trafilatura"],
+                          "narration": cfg["narration"]["engine"],
                           "schedule": cfg["schedule"]["enabled"], "port": cfg["server"]["port"]}
         H.save_manifest(home, doc)
 
@@ -481,6 +656,11 @@ def run(*, home: Path, data: Path | None, answers_file: str | None, assume_yes: 
     out(f"  provider   {cfg['provider']['kind']}" + (f" ({cfg['provider']['model']})" if cfg['provider']['model'] else "")
         + {"stored": ", key stored (0600)", "env": f", key from {cfg['provider']['key_env']}", "none": ", no key"}
         [cfg["provider"]["key"]])
+    c = cfg["checker"]
+    out("  checker    " + ("the same model checks the claims" if c["same"] else
+                           f"{c['kind']} ({c['model']})" + {"stored": ", key stored (0600)", "env": f", key from "
+                                                            f"{S.CHECKER_KEY}", "none": ", no key"}[c["key"]]))
+    out(f"  parser     {'trafilatura (optional article parser)' if cfg['extraction']['trafilatura'] else 'built-in'}")
     out(f"  narration  {'on: ' + cfg['narration']['engine'] if cfg['narration']['enabled'] else 'off (text-only)'}")
     out(f"  schedule   {'daily at ' + cfg['schedule']['time'] if cfg['schedule']['enabled'] else 'off'}")
     if not data_only:

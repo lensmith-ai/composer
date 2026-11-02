@@ -180,9 +180,11 @@ port = {port}
 class InteractiveSetupTests(unittest.TestCase):
     """The real `composer setup` on a terminal: questions one at a time, the key read without echo."""
 
-    STEPS = [("choose 1-3 [1]:", "1"), ("Model [claude-sonnet-5-5]:", ""), ("key:", FAKE_KEY),
+    STEPS = [("choose 1-3 [1]:", "1"), ("choose 1-4 [1]:", ""), ("key:", FAKE_KEY),
+             ("Check claims with the same model? [Y/n]:", ""),
              ("Add Hacker News as a source too? [y/N]:", "n"),
              ("Add your own feed? Paste its address, or press Enter to skip []:", ""),
+             ("Install the optional article parser? [y/N]:", "n"),
              ("Add narration? [y/N]:", "n"),
              ("Compose a daily brief automatically (while Composer runs)? [y/N]:", "y"),
              ("At what time (24-hour HH:MM) [07:00]:", "07:15"), ("In which time zone: local or UTC [local]:", "UTC"),

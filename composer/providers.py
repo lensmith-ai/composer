@@ -14,8 +14,16 @@ Settings (environment variables; the command line can override the first two):
   COMPOSER_OPENAI_BASE_URL  for openai, e.g. https://api.openai.com/v1
   COMPOSER_MAX_TOKENS       the reply ceiling per call (default 16000)
 
+An optional separate checker (the model claim-seal asks whether each source supports each claim, and whether the
+connection holds) has its own settings; without them the writer's model checks its own brief:
+
+  COMPOSER_CHECKER_PROVIDER         anthropic or openai
+  COMPOSER_CHECKER_MODEL            the checker's model id (default claude-sonnet-5-5 for anthropic)
+  COMPOSER_CHECKER_OPENAI_BASE_URL  for an openai checker
+  COMPOSER_CHECKER_API_KEY          the checker's key (or in the 0600 key file under that name)
+
 A provider is a callable `provider(prompt, timeout=None) -> reply text`. That is the shape
-claim-seal expects for its judge, so the same object writes the brief and checks it. The reply
+claim-seal expects for its judge, so the same object can write the brief and check it. The reply
 is a str that also carries `.model` (the model that answered) and `.usage` (token counts, when
 the endpoint reports them).
 
@@ -53,6 +61,15 @@ LOOPBACK = frozenset({"127.0.0.1", "::1", "localhost"})
 
 class ProviderError(RuntimeError):
     """The endpoint could not be reached, refused the call, or answered with something unusable."""
+
+
+class MissingKey(ProviderError):
+    """No key is set for the model that would be called. Its text is the plain sentence the page, `composer
+    compose`, `composer doctor` and the scheduler all show."""
+
+
+NO_KEY_MESSAGE = "Composer needs a model key to write a brief. Run ./setup.sh --reconfigure provider."
+NO_CHECKER_KEY_MESSAGE = "Composer needs the checker model's key to check a brief. Run ./setup.sh --reconfigure checker."
 
 
 class Reply(str):
@@ -147,8 +164,7 @@ def _key_from_file(env_name: str) -> str:
 def _key(env_name: str) -> str:
     value = os.environ.get(env_name, "").strip() or _key_from_file(env_name)
     if not value:
-        raise ProviderError(f"no API key: set {env_name} or run `composer setup` "
-                            "(or run `composer demo`, which needs no key)")
+        raise MissingKey(NO_CHECKER_KEY_MESSAGE if env_name == "COMPOSER_CHECKER_API_KEY" else NO_KEY_MESSAGE)
     return value
 
 
@@ -180,9 +196,12 @@ class Anthropic:
         return body
 
     def __call__(self, prompt: str, timeout: float | None = None) -> Reply:
+        return self.call_with_key(prompt, _key(self.api_key_env), timeout)
+
+    def call_with_key(self, prompt: str, key: str, timeout: float | None = None) -> Reply:
+        """One call with a key the caller holds (setup's test call, before the key is stored); never kept."""
         url = checked_endpoint(self.url)
         body = self.request_body(prompt)
-        key = _key(self.api_key_env)
         headers = {"content-type": "application/json", "anthropic-version": ANTHROPIC_VERSION,
                    "x-api-key": key}
         if "fallbacks" in body:
@@ -230,10 +249,13 @@ class OpenAICompatible:
         _key(self.api_key_env)
 
     def __call__(self, prompt: str, timeout: float | None = None) -> Reply:
+        return self.call_with_key(prompt, _key(self.api_key_env), timeout)
+
+    def call_with_key(self, prompt: str, key: str, timeout: float | None = None) -> Reply:
+        """One call with a key the caller holds (setup's test call, before the key is stored); never kept."""
         base = checked_endpoint(self.base_url).rstrip("/")
         body = {"model": self.model, "max_tokens": self.max_tokens,
                 "messages": [{"role": "user", "content": prompt}]}
-        key = _key(self.api_key_env)
         headers = {"content-type": "application/json", "authorization": f"Bearer {key}"}
         status, data = self.transport(base + "/chat/completions", headers, json.dumps(body).encode("utf-8"),
                                       timeout or DEFAULT_TIMEOUT_S)
@@ -289,6 +311,67 @@ def from_env(provider: str | None = None, model: str | None = None, *, env=None,
     raise ProviderError(f"unknown provider {kind[:20]!r}: use anthropic or openai")
 
 
+TEST_CALL_TOKENS = 16
+TEST_CALL_TIMEOUT_S = 15
+
+
+def test_call(kind: str, model: str, base_url: str, key: str, *, transport=None) -> tuple[bool, str]:
+    """Setup's one tiny call: does this key work with this model at this endpoint? (ok, a plain sentence).
+
+    At most TEST_CALL_TOKENS tokens back and TEST_CALL_TIMEOUT_S seconds per network wait. It goes through no
+    counter, so it is in no brief's calls or costs. The sentence never holds the key."""
+    extra = {"transport": transport} if transport is not None else {}
+    try:
+        if kind == "anthropic":
+            provider = Anthropic(model=model or DEFAULT_ANTHROPIC_MODEL, max_tokens=TEST_CALL_TOKENS, fallback=False,
+                                 **extra)
+        else:
+            provider = OpenAICompatible(model=model, base_url=base_url, max_tokens=TEST_CALL_TOKENS, **extra)
+        reply = provider.call_with_key("Reply with the single word OK.", key, TEST_CALL_TIMEOUT_S)
+    except ProviderError as exc:
+        text = str(exc).replace(key, "[your key]") if key else str(exc)
+        low = text.lower()
+        if "token ceiling" in low or "has no text" in low:
+            return True, "the key and the model id work (the endpoint answered)"
+        if low.startswith(("could not reach", "refused endpoint", "the endpoint answered with a redirect")):
+            return False, f"the endpoint could not be reached ({text[:160]})"
+        if re.search(r"http (401|403)\b", low) or "authentication" in low or "api key" in low:
+            return False, f"the key was refused ({text[:160]})"
+        if re.search(r"http 404\b", low) or ("model" in low and re.search(r"not.?found|does not exist|invalid", low)):
+            return False, f"the model id was not found ({text[:160]})"
+        return False, f"the test call failed ({text[:160]})"
+    # name the model that was asked for, never the endpoint's own `model` field: a hostile or broken endpoint could
+    # echo the key there, and this sentence is printed
+    said = f"the key and the model id work ({model or DEFAULT_ANTHROPIC_MODEL} answered)"
+    return True, said.replace(key, "[your key]") if key else said
+
+
+CHECKER_KEY_ENV = "COMPOSER_CHECKER_API_KEY"
+
+
+def checker_from_env(*, env=None, transport=None):
+    """The separate checker the settings name, or None when the writer's model checks the claims. Nothing is called
+    and no key is read here; its key is COMPOSER_CHECKER_API_KEY, never the writer's."""
+    env = os.environ if env is None else env
+    kind = (env.get("COMPOSER_CHECKER_PROVIDER") or "").strip().lower()
+    if not kind:
+        return None
+    model = (env.get("COMPOSER_CHECKER_MODEL") or "").strip()
+    extra = {"transport": transport} if transport is not None else {}
+    if kind == "anthropic":
+        return Anthropic(model=model or DEFAULT_ANTHROPIC_MODEL, api_key_env=CHECKER_KEY_ENV,
+                         max_tokens=_max_tokens(env),
+                         fallback=env.get("COMPOSER_ANTHROPIC_FALLBACK", "on").lower() != "off", **extra)
+    if kind == "openai":
+        base = (env.get("COMPOSER_CHECKER_OPENAI_BASE_URL") or "").strip()
+        if not base or not model:
+            raise ProviderError("an openai checker needs COMPOSER_CHECKER_OPENAI_BASE_URL and COMPOSER_CHECKER_MODEL")
+        checked_endpoint(base)
+        return OpenAICompatible(model=model, base_url=base, api_key_env=CHECKER_KEY_ENV,
+                                max_tokens=_max_tokens(env), **extra)
+    raise ProviderError(f"unknown checker provider {kind[:20]!r}: use anthropic or openai")
+
+
 class Counted:
     """Wraps a provider and counts its calls and reported tokens. Used for the cost line."""
 
@@ -341,3 +424,7 @@ class Counted:
                 "input_tokens": self.input_tokens if self.tokens_known else None,
                 "output_tokens": self.output_tokens if self.tokens_known else None,
                 "per_call": sorted((dict(c) for c in self.per_call), key=lambda c: c["call"])}
+
+    def receipt(self) -> dict:
+        """Provider-reported usage only. No prices or inferred token counts are added."""
+        return {"provider": self.name, **self.summary()}

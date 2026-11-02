@@ -178,8 +178,25 @@ def extract(markup: str) -> tuple[str, str]:
     return title[:TITLE_CAP], desc[:DESC_CAP]
 
 
+FALLBACK_NOTE = ("the optional article parser (trafilatura) is not installed; articles were read with the built-in "
+                 "parser (text only)")
+
+
+def extract_with_tier(markup: str, source) -> tuple[str, str, str]:
+    """(title, text, the tier that read it). A source that asks for trafilatura is read with it when it is installed;
+    when it is not, the built-in parser reads the same bytes, and the tier says so."""
+    if source.extraction_tier == "native":
+        return (*extract(markup), "native")
+    from .. import html_extract
+    if not html_extract.trafilatura_installed():
+        return (*extract(markup), "native")
+    return (*html_extract.extract(markup, tier=source.extraction_tier), source.extraction_tier)
+
+
 def fetch(source, get):
     receipt = new_receipt(source)
+    receipt["fetch_tier"] = "native"
+    receipt["fetch_tiers"] = {"native": 0, "trafilatura": 0}
     items: list[dict] = []
     try:
         page = get(source.url, TIMEOUT_S)
@@ -204,10 +221,11 @@ def fetch(source, get):
             if resp.status != 200:
                 errors += 1
                 continue
-            title, desc = extract(resp.body.decode("utf-8", "replace"))
+            title, desc, tier = extract_with_tier(resp.body.decode("utf-8", "replace"), source)
             if not title:
                 errors += 1
                 continue
+            receipt["fetch_tiers"][tier] += 1
             t, dsc, link = clean_text(title), clean_text(desc), clean_url(url)
             receipt["cleaned"] += t.changes + dsc.changes + link.changes
             items.append({"title": t.text, "description": dsc.text, "url": link.text, "published": ""})
@@ -216,6 +234,10 @@ def fetch(source, get):
     except Exception as exc:
         receipt["error"] = f"{type(exc).__name__}: {exc}"[:300]
     receipt["items"] = len(items)
+    if receipt["fetch_tiers"]["trafilatura"]:
+        receipt["fetch_tier"] = "trafilatura"  # the most capable tier any article needed
+    if source.extraction_tier != "native" and receipt["fetch_tiers"]["native"]:
+        receipt["note"] = "; ".join(x for x in (receipt.get("note"), FALLBACK_NOTE) if x)
     if items:
         receipt["status"] = "ok"
     elif "error" not in receipt:

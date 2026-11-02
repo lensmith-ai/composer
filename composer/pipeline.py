@@ -10,7 +10,9 @@
 
 Model calls per brief: 1 to write, plus 1 per insight, plus 1 for the connection. With the
 default 5 insights that is 7. A retry, or a brief with fewer items, changes the count; the
-edition records the real number.
+edition records the real number. With a separate checker model (optional), the writer makes the
+write call(s) and the checker makes every check call (each insight and the connection); the
+edition and the receipt record the two separately.
 
 What is written to disk (composer.cli decides where): the edition (our words, the cited titles
 and links, the verdicts and the seal; never the articles' text) and the full claim-seal result.
@@ -18,10 +20,11 @@ The feed text itself stays in memory unless you ask for it with --keep-sources.
 """
 from __future__ import annotations
 
+import hashlib
 import time
 from datetime import datetime, timezone
 
-from . import adapters, prompt as P
+from . import adapters, lenses, prompt as P
 from .fetch import http_get
 from .providers import Counted
 
@@ -62,11 +65,15 @@ def seal_sources(sources: list, fetched: dict, retrieved_at: str) -> dict:
     return out
 
 
-def write(lens: str, sources: list, fetched: dict, model, count: int, log=lambda *_: None) -> tuple[dict, dict]:
+def write(lens: str, sources: list, fetched: dict, model, count: int, log=lambda *_: None,
+          lens_definition: lenses.Lens | None = None) -> tuple[dict, dict]:
     """(brief, info): the model's brief, checked for shape, with single-source labels added."""
     if not any(r["status"] == "ok" for _, r in fetched.values()):
         raise ComposeError("no source gave any material; nothing to write from")
-    text, info = P.build(lens, sources, fetched, count)
+    level = lens_definition.reading_level if lens_definition is not None else P.DEFAULT_READING_LEVEL
+    register = lens_definition.register if lens_definition is not None else ""
+    text, info = P.build(lens, sources, fetched, count, reading_level=level, register=register)
+    info["prompt_sha256"] = hashlib.sha256(text.encode("utf-8")).hexdigest()
     log("lens.started", "writing under the lens")
     valid = {s.id for s in sources}
     problems: list[str] = []
@@ -75,6 +82,8 @@ def write(lens: str, sources: list, fetched: dict, model, count: int, log=lambda
         try:
             brief = P.parse_reply(reply)
             problems = P.check_shape(brief, valid, count)
+            if not problems and lens_definition is not None:
+                problems = lenses.check_shape(lens_definition, brief, count)
         except P.ShapeError as exc:
             problems = [str(exc)]
         if not problems:
@@ -144,7 +153,8 @@ def _card(item: dict, index: int, labels: dict, digests: dict) -> dict:
 
 
 def edition(*, lens: str, sources: list, fetched: dict, result: dict, model: Counted, seconds: int,
-            composed_at: str, write_info: dict) -> dict:
+            composed_at: str, write_info: dict, lens_definition: lenses.Lens | None = None,
+            checker: Counted | None = None) -> dict:
     """The shareable record of one brief: our words, cited titles and links, verdicts, the seal.
 
     It holds no article text. It is the same shape the replay page reads."""
@@ -155,7 +165,9 @@ def edition(*, lens: str, sources: list, fetched: dict, result: dict, model: Cou
     brief = result["brief"]
     cards = [_card(it, i, labels, digests) for i, it in enumerate(brief.get("items") or [])]
     conn = brief.get("connection")
-    out = {"schema": SCHEMA, "lens": lens, "composed_on": composed_at[:10], "seconds": seconds,
+    # the lens the page shows: a named lens (built in or saved) by its name, otherwise the reader's own words
+    shown = lens_definition.name if lens_definition is not None and lens_definition.id != "ad-hoc" else lens
+    out = {"schema": SCHEMA, "lens": shown, "composed_on": composed_at[:10], "seconds": seconds,
            "sources": [{"label": s.label, "items": fetched[s.id][1]["items"],
                         "status": fetched[s.id][1]["status"]} for s in sources],
            "cards": cards}
@@ -175,26 +187,52 @@ def edition(*, lens: str, sources: list, fetched: dict, result: dict, model: Cou
                     "seal_verified": bool(ce) and claim_seal.verify_seal(ce)}
     out["model"] = {"provider": getattr(model.inner, "name", None), **model.summary(),
                     "write_attempts": write_info.get("attempts")}
+    if checker is None or checker is model:
+        out["checker"] = {"provider": getattr(model.inner, "name", None), "same_as_writer": True}
+    else:
+        out["checker"] = {"provider": getattr(checker.inner, "name", None), "same_as_writer": False,
+                          **checker.summary()}
+    if lens_definition is not None:
+        out["lens_definition"] = {"id": lens_definition.id, "name": lens_definition.name,
+                                  "reading_level": lens_definition.reading_level,
+                                  "register": lens_definition.register,
+                                  "revision": lens_definition.revision,
+                                  "prompt_sha256": write_info["prompt_sha256"]}
     return out
 
 
 def compose(*, lens: str, sources: list, model, count: int = P.DEFAULT_INSIGHTS, get=http_get,
-            log=lambda *_: None, clock=time.monotonic) -> dict:
-    """Run the whole brief. Returns {"edition", "result", "fetched"}; raises ComposeError."""
-    P.check_lens(lens)
+            log=lambda *_: None, clock=time.monotonic, lens_definition: lenses.Lens | None = None,
+            checker=None) -> dict:
+    """Run the whole brief. Returns {"edition", "result", "fetched"}; raises ComposeError.
+
+    `model` writes the brief; `checker`, when given, makes every claim-seal call (each insight and the
+    connection) instead of the writer."""
+    lens = P.check_lens(lens)
     counted = model if isinstance(model, Counted) else Counted(model)
+    judge = counted if checker is None else (checker if isinstance(checker, Counted) else Counted(checker))
+    events = []
+
+    def emit(kind, text):
+        events.append({"kind": kind, "text": text})
+        log(kind, text)
+
     started = clock()
     composed_at = _now()
-    log("run.started", f"compose started · {len(sources)} sources · lens: {lens}")
-    fetched = read_sources(sources, get, log)
-    log("sanitize.passed", "source text screened · "
+    emit("run.started", f"compose started · {len(sources)} sources · lens: {lens}")
+    fetched = read_sources(sources, get, emit)
+    emit("sanitize.passed", "source text screened · "
         + f"{sum(r['cleaned'] for _, r in fetched.values())} risky strings neutralized")
-    brief, info = write(lens, sources, fetched, counted, count, log)
-    result = check(brief, seal_sources(sources, fetched, composed_at), counted, log)
+    brief, info = write(lens, sources, fetched, counted, count, emit, lens_definition=lens_definition)
+    result = check(brief, seal_sources(sources, fetched, composed_at), judge, emit)
     ed = edition(lens=lens, sources=sources, fetched=fetched, result=result, model=counted,
-                 seconds=int(round(clock() - started)), composed_at=composed_at, write_info=info)
+                 seconds=int(round(clock() - started)), composed_at=composed_at, write_info=info,
+                 lens_definition=lens_definition, checker=judge)
     tally = {}
     for c in ed["cards"]:
         tally[c["state"]] = tally.get(c["state"], 0) + 1
-    log("claim.verified", "checked · " + " · ".join(f"{n} {STATE_LABELS[k]}" for k, n in tally.items()))
-    return {"edition": ed, "result": result, "fetched": fetched}
+    emit("claim.verified", "checked · " + " · ".join(f"{n} {STATE_LABELS[k]}" for k, n in tally.items()))
+    out = {"edition": ed, "result": result, "fetched": fetched, "events": events, "receipt": counted.receipt()}
+    if judge is not counted:
+        out["checker_receipt"] = judge.receipt()
+    return out

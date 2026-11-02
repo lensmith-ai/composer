@@ -20,17 +20,23 @@ from .home import atomic_write
 
 CONFIG_SCHEMA = "composer-config/v1"
 SECRETS = "secrets.env"
-KEY_NAMES = ("ANTHROPIC_API_KEY", "OPENAI_API_KEY")
+WRITER_KEY_NAMES = ("ANTHROPIC_API_KEY", "OPENAI_API_KEY")
+CHECKER_KEY = "COMPOSER_CHECKER_API_KEY"  # the optional separate checker model's key, under its own name
+KEY_NAMES = (*WRITER_KEY_NAMES, CHECKER_KEY)
 VOICES = ("af_heart", "am_michael", "bf_emma")
 DEFAULTS = {
     "schema": CONFIG_SCHEMA,
     "provider": {"kind": "anthropic", "model": "", "base_url": "", "key": "none", "key_env": "ANTHROPIC_API_KEY"},
+    # the model that checks the claims: the writer's own unless `same` is false
+    "checker": {"same": True, "kind": "anthropic", "model": "", "base_url": "", "key": "none", "key_env": CHECKER_KEY},
     "narration": {"enabled": False, "engine": "none", "model_path": "", "voices_path": "", "python": "",
                   "url": "", "voices": [], "reused": False, "max_bytes": 120000, "max_seconds": 600},
     "schedule": {"enabled": False, "time": "07:00", "timezone": "local", "sources": ["google-ai", "deepmind"],
                  "lens": "what changed this week that a builder should act on", "insights": 5},
     "backup": {"weekly": True, "keep": 8},
     "server": {"port": 8765},
+    "extraction": {"trafilatura": False},
+    "seals": {"daily": True},
 }
 _TIME = re.compile(r"^([01]\d|2[0-3]):([0-5]\d)$")
 
@@ -97,8 +103,20 @@ def validate(cfg: dict) -> None:
         raise SettingsError("provider must be anthropic, openai or none")
     if p["key"] not in ("stored", "env", "none"):
         raise SettingsError("provider.key must be stored, env or none")
-    if p["key_env"] not in KEY_NAMES:
-        raise SettingsError(f"provider.key_env must be one of {', '.join(KEY_NAMES)}")
+    if p["key_env"] not in WRITER_KEY_NAMES:
+        raise SettingsError(f"provider.key_env must be one of {', '.join(WRITER_KEY_NAMES)}")
+    c = cfg["checker"]
+    if not isinstance(c.get("same"), bool):
+        raise SettingsError("checker.same must be true or false")
+    if not c["same"]:
+        if c["kind"] not in ("anthropic", "openai"):
+            raise SettingsError("checker.kind must be anthropic or openai")
+        if c["key"] not in ("stored", "env", "none"):
+            raise SettingsError("checker.key must be stored, env or none")
+        if c["key_env"] != CHECKER_KEY:
+            raise SettingsError(f"checker.key_env must be {CHECKER_KEY}")
+        if c["kind"] == "openai" and (not c["base_url"] or not c["model"]):
+            raise SettingsError("an OpenAI-compatible checker needs base_url and model")
     n = cfg["narration"]
     if n["engine"] not in ("none", "kokoro-onnx", "kokoro-http"):
         raise SettingsError("narration.engine must be none, kokoro-onnx or kokoro-http")
@@ -118,8 +136,12 @@ def validate(cfg: dict) -> None:
         raise SettingsError("schedule.sources must name at least one source")
     if not isinstance(s["lens"], str) or not 1 <= len(s["lens"].strip()) <= 300:
         raise SettingsError("schedule.lens must be 1 to 300 characters")
-    if not isinstance(s["insights"], int) or isinstance(s["insights"], bool) or not 3 <= s["insights"] <= 8:
-        raise SettingsError("schedule.insights must be from 3 to 8")
+    if not isinstance(s["insights"], int) or isinstance(s["insights"], bool) or not 3 <= s["insights"] <= 10:
+        raise SettingsError("schedule.insights must be from 3 to 10")
+    if not isinstance(cfg["extraction"].get("trafilatura"), bool) or set(cfg["extraction"]) != {"trafilatura"}:
+        raise SettingsError("extraction.trafilatura must be true or false")
+    if not isinstance(cfg["seals"].get("daily"), bool) or set(cfg["seals"]) != {"daily"}:
+        raise SettingsError("seals.daily must be true or false")
     port = cfg["server"]["port"]
     if not isinstance(port, int) or isinstance(port, bool) or not 1024 <= port <= 65535:
         raise SettingsError("server.port must be from 1024 to 65535")
@@ -187,14 +209,29 @@ def read_secrets(data: Path, *, strict: bool = True) -> dict:
     return out
 
 
-def key_present(data: Path, cfg: dict) -> bool:
-    name = cfg["provider"]["key_env"]
+def key_present(data: Path, cfg: dict, role: str = "provider") -> bool:
+    """Whether the writer's key (or, with role "checker", the separate checker's key) is set; never its value."""
+    name = cfg[role]["key_env"]
     if os.environ.get(name, "").strip():
         return True
     try:
         return bool(read_secrets(data).get(name))
     except SettingsError:
         return False
+
+
+def checker_env(cfg: dict) -> dict:
+    """The separate checker's settings as the variables providers.checker_from_env reads; {} when the writer's
+    model checks the claims. Never the key itself."""
+    c = cfg["checker"]
+    if c["same"]:
+        return {}
+    env = {"COMPOSER_CHECKER_PROVIDER": c["kind"]}
+    if c["model"]:
+        env["COMPOSER_CHECKER_MODEL"] = c["model"]
+    if c["kind"] == "openai" and c["base_url"]:
+        env["COMPOSER_CHECKER_OPENAI_BASE_URL"] = c["base_url"]
+    return env
 
 
 def provider_env(cfg: dict) -> dict:

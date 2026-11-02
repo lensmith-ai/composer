@@ -34,6 +34,31 @@ Each release note is written from this file and checked against it by claim-seal
 - `composer doctor` (`--online`, `--parity`, `--seals`), `composer backup` / `restore`, `composer update` / `rollback`
   (a migrated copy, a journaled switch, undone on failure or after an interruption) and `composer uninstall`
   (only what setup made; your data only with `--delete-data`).
+- Add a source from the app page: paste a blog's address and Composer lists the feeds behind it (the address itself,
+  the feeds the page advertises, the usual feed addresses), each with its newest titles, comment feeds marked and
+  duplicates folded; you pick one and name it, it is read once more and is live at once. Every request uses the
+  guarded fetch, with one time limit and a request cap for the whole check.
+- Source packages: the picker's package chips, from a bundled file (one package, the two bundled feeds) and your own
+  `packages.json`; a package naming an unknown or hidden source is set aside and reported.
+- Lenses from the app page: name, what to look for, register (earnest, sceptical or deadpan) and reading level. An
+  edit is a new revision of the same lens, linked to the one it replaces; a brief records the revision it used.
+- The reading level (and a saved lens's register) are written into the prompt as rules; `composer compose
+  --reading-level`.
+- An optional article parser for news pages without a feed: the setup question (or `--reconfigure parser`) installs
+  it and every package it needs from a hash-locked file, wheels only; there is no pip extra. Without it those pages
+  are read with the built-in parser and the receipt says so.
+- An optional separate checker model: setup asks "Check claims with the same model?" (or a `[checker]` table in the
+  answers file, `--reconfigure checker`); its key is stored in the same 0600 file under its own name. The checker
+  makes every claim-seal call, the writer only writes, and the edition and receipts record the two models
+  separately; `composer doctor` names the checker and whether its key is present.
+- Setup offers a short list of model ids for the chosen service (from `composer/data/models.json`, plus "type
+  another"), then makes one tiny test call per key that says plainly whether the key was refused, the model id was
+  not found or the endpoint could not be reached, and offers to enter them again; `--no-test-call` skips it.
+- With no model key, Compose on the app page, `composer compose`, `composer doctor` and the daily brief all say
+  "Composer needs a model key to write a brief. Run ./setup.sh --reconfigure provider." before any job starts or feed
+  is read; the recorded brief still shows. `./setup.sh --reconfigure PART` passes the part on to `composer setup`.
+- While `composer up` runs it re-verifies the seal of every saved brief once a day and logs the result; with no model
+  provider key set, the daily brief is skipped with the reason logged instead of failing.
 
 ## [0.1.0] - 2026-11-01
 

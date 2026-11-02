@@ -31,6 +31,16 @@ their pinned SHA-256 (`composer/narration/__init__.py`). The opt-in narration im
 and a source offer (`composer/narration/SOURCE-OFFER.txt`). They are also listed in
 `scripts/release/optional-components.json` and in every release SBOM.
 
+The optional article parser (not in the package or the image) is
+[trafilatura](https://github.com/adbar/trafilatura) 2.3.1 (Apache-2.0) with the packages it needs: babel
+(BSD-3-Clause), certifi (MPL-2.0), charset-normalizer (MIT), courlan (Apache-2.0), dateparser (BSD-3-Clause), htmldate
+(Apache-2.0), justext (BSD-2-Clause), lxml (BSD-3-Clause, with libxml2 and libxslt, MIT), lxml-html-clean
+(BSD-3-Clause), python-dateutil (Apache-2.0 or BSD-3-Clause), pytz (MIT), regex (Apache-2.0 and CNRI-Python), six
+(MIT), tld (MPL-1.1, GPL-2.0 or LGPL-2.1-or-later, at your choice), tzlocal (MIT), urllib3 (MIT) and, on Windows,
+tzdata (Apache-2.0). It is installed only when you choose it in setup, from the hash-locked
+`composer/extraction-requirements.lock` (every package pinned, every file's SHA-256 checked, wheels only); there is
+no pip extra for it. They are also listed in `scripts/release/optional-components.json` and in every release SBOM.
+
 ## Release and CI tools (not part of Composer)
 
 | name | version | licence | how it is used |

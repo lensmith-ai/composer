@@ -29,6 +29,7 @@ from pathlib import Path
 from . import __version__, demo
 from . import home as H
 from . import settings as S
+from .providers import NO_CHECKER_KEY_MESSAGE, NO_KEY_MESSAGE
 from .job_store import DATA_SCHEMA
 
 PARITY_SCRIPT = (
@@ -146,14 +147,24 @@ def offline_checks(r: Report, home: Path, data: Path) -> None:
         r.add("SKIP", "key", "no model provider chosen: the app shows the recorded brief; composing needs one",
               "run `composer setup --reconfigure provider`")
     elif cfg["provider"]["key"] == "none" and not S.key_present(data, cfg):
-        r.add("SKIP", "key", f"no key yet ({cfg['provider']['key_env']}): the app shows the recorded brief; "
-              "composing needs one", "run `composer setup --reconfigure provider`")
+        r.add("SKIP", "key", f"{NO_KEY_MESSAGE} ({cfg['provider']['key_env']} is not set; the app shows the "
+              "recorded brief meanwhile)", "run `./setup.sh --reconfigure provider`")
     else:
         present = S.key_present(data, cfg)
         where = "environment variable" if os.environ.get(cfg["provider"]["key_env"]) else "key file"
         r.add("PASS" if present else "FAIL", "key", f"{cfg['provider']['key_env']} present: "
-              + (f"yes ({where})" if present else "no"), f"set {cfg['provider']['key_env']} or run "
-              "`composer setup --reconfigure provider`")
+              + (f"yes ({where})" if present else f"no. {NO_KEY_MESSAGE}"), f"set {cfg['provider']['key_env']} or "
+              "run `./setup.sh --reconfigure provider`")
+    c = cfg["checker"]
+    if c["same"]:
+        r.add("PASS", "checker", "same model as the writer (it checks its own brief)")
+    else:
+        present = S.key_present(data, cfg, "checker")
+        where = "environment variable" if os.environ.get(c["key_env"]) else "key file"
+        r.add("PASS" if present else "FAIL", "checker",
+              f"a different model: {c['kind']}" + (f", model {c['model']}" if c["model"] else "")
+              + f"; {c['key_env']} present: " + (f"yes ({where})" if present else f"no. {NO_CHECKER_KEY_MESSAGE}"),
+              f"set {c['key_env']} or run `composer setup --reconfigure checker`")
     try:
         from .registry import Registry
         sf = S.sources_file(data)
@@ -172,6 +183,26 @@ def offline_checks(r: Report, home: Path, data: Path) -> None:
         r.add("PASS", "scheduler", f"daily at {s['time']} ({s['timezone']}); next run {nxt}, while `composer up` runs")
     else:
         r.add("SKIP", "scheduler", "no daily brief set", "`composer setup --reconfigure schedule` to add one")
+    try:
+        state = json.loads((data / "scheduler.json").read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        state = {}
+    if not cfg["seals"]["daily"]:
+        r.add("SKIP", "daily seal re-check", "off (seals.daily is false)")
+    elif isinstance(state, dict) and state.get("last_seal_day"):
+        outcome = str(state.get("last_seal_outcome") or "")
+        r.add("FAIL" if outcome.startswith(("FAILED", "could not run")) else "PASS", "daily seal re-check",
+              f"{state['last_seal_day']}: {outcome[:200]}", "run `composer doctor --seals` and restore from a backup")
+    else:
+        r.add("SKIP", "daily seal re-check", "not run yet; it runs once a day while `composer up` runs")
+    from .html_extract import trafilatura_installed
+    if trafilatura_installed():
+        r.add("PASS", "article parser", "trafilatura is installed (html-index sources that ask for it use it)")
+    elif cfg["extraction"]["trafilatura"]:
+        r.add("FAIL", "article parser", "setup installed trafilatura but it cannot be imported now; pages without a "
+              "feed are read with the built-in parser", "`composer setup --reconfigure parser`")
+    else:
+        r.add("SKIP", "article parser", "built-in parser (the optional trafilatura parser is not installed)")
     free = shutil.disk_usage(data).free
     r.add("PASS" if free > 200 * 1024 * 1024 else "FAIL", "disk", f"{free // (1024 * 1024)} MB free",
           "free some disk space")
@@ -239,11 +270,21 @@ def online_checks(r: Report, home: Path, data: Path, cfg: dict | None, *, transp
         try:
             started = time.monotonic()
             model = from_env(env=env, transport=transport)
-            reply = model("Reply with the single word OK.", timeout=60)
-            r.add("PASS", "online: model", f"{getattr(reply, 'model', None) or model.name} answered in "
-                  f"{time.monotonic() - started:.1f} s ({str(reply).strip()[:20]!r})")
+            model("Reply with the single word OK.", timeout=60)
+            # the configured name, not the endpoint's own model field or reply text (either could echo the key)
+            r.add("PASS", "online: model", f"{model.name} answered in {time.monotonic() - started:.1f} s")
         except ProviderError as exc:
             r.add("FAIL", "online: model", str(exc)[:200], "check the key and the model name")
+    if not cfg["checker"]["same"]:
+        from .providers import checker_from_env
+        use_key_file(S.secrets_path(data))
+        try:
+            started = time.monotonic()
+            checker = checker_from_env(env={**os.environ, **S.checker_env(cfg)}, transport=transport)
+            checker("Reply with the single word OK.", timeout=60)
+            r.add("PASS", "online: checker", f"{checker.name} answered in {time.monotonic() - started:.1f} s")
+        except ProviderError as exc:
+            r.add("FAIL", "online: checker", str(exc)[:200], "check the checker's key and model name")
     from . import adapters
     from .fetch import http_get
     from .registry import Registry
@@ -403,43 +444,16 @@ def seal_checks(r: Report, data: Path, *, verify=None) -> None:
     if not (data / "current").exists():
         r.add("SKIP", "seals", "no data")
         return
-    if verify is None:
-        try:
-            import claim_seal
-            verify = claim_seal.verify_seal
-        except ImportError:
-            r.add("FAIL", "seals", "claim-seal is not installed", "reinstall Composer")
-            return
-    gen = S.generation_dir(data, create=False)
-    checked, bad, unsealed = 0, [], []
-    for marker in sorted((gen / "jobs").glob("job-*/saved.json")):
-        folder = marker.parent
-        try:
-            job = json.loads((folder / "job.json").read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            bad.append(f"{folder.name} (unreadable)")
-            continue
-        draft = job.get("result")
-        digest = hashlib.sha256(json.dumps(draft, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
-        if job.get("draft_sha256") and digest != job["draft_sha256"]:
-            bad.append(f"{folder.name} (the brief changed after it was checked)")
-            continue
-        check = folder / "check.json"
-        if not check.is_file():
-            unsealed.append(folder.name)
-            continue
-        evidence = json.loads(check.read_text(encoding="utf-8")).get("claim_evidence")
-        sealed_value = ((evidence or {}).get("verification") or {}).get("seal", {}).get("value")
-        stated = ((draft or {}).get("check") or {}).get("seal")
-        if not verify(evidence) or (stated and stated != sealed_value):
-            bad.append(f"{folder.name} (seal does not verify)")
-            continue
-        checked += 1
-    if bad:
-        r.add("FAIL", "seals", f"{checked} verified; failed: {', '.join(bad)[:300]}",
+    from . import seal as SEAL
+    try:
+        result = SEAL.recheck_saved(data, verify=verify)
+    except SEAL.SealError as exc:
+        r.add("FAIL", "seals", str(exc), "reinstall Composer")
+        return
+    if result["failed"]:
+        r.add("FAIL", "seals", f"{result['checked']} verified; failed: {', '.join(result['failed'])[:300]}",
               "restore the brief from a backup")
-    elif checked or unsealed:
-        r.add("PASS", "seals", f"{checked} saved brief(s) re-verified" + (f"; {len(unsealed)} carry no seal record "
-              "(saved before seals were kept)" if unsealed else ""))
+    elif result["checked"] or result["unsealed"]:
+        r.add("PASS", "seals", SEAL.summary(result))
     else:
         r.add("SKIP", "seals", "no saved briefs yet")

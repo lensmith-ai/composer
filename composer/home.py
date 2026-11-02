@@ -302,7 +302,8 @@ def private_env(home: Path, base: dict | None = None) -> dict:
     the app folder, user pip settings and the user site folder are ignored, and pip refuses to install outside
     a virtual environment."""
     env = {k: v for k, v in (os.environ if base is None else base).items()
-           if k not in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "COMPOSER_SERVER_PASS")}  # no key reaches a child
+           if k not in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "COMPOSER_CHECKER_API_KEY",
+                        "COMPOSER_SERVER_PASS")}  # no key reaches a child
     cache, tmp = home / "cache", home / "tmp"
     env.update({
         "TMPDIR": str(tmp), "PIP_CACHE_DIR": str(cache / "pip"), "UV_CACHE_DIR": str(cache / "uv"),

@@ -3,7 +3,10 @@
 #   deploy-proof  tests/deploy/proof.sh: build the image, compose.yaml + Caddy on a local CA, HTTPS with the login,
 #                 the app port unreachable directly, backup / destroy / restore of the data volume
 #   browser       tests/stranger/browser_smoke.mjs: the demo pages and the served page in Chromium and WebKit at
-#                 390, 1280 and 1600 px: 0 console errors, 0 failed requests, 0 outside requests
+#                 390, 1280 and 1600 px: 0 console errors, 0 failed requests, 0 outside requests; then
+#                 tests/browser/parity_flow.mjs: on the app page, add a source from a pasted address, make and edit a
+#                 lens, compose with them and see the checked brief (a local HTTPS feed site and a made-up model;
+#                 no internet, no key)
 # The rest of the stranger test (setup, coexistence, the full page flow, update and recovery) is pending phases
 # P2 and P3; it joins this workflow as those land.
 name: stranger
@@ -80,3 +83,6 @@ jobs:
         run: |
           PLAYWRIGHT_MODULE="$RUNNER_TEMP/pw/node_modules/playwright/index.mjs" node tests/stranger/browser_smoke.mjs \
             http://127.0.0.1:8000/index.html http://127.0.0.1:8000/brief.html http://127.0.0.1:8765/
+      - name: App page flow (add a source, make a lens, compose)
+        run: |
+          PLAYWRIGHT_MODULE="$RUNNER_TEMP/pw/node_modules/playwright/index.mjs" node tests/browser/parity_flow.mjs python

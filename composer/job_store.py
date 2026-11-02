@@ -15,7 +15,7 @@ import uuid
 
 DATA_SCHEMA = "1"  # the data schema this code reads and writes; a newer generation is refused at start
 AUDIO_STATES = ("off", "generating", "ready", "failed")
-ARTIFACTS = ("check.json",)
+ARTIFACTS = ("check.json", "receipts.json")
 
 
 class StoreError(RuntimeError):

@@ -94,7 +94,8 @@ class PageTests(unittest.TestCase):
         self.assertIn("connect-src &#x27;self&#x27;", html)
         self.assertIn('name="pass"', html)
         cfg = json.loads(re.search(r'id="page-config">(.*?)</script>', html, re.S).group(1))
-        self.assertEqual(cfg["sources"][0], {"id": "google-ai", "label": "Google AI blog"})
+        self.assertEqual(cfg["sources"][0], {"id": "google-ai", "label": "Google AI blog",
+                                              "available": True, "hidden": False, "reason": ""})
 
 
 if __name__ == "__main__":

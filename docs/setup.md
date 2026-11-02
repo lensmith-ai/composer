@@ -22,24 +22,47 @@ asks, what it creates, what it never touches, and how to update, back up and rem
 
 One at a time, with a default in [brackets]. Press Enter to take it.
 
-1. **Model provider**: Anthropic (default model `claude-sonnet-5-5`), an OpenAI-compatible endpoint (OpenAI,
-   OpenRouter, a local Ollama or LM Studio server), or skip for now (the app then shows the recorded brief).
+1. **Model provider**: Anthropic, an OpenAI-compatible endpoint (OpenAI, OpenRouter, a local Ollama or LM Studio
+   server), or skip for now (the app then shows the recorded brief). Then the model: for Anthropic a short numbered
+   list (`claude-sonnet-5-5`, the default, `claude-opus-5-5`, `claude-haiku-5-5`) and "type another model id"; for an
+   OpenAI-compatible endpoint you type the id it uses (OpenRouter's look like `anthropic/claude-opus-5-5`). The list
+   is `composer/data/models.json`; edit it to change what is offered. An answers file takes any id.
 2. **Key**: pasted without being shown, and stored in `data/secrets.env` (mode 0600, in a folder only you can open).
-   Press Enter instead to keep using the `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` environment variable.
-3. **Sources**: the two bundled feeds are always there; add Hacker News, or paste any RSS or Atom address. Each one
+   Press Enter instead to keep using the `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` environment variable. Then one
+   tiny test call (asking for at most 16 tokens, 15-second network limit) checks that the key and the model id work.
+   If not, it says which: the key was refused, the model id was not found, or the endpoint could not be reached, and
+   offers to enter them again or keep going (an answers file just keeps going and says so). The key is never
+   printed, and the call is no part of any brief's calls or costs. `--no-test-call` (or `COMPOSER_NO_TEST_CALL=1`)
+   skips it.
+3. **Checker** (optional): "Check claims with the same model? [Y/n]". Yes (the default) means the model that wrote
+   the brief also checks each claim against its source. No asks for a second model: Anthropic or an
+   OpenAI-compatible endpoint (with its base URL), the model, and its key (hidden, stored in the same 0600 file as
+   `COMPOSER_CHECKER_API_KEY`, apart from the writer's key; Enter keeps using that environment variable), with the
+   same model list and the same test call. The checker
+   then makes every check call (each insight and the connection) and the writer only writes. A different model can
+   catch mistakes the writer would repeat when it checks its own work; it costs whatever that model costs for those
+   calls. Each brief's `receipts.json` says which model wrote it and which checked it.
+4. **Sources**: the two bundled feeds are always there; add Hacker News, or paste any RSS or Atom address. Each one
    is read once and shown before it is added.
-4. **Narration** (optional): a Listen button and three voices, made on your computer. Setup shows what it needs and
+5. **Article parser** (optional, default no): trafilatura (Apache-2.0) and the packages it needs,
+   installed into the app's own environment from the hash-locked `composer/extraction-requirements.lock` (wheels
+   only, every file's SHA-256 checked). It reads news pages that have no feed (`html-index` sources that ask for it)
+   better than the built-in parser. Without it, those pages are read with the built-in parser (text only) and each
+   brief's receipt says so; feeds are not affected. This lock file is the only way it is installed (there is no pip
+   extra, which could not hash-check the packages it needs); `composer setup --reconfigure parser` adds it later.
+6. **Narration** (optional): a Listen button and three voices, made on your computer. Setup shows what it needs and
    the licences (the Kokoro-82M model and voices are Apache-2.0; kokoro-onnx, onnxruntime and espeakng-loader are
    MIT; espeakng-loader bundles eSpeak NG, which is GPL-3.0; soundfile is BSD-3-Clause). Then it looks for a Kokoro
    you already have (below) and offers: use it, download the model into the app folder, or skip. Without narration
    briefs are text-only and the page shows no player and no voice picker.
-5. **Daily brief** (optional): a time, your time zone or UTC, and a lens. It runs while `composer up` runs, and
+7. **Daily brief** (optional): a time, your time zone or UTC, and a lens. It runs while `composer up` runs, and
    each one is saved to your shelf. If your computer was asleep at that time, it runs once when the app is back
-   within 6 hours; later than that it is skipped and logged. Missed days never pile up.
-6. **Port** on this computer.
+   within 6 hours; later than that it is skipped and logged. Missed days never pile up. With no model provider key
+   set, that day's brief is skipped and the log and `/schedule` say why.
+8. **Port** on this computer.
 
 Then it prints what it chose and how to start the app. Run `./setup.sh` (or `composer setup`) again at any time: it
-keeps your key, sources, lenses and briefs, and `--reconfigure provider|sources|narration|schedule|port` asks one
+keeps your key, sources, lenses and briefs, and `--reconfigure provider|checker|sources|parser|narration|schedule|port` asks one
 part again.
 
 ## With no questions: an answers file
@@ -54,9 +77,19 @@ kind = "anthropic"                    # anthropic, openai or none
 model = "claude-sonnet-5-5"
 key_from_env = "ANTHROPIC_API_KEY"    # read once now and stored (0600); or: key = "env" to keep using the variable
 
+[checker]                             # leave this table out to check with the same model
+kind = "openai"                       # anthropic or openai
+base_url = "https://api.openai.com/v1"
+model = "gpt-4.1"                     # the checker's model id at that endpoint
+key_from_env = "COMPOSER_CHECKER_API_KEY"  # read once now and stored (0600); or key = "env". Only this name:
+                                      # the writer's key is never sent to the checker
+
 [sources]
 hacker_news = true
 add = ["https://example.org/feed.xml"]
+
+[parser]
+trafilatura = false                   # true installs the optional article parser (hash-locked)
 
 [narration]
 enabled = true
@@ -128,7 +161,10 @@ why.
 ~/.lensmith-composer/bin/composer doctor --seals    # also re-verify the seal of every saved brief
 ```
 
-It says whether a key is present, never the key.
+It says whether a key is present, never the key, and whether the claims are checked by the writer's model or a
+separate one (with that key present or not); `--online` also makes one tiny call to a separate checker. It also shows the last daily seal re-check: while `composer up`
+runs, the app re-verifies the seal of every saved brief once a day (the same check as `--seals`) and logs the result;
+set `"seals": {"daily": false}` in `config.json` to turn that off.
 
 ## Back up, update, roll back
 

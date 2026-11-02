@@ -6,6 +6,8 @@
 #   ./setup.sh --yes                    no questions, every default
 #   ./setup.sh --home DIR               another app folder (default ~/.lensmith-composer, or COMPOSER_HOME)
 #   ./setup.sh --python-download        allow downloading a private Python if this computer has no 3.10+
+#   ./setup.sh --no-test-call           skip the one tiny model call that checks each key and model id
+#   ./setup.sh --reconfigure PART       ask one part again (provider, checker, sources, parser, narration, ...)
 #
 # What it does: checks everything first and writes nothing until every check passes. Then it makes ONE folder,
 # finds Python 3.10+ (or, only if you say yes, downloads a pinned, checksum-verified uv into that folder, which
@@ -29,12 +31,18 @@ H=${COMPOSER_HOME:-${HOME:-}/.lensmith-composer}
 ANSWERS=""
 YES=0
 PYDL=0
+NOTEST=""
+RECONF=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --home) [ $# -ge 2 ] || die "--home needs a folder"; H=$2; shift 2 ;;
     --answers) [ $# -ge 2 ] || die "--answers needs a file"; ANSWERS=$2; shift 2 ;;
     --yes) YES=1; shift ;;
     --python-download) PYDL=1; shift ;;
+    --no-test-call) NOTEST=--no-test-call; shift ;;
+    --reconfigure) [ $# -ge 2 ] || die "--reconfigure needs a part, such as provider"
+      case "$2" in *[!a-z]*|"") die "--reconfigure takes a part name such as provider" ;; esac
+      RECONF="$RECONF $2"; shift 2 ;;
     -h|--help) sed -n '2,19p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) die "unknown option $1 (see ./setup.sh --help)" ;;
   esac
@@ -216,6 +224,8 @@ set -- setup --home "$H"
 [ -n "$ANSWERS" ] && set -- "$@" --answers "$ANSWERS"
 [ "$YES" = 1 ] && set -- "$@" --yes
 [ "$STATE" = new ] && set -- "$@" --home-created
+[ -n "$NOTEST" ] && set -- "$@" "$NOTEST"
+for part in $RECONF; do set -- "$@" --reconfigure "$part"; done
 if has_tty && [ -z "$ANSWERS" ] && [ "$YES" = 0 ]; then
   "$H/app/current/venv/bin/composer" "$@" < /dev/tty
 else

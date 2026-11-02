@@ -28,10 +28,10 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from . import __version__, demo, page, pipeline, registry
+from . import __version__, demo, lenses, page, pipeline, receipts, registry, seal, sources_registry
 from .fetch import http_get
 from .prompt import DEFAULT_INSIGHTS, INSIGHT_RANGE
-from .providers import ProviderError, from_env
+from .providers import ProviderError, checker_from_env, from_env
 
 
 def _registry(args) -> registry.Registry:
@@ -71,14 +71,26 @@ def cmd_compose(args) -> int:
     sources = reg.pick(ids)
     model = from_env(args.provider, args.model)
     model.ready()
+    checker = checker_from_env()  # optional: COMPOSER_CHECKER_PROVIDER and friends
+    if checker is not None:
+        checker.ready()
     out = _fresh_dir(args.out)
 
     def log(_kind, text):
         print(f"  {text}", flush=True)
 
     try:
-        run = pipeline.compose(lens=args.lens, sources=sources, model=model, count=args.insights, get=http_get,
-                               log=log)
+        lens = lenses.LensRegistry.builtin().get(args.lens.strip())  # a public lens by id
+    except lenses.LensError:
+        lens = None  # the words themselves are the lens
+    if args.reading_level:
+        import dataclasses
+        lens = dataclasses.replace(lens, reading_level=args.reading_level) if lens else lenses.Lens(
+            "ad-hoc", "Your words", "A lens written for this brief.", lenses.validate_text(args.lens),
+            args.reading_level)
+    try:
+        run = pipeline.compose(lens=lens.instruction if lens else args.lens, sources=sources, model=model,
+                               count=args.insights, get=http_get, log=log, lens_definition=lens, checker=checker)
     except (pipeline.ComposeError, ProviderError) as exc:
         print(f"could not compose: {exc}", file=sys.stderr)
         return 1
@@ -86,13 +98,14 @@ def cmd_compose(args) -> int:
     (out / "edition.json").write_text(json.dumps(ed, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     (out / "check.json").write_text(json.dumps(run["result"], indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     page.write(out / "index.html", ed)
+    written = [p.name for p in receipts.write_brief_artifacts(out, run, requested=ids)]
     if args.keep_sources:
         fetched = {sid: {"items": items, "receipt": receipt} for sid, (items, receipt) in run["fetched"].items()}
         (out / "sources-read.json").write_text(json.dumps(fetched, indent=1, ensure_ascii=False) + "\n",
                                                encoding="utf-8")
     print()
     print(demo.text_report(ed))
-    print(f"\nwrote {out}/edition.json, check.json and index.html"
+    print(f"\nwrote {out}/edition.json, check.json, index.html, {' and '.join(written)}"
           + (" and sources-read.json (feed text: keep it private)" if args.keep_sources else ""))
     return 0
 
@@ -125,6 +138,19 @@ def cmd_sources(args) -> int:
     return 2
 
 
+def cmd_seal(args) -> int:
+    try:
+        verified, value = seal.verify_check_path(Path(args.path))
+    except seal.SealError as exc:
+        print(f"composer: {exc}", file=sys.stderr)
+        return 2
+    if not verified:
+        print("seal did not verify", file=sys.stderr)
+        return 1
+    print("seal verified" + (f": {value}" if value else ""))
+    return 0
+
+
 def cmd_serve(args) -> int:
     from . import server
     reg = _registry(args)
@@ -135,8 +161,13 @@ def cmd_serve(args) -> int:
     except ProviderError as exc:
         print(f"note: {exc}. The page will show the recorded brief; Compose will fail until a key is set.", flush=True)
     data_root = Path(args.out) if args.out else Path.home() / ".lensmith-composer" / "data"
-    app = server.App(reg, lambda: from_env(args.provider, args.model),
-                     out_dir=Path(args.out) if args.out else None, data_root=data_root, passphrase=passphrase)
+    source_path = registry.local_path(args.sources_file) or Path(args.sources_file or registry.LOCAL_DEFAULT)
+    app = server.App(reg, lambda: from_env(args.provider, args.model), make_checker=lambda: checker_from_env(),
+                     out_dir=Path(args.out) if args.out else None, data_root=data_root, passphrase=passphrase,
+                     source_service=sources_registry.SourceService(
+                         source_path, packages=sources_registry.PackageService(
+                             source_path.parent / "composer-packages.json")),
+                     lens_store=lenses.LensStore(source_path.parent / "composer-lenses"))
     server.serve(app, args.host, args.port)
     return 0
 
@@ -151,16 +182,52 @@ def cmd_setup(args) -> int:
     from . import installer
     home, _ = _where(args)
     data = Path(args.data).resolve() if args.data else None
+    import os
+    from .providers import test_call
+    skip = args.no_test_call or os.environ.get("COMPOSER_NO_TEST_CALL", "").strip() == "1"
     return installer.run(home=home, data=data, answers_file=args.answers, assume_yes=args.yes,
                          reconfigure=args.reconfigure or [], data_only=args.data_only,
-                         home_created_by_bootstrap=args.home_created, check_only=args.check_only)
+                         home_created_by_bootstrap=args.home_created, check_only=args.check_only,
+                         test_call=None if skip else test_call)
+
+
+CHECKER_SETTINGS = ("COMPOSER_CHECKER_PROVIDER", "COMPOSER_CHECKER_MODEL", "COMPOSER_CHECKER_OPENAI_BASE_URL")
+
+
+def up_env(cfg: dict, environ) -> dict:
+    """The model settings `composer up` uses: the environment with the saved settings on top. For the checker the
+    saved choice decides alone: with "the same model" set, checker settings inherited from the environment are
+    dropped, so they cannot route the checks to another model (or block a brief on a missing checker key)."""
+    from . import settings as S
+    env = {k: v for k, v in dict(environ).items() if k not in CHECKER_SETTINGS}
+    env.update(S.provider_env(cfg))
+    env.update(S.checker_env(cfg))  # the separate checker's settings, if any (never a key)
+    return env
+
+
+def _ready(*models) -> None:
+    for model in models:
+        if model is not None:
+            model.ready()
+
+
+def build_scheduler(data: Path, cfg: dict, env: dict, *, provider=None, model=None, store=None, clock=None,
+                    log=print):
+    """`composer up`'s scheduler: the daily brief (skipped, with the reason logged, while no model provider key is
+    set), the weekly backup and the daily seal re-check of every saved brief."""
+    from . import lifecycle
+    from .scheduler import Scheduler
+    return Scheduler(data, cfg, store, backup=lambda keep: lifecycle.backup(data, keep=keep, tag="weekly"),
+                     model_ready=lambda: _ready(from_env(provider, model, env=env),
+                                                None if cfg["checker"]["same"] else checker_from_env(env=env)),
+                     seal_check=lambda: seal.recheck_saved(data), clock=clock, log=log)
 
 
 def cmd_up(args) -> int:
     import os
     from . import home as H, lifecycle, narration, server, settings as S
     from .providers import use_key_file
-    from .scheduler import Scheduler, chain
+    from .scheduler import chain
     home, data = _where(args)
     container = bool(os.environ.get(H.DATA_ENV)) and not (home / H.MANIFEST).exists()
     if not (data / "current").exists() and not container:
@@ -174,14 +241,17 @@ def cmd_up(args) -> int:
     lifecycle.check_data_schema(data)
     cfg = S.load(data)
     use_key_file(S.secrets_path(data))
-    env = dict(os.environ)
-    env.update(S.provider_env(cfg))
+    env = up_env(cfg, os.environ)
     sf = S.sources_file(data)
     reg = registry.Registry.load(str(sf) if sf.exists() else None)
     base = H.runtime_base(home, data)
     narrator = narration.Narrator(cfg["narration"], base)
-    sched = Scheduler(data, cfg, None, backup=lambda keep: lifecycle.backup(data, keep=keep, tag="weekly"))
+    sched = build_scheduler(data, cfg, env, provider=args.provider, model=args.model)
     app = server.App(reg, lambda: from_env(args.provider, args.model, env=env), data_root=data, settings=cfg,
+                     make_checker=None if cfg["checker"]["same"] else (lambda: checker_from_env(env=env)),
+                     source_service=sources_registry.SourceService(
+                         sf, packages=sources_registry.PackageService(sf.parent / "packages.json")),
+                     lens_store=lenses.LensStore(sf.parent / "lenses"),
                      on_finished=chain(lambda j: narrator.on_finished(j), lambda j: sched.on_finished(j)))
     narrator.attach(app.jobs)
     sched.store = app.jobs
@@ -195,7 +265,7 @@ def cmd_up(args) -> int:
     try:
         from_env(args.provider, args.model, env=env).ready()
     except ProviderError as exc:
-        print(f"note: {exc}. The page shows the recorded brief; composing needs a key.", flush=True)
+        print(f"note: {exc} Until then the page shows the recorded brief.", flush=True)
     print(f"narration: {'on (' + cfg['narration']['engine'] + ')' if narrator.enabled else 'off (text-only)'}; "
           f"daily brief: {'at ' + cfg['schedule']['time'] if cfg['schedule']['enabled'] else 'off'}", flush=True)
     server.serve(app, args.host, args.port or cfg["server"]["port"], trusted=trusted, public_origin=origin)
@@ -290,9 +360,12 @@ def parser() -> argparse.ArgumentParser:
 
     c = sub.add_parser("compose", help="compose a new brief (needs an API key)")
     c.add_argument("--sources", required=True, help="comma-separated source ids, e.g. google-ai,deepmind")
-    c.add_argument("--lens", required=True, help="what to look for, in your words (up to 300 characters)")
+    c.add_argument("--lens", required=True, help="what to look for, in your words (up to 300 characters), or "
+                   "a public lens id: system-improvements, second-order-effects, raised-eyebrow")
     c.add_argument("--insights", type=int, default=DEFAULT_INSIGHTS,
                    choices=list(INSIGHT_RANGE), help="how many insights (default 5)")
+    c.add_argument("--reading-level", choices=list(lenses.READING_LEVELS),
+                   help="plain, standard or technical (default: the lens's own, else standard)")
     c.add_argument("--out", help="a new folder for the brief (default briefs/<time>)")
     c.add_argument("--provider", choices=["anthropic", "openai"], help="default: COMPOSER_PROVIDER or anthropic")
     c.add_argument("--model", help="default: COMPOSER_MODEL, or claude-sonnet-5-5 for anthropic")
@@ -316,6 +389,11 @@ def parser() -> argparse.ArgumentParser:
     s.add_argument("--file", help="for add: the file to add to (default ./composer-sources.json)")
     s.set_defaults(func=cmd_sources)
 
+    q = sub.add_parser("seal", help="re-verify a saved claim-evidence seal without a model call")
+    q.add_argument("action", choices=["verify"])
+    q.add_argument("path", help="a check.json file or brief directory")
+    q.set_defaults(func=cmd_seal)
+
     v = sub.add_parser("serve", help="run the web page with a compose form (needs an API key)")
     v.add_argument("--host", default="127.0.0.1")
     v.add_argument("--port", type=int, default=8765)
@@ -334,10 +412,12 @@ def parser() -> argparse.ArgumentParser:
     st.add_argument("--answers", metavar="FILE", help="answers file (.toml or .json): no questions")
     st.add_argument("--yes", action="store_true", help="no questions: every default")
     st.add_argument("--reconfigure", action="append", metavar="PART",
-                    help="ask one part again: provider, sources, narration, schedule or port")
+                    help="ask one part again: provider, checker, sources, parser, narration, schedule or port")
     st.add_argument("--data-only", action="store_true", help="settings and key in the data folder only (container)")
     st.add_argument("--home-created", action="store_true", help=argparse.SUPPRESS)
     st.add_argument("--check-only", action="store_true", help="run every check, ask nothing, write nothing")
+    st.add_argument("--no-test-call", action="store_true",
+                    help="skip the one tiny model call that checks each key and model id (also COMPOSER_NO_TEST_CALL=1)")
     st.set_defaults(func=cmd_setup)
 
     u = where(sub.add_parser("up", help="run the app (page, engine, narration, daily brief)"))

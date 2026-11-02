@@ -18,6 +18,7 @@ Safe defaults:
 """
 from __future__ import annotations
 
+import dataclasses
 import hmac
 import ipaddress
 import json
@@ -29,10 +30,10 @@ from urllib.parse import urlsplit
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from . import app_static, demo, live_files, page, pipeline
+from . import app_static, demo, discovery, html_extract, lenses, live_files, page, pipeline, receipts, sources_registry
 from .job_store import JobStore, StoreError
 from .narration import options_fragment
-from .prompt import DEFAULT_INSIGHTS, LENS_MAX_CHARS
+from .prompt import DEFAULT_INSIGHTS, INSIGHT_RANGE
 from .providers import ProviderError
 from .registry import RegistryError
 
@@ -41,6 +42,9 @@ LOOPBACK = {"127.0.0.1", "::1", "localhost"}
 LOOPBACK_NAMES = {"127.0.0.1", "localhost", "::1"}
 CSRF_HEADER = "X-Composer-CSRF"
 CSRF_VALUE = "same-origin"
+# the source and lens services: a POST to each path goes to the App method named here
+SERVICE_ROUTES = {"/source/probe": "handle_source_probe", "/source/register": "handle_source_register",
+                  "/lens/save": "handle_lens_save"}
 
 
 _PORT = re.compile(r"[0-9]{1,5}")
@@ -78,7 +82,7 @@ def request_problem(method: str, headers, *, local_only: bool) -> str | None:
     proxy in front may rewrite Host, so those two checks are not made there."""
     get_all = getattr(headers, "get_all", None)
     if get_all is not None:
-        for name in ("Host", "Origin", "Content-Type", "Sec-Fetch-Site"):
+        for name in ("Host", "Origin", "Content-Type", "Sec-Fetch-Site", CSRF_HEADER):
             if len(get_all(name) or []) > 1:
                 return f"send one {name} header"
     host = headers.get("Host", "")
@@ -104,12 +108,37 @@ def request_problem(method: str, headers, *, local_only: bool) -> str | None:
     return None
 
 
+class _StaticSources:
+    """The source service for an App made without one: the App's own registry, read as it is now."""
+
+    def __init__(self, current):
+        self.current = current
+        self.packages = sources_registry.PackageService(None)
+
+    def package_options(self):
+        registry = self.current()
+        packages, health = self.packages.current(registry)
+        return sources_registry.package_projection(packages, registry), health
+
+    def snapshot(self):
+        return self.current()
+
+    def options(self):
+        return {"generation": 1, "reload": {"state": "ready", "reason": ""},
+                "sources": [sources_registry.source_option(item) for item in self.current().entries()]}
+
+
 class App:
     def __init__(self, registry, make_model, *, out_dir: Path | None = None, passphrase: str = "",
                  compose=pipeline.compose, data_root: Path | str | None = None, job_worker=None,
-                 settings: dict | None = None, on_finished=None):
+                 settings: dict | None = None, on_finished=None, source_service=None, lens_store=None,
+                 make_checker=None):
         self.registry = registry
+        self.source_service = source_service or _StaticSources(lambda: self.registry)
+        self.lens_registry = lenses.LensRegistry.builtin()
+        self.lens_store = lens_store
         self.make_model = make_model
+        self.make_checker = make_checker  # the optional separate checker model; None: the writer checks its brief
         self.out_dir = out_dir
         self.passphrase = passphrase
         self.compose = compose
@@ -120,74 +149,168 @@ class App:
         root = Path(data_root) if data_root is not None else ((out_dir or Path(tempfile.mkdtemp(prefix="composer-data-"))) / "composer-data")
         self.jobs = JobStore(root, worker=job_worker or self._job_worker, on_finished=on_finished)
 
+    def sources(self):
+        """The source registry as it is now: a sources file edited while the server runs is read again, and
+        a broken edit keeps the last good registry (the options say why)."""
+        return self.source_service.snapshot()
+
     def narration_voices(self) -> list:
         return options_fragment(self.settings)["voices"]
 
+    def lens_entries(self) -> tuple:
+        custom = self.lens_store.entries() if self.lens_store is not None else ()
+        return (*self.lens_registry.entries(), *custom)
+
     def options(self) -> dict:
-        """data/options.json: what the page offers. The narration part follows the settings: voices [] and
+        """data/options.json: what the page offers, the one list of sources, lenses, reading levels, insight
+        range and voices the engine accepts. The narration part follows the settings: voices [] and
         narration.enabled false when narration is off, so the page shows no voice picker and no player."""
-        entries = self.registry.entries()
-        out = {"sources": [e.id for e in entries], "source_meta": {e.id: {"label": e.label} for e in entries},
-               "insights": {"minimum": 3, "maximum": 8, "default": DEFAULT_INSIGHTS}}
+        registry_options = self.source_service.options()
+        rows = registry_options["sources"]
+        low, high = INSIGHT_RANGE.start, INSIGHT_RANGE.stop - 1
+        lens_rows = self.lens_entries()
+        reload_state = registry_options.get("reload") or {}
+        packages, package_health = self.source_service.package_options()
+        out = {"sources": [r["id"] for r in rows],
+               "source_meta": {r["id"]: {"label": r["label"], "kind": r["kind"], "max_items": r["max_items"]}
+                               for r in rows},
+               "source_status": {r["id"]: {"available": r["available"], "hidden": r["hidden"],
+                                           "reason": r["reason"]} for r in rows},
+               "registry_health": {"degraded": reload_state.get("state") == "degraded",
+                                   "error": reload_state.get("reason", ""),
+                                   "generation": registry_options.get("generation"),
+                                   "packages": package_health},
+               "packages": packages,
+               "lenses": [lens.id for lens in lens_rows],
+               "lens_meta": {lens.id: _lens_meta(lens) for lens in lens_rows},
+               "lens_status": {lens.id: {"available": lens.available, "hidden": False, "reason": lens.reason}
+                               for lens in lens_rows},
+               "default_lens": self.lens_registry.ids[0],
+               "reading_levels": list(lenses.READING_LEVELS),
+               "default_reading_level": "standard",
+               "insights": {"minimum": low, "maximum": high, "min": low, "max": high, "default": DEFAULT_INSIGHTS},
+               "extraction_tiers": html_extract.available_tiers()}
         out.update(options_fragment(self.settings))
         return out
 
     def source_ids(self) -> dict:
-        return {e.label: e.id for e in self.registry.entries()}
+        return {e.label: e.id for e in self.sources().entries()}
 
-    def _job_worker(self, job: dict, draft_ready) -> dict:
-        request = job["request"]
-        sources = self.registry.pick(request["sources"])
+    def _resolve_lens(self, raw: object, reading_level: object = None) -> lenses.Lens:
+        """A public lens by id, a saved lens by id, or else the words themselves as a lens for this brief."""
+        value = lenses.validate_text(raw)
+        found = None
+        try:
+            found = self.lens_registry.get(value)
+        except lenses.LensError:
+            for entry in (self.lens_store.entries() if self.lens_store is not None else ()):
+                if entry.id == value:
+                    found = entry
+                    break
+        if found is None:
+            found = lenses.Lens("ad-hoc", "Your words", "A lens written for this brief.", value)
+        if reading_level is not None:
+            if reading_level not in lenses.READING_LEVELS:
+                raise lenses.LensError("reading_level must be plain, standard, or technical")
+            found = dataclasses.replace(found, reading_level=reading_level)
+        return found
+
+    def _models(self):
+        """(writer, checker or None), each checked for its key before any feed is read."""
         model = self.make_model()
         if hasattr(model, "ready"):
             model.ready()
-        run = self.compose(lens=request["lens"], sources=sources, model=model,
-                           count=request.get("insights", DEFAULT_INSIGHTS))
+        checker = self.make_checker() if self.make_checker is not None else None
+        if checker is not None and hasattr(checker, "ready"):
+            checker.ready()
+        return model, checker
+
+    def _job_worker(self, job: dict, draft_ready) -> dict:
+        request = job["request"]
+        sources = self.sources().pick(request["sources"])
+        lens = self._resolve_lens(request["lens"], request.get("reading_level"))
+        model, checker = self._models()
+        extra = {"checker": checker} if checker is not None else {}
+        run = self.compose(lens=lens.instruction, lens_definition=lens, sources=sources, model=model,
+                           count=request.get("insights", DEFAULT_INSIGHTS), **extra)
         draft_ready(run["edition"])
         evidence = (run.get("result") or {}).get("claim_evidence")
         if isinstance(evidence, dict):  # kept so `composer doctor --seals` can re-verify the seal later
             self.jobs.write_artifact(job["job"], "check.json", {"claim_evidence": evidence})
+        self.jobs.write_artifact(job["job"], "receipts.json",
+                                 receipts.build_receipt(run, requested=request["sources"]))
         return {"status": "ok", "claim_evidence": {"job": job["job"],
                                                         "draft_sha256": job["draft_sha256"]}}
 
-    def submit_job(self, headers, body: bytes) -> tuple[int, dict]:
+    @staticmethod
+    def _json_body(body: bytes) -> dict:
+        try:
+            value = json.loads(body.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            raise ValueError("send a JSON object") from None
+        if not isinstance(value, dict):
+            raise ValueError("send a JSON object")
+        return value
+
+    def _authorize(self, headers) -> tuple[int, dict] | None:
         if self.passphrase:
             sent = headers.get("X-Composer-Pass", "")
             if not hmac.compare_digest(sent.encode("utf-8"), self.passphrase.encode("utf-8")):
                 return 403, {"error": "wrong or missing pass phrase"}
+        return None
+
+    def _compose_request(self, body: bytes, extra: set) -> tuple[dict | None, tuple[int, dict] | None]:
+        """The checked fields of a compose request, or the refusal. Nothing is fetched before this passes."""
         try:
-            req = json.loads(body.decode("utf-8"))
-        except (UnicodeDecodeError, json.JSONDecodeError):
-            return 400, {"error": "send a JSON object"}
-        if not isinstance(req, dict) or set(req) - {"sources", "lens", "insights", "voice"}:
-            return 400, {"error": "send {\"sources\": [...], \"lens\": \"...\"}"}
-        voice = req.get("voice")
+            req = self._json_body(body)
+        except ValueError as exc:
+            return None, (400, {"error": str(exc)})
+        if set(req) - ({"sources", "lens", "insights", "reading_level"} | extra):
+            return None, (400, {"error": "send {\"sources\": [...], \"lens\": \"...\"}"})
+        ids = req.get("sources")
+        count = req.get("insights", DEFAULT_INSIGHTS)
+        try:
+            lens = self._resolve_lens(req.get("lens"), req.get("reading_level"))
+        except lenses.LensError as exc:
+            return None, (400, {"error": str(exc)})
+        if not isinstance(ids, list) or not ids or len(ids) > 8 or not all(isinstance(x, str) for x in ids):
+            return None, (400, {"error": "name 1 to 8 sources"})
+        if not isinstance(count, int) or isinstance(count, bool) or count not in INSIGHT_RANGE:
+            return None, (400, {"error": f"insights must be from {INSIGHT_RANGE.start} to {INSIGHT_RANGE.stop - 1}"})
+        try:
+            sources = self.sources().pick(ids)
+        except RegistryError as exc:
+            return None, (400, {"error": str(exc)})
+        return {"req": req, "ids": ids, "count": count, "lens": lens, "sources": sources}, None
+
+    def submit_job(self, headers, body: bytes) -> tuple[int, dict]:
+        denied = self._authorize(headers)
+        if denied:
+            return denied
+        checked, refused = self._compose_request(body, {"voice"})
+        if refused:
+            return refused
+        voice = checked["req"].get("voice")
         if voice is not None and voice not in self.narration_voices():
             return 400, {"error": "that voice is not available; narration may be off"}
-        lens, ids = req.get("lens"), req.get("sources")
-        count = req.get("insights", DEFAULT_INSIGHTS)
-        if not isinstance(lens, str) or not lens.strip() or len(lens) > LENS_MAX_CHARS:
-            return 400, {"error": f"the lens must be 1 to {LENS_MAX_CHARS} characters"}
-        if not isinstance(ids, list) or not ids or len(ids) > 8 or not all(isinstance(x, str) for x in ids):
-            return 400, {"error": "name 1 to 8 sources"}
-        if not isinstance(count, int) or isinstance(count, bool) or not 3 <= count <= 8:
-            return 400, {"error": "insights must be from 3 to 8"}
         try:
-            self.registry.pick(ids)
-            request = {"sources": ids, "lens": lens.strip(), "insights": count}
-            if voice is not None:
-                request["voice"] = voice
+            self._models()  # no key: say so now, in a plain sentence, before any job starts or feed is read
+        except ProviderError as exc:
+            return 503, {"error": str(exc)[:300]}
+        request = {"sources": checked["ids"], "lens": checked["req"]["lens"].strip(), "insights": checked["count"]}
+        if checked["req"].get("reading_level") is not None:
+            request["reading_level"] = checked["req"]["reading_level"]
+        if voice is not None:
+            request["voice"] = voice
+        try:
             return 202, self.jobs.submit(request)
-        except RegistryError as exc:
-            return 400, {"error": str(exc)}
         except RuntimeError:
             return 409, {"error": "compose capacity is full"}
 
     def change_job(self, headers, path: str, request: object) -> tuple[int, dict]:
-        if self.passphrase:
-            sent = headers.get("X-Composer-Pass", "")
-            if not hmac.compare_digest(sent.encode("utf-8"), self.passphrase.encode("utf-8")):
-                return 403, {"error": "wrong or missing pass phrase"}
+        denied = self._authorize(headers)
+        if denied:
+            return denied
         if not isinstance(request, dict):
             return 400, {"error": "send a JSON object"}
         try:
@@ -213,44 +336,86 @@ class App:
             return 409 if "active jobs" in str(exc) else 400, {"error": str(exc)}
         return 400, {"error": "request does not match this change route"}
 
+    def handle_source_probe(self, headers, body: bytes) -> tuple[int, dict]:
+        """The page's "Check the address": {"url"} gives the candidate feeds behind a pasted address (none chosen).
+        A full registry entry instead is read once as it stands. Nothing is saved either way; every request goes
+        through the same guarded fetch as a brief."""
+        denied = self._authorize(headers)
+        if denied:
+            return denied
+        if not isinstance(self.source_service, sources_registry.SourceService):
+            return 503, {"error": "this server has no sources file to add to"}
+        try:
+            request = self._json_body(body)
+            if set(request) == {"url"}:
+                return 200, self.source_service.discover(request["url"])
+            return 200, self.source_service.probe(request)
+        except discovery.Busy as exc:
+            return 409, {"error": str(exc)}
+        except (ValueError, sources_registry.SourceServiceError) as exc:
+            return 400, {"error": str(exc)}
+
+    def handle_source_register(self, headers, body: bytes) -> tuple[int, dict]:
+        """The page's "Add to my sources": {candidate, label, pasted_url}, the candidate read again before it is
+        written; or a full registry entry, probed first. Live on the next request, without a restart."""
+        denied = self._authorize(headers)
+        if denied:
+            return denied
+        if not isinstance(self.source_service, sources_registry.SourceService):
+            return 503, {"error": "this server has no sources file to add to"}
+        try:
+            request = self._json_body(body)
+            if "candidate" in request:
+                return 201, self.source_service.register_candidate(request)
+            return 201, {"source": self.source_service.register(request)}
+        except (ValueError, sources_registry.SourceServiceError) as exc:
+            return 400, {"error": str(exc)}
+
+    def handle_lens_save(self, headers, body: bytes) -> tuple[int, dict]:
+        """The page's lens form: {name, looks_for, register, reading_level, replaces}. A new lens gets its own id; an
+        edit (`replaces` names one of your lenses) becomes that lens's newest revision, and briefs already made keep
+        the revision they used. The older recipe shape {name, instruction, reading_level, previous} still works."""
+        denied = self._authorize(headers)
+        if denied:
+            return denied
+        if self.lens_store is None:
+            return 503, {"error": "lens storage is not configured"}
+        try:
+            request = self._json_body(body)
+            if "looks_for" in request:
+                entry, written = self.lens_store.save_form(request)
+            else:
+                previous = request.pop("previous", None)
+                entry, written = self.lens_store.save(request, previous=previous), True
+        except lenses.StaleRevision as exc:
+            return 409, {"error": str(exc)}
+        except (ValueError, lenses.LensError) as exc:
+            return 400, {"error": str(exc)}
+        return (201 if written else 200), {"lens": entry.option(), "changed": written}
+
     def page(self) -> bytes:
-        return page.build(self.latest, live=True, sources=self.registry.entries(),
+        return page.build(self.latest, live=True, sources=self.sources().entries(),
                           needs_pass=bool(self.passphrase)).encode("utf-8")
 
     def handle_compose(self, headers, body: bytes) -> tuple[int, dict]:
-        if self.passphrase:
-            sent = headers.get("X-Composer-Pass", "")
-            if not hmac.compare_digest(sent.encode("utf-8"), self.passphrase.encode("utf-8")):
-                return 403, {"error": "wrong or missing pass phrase"}
+        """The classic page's compose: one brief, composed while the request waits."""
+        denied = self._authorize(headers)
+        if denied:
+            return denied
+        checked, refused = self._compose_request(body, set())
+        if refused:
+            return refused
         try:
-            req = json.loads(body.decode("utf-8"))
-        except (UnicodeDecodeError, json.JSONDecodeError):
-            return 400, {"error": "send a JSON object"}
-        if not isinstance(req, dict) or set(req) - {"sources", "lens", "insights"}:
-            return 400, {"error": "send {\"sources\": [...], \"lens\": \"...\"}"}
-        lens = req.get("lens")
-        ids = req.get("sources")
-        count = req.get("insights", DEFAULT_INSIGHTS)
-        if not isinstance(lens, str) or not lens.strip() or len(lens) > LENS_MAX_CHARS:
-            return 400, {"error": f"the lens must be 1 to {LENS_MAX_CHARS} characters"}
-        if not isinstance(ids, list) or not ids or len(ids) > 8 or not all(isinstance(x, str) for x in ids):
-            return 400, {"error": "name 1 to 8 sources"}
-        if not isinstance(count, int) or isinstance(count, bool) or not 3 <= count <= 8:
-            return 400, {"error": "insights must be from 3 to 8"}
-        try:
-            sources = self.registry.pick(ids)
-        except RegistryError as exc:
-            return 400, {"error": str(exc)}
-        try:
-            model = self.make_model()
-            if hasattr(model, "ready"):
-                model.ready()  # no key: say so before any feed is fetched
+            model, checker = self._models()  # no key: say so before any feed is fetched
         except ProviderError as exc:
             return 503, {"error": str(exc)[:300]}
         if not self.lock.acquire(blocking=False):
             return 429, {"error": "a brief is already being composed; try again in a minute"}
+        lens = checked["lens"]
         try:
-            run = self.compose(lens=lens.strip(), sources=sources, model=model, count=count)
+            extra = {"checker": checker} if checker is not None else {}
+            run = self.compose(lens=lens.instruction, lens_definition=lens, sources=checked["sources"], model=model,
+                               count=checked["count"], **extra)
         except (pipeline.ComposeError, ProviderError, ValueError) as exc:
             return 502, {"error": str(exc)[:300]}
         finally:
@@ -261,6 +426,19 @@ class App:
             (self.out_dir / "latest-edition.json").write_text(
                 json.dumps(self.latest, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
         return 200, self.latest
+
+
+def _lens_meta(lens: lenses.Lens) -> dict:
+    """What the page shows for one lens; your own lenses carry what the edit form needs."""
+    meta = {"title": lens.name, "blurb": lens.blurb, "reading_level": lens.reading_level,
+            "shape": dict(lens.shape or {}), "revision": lens.revision,
+            "looks_for": lens.instruction if lens.editable else "", "editable": lens.editable,
+            "register": lens.register.capitalize(), "register_choice": lens.register}
+    if lens.editable:
+        meta["revision_number"] = lens.number
+        meta["previous"] = lens.previous or None
+        meta["blurb"] = f"Your lens \u00b7 revision {lens.number}" + (f" \u00b7 {lens.register}" if lens.register else "")
+    return meta
 
 
 def proxy_problem(client_ip: str, method: str, headers, trusted, public_origin: str) -> str | None:
@@ -431,9 +609,10 @@ def handler_for(app: App, *, local_only: bool = True, trusted=None, public_origi
             if self._refused("POST"):
                 return
             routes = {"/api/compose", "/compose", "/retention", "/update/migrate", "/update/switch", "/update/rollback"}
+            routes |= set(SERVICE_ROUTES)
             if self.path not in routes and not any(self.path.startswith(prefix) for prefix in ("/save/", "/delete/", "/restore/")):
                 return self._json(404, {"error": "not found"})
-            if self.path == "/compose" and not self.headers.get("Origin"):
+            if self.path in ("/compose", *SERVICE_ROUTES) and not self.headers.get("Origin"):
                 return self._json(403, {"error": "compose requests need a same-origin Origin header"})
             try:
                 length = int(self.headers.get("Content-Length") or 0)
@@ -446,6 +625,8 @@ def handler_for(app: App, *, local_only: bool = True, trusted=None, public_origi
                 status, obj = app.submit_job(self.headers, body)
             elif self.path == "/api/compose":
                 status, obj = app.handle_compose(self.headers, body)
+            elif self.path in SERVICE_ROUTES:
+                status, obj = getattr(app, SERVICE_ROUTES[self.path])(self.headers, body)
             else:
                 try:
                     request = json.loads(body.decode("utf-8"))

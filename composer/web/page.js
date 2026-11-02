@@ -152,6 +152,7 @@
     var form = document.getElementById('compose');
     var box = document.getElementById('picks');
     cfg.sources.forEach(function (s, k) {
+      if (!s.available || s.hidden) return;
       var lab = el('label');
       var cb = el('input');
       cb.type = 'checkbox';

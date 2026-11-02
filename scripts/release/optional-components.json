@@ -1,5 +1,5 @@
 {
-  "about": "Parts of OPTIONAL narration. None of them is in the wheel, the sdist or the default container image. build.py adds them to every release SBOM with scope 'excluded' (not in this artifact) so their licences are on record. eSpeak NG is GPL-3.0: any published image that includes it must ship the licence text and a source offer (see the narration target in the Dockerfile). The install pins are composer/narration/requirements.lock (universal, hash-locked; on Python 3.10 it resolves onnxruntime 1.24.3 and numpy 2.2.6, from 3.11 the versions below).",
+  "about": "Parts of OPTIONAL narration. None of them is in the wheel, the sdist or the default container image. build.py adds them to every release SBOM with scope 'excluded' (not in this artifact) so their licences are on record. eSpeak NG is GPL-3.0: any published image that includes it must ship the licence text and a source offer (see the narration target in the Dockerfile). The install pins are composer/narration/requirements.lock (universal, hash-locked; on Python 3.10 it resolves onnxruntime 1.24.3 and numpy 2.2.6, from 3.11 the versions below). The optional article parser (trafilatura and the packages it needs) is not in the wheel, the sdist or the image either; it is installed only when chosen in setup, from composer/extraction-requirements.lock (hash-locked, wheels only); there is no pip extra.",
   "components": [
     {
       "type": "library",
@@ -57,6 +57,150 @@
       "hashes": [{"alg": "SHA-256", "content": "bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d"}],
       "externalReferences": [{"type": "distribution", "url": "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin"}],
       "delivery": "downloaded into your data folder only when you turn narration on (28,214,398 bytes)"
+    },
+    {
+      "type": "library",
+      "name": "trafilatura",
+      "version": "2.3.1",
+      "purl": "pkg:pypi/trafilatura@2.3.1",
+      "licenses": [{"license": {"id": "Apache-2.0"}}],
+      "delivery": "installed only when the optional article parser is chosen (the parser itself)"
+    },
+    {
+      "type": "library",
+      "name": "babel",
+      "version": "2.18.0",
+      "purl": "pkg:pypi/babel@2.18.0",
+      "licenses": [{"license": {"id": "BSD-3-Clause"}}],
+      "delivery": "installed only when the optional article parser is chosen (needed by trafilatura)"
+    },
+    {
+      "type": "library",
+      "name": "certifi",
+      "version": "2026.7.22",
+      "purl": "pkg:pypi/certifi@2026.7.22",
+      "licenses": [{"license": {"id": "MPL-2.0"}}],
+      "delivery": "installed only when the optional article parser is chosen (needed by trafilatura)"
+    },
+    {
+      "type": "library",
+      "name": "charset-normalizer",
+      "version": "3.5.2",
+      "purl": "pkg:pypi/charset-normalizer@3.5.2",
+      "licenses": [{"license": {"id": "MIT"}}],
+      "delivery": "installed only when the optional article parser is chosen (needed by trafilatura)"
+    },
+    {
+      "type": "library",
+      "name": "courlan",
+      "version": "1.4.0",
+      "purl": "pkg:pypi/courlan@1.4.0",
+      "licenses": [{"license": {"id": "Apache-2.0"}}],
+      "delivery": "installed only when the optional article parser is chosen (needed by trafilatura)"
+    },
+    {
+      "type": "library",
+      "name": "dateparser",
+      "version": "1.4.3",
+      "purl": "pkg:pypi/dateparser@1.4.3",
+      "licenses": [{"license": {"id": "BSD-3-Clause"}}],
+      "delivery": "installed only when the optional article parser is chosen (needed by trafilatura)"
+    },
+    {
+      "type": "library",
+      "name": "htmldate",
+      "version": "1.11.0",
+      "purl": "pkg:pypi/htmldate@1.11.0",
+      "licenses": [{"license": {"id": "Apache-2.0"}}],
+      "delivery": "installed only when the optional article parser is chosen (needed by trafilatura)"
+    },
+    {
+      "type": "library",
+      "name": "justext",
+      "version": "3.0.2",
+      "purl": "pkg:pypi/justext@3.0.2",
+      "licenses": [{"license": {"id": "BSD-2-Clause"}}],
+      "delivery": "installed only when the optional article parser is chosen (needed by trafilatura)"
+    },
+    {
+      "type": "library",
+      "name": "lxml",
+      "version": "6.1.3",
+      "purl": "pkg:pypi/lxml@6.1.3",
+      "licenses": [{"license": {"id": "BSD-3-Clause"}}],
+      "delivery": "installed only when the optional article parser is chosen (needed by trafilatura)"
+    },
+    {
+      "type": "library",
+      "name": "lxml-html-clean",
+      "version": "0.4.5",
+      "purl": "pkg:pypi/lxml-html-clean@0.4.5",
+      "licenses": [{"license": {"id": "BSD-3-Clause"}}],
+      "delivery": "installed only when the optional article parser is chosen (needed by trafilatura)"
+    },
+    {
+      "type": "library",
+      "name": "python-dateutil",
+      "version": "2.9.0.post0",
+      "purl": "pkg:pypi/python-dateutil@2.9.0.post0",
+      "licenses": [{"expression": "Apache-2.0 OR BSD-3-Clause"}],
+      "delivery": "installed only when the optional article parser is chosen (needed by trafilatura)"
+    },
+    {
+      "type": "library",
+      "name": "pytz",
+      "version": "2026.5",
+      "purl": "pkg:pypi/pytz@2026.5",
+      "licenses": [{"license": {"id": "MIT"}}],
+      "delivery": "installed only when the optional article parser is chosen (needed by trafilatura)"
+    },
+    {
+      "type": "library",
+      "name": "regex",
+      "version": "2026.9.29",
+      "purl": "pkg:pypi/regex@2026.9.29",
+      "licenses": [{"expression": "Apache-2.0 AND CNRI-Python"}],
+      "delivery": "installed only when the optional article parser is chosen (needed by trafilatura)"
+    },
+    {
+      "type": "library",
+      "name": "six",
+      "version": "1.17.0",
+      "purl": "pkg:pypi/six@1.17.0",
+      "licenses": [{"license": {"id": "MIT"}}],
+      "delivery": "installed only when the optional article parser is chosen (needed by trafilatura)"
+    },
+    {
+      "type": "library",
+      "name": "tld",
+      "version": "0.13.2",
+      "purl": "pkg:pypi/tld@0.13.2",
+      "licenses": [{"expression": "MPL-1.1 OR GPL-2.0-only OR LGPL-2.1-or-later"}],
+      "delivery": "installed only when the optional article parser is chosen (needed by trafilatura)"
+    },
+    {
+      "type": "library",
+      "name": "tzdata",
+      "version": "2026.5",
+      "purl": "pkg:pypi/tzdata@2026.5",
+      "licenses": [{"license": {"id": "Apache-2.0"}}],
+      "delivery": "installed only when the optional article parser is chosen (needed by trafilatura)"
+    },
+    {
+      "type": "library",
+      "name": "tzlocal",
+      "version": "5.4.4",
+      "purl": "pkg:pypi/tzlocal@5.4.4",
+      "licenses": [{"license": {"id": "MIT"}}],
+      "delivery": "installed only when the optional article parser is chosen (needed by trafilatura)"
+    },
+    {
+      "type": "library",
+      "name": "urllib3",
+      "version": "2.8.0",
+      "purl": "pkg:pypi/urllib3@2.8.0",
+      "licenses": [{"license": {"id": "MIT"}}],
+      "delivery": "installed only when the optional article parser is chosen (needed by trafilatura)"
     }
   ]
 }

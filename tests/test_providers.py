@@ -56,8 +56,10 @@ class AnthropicTests(unittest.TestCase):
 
     def test_missing_key(self):
         with mock.patch.dict(os.environ, {"ANTHROPIC_API_KEY": ""}):
-            with self.assertRaisesRegex(ProviderError, "ANTHROPIC_API_KEY"):
+            with self.assertRaises(ProviderError) as cm:
                 Anthropic(transport=ScriptedTransport([]))("x")
+        self.assertEqual(str(cm.exception),
+                         "Composer needs a model key to write a brief. Run ./setup.sh --reconfigure provider.")
 
     def test_error_refusal_and_cutoff(self):
         err = (429, {"type": "error", "error": {"type": "rate_limit_error", "message": "slow down"}})

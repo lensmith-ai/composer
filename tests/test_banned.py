@@ -114,6 +114,8 @@ def tree_files():
     for dirpath, dirnames, filenames in os.walk(ROOT):
         dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS and not d.endswith(".egg-info")]
         for name in filenames:
+            if dirpath == str(ROOT) and name == ".git":
+                continue  # a linked worktree's gitdir pointer is host metadata, not repository text
             yield os.path.join(dirpath, name)
 
 

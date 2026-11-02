@@ -1,0 +1,14 @@
+{
+  "schema": "source-packages/v1",
+  "packages": [
+    {
+      "package_id": "ai-labs",
+      "label": "AI labs",
+      "description": "The two AI lab blogs that come with Composer: the Google AI blog and the Google DeepMind blog.",
+      "provenance": "bundled with Composer",
+      "source_ids": ["google-ai", "deepmind"],
+      "selection_policy": {"unavailable_members": "refuse", "paid_requires_confirmation": false,
+                           "offline_trial_eligible": false}
+    }
+  ]
+}

@@ -69,7 +69,8 @@ class ServerTests(unittest.TestCase):
                        compose=lambda **kw: calls.append(kw))
         status, obj = self.post(a, {"sources": ["google-ai"], "lens": "x"})
         self.assertEqual(status, 503)
-        self.assertIn("COMPOSER_TEST_UNSET_KEY", obj["error"])
+        self.assertEqual(obj["error"],
+                         "Composer needs a model key to write a brief. Run ./setup.sh --reconfigure provider.")
         self.assertEqual(calls, [])
 
     def test_page_starts_with_the_recorded_brief(self):
@@ -116,7 +117,7 @@ class CliTests(unittest.TestCase):
             code, _, err = self.run_cli("compose", "--sources", "google-ai", "--lens", "x",
                                         "--out", str(Path(d) / "b"))
         self.assertEqual(code, 2)
-        self.assertIn("ANTHROPIC_API_KEY", err)
+        self.assertIn("Composer needs a model key to write a brief. Run ./setup.sh --reconfigure provider.", err)
 
     def test_compose_unknown_source(self):
         code, _, err = self.run_cli("compose", "--sources", "nope", "--lens", "x")

@@ -16,12 +16,14 @@ proc step {prompt reply} {
   }
 }
 step "choose 1-3 \[1\]:" "1"
-step "Model \[claude-sonnet-5-5\]:" ""
+step "choose 1-4 \[1\]:" ""
 log_user 0
 step "key:" $key
 log_user 1
+step "Check claims with the same model? \[Y/n\]:" ""
 step "Add Hacker News as a source too? \[y/N\]:" "n"
 step "press Enter to skip \[\]:" ""
+step "Install the optional article parser? \[y/N\]:" "n"
 step "Add narration? \[y/N\]:" "n"
 step "(while Composer runs)? \[y/N\]:" "n"
 step "Port on this computer \[" ""

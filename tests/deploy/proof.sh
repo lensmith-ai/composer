@@ -68,7 +68,7 @@ ok "image built: $(docker image inspect "$IMAGE" --format '{{.Id}} {{.Size}} byt
 echo "== the model key goes into the data volume (setup --data-only), never into the container's environment"
 PROOF_KEY="proof-key-$(secret)"
 printf '[provider]\nkind = "anthropic"\nkey_from_env = "ANTHROPIC_API_KEY"\n[narration]\nenabled = false\n' | \
-  dc run --rm --no-deps -T -e "ANTHROPIC_API_KEY=$PROOF_KEY" composer setup --data-only --answers /dev/stdin \
+  dc run --rm --no-deps -T -e "ANTHROPIC_API_KEY=$PROOF_KEY" composer setup --data-only --no-test-call --answers /dev/stdin \
   > "$WORK/setup.log" 2>&1 && ok "setup --data-only finished" || { bad "setup --data-only failed"; cat "$WORK/setup.log"; }
 grep -q "$PROOF_KEY" "$WORK/setup.log" && bad "setup printed the key" || ok "setup never printed the key"
 

@@ -4,7 +4,11 @@ While `composer up` runs, a thread looks at the clock every 30 seconds. For a da
   - it composes once per slot, through the same job store as the page, and saves the brief to your shelf;
   - if the app was asleep or down at the slot, it still runs once if it is within 6 hours, else it skips that
     slot and logs why; missed slots never stack up;
-  - the slot is recorded BEFORE the brief starts, so a crash or restart cannot run the same slot twice.
+  - the slot is recorded BEFORE the brief starts, so a crash or restart cannot run the same slot twice;
+  - with no model key set, the slot is skipped and the log and status say so in a plain sentence (nothing is
+    fetched).
+Once a day (the first check after midnight UTC) it also re-verifies the seal of every saved brief, the same check
+as `composer doctor --seals`, and logs and records the result (turn it off with "seals": {"daily": false}).
 State lives in <data>/scheduler.json, outside the data generations, so updates and rollbacks keep it.
 """
 from __future__ import annotations
@@ -35,11 +39,14 @@ def next_slot(now: datetime, hhmm: str, tz: str) -> datetime:
 
 
 class Scheduler:
-    def __init__(self, data: Path, cfg: dict, store, *, backup=None, clock=None, log=print):
+    def __init__(self, data: Path, cfg: dict, store, *, backup=None, clock=None, log=print, model_ready=None,
+                 seal_check=None):
         self.data = data
         self.cfg = cfg
         self.store = store
         self.backup = backup  # callable(keep) -> path, for the weekly backup; None turns it off
+        self.model_ready = model_ready  # callable that raises when no model provider key is set; None skips the check
+        self.seal_check = seal_check  # callable() -> composer.seal.recheck_saved result; None turns the daily check off
         self.clock = clock or (lambda: datetime.now(timezone.utc))
         self.log = log
         self.lock = threading.Lock()
@@ -64,7 +71,9 @@ class Scheduler:
         st = self.state()
         out = {"enabled": bool(s.get("enabled")), "time": s.get("time"), "timezone": s.get("timezone"),
                "last_slot": st.get("last_slot"), "last_outcome": st.get("last_outcome"),
-               "last_job": st.get("last_job"), "last_backup_week": st.get("last_backup_week")}
+               "last_job": st.get("last_job"), "last_backup_week": st.get("last_backup_week"),
+               "seals_daily": self.seal_check is not None and bool(self.cfg.get("seals", {}).get("daily", True)),
+               "last_seal_day": st.get("last_seal_day"), "last_seal_outcome": st.get("last_seal_outcome")}
         if out["enabled"]:
             out["next_run_utc"] = next_slot(self.clock(), s["time"], s["timezone"]).strftime("%Y-%m-%dT%H:%M:%SZ")
         return out
@@ -81,6 +90,8 @@ class Scheduler:
                 outcome = self._daily(now, s)
             if self.backup is not None and self.cfg.get("backup", {}).get("weekly"):
                 self._weekly_backup(now)
+            if self.seal_check is not None and self.cfg.get("seals", {}).get("daily", True):
+                self._daily_seals(now)
             return outcome
 
     def _daily(self, now: datetime, s: dict) -> str | None:
@@ -94,6 +105,15 @@ class Scheduler:
             self._save(st)
             self.log(f"scheduler: skipped the {key} brief (missed by more than 6 hours)")
             return "skipped"
+        if self.model_ready is not None:
+            try:
+                self.model_ready()
+            except Exception as exc:  # no key (or no endpoint): say so instead of a brief that fails on its first call
+                reason = " ".join(str(exc).split())[:200]
+                st.update(last_slot=key, last_outcome=f"skipped: {reason}")
+                self._save(st)
+                self.log(f"scheduler: skipped the {key} brief: {reason}")
+                return "skipped"
         st.update(last_slot=key, last_outcome="starting")
         self._save(st)  # recorded first: a crash from here on cannot run this slot twice
         try:
@@ -122,6 +142,23 @@ class Scheduler:
             self.log(f"scheduler: weekly backup written to {path}")
         except Exception as exc:  # a failed backup is logged; it never stops the app
             self.log(f"scheduler: the weekly backup failed: {exc}")
+
+    def _daily_seals(self, now: datetime) -> None:
+        day = now.astimezone(timezone.utc).strftime("%Y-%m-%d")
+        st = self.state()
+        if st.get("last_seal_day") == day:
+            return
+        st.update(last_seal_day=day, last_seal_outcome="running")
+        self._save(st)  # recorded first, like a brief slot: at most one check a day
+        from .seal import summary
+        try:
+            outcome = summary(self.seal_check())
+        except Exception as exc:  # a check that cannot run is logged; it never stops the app
+            outcome = f"could not run: {' '.join(str(exc).split())[:200]}"
+        st = self.state()
+        st["last_seal_outcome"] = outcome
+        self._save(st)
+        self.log(f"scheduler: daily seal re-check {day}: {outcome}")
 
     # ------------------------------------------------------------------ follow-up and loop
 

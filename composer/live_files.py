@@ -3,6 +3,7 @@
   job.json         the job record, with `audio_state` (off, generating, ready, failed) and `audio`
   composed.json    the brief in the page's composed-brief/v1 shape, including `transcript`: the narration script
   transcript.txt   the same narration script, as plain text
+  receipts.json    what was read and how, the model calls and the check summary (no source text; see receipts.py)
   composer-<voice>.mp3 (or .wav)   the narration, once it is ready
 
 Nothing is ever joined from the request: the job id must match the store's job-id shape and the file name must
@@ -14,11 +15,12 @@ import json
 import re
 from pathlib import Path
 
+from . import receipts
 from .narration import VOICES
 
 PREFIX = "/data/live/"
 JOB_ID = re.compile(r"^job-[0-9a-f]{16}$")
-TEXT_FILES = ("job.json", "composed.json", "transcript.txt")
+TEXT_FILES = ("job.json", "composed.json", "transcript.txt", "receipts.json")
 AUDIO = re.compile(r"^composer-(" + "|".join(VOICES) + r")\.(mp3|wav)$")
 AUDIO_TYPES = {"mp3": "audio/mpeg", "wav": "audio/wav"}
 VERDICT = {"supported": "supported", "partial": "partially_supported", "unsupported": "unsupported",
@@ -78,10 +80,7 @@ def composed_view(job: dict, source_ids: dict | None = None) -> dict | None:
 
 
 def transcript_text(job: dict) -> str | None:
-    ed = job.get("result")
-    if isinstance(ed, dict) and isinstance(ed.get("transcript"), str) and ed["transcript"].strip():
-        return ed["transcript"].strip() + "\n"
-    return None
+    return receipts.transcript_text(job.get("result"))
 
 
 def read(store, job_id: str, name: str, source_ids: dict | None = None) -> tuple[bytes | Path, str] | None:
@@ -99,6 +98,11 @@ def read(store, job_id: str, name: str, source_ids: dict | None = None) -> tuple
     if name == "transcript.txt":
         text = transcript_text(job)
         return (text.encode("utf-8"), "text/plain; charset=utf-8") if text else None
+    if name == "receipts.json":
+        path = Path(store.job_dir(job_id)) / name
+        if path.is_symlink() or not path.is_file():
+            return None
+        return path.read_bytes(), "application/json"
     m = AUDIO.match(name)
     audio = job.get("audio") or {}
     if not m or job.get("audio_state") != "ready" or audio.get("file") != name:

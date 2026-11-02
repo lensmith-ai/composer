@@ -11,7 +11,8 @@ from unittest import mock
 
 CLEAR = ("COMPOSER_HOME", "COMPOSER_DATA", "KOKORO_MODEL_PATH", "KOKORO_VOICES_PATH", "ANTHROPIC_API_KEY",
          "OPENAI_API_KEY", "COMPOSER_PROVIDER", "COMPOSER_MODEL", "COMPOSER_SOURCES", "COMPOSER_TRUSTED_PROXY",
-         "COMPOSER_PUBLIC_ORIGIN", "COMPOSER_SERVER_PASS")
+         "COMPOSER_PUBLIC_ORIGIN", "COMPOSER_SERVER_PASS", "COMPOSER_CHECKER_API_KEY", "COMPOSER_CHECKER_PROVIDER",
+         "COMPOSER_CHECKER_MODEL", "COMPOSER_CHECKER_OPENAI_BASE_URL")
 FAKE_KEY = "test-key-value-for-setup-only"
 
 
@@ -22,7 +23,8 @@ def fake_home(**extra_env):
     home = root / "home"
     home.mkdir()
     env = {k: v for k, v in os.environ.items() if k not in CLEAR}
-    env.update({"HOME": str(home)}, **extra_env)
+    # test mode: a `composer setup` started here makes no test call to a model service
+    env.update({"HOME": str(home), "COMPOSER_NO_TEST_CALL": "1"}, **extra_env)
     try:
         with mock.patch.dict(os.environ, env, clear=True):
             yield home

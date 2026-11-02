@@ -1,7 +1,7 @@
 import json
 import unittest
 
-from composer import pipeline, prompt as P
+from composer import lenses, pipeline, prompt as P
 from composer.providers import Counted
 
 from helpers import JUDGE_ANSWERS, ScriptedGet, ScriptedModel, brief_for_fixtures, fixture, source
@@ -79,6 +79,18 @@ class PromptTests(unittest.TestCase):
         self.assertTrue(obj["items"][0]["why_it_matters"].startswith("Single source: "))
         self.assertFalse(obj["items"][2]["why_it_matters"].startswith("Single source:"))
         self.assertEqual(P.label_single_source(obj), 0)
+
+
+class DeclaredLensShapeTests(unittest.TestCase):
+    def test_plain_lens_shape_retries_an_unreadable_brief_before_claim_checking(self):
+        bad = brief_for_fixtures()
+        bad["items"][0]["insight"] = "Pneumonoultramicroscopicsilicovolcanoconiosis needs a clearer explanation"
+        model = ScriptedModel([bad, bad], lambda *_args, **_kwargs: AssertionError("claim check should not run"))
+        fetched = {s.id: pipeline.adapters.fetch(s, ScriptedGet(GET)) for s in (HARBOR, QUARRY)}
+        lens = lenses.Lens("custom-test", "Plain test", "", "Use plain language.", "plain")
+        with self.assertRaisesRegex(pipeline.ComposeError, "plain reading level failed"):
+            pipeline.write(lens.instruction, [HARBOR, QUARRY], fetched, model, 3, lens_definition=lens)
+        self.assertEqual(len(model.prompts), 2)
 
 
 @unittest.skipIf(claim_seal is None, "claim-seal is not installed (pip install -e .)")

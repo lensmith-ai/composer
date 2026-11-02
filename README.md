@@ -69,7 +69,8 @@ composer compose --sources google-ai,deepmind --lens "system improvements" --out
 It prints each step and then the brief, and writes three files to the `--out` folder (without
 `--out`, a new folder under `briefs/`): `edition.json` (the brief), `check.json` (claim-seal's
 full result, with the sealed rows) and `index.html` (the brief as a web page). Any lens works:
-try `--lens "what this means for small teams"`. All the options:
+try `--lens "what this means for small teams"`. `--reading-level plain|standard|technical` sets how the brief is
+written (the level is a rule in the prompt, and `plain` is also checked on the answer). All the options:
 
 ```sh
 composer compose --help
@@ -89,8 +90,11 @@ The full app (the phone-width page, saved briefs, a daily brief, optional narrat
 only if you say yes, downloads a pinned, checksum-verified uv into that folder, which brings its own Python), makes
 a private environment there, and asks, one question at a time: your model provider and key (typed without being
 shown, stored in a file only you can read), starting sources, optional narration (it shows the size and the
-licences first, and reuses a Kokoro you already have, read-only, when it passes a check), a daily brief, and a
-port. `./setup.sh --answers answers.toml` asks nothing. `composer doctor` checks the install one line at a time;
+licences first, and reuses a Kokoro you already have, read-only, when it passes a check), an optional article
+parser for news pages without a feed, a daily brief, and a port. In the app you can add a source by pasting a blog's
+address (it finds the feeds and you pick one), start from a package of sources, and make and edit your own lenses
+(name, what to look for, register, reading level; each edit is a new revision, and a brief records the one it
+used). `./setup.sh --answers answers.toml` asks nothing. `composer doctor` checks the install one line at a time;
 `composer uninstall` removes what setup made and keeps your briefs unless you add `--delete-data`. Everything,
 including updates, backups and what each command may touch: [docs/setup.md](docs/setup.md).
 
@@ -107,6 +111,9 @@ Composer calls the model with your own key. Nothing goes through any other servi
 | `OPENAI_API_KEY` | for `openai`: the key |
 | `COMPOSER_MAX_TOKENS` | the reply ceiling per call (default 16000) |
 | `COMPOSER_ANTHROPIC_FALLBACK` | `off` turns off the API's server-side refusal fallback, which is on by default for the models that accept it |
+| `COMPOSER_CHECKER_PROVIDER` | optional: `anthropic` or `openai` for a separate model that checks the claims (unset: the writer checks) |
+| `COMPOSER_CHECKER_MODEL`, `COMPOSER_CHECKER_OPENAI_BASE_URL` | that checker's model id and, for `openai`, its endpoint |
+| `COMPOSER_CHECKER_API_KEY` | that checker's key (never the writer's key) |
 
 The key is read when each call is made. It is never logged or printed. The command line never stores it; the
 installed app stores it only if you give it to `composer setup`, in a file only you can read (mode 0600).
@@ -171,6 +178,12 @@ and $10 per million output tokens ([pricing page](https://platform.claude.com/do
 read 2026-11-01), that is $0.0287 + $0.0468 = **$0.0755**. It took 29 seconds from start to finish.
 Your cost moves with the number of sources and items, the model, and whether a retry is needed;
 each brief's `edition.json` records its own calls and the token counts the API reported.
+
+**A separate checker is optional.** By default the model that writes the brief also checks it. You can name a
+second model for the checks (`composer setup` asks; or the `COMPOSER_CHECKER_*` settings above): the writer then
+makes the 1 write call and the checker the 6 check calls, each billed at its own model's price, and the brief's
+receipts list the two models separately. A different model can catch mistakes the writer shares with itself; it
+does not make the check infallible.
 
 The recorded demo brief was written and checked by gpt-5.6-terra (an OpenAI model) on a
 flat-rate plan, before this repository had its own API layer: 7 calls, 37,489 input and 4,065

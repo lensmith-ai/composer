@@ -8,6 +8,47 @@ your file with the same id as a bundled one replaces it.
 You can also keep the file somewhere else and point to it with `--sources-file FILE` or the
 `COMPOSER_SOURCES` environment variable.
 
+## From the app page
+
+In the app (`composer up` or `composer serve`), open the menu, then **Sources**, then **Add a source**. Paste the
+address of a blog or a feed and tap **Check the address**. Composer reads that address once, then every RSS or Atom
+feed the page advertises, then a few usual feed addresses under it (`/feed/`, `/rss.xml`, `/blog/feed/` and so on),
+and lists every feed that answered with its newest titles. It picks none for you: a site often offers its whole-site
+feed, a comments feed and the blog's own feed side by side, and only the titles tell them apart. Comment feeds are
+marked and listed last; addresses that gave exactly the same items are shown once, on the narrowest address. Tap the
+one you recognise, give it a name, and **Add to my sources**: Composer reads that feed once more, adds it to your
+sources file with a note of when and from which address, and it is in the picker at once, with no restart.
+
+The check uses the same guarded fetch as a brief (below): https only (a pasted `http://` address is tried as
+`https://`; if only plain http answers, the page says so and why: a feed read without encryption can be changed on
+its way, and the claim check would then vouch for the changed text), public addresses only, checked again on the address actually connected to and after every redirect, no
+proxies, at most 2 MB a request, and one 60-second limit for the whole check. It makes at most 14 requests, and only
+one check runs at a time. Checking a full entry (any kind, including a news page with up to 40
+candidate articles) is held to 60 seconds, 24 requests and 8 MB read in all.
+
+## Packages
+
+The source picker also shows packages: a named starting set of sources you can tap to tick them all, then change.
+Composer ships one, **AI labs** (the two bundled feeds). Add your own in `composer-packages.json` next to your sources
+file (with `composer up`, `packages.json` in the data folder's current generation), in this shape:
+
+```json
+{
+  "schema": "source-packages/v1",
+  "packages": [
+    {"package_id": "my-morning", "label": "My morning", "description": "The feeds I read first.",
+     "provenance": "added by me", "source_ids": ["google-ai", "my-blog"],
+     "selection_policy": {"unavailable_members": "refuse", "paid_requires_confirmation": false,
+                          "offline_trial_eligible": false}}
+  ]
+}
+```
+
+`unavailable_members` is `refuse` (the chip is off while any of its sources is unavailable) or
+`skip_with_disclosure` (it ticks the rest and says what it left out). A package that names a source that is not in
+your sources, or a hidden one, is set aside and the Sources page says why; the others still load. The file is read
+again when it changes. A package is only a suggestion: the brief uses the sources that are ticked when you compose.
+
 ## The quick way
 
 ```sh
@@ -71,6 +112,11 @@ The rules each entry must meet (Composer refuses the file and says why otherwise
 - `discovery` (only for `html-index`): the hosts and path prefixes an article link must be on.
   Composer checks every link against these before it fetches anything, and keeps at most
   `max_candidates` (1 to 40). This stops a page from sending Composer anywhere else.
+- `extraction_tier` (only for `html-index`, optional): `native` is the default parser with no
+  extra package. `trafilatura` uses the optional article parser (say yes to it in `composer setup`, or run
+  `composer setup --reconfigure parser`; it installs from a hash-locked file). When it is not installed, the pages are read with the built-in
+  parser (text only), and the brief's receipt says which parser read each source (`fetch_tier`, `fetch_tiers`) and
+  that the optional one was missing.
 
 Every fetch is https only (a redirect to `http://` is refused), follows at most 5 redirects,
 reads at most 2 MB and stops after 60 seconds in total, however slowly the answer arrives.

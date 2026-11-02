@@ -20,7 +20,9 @@ from pathlib import Path
 SECTIONS = {
     "install": {"home": str, "python_download": bool},
     "provider": {"kind": str, "model": str, "base_url": str, "key": str, "key_from_env": str},
+    "checker": {"kind": str, "model": str, "base_url": str, "key": str, "key_from_env": str},
     "sources": {"hacker_news": bool, "add": list},
+    "parser": {"trafilatura": bool},
     "narration": {"enabled": bool, "use": str, "accept_licences": bool, "url": str},
     "schedule": {"enabled": bool, "time": str, "timezone": str, "sources": list, "lens": str, "insights": int},
     "server": {"port": int},

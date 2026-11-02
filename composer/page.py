@@ -59,7 +59,8 @@ def build(edition: dict, *, live: bool = False, sources: list | None = None, nee
         badge, note = "a recorded brief, replayed", "Nothing is composed here: this replays a brief written earlier."
     else:
         badge, note = "a brief", "A saved brief, shown as it was written."
-    config = {"live": live, "sources": [{"id": s.id, "label": s.label} for s in (sources or [])]}
+    config = {"live": live, "sources": [{"id": s.id, "label": s.label, "available": s.available,
+                                             "hidden": s.hidden, "reason": s.reason} for s in (sources or [])]}
     connect = " connect-src 'self';" if live else ""
     csp = (f"default-src 'none'; style-src {_sha(css)}; script-src {_sha(js)};{connect} "
            "img-src 'none'; form-action 'none'; base-uri 'none'")

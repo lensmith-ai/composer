@@ -1,0 +1,13 @@
+{
+  "schema": "composer-models/v1",
+  "about": "The model ids `composer setup` offers after you choose a service. Edit this list to change what it offers; an answers file and the 'type another' choice take any id.",
+  "anthropic": {
+    "default": "claude-sonnet-5-5",
+    "models": ["claude-sonnet-5-5", "claude-opus-5-5", "claude-haiku-5-5"]
+  },
+  "openai": {
+    "default": "",
+    "models": [],
+    "note": "Type the model id your endpoint uses, for example OpenRouter's \"anthropic/claude-opus-5-5\"."
+  }
+}
