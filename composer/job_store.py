@@ -518,7 +518,9 @@ class JobStore:
     @staticmethod
     def _atomic_text(path: Path, value: str) -> None:
         path.parent.mkdir(parents=True, exist_ok=True); tmp = path.with_name("." + path.name + ".tmp")
-        with tmp.open("w", encoding="utf-8") as handle: handle.write(value); handle.flush(); os.fsync(handle.fileno())
+        tmp.unlink(missing_ok=True)  # a fresh file: an existing one (or a hard link elsewhere) is never truncated
+        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0), 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as handle: handle.write(value); handle.flush(); os.fsync(handle.fileno())
         os.replace(tmp, path)
         descriptor = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
         try: os.fsync(descriptor)

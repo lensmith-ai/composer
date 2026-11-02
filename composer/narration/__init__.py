@@ -38,7 +38,7 @@ import urllib.request
 from pathlib import Path
 from urllib.parse import urlsplit
 
-from ..home import CONFINED, HomeError, open_owned, owned_dir, private_env
+from ..home import CONFINED, HomeError, atomic_write, open_owned, owned_dir, private_env
 
 VOICES = ("af_heart", "am_michael", "bf_emma")
 VOICE_LABELS = {"af_heart": "Heart", "am_michael": "Michael", "bf_emma": "Emma"}
@@ -213,7 +213,9 @@ def download(home: Path, *, log=print, opener=None) -> tuple[Path, Path]:
         log(f"  downloading {name} ({want_size / 1_000_000:.0f} MB)")
         h, got = hashlib.sha256(), 0
         try:
-            with open_url(RELEASE + name, timeout=60) as resp, open(part, "wb") as out:
+            part.unlink(missing_ok=True)  # never reuse (or truncate) an existing .part, which may be a hard link
+            fresh = os.open(part, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0), 0o600)
+            with open_url(RELEASE + name, timeout=60) as resp, os.fdopen(fresh, "wb") as out:
                 if not resp.geturl().startswith("https://"):
                     raise NarrationError("the download left HTTPS; stopped")
                 while True:
@@ -252,7 +254,10 @@ def _download_at(home: Path, target: Path, *, log, opener) -> tuple[Path, Path]:
             log(f"  downloading {name} ({want_size / 1_000_000:.0f} MB)")
             h, got = hashlib.sha256(), 0
             try:
-                fd = os.open(part, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o600, dir_fd=at.fd)
+                # a fresh file every time: whatever has the .part name (a leftover, or a hard link to a file
+                # elsewhere) is unlinked, never opened and truncated
+                _unlink_at(at.fd, part)
+                fd = os.open(part, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600, dir_fd=at.fd)
                 with open_url(RELEASE + name, timeout=60) as resp, os.fdopen(fd, "wb") as out:
                     if not resp.geturl().startswith("https://"):
                         raise NarrationError("the download left HTTPS; stopped")
@@ -321,7 +326,7 @@ def install_runtime(home: Path, *, log=print, base_python: str | None = None) ->
                         "--only-binary", ":all:", "-r", str(RUNTIME_LOCK)], check=True, env=env)
         subprocess.run([str(python), "-I", "-c", "import kokoro_onnx, soundfile"], check=True, env=env,
                        capture_output=True)
-        (venv / ".runtime-ok").write_text("installed from requirements.lock\n", encoding="utf-8")
+        atomic_write(venv / ".runtime-ok", "installed from requirements.lock\n", mode=0o600)
     except (subprocess.CalledProcessError, OSError) as exc:
         if made:
             _remove_owned_tree(home, ("narration",), "venv")  # a half-made runtime would look installed next time
@@ -415,7 +420,10 @@ def server_render(url: str, voice: str, text: str, out_base: Path, *, timeout: f
     if not data or not (data[:3] == b"ID3" or data[:1] == b"\xff"):
         raise NarrationError("the Kokoro server's answer is not MP3 audio")
     path = Path(str(out_base) + ".mp3")
-    path.write_bytes(data)
+    path.unlink(missing_ok=True)  # a fresh file, never an existing one (or a hard link) truncated
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0), 0o600)
+    with os.fdopen(fd, "wb") as out:
+        out.write(data)
     return {"ok": True, "file": str(path), "format": "mp3", "seconds": round(time.monotonic() - started, 2)}
 
 

@@ -184,6 +184,10 @@ class Owned:
         if not _plain_name(name):
             raise HomeError(f"refused: {name!r} is not a plain file name")
         tmp = f".{name}.{os.getpid()}.tmp"
+        try:
+            os.unlink(tmp, dir_fd=self.fd)  # a leftover of that name is never reused: always a fresh file
+        except FileNotFoundError:
+            pass
         fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, mode, dir_fd=self.fd)
         try:
             with os.fdopen(fd, "w", encoding="utf-8") as handle:
@@ -466,7 +470,11 @@ def atomic_write(path: Path, text: str, *, mode: int = 0o644) -> None:
     """Write text to a temporary file next to `path` (created with `mode` from the start), then rename it."""
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_name("." + path.name + f".{os.getpid()}.tmp")
-    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | getattr(os, "O_NOFOLLOW", 0), mode)
+    try:
+        os.unlink(tmp)  # a leftover of that name (or a hard link to a file elsewhere) is never reused
+    except FileNotFoundError:
+        pass
+    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0), mode)
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as handle:
             handle.write(text)
