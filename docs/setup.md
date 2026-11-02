@@ -176,10 +176,13 @@ composer rollback
 ```
 
 The app also makes a backup once a week (`...-weekly.tar.gz`) and keeps the last 8 of those; backups you make yourself are never pruned. Copy backups somewhere else too. An update installs
-the new version into its own environment, copies and migrates your data if the new version needs it (the original
-stays as it was), switches, runs `composer doctor` with the new version, and undoes itself if that fails. An update
-that stopped half way is undone the next time Composer starts. Rollback first exports every brief made since the
-update to `data/recovery/exports/`. Stop `composer up` before restore, update, rollback or uninstall; they refuse
+the new version into its own environment in `app/<version>` and checks that it starts there, copies and migrates
+your data if the new version needs it (the original stays as it was), switches, runs `composer doctor` with the new
+version, and undoes itself if anything fails: your data and the version you had stay current. An update that
+stopped half way is undone the next time Composer starts, or by `composer rollback`. Rollback first exports every
+brief made since the update to `data/recovery/exports/`. If the current version's environment cannot start at all,
+`bin/composer` still runs `rollback`, `uninstall`, `backup` and `doctor`, with another installed version or your
+system `python3`. Stop `composer up` before restore, update, rollback or uninstall; they refuse
 while it runs.
 
 ## Remove it

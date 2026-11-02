@@ -5,12 +5,19 @@ backup    a dated .tar.gz of the current data generation (your briefs, settings,
 restore   checks the archive first (no absolute paths, no "..", no links or devices, size limits, every
           file's SHA-256), backs up what is there now, then swaps the restored generation in. The replaced
           generation is kept under <data>/recovery/replaced/.
-update    installs a release file into its own app/<version>/venv (checksum first), then, journaled in the job
-          store: migrates a COPY of the data if the new version needs a newer schema, switches the data pointer,
-          switches app/current, runs `composer doctor` with the new version, and undoes everything if that
-          fails. An update that was interrupted is finished or undone the next time Composer starts.
+update    reads the release file's version (checksum first) and installs it straight into app/<version>/venv,
+          where it stays (a virtual environment's scripts name the folder they were made in, so it is never
+          moved); checks that the new version starts from there; then, journaled in the job store: migrates a
+          COPY of the data if the new version needs a newer schema, switches the data pointer, switches
+          app/current, runs `composer doctor` with the new version. Any failure after the install puts the data
+          and app/current back and removes the new version's folder; an update that was interrupted is undone
+          the next time Composer starts (or by `composer rollback`), and its folder is replaced by the next try.
 rollback  points the data and the code back to the pair the last update recorded, exporting every brief made
           since the update to <data>/recovery/exports/ first. Nothing is deleted.
+
+bin/composer runs these with the current version's environment, or, when that environment does not start, with
+another installed version's or the system python3 (rollback, uninstall, backup and doctor only); this module and
+everything it imports use only the standard library for that reason.
 uninstall removes only what the install manifest lists as created, and your data only with --delete-data.
 """
 from __future__ import annotations
@@ -22,8 +29,11 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import tarfile
 import uuid
+import zipfile
+from email.parser import Parser
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -369,6 +379,52 @@ def _venv_python(venv: Path) -> Path:
     return venv / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
 
 
+def _venv_script(venv: Path, name: str) -> Path:
+    return venv / ("Scripts" if os.name == "nt" else "bin") / (name + (".exe" if os.name == "nt" else ""))
+
+
+PROJECT = "lensmith-composer"
+MAX_METADATA = 1024 * 1024
+
+
+def release_version(path: Path) -> str:
+    """The version a release file (.whl or .tar.gz) declares in its own metadata, read without installing it, so
+    the new environment can be made in its final folder. Refuses a file that is not a Composer release."""
+    try:
+        if path.name.endswith(".whl"):
+            with zipfile.ZipFile(path) as z:
+                names = [i for i in z.infolist() if re.fullmatch(r"[^/]+\.dist-info/METADATA", i.filename)]
+                if len(names) != 1 or names[0].file_size > MAX_METADATA:
+                    raise LifecycleError(f"refused: {path.name} has no single METADATA file")
+                blob = z.read(names[0])
+        elif path.name.endswith(".tar.gz"):
+            with tarfile.open(path, mode="r:gz") as tar:
+                names = [m for m in tar.getmembers() if m.isreg() and re.fullmatch(r"[^/]+/PKG-INFO", m.name)]
+                if len(names) != 1 or names[0].size > MAX_METADATA:
+                    raise LifecycleError(f"refused: {path.name} has no single PKG-INFO file")
+                blob = tar.extractfile(names[0]).read()
+        else:
+            raise LifecycleError("refused: give a release file ending in .whl or .tar.gz")
+    except (OSError, zipfile.BadZipFile, tarfile.TarError, EOFError) as exc:
+        raise LifecycleError(f"refused: {path.name} cannot be read as a release ({exc})") from None
+    meta = Parser().parsestr(blob.decode("utf-8", "replace"), headersonly=True)
+    name = re.sub(r"[-_.]+", "-", (meta.get("Name") or "").strip().lower())
+    if name != PROJECT:
+        raise LifecycleError(f"refused: {path.name} is not a Lensmith Composer release (it names {name!r})")
+    version = (meta.get("Version") or "").strip()
+    if not VERSION_NAME.fullmatch(version) or version == "current":
+        raise LifecycleError(f"refused: the release's version {version[:70]!r} is not a version Composer installs")
+    return version
+
+
+def _remove_version(home: Path, version: str) -> None:
+    """Remove app/<version>, never app/current's target, and only a real folder with a version's name."""
+    folder = home / "app" / version
+    if (VERSION_NAME.fullmatch(version) and version != "current" and version != _current_version(home)
+            and folder.is_dir() and not folder.is_symlink()):
+        shutil.rmtree(folder)
+
+
 def verify_file(path: Path, sha256: str | None) -> str:
     got = _sha(path)
     want = (sha256 or "").strip().lower()
@@ -387,7 +443,14 @@ def verify_file(path: Path, sha256: str | None) -> str:
 
 
 def _query(python: Path, home: Path, code: str, run) -> str:
-    proc = run([str(python), "-I", "-c", code], capture_output=True, text=True, env=H.private_env(home), timeout=120)
+    return _started([str(python), "-I", "-c", code], home, run)
+
+
+def _started(argv: list, home: Path, run) -> str:
+    try:
+        proc = run(argv, capture_output=True, text=True, env=H.private_env(home), timeout=120)
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise LifecycleError(f"the new version does not start: {exc}") from None
     if proc.returncode != 0:
         raise LifecycleError(f"the new version does not start: {(proc.stderr or '').strip()[-200:]}")
     return proc.stdout.strip()
@@ -416,53 +479,79 @@ def _update(home: Path, data: Path, release: Path, *, sha256, run, crash_after, 
         raise LifecycleError("this is not a native install with app/current; in Docker, change the image tag "
                              "(docs/deploy-vps.md, updates)")
     verify_file(release, sha256)
-    staging = home / "app" / (".new-" + uuid.uuid4().hex[:8])
+    new_version = release_version(release)
+    if new_version == old_version:
+        raise LifecycleError(f"refused: the release is version {new_version!r}, which is already installed")
+    folder = home / "app" / new_version
+    if os.path.lexists(folder):
+        if folder.is_symlink() or not folder.is_dir():
+            raise LifecycleError(f"refused: {folder} is not a folder Composer made; nothing was installed")
+        _remove_version(home, new_version)  # an earlier, unfinished try at this same version (never the current)
+    venv = folder / "venv"
     base = Path(os.path.realpath(_venv_python(home / "app" / old_version / "venv")))
+    if not base.is_file():  # the Python the old environment was made from is gone: use the one running this
+        base = Path(getattr(sys, "_base_executable", "") or sys.executable)
     env = H.private_env(home)
-    log("  installing the new version into its own environment")
+    log(f"  installing {new_version} into its own environment, {venv}")
     try:
-        r = run([str(base), "-m", "venv", str(staging / "venv")], env=env, capture_output=True, text=True)
+        # made in its final folder: a virtual environment's scripts and paths name the folder they were made in
+        r = run([str(base), "-m", "venv", str(venv)], env=env, capture_output=True, text=True)
         if r.returncode != 0:
-            raise LifecycleError("could not make the new environment")
-        r = run([str(_venv_python(staging / "venv")), "-m", "pip", "install", "--quiet", str(release)], env=env,
+            raise LifecycleError(f"could not make the new environment: {(r.stderr or '').strip()[-300:]}")
+        r = run([str(_venv_python(venv)), "-m", "pip", "install", "--quiet", str(release)], env=env,
                 capture_output=True, text=True)
         if r.returncode != 0:
             raise LifecycleError(f"the release did not install: {(r.stderr or '').strip()[-300:]}")
-        new_version = _query(_venv_python(staging / "venv"), home, "import composer; print(composer.__version__)", run)
-        new_schema = _query(_venv_python(staging / "venv"), home,
-                            "from composer import job_store as j; print(getattr(j, 'DATA_SCHEMA', '1'))", run)
-    except BaseException:
-        shutil.rmtree(staging, ignore_errors=True)
+        got = _query(_venv_python(venv), home, "import composer; print(composer.__version__)", run)
+        if got != new_version:
+            raise LifecycleError(f"refused: the release says version {new_version} but its code says {got[:70]!r}")
+        # start it the ways it will be started: its own `composer` script and the launcher's python
+        said = _started([str(_venv_script(venv, "composer")), "--version"], home, run)
+        if said != f"composer {new_version}":
+            raise LifecycleError(f"the new version does not start: `composer --version` said {said[-200:]!r}")
+        new_schema = _query(_venv_python(venv), home,
+                            "import composer.cli, composer.lifecycle; from composer import job_store as j; "
+                            "print(getattr(j, 'DATA_SCHEMA', '1'))", run)
+    except BaseException as exc:
+        _remove_version(home, new_version)
+        if isinstance(exc, (OSError, subprocess.SubprocessError)):
+            raise LifecycleError(f"the release did not install ({exc}); nothing was changed") from None
         raise
-    if not VERSION_NAME.fullmatch(new_version) or new_version == old_version:
-        shutil.rmtree(staging, ignore_errors=True)
-        raise LifecycleError(f"refused: the release is version {new_version!r}, which is already installed")
-    if (home / "app" / new_version).exists():
-        shutil.rmtree(home / "app" / new_version)  # an earlier, unfinished try at this same version
-    os.replace(staging, home / "app" / new_version)
     store = JobStore(data, worker=None)
     old_gen = store.current_generation()
     fields = {"old_version": old_version, "new_version": new_version, "old_generation": old_gen,
               "new_generation": old_gen}
     _step(store, "intent", crash_after, fields)
-    if new_schema != store.generation_schema():
-        log(f"  migrating a copy of your data to schema {new_schema} (the original stays as it is)")
-        store.migrate_copy(new_schema)
-        target = next(g for g in ("g1", "g2") if g != old_gen)
-        _step(store, "data_migrated", crash_after, dict(fields, new_generation=target))
-        store.switch(target)
-        fields["new_generation"] = target
-        _step(store, "data_switched", crash_after, fields)
-    _point_code(home, new_version)
-    _step(store, "code_switched", crash_after, fields)
-    doctor = run([str(home / "app" / new_version / "venv" / "bin" / "composer"), "doctor", "--parity", "--integrity-only",
-                  "--home", str(home), "--data", str(data)], env=env, capture_output=True, text=True)
-    if doctor.returncode != 0:
-        log("  the new version's doctor failed; undoing the update")
+    try:
+        if new_schema != store.generation_schema():
+            log(f"  migrating a copy of your data to schema {new_schema} (the original stays as it is)")
+            store.migrate_copy(new_schema)
+            target = next(g for g in ("g1", "g2") if g != old_gen)
+            _step(store, "data_migrated", crash_after, dict(fields, new_generation=target))
+            store.switch(target)
+            fields["new_generation"] = target
+            _step(store, "data_switched", crash_after, fields)
+        _point_code(home, new_version)
+        _step(store, "code_switched", crash_after, fields)
+        try:
+            doctor = run([str(_venv_script(venv, "composer")), "doctor", "--parity", "--integrity-only",
+                          "--home", str(home), "--data", str(data)], env=env, capture_output=True, text=True)
+        except (OSError, subprocess.SubprocessError) as exc:
+            raise LifecycleError(f"the update was undone: the new version's doctor did not start ({exc})") from None
+        if doctor.returncode != 0:
+            raise LifecycleError("the update was undone because `composer doctor` failed with the new version:\n"
+                                 + (doctor.stdout or "")[-1500:])
+        _step(store, "committed", None, fields)
+    except Crash:
+        raise  # the test hook stands for a computer that went off here: recovery undoes it at the next start
+    except BaseException as exc:
+        log(f"  the update did not finish ({type(exc).__name__}); undoing it")
         _undo(home, store, fields, log)
-        raise LifecycleError("the update was undone because `composer doctor` failed with the new version:\n"
-                             + (doctor.stdout or "")[-1500:])
-    _step(store, "committed", None, fields)
+        if _current_version(home) == old_version:
+            _remove_version(home, new_version)  # this process runs the old version, so the new one can go
+        if isinstance(exc, Exception) and not isinstance(exc, LifecycleError):
+            raise LifecycleError(f"the update was undone: {exc}") from exc
+        raise
     return {"from": old_version, "to": new_version, "data_migrated": fields["new_generation"] != old_gen}
 
 
@@ -499,7 +588,12 @@ def recover(home: Path | None, data: Path, *, log=print) -> str | None:
 
 def rollback(home: Path | None, data: Path, *, data_only: bool = False, log=print) -> dict:
     with exclusive(data, "roll back"):
-        recover(home, data, log=log)
+        _recover_restore(data, log)  # before the store opens (see there)
+        last = JobStore(data, worker=None).last("update") if (data / "current").exists() else None
+        if recover(home, data, log=log) and last and last["stage"] not in ("committed", "undone", "rolled_back"):
+            # an update that stopped half way: undoing it IS the rollback (data and code are back as they were)
+            return {"exported_jobs": [], "export_directory": None, "recovered": True,
+                    "code": None if data_only or home is None else _current_version(home)}
         return _rollback(home, data, data_only=data_only)
 
 

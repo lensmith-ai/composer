@@ -233,12 +233,25 @@ class BackupRestoreTests(unittest.TestCase):
             self.assertEqual(snapshot(data), before)
 
 
+def release_file(folder: Path, version: str = "0.3.0", name: str = "lensmith-composer") -> Path:
+    """A small sdist-shaped release: <name>-<version>/PKG-INFO is all update() reads before installing it."""
+    path = folder / f"lensmith_composer-{version.replace('/', '_')}.tar.gz"
+    blob = f"Metadata-Version: 2.1\nName: {name}\nVersion: {version}\n".encode()
+    with tarfile.open(path, "w:gz") as tar:
+        info = tarfile.TarInfo(f"lensmith_composer-{version.replace('/', '_')}/PKG-INFO")
+        info.size = len(blob)
+        tar.addfile(info, io.BytesIO(blob))
+    return path
+
+
 class FakeRun:
     """Stands in for subprocess.run in update(): makes the new environment, reports a version and a data schema,
-    and answers the new version's doctor with `doctor_rc`."""
+    starts the new `composer --version` (or not: `starts`), and answers the new version's doctor with `doctor_rc`
+    (or raises `doctor_raises`, as a script whose interpreter is gone does)."""
 
-    def __init__(self, version="0.3.0", schema="1", doctor_rc=0):
+    def __init__(self, version="0.3.0", schema="1", doctor_rc=0, starts=True, doctor_raises=None):
         self.version, self.schema, self.doctor_rc = version, schema, doctor_rc
+        self.starts, self.doctor_raises = starts, doctor_raises
         self.calls = []
 
     def __call__(self, argv, **kw):
@@ -248,9 +261,16 @@ class FakeRun:
             venv = Path(argv[-1])
             (venv / "bin").mkdir(parents=True)
             (venv / "bin" / "python").write_text("", encoding="utf-8")
+            (venv / "bin" / "composer").write_text(f"#!{venv / 'bin' / 'python'}\n", encoding="utf-8")
         elif "-c" in argv:
             out = self.version if "__version__" in argv[-1] else self.schema
+        elif "--version" in argv:
+            if not self.starts:
+                raise FileNotFoundError(2, "No such file or directory", argv[0])
+            out = f"composer {self.version}"
         elif "doctor" in argv:
+            if self.doctor_raises:
+                raise self.doctor_raises
             rc = self.doctor_rc
         return mock.Mock(returncode=rc, stdout=out, stderr="")
 
@@ -261,9 +281,7 @@ class UpdateRollbackTests(unittest.TestCase):
         (target / "app" / "0.2.0" / "venv" / "bin").mkdir(parents=True)
         (target / "app" / "0.2.0" / "venv" / "bin" / "python").write_text("", encoding="utf-8")
         os.symlink("0.2.0", target / "app" / "current")
-        release = home.parent / "lensmith_composer-0.3.0.tar.gz"
-        release.write_bytes(b"a release")
-        return target, target / "data", release
+        return target, target / "data", release_file(home.parent)
 
     def sha(self, path):
         import hashlib
@@ -307,6 +325,65 @@ class UpdateRollbackTests(unittest.TestCase):
             self.assertEqual(os.readlink(target / "app" / "current"), "0.2.0")
             self.assertEqual(JobStore(data, worker=None).current_generation(), "g1")
             self.assertEqual(JobStore(data, worker=None).last("update")["stage"], "undone")
+
+    def test_the_new_environment_is_made_in_its_final_folder(self):
+        with fake_home() as home:
+            target, data, release = self.native(home)
+            run = FakeRun()
+            L.update(target, data, release, sha256=self.sha(release), run=run, log=lambda *_: None)
+            venvs = [argv[-1] for argv in run.calls if "-m" in argv and argv[argv.index("-m") + 1] == "venv"]
+            self.assertEqual(venvs, [str(target / "app" / "0.3.0" / "venv")])  # never made elsewhere and moved
+            self.assertEqual(sorted(os.listdir(target / "app")), ["0.2.0", "0.3.0", "current"])
+            doctor = next(argv for argv in run.calls if "doctor" in argv)
+            self.assertEqual(doctor[0], str(L._venv_script(target / "app" / "0.3.0" / "venv", "composer")))
+
+    def test_a_new_version_that_does_not_start_is_never_switched_to(self):
+        for run in (FakeRun(starts=False), FakeRun(version="9.9.9")):
+            with self.subTest(run=run.__dict__), fake_home() as home:
+                target, data, release = self.native(home)
+                with self.assertRaises(L.LifecycleError):
+                    L.update(target, data, release, sha256=self.sha(release), run=run, log=lambda *_: None)
+                self.assertEqual(os.readlink(target / "app" / "current"), "0.2.0")
+                self.assertEqual(sorted(os.listdir(target / "app")), ["0.2.0", "current"])
+                self.assertIsNone(JobStore(data, worker=None).last("update"))  # nothing was journaled or switched
+
+    def test_any_failure_after_the_switch_undoes_the_update(self):
+        for run in (FakeRun(schema="2", doctor_raises=FileNotFoundError(2, "No such file or directory")),
+                    FakeRun(schema="2", doctor_raises=KeyboardInterrupt())):
+            with self.subTest(raises=type(run.doctor_raises).__name__), fake_home() as home:
+                target, data, release = self.native(home)
+                with self.assertRaises((L.LifecycleError, KeyboardInterrupt)):
+                    L.update(target, data, release, sha256=self.sha(release), run=run, log=lambda *_: None)
+                self.assertEqual(os.readlink(target / "app" / "current"), "0.2.0")
+                self.assertEqual(JobStore(data, worker=None).current_generation(), "g1")
+                self.assertEqual(JobStore(data, worker=None).last("update")["stage"], "undone")
+                self.assertEqual(sorted(os.listdir(target / "app")), ["0.2.0", "current"])
+
+    def test_a_file_that_is_not_a_composer_release_is_refused_before_anything_is_made(self):
+        with fake_home() as home:
+            target, data, _ = self.native(home)
+            (home.parent / "other").mkdir()
+            other = release_file(home.parent / "other", name="other")
+            plain = home.parent / "notes.zip"
+            plain.write_bytes(b"not a release")
+            for release in (other, plain):
+                with self.subTest(release=release.name):
+                    with self.assertRaises(L.LifecycleError):
+                        L.update(target, data, release, sha256=self.sha(release), run=FakeRun(), log=lambda *_: None)
+                    self.assertEqual(sorted(os.listdir(target / "app")), ["0.2.0", "current"])
+
+    def test_rollback_after_an_interrupted_update_undoes_it(self):
+        with fake_home() as home:
+            target, data, release = self.native(home)
+            with self.assertRaises(L.Crash):
+                L.update(target, data, release, sha256=self.sha(release), run=FakeRun(schema="2"),
+                         crash_after="code_switched", log=lambda *_: None)
+            out = L.rollback(target, data, log=lambda *_: None)
+            self.assertEqual((out["code"], out.get("recovered")), ("0.2.0", True))
+            self.assertEqual(os.readlink(target / "app" / "current"), "0.2.0")
+            self.assertEqual(JobStore(data, worker=None).current_generation(), "g1")
+            with self.assertRaises(L.LifecycleError):
+                L.rollback(target, data, log=lambda *_: None)  # nothing left to roll back
 
     def test_an_update_stopped_at_any_step_is_undone_at_the_next_start(self):
         for stage in ("intent", "data_migrated", "data_switched", "code_switched"):

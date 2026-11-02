@@ -454,15 +454,60 @@ def _launcher_text(home: Path, target: str) -> str:
              "this folder:", "# every cache and temporary file goes inside it."]
     for key in sorted(env):
         lines.append(f"{key}={shlex.quote(env[key])}; export {key}")
-    lines.append(f"exec {target} \"$@\"")
+    lines.append(target)
     return "\n".join(lines) + "\n"
+
+
+# Runs app/current's own python (never its scripts, so nothing depends on the folder an environment was made in).
+# When that environment does not start (an update that stopped half way, or a Python that went away), the commands
+# that repair or remove an install still run: with another installed version's environment, or with the system
+# python3 on that version's code (rollback, uninstall, backup and doctor need only the standard library).
+# -I keeps the current folder and PYTHON* variables out, as the scripts pip writes do.
+APP_LAUNCH = r"""APP=__APP__
+RUN='import sys; sys.argv[0] = "composer"; from composer.cli import main; sys.exit(main())'
+ON_PATH='import sys; sys.path.insert(0, sys.argv.pop(1)); sys.argv[0] = "composer"
+from composer.cli import main; sys.exit(main())'
+starts() { [ -x "$1" ] && "$1" -I -c 'import composer.cli, composer.lifecycle' >/dev/null 2>&1; }
+if starts "$APP/current/venv/bin/python"; then exec "$APP/current/venv/bin/python" -I -c "$RUN" "$@"; fi
+case "${1:-}" in
+  rollback|uninstall|backup|doctor|--version) ;;
+  *) echo "composer: the environment in $APP/current does not start (an update that stopped half way," \
+          "or the Python it was made from went away)." >&2
+     echo "  Run: $0 rollback   (back to the version before the last update), or: $0 uninstall   (your data stays)" >&2
+     exit 127 ;;
+esac
+CUR=$(readlink "$APP/current" 2>/dev/null || true)
+for v in "$CUR" $(ls -t "$APP" 2>/dev/null); do
+  case "$v" in ""|current|.*) continue ;; esac
+  if starts "$APP/$v/venv/bin/python"; then
+    echo "composer: the environment in $APP/current does not start; running $v's instead" >&2
+    exec "$APP/$v/venv/bin/python" -I -c "$RUN" "$@"
+  fi
+done
+SYS=$(command -v python3 2>/dev/null || true)
+if [ -n "$SYS" ]; then
+  for v in "$CUR" $(ls -t "$APP" 2>/dev/null); do
+    case "$v" in ""|current|.*) continue ;; esac
+    for sp in "$APP/$v"/venv/lib/python3*/site-packages; do
+      [ -f "$sp/composer/cli.py" ] || continue
+      if "$SYS" -I -c 'import sys; sys.path.insert(0, sys.argv[1]); import composer.cli, composer.lifecycle' \
+           "$sp" >/dev/null 2>&1; then
+        echo "composer: no installed environment starts; running $v's code with $SYS" >&2
+        exec "$SYS" -I -c "$ON_PATH" "$sp" "$@"
+      fi
+    done
+  done
+fi
+echo "composer: no installed environment starts, and there is no python3 on PATH to run rollback or uninstall" >&2
+echo "  Install Python 3.10+, or remove $APP yourself; your data is in its own folder and was not touched." >&2
+exit 127"""
 
 
 def write_launcher(home: Path) -> Path:
     """bin/composer: runs app/current when setup.sh made the private environment, else this Python."""
     in_app = Path(sys.prefix).parent.parent == home / "app"
-    command = (shlex.quote(str(home / "app" / "current" / "venv" / "bin" / "composer")) if in_app
-               else f"{shlex.quote(sys.executable)} -m composer")
+    command = (APP_LAUNCH.replace("__APP__", shlex.quote(str(home / "app"))) if in_app
+               else f"exec {shlex.quote(sys.executable)} -m composer \"$@\"")
     path = home / "bin" / "composer"
     path.parent.mkdir(mode=0o700, exist_ok=True)
     H.atomic_write(path, _launcher_text(home, command), mode=0o700)

@@ -14,7 +14,7 @@ from unittest import mock
 
 from helpers import ROOT
 from install_helpers import FakeRender, fake_home, snapshot
-from test_lifecycle import FakeRun, install, saved_job
+from test_lifecycle import FakeRun, install, release_file, saved_job
 
 from composer import home as H, installer, lifecycle as L, narration as N, server, settings as S
 from composer.job_store import JobStore
@@ -105,13 +105,13 @@ class UpdateFixTests(unittest.TestCase):
             (target / "app" / "0.2.0" / "venv" / "bin").mkdir(parents=True)
             (target / "app" / "0.2.0" / "venv" / "bin" / "python").write_text("", encoding="utf-8")
             os.symlink("0.2.0", target / "app" / "current")
-            release = home.parent / "r.tar.gz"
-            release.write_bytes(b"r")
             import hashlib
-            for name in ("..", ".", ".hidden", "a/b"):
+            for name in ("..", ".", ".hidden", "a/b", "current"):
                 with self.subTest(version=name):
+                    release = release_file(home.parent, version=name)
                     with self.assertRaises(L.LifecycleError):
-                        L.update(target, target / "data", release, sha256=hashlib.sha256(b"r").hexdigest(),
+                        L.update(target, target / "data", release,
+                                 sha256=hashlib.sha256(release.read_bytes()).hexdigest(),
                                  run=FakeRun(version=name), log=lambda *_: None)
                     self.assertTrue((target / "data" / "current").is_file())
                     self.assertTrue((target / "bin").is_dir())
