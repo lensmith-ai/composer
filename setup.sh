@@ -74,6 +74,15 @@ while [ $# -gt 0 ]; do
   esac
 done
 
+# Model keys and the server pass phrase are for Composer's own setup step only (its check and its run, below): no
+# other program setup.sh starts (Python discovery, uv, venv, pip and the build backends pip runs, version checks)
+# gets them. They are taken out of the environment here and handed back only to `composer setup`.
+HELD=""
+for k in ANTHROPIC_API_KEY OPENAI_API_KEY COMPOSER_CHECKER_API_KEY COMPOSER_SERVER_PASS; do
+  if eval "[ -n \"\${$k+x}\" ]"; then eval "held_$k=\$$k"; HELD="$HELD $k"; unset "$k"; fi
+done
+with_keys() { ( for k in $HELD; do eval "export $k=\"\$held_$k\""; done; exec "$@" ) }
+
 SRC=$(cd "$(dirname "$0")" && pwd)
 [ -f "$SRC/pyproject.toml" ] && [ -d "$SRC/composer" ] || die "run this from a Composer folder (it installs that folder)"
 VERSION=$(sed -n 's/^version = "\([0-9][0-9A-Za-z.+_-]*\)"$/\1/p' "$SRC/pyproject.toml" | head -n 1)
@@ -175,7 +184,7 @@ if [ -n "$PY" ]; then
   set -- setup --home "$H" --check-only
   [ -n "$ANSWERS" ] && set -- "$@" --answers "$ANSWERS"
   [ "$YES" = 1 ] && set -- "$@" --yes
-  (cd "$SRC" && PYTHONDONTWRITEBYTECODE=1 PYTHONNOUSERSITE=1 "$PY" -m composer "$@") || \
+  (cd "$SRC" && export PYTHONDONTWRITEBYTECODE=1 PYTHONNOUSERSITE=1 && with_keys "$PY" -m composer "$@") || \
     die "the checks above failed; nothing was written"
 fi
 FREE_KB=$(df -Pk "$PARENT" | awk 'NR==2 {print $4}')
@@ -264,7 +273,7 @@ set -- setup --home "$H"
 [ -n "$NOTEST" ] && set -- "$@" "$NOTEST"
 for part in $RECONF; do set -- "$@" --reconfigure "$part"; done
 if has_tty && [ -z "$ANSWERS" ] && [ "$YES" = 0 ]; then
-  "$H/app/current/venv/bin/composer" "$@" < /dev/tty
+  with_keys "$H/app/current/venv/bin/composer" "$@" < /dev/tty
 else
-  "$H/app/current/venv/bin/composer" "$@"
+  with_keys "$H/app/current/venv/bin/composer" "$@"
 fi
