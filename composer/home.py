@@ -80,7 +80,7 @@ def now() -> str:
 # Composer trusts your own account and root, and nothing else. Before it sets up, updates, rolls back, recovers or
 # works in its folder (narration included), the folder and every folder above it, up to /, must be owned by you or
 # root and writable by no one else (no group or other write bit), checked on the path as given and on its real path
-# (links resolved). Inside it, the same rule holds for every folder and file Composer writes into, runs or reads as
+# (links resolved); the path as given may not go through a symbolic link at all. Inside it, the same rule holds for every folder and file Composer writes into, runs or reads as
 # its own configuration (bin, app, app/<version> and its environment, python, bootstrap, narration, models, cache,
 # tmp, the marker and the manifest, and the data folder with its recovery records): an existing install where any of
 # them breaks it is refused, not adopted. This is the rule OpenSSH applies to ~/.ssh ("StrictModes"). With it, only
@@ -115,7 +115,10 @@ def _uid() -> int | None:
 
 def check_trust(path: Path) -> None:
     """Refuse when `path` (or, if it does not exist yet, its nearest existing folder) or any folder above it is owned
-    by another account or writable by group or others. Only reads."""
+    by another account or writable by group or others, or when any of them is a symbolic link. A link is refused
+    because the folders it leads through (and the ones its target's own links lead through) are on neither the path
+    as given nor the real path, so they would go unchecked: a writable folder there lets another account change
+    where the path leads. Only reads."""
     uid = _uid()
     if uid is None:
         return
@@ -123,6 +126,11 @@ def check_trust(path: Path) -> None:
     start = path
     while not os.path.lexists(start) and start != start.parent:
         start = start.parent
+    for folder in (start, *start.parents):
+        if os.path.islink(folder):
+            raise HomeError(f"refused: {folder} is a symbolic link. Give the real path instead "
+                            f"({os.path.realpath(path)}): Composer checks every folder on the path it is given, and "
+                            "the folders a link leads through are not on it")
     real = Path(os.path.realpath(start))
     seen = set()
     for folder in (start, *start.parents, real, *real.parents):

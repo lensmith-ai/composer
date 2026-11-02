@@ -65,7 +65,8 @@ check_owned() {
   why=$(owned_ok) || die "refused: $why. Setup works only in its own real folders that no other account can change, so nothing was written or removed. Fix that (or remove the link) and run it again."
 }
 # The trust contract (SECURITY.md): the app folder and every folder above it, up to /, on the path as given and on
-# its real path, must belong to you or root and be writable by no one else. Checks the nearest existing folder.
+# its real path, must belong to you or root and be writable by no one else, and the path as given may not go through
+# a symbolic link. Checks the nearest existing folder.
 trust_one() {  # trust_one FOLDER: prints why not, returns 1
   set -- "$1" "$(ls -ldn -- "$1" 2>/dev/null)"
   [ -n "$2" ] || { say "$1 cannot be checked"; return 1; }
@@ -79,7 +80,14 @@ trust_one() {  # trust_one FOLDER: prints why not, returns 1
 }
 trust_ok() {
   d=$H
-  while [ ! -e "$d" ] && [ "$d" != / ]; do d=$(dirname "$d"); done
+  while [ ! -e "$d" ] && [ ! -L "$d" ] && [ "$d" != / ]; do d=$(dirname "$d"); done
+  # no symbolic link on the way: the folders a link leads through are on neither path, so they would go unchecked
+  p=$d
+  while :; do
+    if [ -L "$p" ]; then say "$p is a symbolic link; give the real path instead ($(cd "$d" 2>/dev/null && pwd -P)${H#"$d"})"; return 1; fi
+    [ "$p" = / ] && break
+    p=$(dirname "$p")
+  done
   for start in "$d" "$(cd "$d" 2>/dev/null && pwd -P)"; do
     [ -n "$start" ] || continue
     p=$start
