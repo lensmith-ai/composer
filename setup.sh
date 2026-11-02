@@ -47,10 +47,22 @@ owned_ok() {
         if [ -L "$p/venv" ]; then say "$p/venv is a symbolic link"; return 1; fi ;;
     esac
   done
+  tree_ok
+}
+# The trust contract all the way down: every folder, file and link in the app folder must belong to you or root, and
+# no folder or file in it may be writable by group or others. An existing install is checked, never adopted as it is.
+tree_ok() {
+  [ -d "$H" ] || return 0
+  nl='
+'
+  bad=$(find "$H" ! -user "$(id -u)" ! -user 0 -print) || { say "$H cannot be checked all the way down"; return 1; }
+  if [ -n "$bad" ]; then say "${bad%%"$nl"*} belongs to another account; fix: chown -R $(id -un) $H"; return 1; fi
+  bad=$(find "$H" ! -type l \( -perm -020 -o -perm -002 \) -print) || { say "$H cannot be checked all the way down"; return 1; }
+  if [ -n "$bad" ]; then say "${bad%%"$nl"*} can be written by other accounts; fix: chmod -R go-w $H"; return 1; fi
   return 0
 }
 check_owned() {
-  why=$(owned_ok) || die "refused: $why; setup works only in its own real folders, so nothing was written or removed. Remove the link (or the file) and run it again."
+  why=$(owned_ok) || die "refused: $why. Setup works only in its own real folders that no other account can change, so nothing was written or removed. Fix that (or remove the link) and run it again."
 }
 # The trust contract (SECURITY.md): the app folder and every folder above it, up to /, on the path as given and on
 # its real path, must belong to you or root and be writable by no one else. Checks the nearest existing folder.

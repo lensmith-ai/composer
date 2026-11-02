@@ -539,8 +539,9 @@ def update(home: Path, data: Path, release: Path, *, sha256: str | None = None, 
             except H.HomeError as exc:
                 raise LifecycleError(str(exc)) from None
         try:
-            return _update(home, data, release, sha256=sha256, run=run, crash_after=crash_after, log=log,
-                           home_at=home_at)
+            with H.no_group_write():  # the new environment is made private whatever the umask
+                return _update(home, data, release, sha256=sha256, run=run, crash_after=crash_after, log=log,
+                               home_at=home_at)
         finally:
             if home_at is not None:
                 home_at.close()
@@ -574,6 +575,12 @@ def _update(home: Path, data: Path, release: Path, *, sha256, run, crash_after, 
     base = Path(os.path.realpath(_venv_python(home / "app" / old_version / "venv")))
     if not base.is_file():  # the Python the old environment was made from is gone: use the one running this
         base = Path(getattr(sys, "_base_executable", "") or sys.executable)
+    try:  # the folders the new environment's programs are handed (TMPDIR, caches), and the new version's own
+        H.check_handed(home)
+        H.check_entry(folder)
+    except H.HomeError as exc:
+        _remove_version(home, new_version, home_at, log)
+        raise LifecycleError(str(exc)) from None
     env = H.private_env(home)
     log(f"  installing {new_version} into its own environment, {venv}")
     try:

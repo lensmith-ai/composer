@@ -462,7 +462,16 @@ def parser() -> argparse.ArgumentParser:
     return p
 
 
+def no_group_write_umask() -> None:
+    """Everything Composer writes, and everything the programs it starts write (venv, pip, Python's bytecode cache,
+    the narration runtime), is made without a group or other write bit, whatever umask it was started with (002 is
+    common): the trust contract refuses such folders and files in the app and data folders (home.check_tree)."""
+    from .home import no_group_write
+    no_group_write().__enter__()  # for the whole command: never undone
+
+
 def main(argv: list[str] | None = None) -> int:
+    no_group_write_umask()
     args = parser().parse_args(argv)
     if args.command == "sources":
         if args.action == "add":

@@ -37,7 +37,8 @@ import urllib.request
 from pathlib import Path
 from urllib.parse import urlsplit
 
-from ..home import CONFINED, HomeError, atomic_write, open_owned, owned_dir, private_env
+from ..home import (CONFINED, HomeError, atomic_write, check_handed, no_group_write, open_owned, owned_dir,
+                    private_env)
 
 VOICES = ("af_heart", "am_michael", "bf_emma")
 VOICE_LABELS = {"af_heart": "Heart", "am_michael": "Michael", "bf_emma": "Emma"}
@@ -183,6 +184,16 @@ def _owned(home: Path, *parts: str) -> Path:
         raise NarrationError(str(exc)) from None
 
 
+def _handed_env(home: Path) -> dict:
+    """private_env(home), after checking every folder it hands to the program (TMPDIR, the caches) is still one no
+    other account can change."""
+    try:
+        check_handed(home)
+    except HomeError as exc:
+        raise NarrationError(str(exc)) from None
+    return private_env(home)
+
+
 def _remove_owned_tree(home: Path, parts: tuple, name: str, log=lambda *_: None) -> bool:
     """Remove <home>/<parts>/<name> through open folders; a missing folder is fine. Where folders cannot be opened
     that way (CONFINED is False), nothing is removed by path: the folder is left, with a note. True when removed."""
@@ -316,19 +327,20 @@ def install_runtime(home: Path, *, log=print, base_python: str | None = None) ->
     venv = _owned(home, "narration") / "venv"
     if os.path.islink(venv):
         raise NarrationError(f"refused: {venv} is a symbolic link; nothing was installed")
-    env = private_env(home)
+    env = _handed_env(home)
     made = not venv.exists()
     python = venv / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
     try:
-        if made:
-            log("  making a private environment for narration")
-            subprocess.run([base_python or sys.executable, "-m", "venv", str(venv)], check=True, env=env)
-        log(f"  installing the narration runtime (about {RUNTIME_MB} MB, hash-checked)")
-        subprocess.run([str(python), "-m", "pip", "install", "--quiet", "--require-hashes", "--no-deps",
-                        "--only-binary", ":all:", "-r", str(RUNTIME_LOCK)], check=True, env=env)
-        subprocess.run([str(python), "-I", "-c", "import kokoro_onnx, soundfile"], check=True, env=env,
-                       capture_output=True)
-        atomic_write(venv / ".runtime-ok", "installed from requirements.lock\n", mode=0o600)
+        with no_group_write():  # the runtime is made private whatever the umask
+            if made:
+                log("  making a private environment for narration")
+                subprocess.run([base_python or sys.executable, "-m", "venv", str(venv)], check=True, env=env)
+            log(f"  installing the narration runtime (about {RUNTIME_MB} MB, hash-checked)")
+            subprocess.run([str(python), "-m", "pip", "install", "--quiet", "--require-hashes", "--no-deps",
+                            "--only-binary", ":all:", "-r", str(RUNTIME_LOCK)], check=True, env=env)
+            subprocess.run([str(python), "-I", "-c", "import kokoro_onnx, soundfile"], check=True, env=env,
+                           capture_output=True)
+            atomic_write(venv / ".runtime-ok", "installed from requirements.lock\n", mode=0o600)
     except (subprocess.CalledProcessError, OSError) as exc:
         if made:
             _remove_owned_tree(home, ("narration",), "venv", log)  # a half-made runtime would look installed
@@ -338,8 +350,8 @@ def install_runtime(home: Path, *, log=print, base_python: str | None = None) ->
 
 def run_worker(python: Path, request: dict, *, home: Path, timeout: float) -> dict:
     """Run worker.py in the narration runtime; its JSON answer, or NarrationError with a short reason."""
-    env = private_env(home)
     _owned(home, "tmp")
+    env = _handed_env(home)
     try:  # the worker lowers its own priority (forking hooks are unsafe in a threaded server)
         proc = subprocess.run([str(python), "-I", str(WORKER)], input=json.dumps({**request, "nice": 10}),
                               capture_output=True, text=True, timeout=timeout, env=env)
@@ -362,7 +374,7 @@ def check_render(python: Path, model: str, voices: str, *, home: Path, timeout: 
     work = _owned(home, "tmp", "narration-check")
     try:
         req = {"mode": "check", "model": str(model), "voices": str(voices), "out_dir": str(work), "want": list(VOICES)}
-        env = private_env(home)
+        env = _handed_env(home)
         proc = subprocess.run([str(python), "-I", str(WORKER)], input=json.dumps(req), capture_output=True,
                               text=True, timeout=timeout, env=env)
         lines = [ln for ln in proc.stdout.splitlines() if ln.strip().startswith("{")]

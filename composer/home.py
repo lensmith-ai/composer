@@ -80,29 +80,52 @@ def now() -> str:
 # Composer trusts your own account and root, and nothing else. Before it sets up, updates, rolls back, recovers or
 # works in its folder (narration included), the folder and every folder above it, up to /, must be owned by you or
 # root and writable by no one else (no group or other write bit), checked on the path as given and on its real path
-# (links resolved). This is the rule OpenSSH applies to ~/.ssh ("StrictModes"). With it, only your own account (or
-# root) can change anything under Composer's folder, so a race between a check and a use there is a race against
-# yourself: no other account can redirect a write, a removal, or what a program Composer starts reads or writes.
+# (links resolved). Inside it, the same rule holds for every folder and file Composer writes into, runs or reads as
+# its own configuration (bin, app, app/<version> and its environment, python, bootstrap, narration, models, cache,
+# tmp, the marker and the manifest, and the data folder with its recovery records): an existing install where any of
+# them breaks it is refused, not adopted. This is the rule OpenSSH applies to ~/.ssh ("StrictModes"). With it, only
+# your own account (or root) can change anything under Composer's folder, so a race between a check and a use there
+# is a race against yourself: no other account can redirect a write, a removal, or what a program Composer starts
+# reads or writes.
 # What is not defended: a process already running as you (it can change your files directly), root, and systems
 # without POSIX owners and permission bits (on Windows this check does not run).
 _OTHERS_WRITE = stat.S_IWGRP | stat.S_IWOTH
 
 
+def trust_problem(path, st: os.stat_result, uid: int) -> str | None:
+    """The rule for one folder or file, from its stat result: why another account could change it, or None. It must
+    belong to you (uid) or root, and a folder or file must have no group or other write bit (a link's own bits mean
+    nothing, so only its owner counts). Pure: it only reads `st`."""
+    if st.st_uid not in (uid, 0):
+        return (f"{path} belongs to another account (uid {st.st_uid}). Fix: chown $(id -un) {path}, or put the "
+                "app folder somewhere else (the default is ~/.lensmith-composer)")
+    if stat.S_ISLNK(st.st_mode) or not st.st_mode & _OTHERS_WRITE:
+        return None
+    mode = f"{stat.S_IMODE(st.st_mode):04o}"
+    if stat.S_ISDIR(st.st_mode) and st.st_mode & stat.S_ISVTX:
+        return (f"{path} is a folder shared by every account (mode {mode}, like /tmp). Put the app folder under "
+                "your own home instead (the default is ~/.lensmith-composer)")
+    return (f"{path} can be written by other accounts (mode {mode}). Fix: chmod go-w {path}, or put the app "
+            "folder somewhere else (the default is ~/.lensmith-composer)")
+
+
+def _uid() -> int | None:
+    return os.getuid() if os.name == "posix" and hasattr(os, "getuid") else None
+
+
 def check_trust(path: Path) -> None:
     """Refuse when `path` (or, if it does not exist yet, its nearest existing folder) or any folder above it is owned
     by another account or writable by group or others. Only reads."""
-    if os.name != "posix" or not hasattr(os, "getuid"):
+    uid = _uid()
+    if uid is None:
         return
-    uid = os.getuid()
     path = Path(os.path.normpath(str(path)))
     start = path
     while not os.path.lexists(start) and start != start.parent:
         start = start.parent
-    chains = [start, *start.parents]
     real = Path(os.path.realpath(start))
-    chains += [real, *real.parents]
     seen = set()
-    for folder in chains:
+    for folder in (start, *start.parents, real, *real.parents):
         if folder in seen:
             continue
         seen.add(folder)
@@ -110,21 +133,72 @@ def check_trust(path: Path) -> None:
             st = os.stat(folder)
         except OSError as exc:
             raise HomeError(f"refused: cannot check {folder} ({exc.strerror or exc})") from None
-        if st.st_uid not in (uid, 0):
-            raise HomeError(f"refused: {folder} belongs to another account (uid {st.st_uid}). Composer's folder and "
-                            "every folder above it must belong to you or root, so no other account can change what "
-                            f"it runs. Fix: chown $(id -un) {folder}, or put the app folder somewhere else (the "
-                            "default is ~/.lensmith-composer)")
-        if st.st_mode & _OTHERS_WRITE and st.st_mode & stat.S_ISVTX:
-            raise HomeError(f"refused: {folder} is a folder shared by every account (mode {stat.S_IMODE(st.st_mode):04o},"
-                            " like /tmp). Composer's folder and every folder above it must be writable only by you "
-                            "or root, so no other account can change what it runs. Put the app folder under your own "
-                            "home instead (the default is ~/.lensmith-composer)")
-        if st.st_mode & _OTHERS_WRITE:
-            raise HomeError(f"refused: {folder} can be written by other accounts (mode "
-                            f"{stat.S_IMODE(st.st_mode):04o}). Composer's folder and every folder above it must be "
-                            f"writable only by you or root, so no other account can change what it runs. Fix: chmod "
-                            f"go-w {folder}, or put the app folder somewhere else (the default is ~/.lensmith-composer)")
+        why = trust_problem(folder, st, uid)
+        if why:
+            raise HomeError(f"refused: {why}. Composer's folder and every folder above it must belong to you or root "
+                            "and be writable only by you or root, so no other account can change what it runs")
+
+
+class no_group_write:
+    """For as long as it is held (a whole update, a runtime install), everything this process and the programs it
+    starts make (venv, pip, Python's bytecode) gets no group or other write bit, whatever the umask was: under 002,
+    common with per-user groups, they would make folders the check below refuses. Only takes bits away."""
+
+    def __enter__(self):
+        self.old = os.umask(0o022) if os.name == "posix" else None
+        if self.old is not None:
+            os.umask(self.old | 0o022)
+        return self
+
+    def __exit__(self, *exc):
+        if self.old is not None:
+            os.umask(self.old)
+        return False
+
+
+def check_entry(path: Path, st: os.stat_result | None = None) -> None:
+    """The rule for one folder or file inside Composer's folders (lstat unless `st` is given). Only reads."""
+    uid = _uid()
+    if uid is None:
+        return
+    if st is None:
+        try:
+            st = os.lstat(path)
+        except FileNotFoundError:
+            return
+    why = trust_problem(path, st, uid)
+    if why:
+        raise HomeError(f"refused: {why}. Every folder and file in Composer's folder must belong to you or root and "
+                        "be writable only by you or root, so no other account can change what it writes, runs or "
+                        "reads; nothing was written or removed")
+
+
+def check_tree(root: Path) -> None:
+    """check_entry for `root` and everything below it, links included but never followed: folders, files and
+    links. Only reads. Refuses at the first entry that another account could change."""
+    if _uid() is None:
+        return
+    root = Path(os.path.normpath(str(root)))
+    try:
+        st = os.lstat(root)
+    except FileNotFoundError:
+        return
+    check_entry(root, st)
+    if not stat.S_ISDIR(st.st_mode):
+        return
+    stack = [root]
+    while stack:
+        folder = stack.pop()
+        try:
+            entries = list(os.scandir(folder))
+        except OSError as exc:
+            raise HomeError(f"refused: cannot check {folder} ({exc.strerror or exc}); nothing was written or "
+                            "removed") from None
+        for entry in entries:
+            st = entry.stat(follow_symlinks=False)
+            check_entry(Path(entry.path), st)
+            if stat.S_ISDIR(st.st_mode):
+                stack.append(Path(entry.path))
 
 
 def guard(home: Path, *, need_bytes: int = MIN_FREE_BYTES) -> str:
@@ -199,7 +273,29 @@ def owned_dir(base: Path, *parts: str, create: bool = True) -> Path:
             os.mkdir(path, 0o700)
             if os.path.islink(path) or not path.is_dir():  # made by someone else in between
                 raise HomeError(f"refused: {path} changed while Composer made it")
+        else:
+            continue
+        check_entry(path)  # each folder on the way, not only the base: a writable one lets another account swap
     return path
+
+
+# The folders whose paths every program Composer starts is given (private_env): TMPDIR, the caches, the Python
+# folder. Checked just before a program is started, so a folder opened up since the last full check is refused.
+HANDED = ("tmp", "cache", "python", "cache/pip", "cache/uv", "cache/xdg", "cache/xdg-config", "cache/xdg-data",
+          "cache/hf", "cache/pycache")
+
+
+def check_handed(base: Path) -> None:
+    """Refuse when a folder whose path private_env(base) hands to a program, or `base` itself, could be changed by
+    another account (the folders that do not exist yet are fine: they are made private). Only reads."""
+    base = Path(os.path.normpath(str(base)))
+    check_trust(base)
+    check_entry(base)
+    for rel in HANDED:
+        path = base / rel
+        if os.path.islink(path):
+            raise HomeError(f"refused: {path} is a symbolic link; Composer works only in its own real folders")
+        check_entry(path)
 
 
 # ------------------------------------------------------------------------------------------- confined operations
@@ -273,7 +369,7 @@ class Owned:
         except OSError:
             raise HomeError(f"refused: {self.path / name} is a symbolic link or not a folder; Composer works only in "
                             "its own real folders, so nothing was written or removed") from None
-        return Owned(fd, self.path / name)
+        return _checked(fd, self.path / name)
 
     def exists(self, name: str) -> bool:
         try:
@@ -296,6 +392,17 @@ class Owned:
         os.rmdir(name, dir_fd=self.fd)
 
 
+def _checked(fd: int, path: Path) -> Owned:
+    """An opened folder, kept only when the folder actually opened passes the rule (fstat: the folder itself, not
+    whatever has its name by now)."""
+    try:
+        check_entry(path, os.fstat(fd))
+    except BaseException:
+        os.close(fd)
+        raise
+    return Owned(fd, path)
+
+
 def open_home(home: Path) -> Owned:
     """The app folder itself, opened without following a link. Everything later is done relative to it."""
     if not CONFINED:
@@ -304,9 +411,10 @@ def open_home(home: Path) -> Owned:
     home = Path(os.path.normpath(str(home)))
     check_trust(home)
     try:
-        return Owned(os.open(home, _DIR_FLAGS), home)
+        fd = os.open(home, _DIR_FLAGS)
     except OSError:
         raise HomeError(f"refused: {home} is a symbolic link or not a folder; give the real folder") from None
+    return _checked(fd, home)
 
 
 def open_owned(home: Path, *parts: str, create: bool = True) -> Owned:
@@ -326,14 +434,20 @@ def open_owned(home: Path, *parts: str, create: bool = True) -> Owned:
 def check_owned(home: Path) -> None:
     """Refuse an app folder whose own parts lead elsewhere: every folder Composer makes in it (bin, app, python,
     bootstrap, narration, models, cache, tmp and the ones inside them) must be a real folder, not a symbolic link,
-    and the only link allowed is app/current, which must name a real app/<version> folder beside it. Call it before
-    any write or removal in the app folder; it only reads."""
+    and the only link allowed is app/current, which must name a real app/<version> folder beside it. And refuse one
+    where anything in it (every folder, file and link, all the way down) belongs to another account or can be
+    written by group or others: an existing install is checked, never adopted as it is. Call it before any write
+    or removal in the app folder; it only reads."""
     home = Path(os.path.normpath(str(home)))
     if os.path.islink(home):
         raise HomeError(f"refused: {home} is a symbolic link; give the real folder")
     check_trust(home)
     if not home.exists():
         return
+    try:
+        check_tree(home)
+    except HomeError as exc:
+        raise HomeError(f"{exc}. To fix a whole install made under a permissive umask: chmod -R go-w {home}") from None
     for name in OWNED_DIRS:
         owned_dir(home, name, create=False)
     for parts in OWNED_SUBDIRS:

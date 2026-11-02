@@ -339,6 +339,7 @@ def setup_parser(plan: dict, base: Path, log, *, install=None) -> dict:
         log("  article parser not installed: this image has no way to add packages; pages without a feed are read "
             "with the built-in parser")
         return {"trafilatura": False}
+    H.check_handed(base)  # the folders pip is handed (TMPDIR, caches) are still ones no other account can change
     try:
         (install or X.install_trafilatura)(env=H.private_env(base), log=log)
     except X.ExtractionError as exc:
@@ -570,6 +571,16 @@ def run(*, home: Path, data: Path | None, answers_file: str | None, assume_yes: 
         data_only: bool, home_created_by_bootstrap: bool = False, check_only: bool = False, out=print, read=input,
         secret=getpass.getpass, interactive: bool | None = None, detect=N.detect, get=None, check=None,
         install=None, download=None, install_parser=None, test_call=None) -> int:
+    with H.no_group_write():  # what setup makes passes the trust contract whatever the umask
+        return _run(home=home, data=data, answers_file=answers_file, assume_yes=assume_yes, reconfigure=reconfigure,
+                    data_only=data_only, home_created_by_bootstrap=home_created_by_bootstrap, check_only=check_only,
+                    out=out, read=read, secret=secret, interactive=interactive, detect=detect, get=get, check=check,
+                    install=install, download=download, install_parser=install_parser, test_call=test_call)
+
+
+def _run(*, home: Path, data: Path | None, answers_file: str | None, assume_yes: bool, reconfigure: list,
+         data_only: bool, home_created_by_bootstrap: bool, check_only: bool, out, read, secret, interactive, detect,
+         get, check, install, download, install_parser, test_call) -> int:
     # 1. Read-only: every guard and every answer, before anything is written.
     ans = A.load(answers_file) if answers_file else {}
     if check_only:
