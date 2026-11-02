@@ -42,7 +42,7 @@ is "not checked", never a pass), but it cannot make the reading correct.
 You need Python 3.10 or newer. Download or clone this repository, then work from its folder.
 
 **See it work with no key and no install.** This replays a brief composed on 2026-10-25 from
-the two bundled feeds. It makes no network request and no model call:
+two of the bundled feeds. It makes no network request and no model call:
 
 ```sh
 python3 -m composer demo
@@ -115,6 +115,10 @@ Composer calls the model with your own key. Nothing goes through any other servi
 | `COMPOSER_CHECKER_MODEL`, `COMPOSER_CHECKER_OPENAI_BASE_URL` | that checker's model id and, for `openai`, its endpoint |
 | `COMPOSER_CHECKER_API_KEY` | that checker's key (never the writer's key) |
 
+`composer setup` offers a short list of model ids for the service you choose (`composer/data/models.json`;
+`claude-sonnet-5-5` stays the default), makes one tiny test call per key that says plainly what is wrong if it
+fails, and can name a separate model to check the claims ([docs/setup.md](docs/setup.md)).
+
 The key is read when each call is made. It is never logged or printed. The command line never stores it; the
 installed app stores it only if you give it to `composer setup`, in a file only you can read (mode 0600).
 
@@ -162,12 +166,22 @@ installed app stores it only if you give it to `composer setup`, in a file only 
    To run it on a server with HTTPS and a login, use the container image with Docker Compose and Caddy:
    [docs/deploy-vps.md](docs/deploy-vps.md) walks through it step by step, with a trial on your own computer first.
 
+## To get this every day
+
+Pick one of three:
+
+1. **Your laptop.** Turn on the daily brief (`./setup.sh` asks; later, `composer setup --reconfigure schedule`). It
+   runs only while `composer up` runs and that computer is awake, and you read it on that computer.
+2. **Your own server with a domain.** Always on, and you can read it from anywhere, on any device. The container
+   image, Caddy for HTTPS and one login: [docs/deploy-vps.md](docs/deploy-vps.md).
+3. **No setup.** Sign up on [lensmith.ai](https://lensmith.ai) to get the daily brief by email.
+
 ## What a brief costs
 
 **7 model calls** with the default settings: 1 to write the brief, 1 to check each of the 5
 insights, and 1 to check the connection the brief draws between sources. If the first answer
 cannot be used (not valid JSON, or a citation outside the chosen sources), Composer asks once
-more, which makes 8. Fetching the two bundled feeds costs nothing; it is one request each.
+more, which makes 8. Fetching a feed costs nothing; it is one request each.
 
 **Measured: about $0.08 per brief** with the default model. One live brief (the command above,
 Google AI blog and Google DeepMind blog, 5 items each, on 2026-11-01) made 7 calls to
@@ -212,6 +226,40 @@ composer sources list
 - The feed text is held in memory for the one brief. `--keep-sources` saves it, for debugging.
 - The recorded demo brief (`composer/data/recorded-run.json`) follows the same rule.
 
+## Sources and your responsibility
+
+Composer reads the sources **you** choose and writes a brief in a model's own words. When you run your own copy,
+you are the publisher of what it writes. Before you share a brief, please:
+
+- **Check the source's terms.** Some sites forbid automated reading, reuse or AI use in their terms of use or
+  `robots.txt`. A public feed is an invitation to read, not a licence to republish.
+- **Do not get around paywalls or log-ins.** Composer sends no cookies or log-ins, and you should not add sources
+  that need them.
+- **Link, credit and keep quotes short.** Every insight already links to its article. If you quote a source, use
+  quotation marks, name it (and its author), and keep each quote short. We use at most 25 words per quote, at most
+  two quotes from one article per brief, and never the article's opening sentence. Composer asks its writer for
+  its own words and checks every brief against these limits before it is shown; a brief that breaks them is
+  rewritten once, or the parts that break them are dropped, and the brief's receipt says so.
+- **Do not use logos or images** from a source; name it in plain text.
+- **Say it was written by AI.** Every brief page and the app show the line "AI-written summary; check the source."
+  Keep it on anything you publish. The model can get things wrong, and claim-seal's check is a model too. In the
+  EU, publishing AI-written text about matters of public interest without saying so can break the AI Act
+  (Article 50), unless a person reviews it and takes editorial responsibility.
+- **Think twice before publishing a claim marked "not supported"**, especially about a named person or company.
+  You are the publisher of what your copy writes.
+- **Fix and remove fast.** If you publish briefs, give publishers and readers a way to reach you, and act on
+  corrections and removal requests.
+- **`html-index` sources read web pages, not feeds.** Composer does not check a site's `robots.txt` yet; check it
+  yourself before you add a page like that.
+
+The six bundled sources are public feeds: the Google AI blog, the Google DeepMind blog, the Hugging Face blog, the
+Microsoft Research blog, the PyTorch blog, and arXiv's daily cs.AI listing (titles and abstracts, which arXiv offers
+under CC0). Composer keeps a short excerpt of each item and never stores or re-serves a post's full text. Bundling a
+feed is not an endorsement by its publisher, and no publisher has reviewed Composer.
+
+Composer is MIT-licensed and comes with no warranty (see [LICENSE](LICENSE)). The licence covers the code; it gives
+you no rights to anyone else's articles. This section is guidance, not legal advice.
+
 ## What is in this repository
 
 | path | what it is |
@@ -227,13 +275,13 @@ composer sources list
 | `composer/doctor.py`, `composer/lifecycle.py`, `composer/scheduler.py` | doctor; backup, restore, update, rollback, uninstall; the daily brief |
 | `composer/page.py`, `composer/web/` | the one-file brief page |
 | `composer/window.py`, `composer/web/window/` | the animated replay window and its scripts and styles |
-| `composer/sources.json` | the two bundled feeds |
+| `composer/sources.json` | the six bundled feeds |
 | `composer/data/recorded-run.json` | the recorded brief the demo replays |
 | `docs/demo/` | the static demo: the animated replay (`index.html`) and the plain page (`brief.html`) |
 | `tests/` | offline tests: fixtures only, no network, no key |
 | `Dockerfile`, `compose.yaml`, `Caddyfile` | the container image and the always-on setup ([docs/deploy-vps.md](docs/deploy-vps.md)) |
 | `tests/deploy/proof.sh` | the always-on proof: HTTPS through Caddy with the login, the app port closed, a backup restored |
-| `scripts/release/` | the release build (sdist, wheel, SBOM, checksums) and the claim-sealed release note |
+| `scripts/release/` | the release build (sdist, wheel, SBOM, checksums), release candidates (`rc.py`) and the claim-sealed release note |
 | `.github/workflows/` | tests on Linux, macOS and Windows, the scans, the nightly proof, and the release |
 
 ## Privacy

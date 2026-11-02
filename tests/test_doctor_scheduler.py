@@ -12,6 +12,7 @@ from install_helpers import FAKE_KEY, FakeRender, fake_home
 
 from composer import doctor, installer, narration as N, settings as S
 from composer.fetch import Response
+from composer.registry import BUNDLED, read_file
 from composer.job_store import JobStore
 from composer.scheduler import Scheduler, next_slot, slot_for
 
@@ -79,12 +80,13 @@ class DoctorFlagTests(unittest.TestCase):
             rc, lines = self.run_doctor(target, online=True, transport=transport, get=get, render=render)
             names = self.names(lines)
             self.assertIn("online: model", names)
-            self.assertIn("online: source google-ai", names)
-            self.assertIn("online: source deepmind", names)
+            bundled = [e.id for e in read_file(BUNDLED)]
+            for sid in bundled:  # one request per bundled source (the six defaults)
+                self.assertIn(f"online: source {sid}", names)
             self.assertIn("online: narration", names)
             self.assertEqual(len(calls["model"]), 1)
             self.assertEqual(calls["model"][0][1], FAKE_KEY)  # the stored key file, read at call time
-            self.assertEqual(len(calls["get"]), 2)
+            self.assertEqual(len(calls["get"]), len(bundled))
             self.assertEqual(len(render.calls), 1)
             self.assertTrue(any(ln.startswith("PASS online: model") for ln in lines), lines)
             self.assertFalse(any(FAKE_KEY in ln for ln in lines))

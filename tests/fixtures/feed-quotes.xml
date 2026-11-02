@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+<title>Lantern Works journal</title>
+<link>https://example.org/lantern/</link>
+<description>Invented feed for the quote rule tests. Lantern Works is not a real organisation.</description>
+<item>
+<title>Lantern Works releases a solar lamp that charges in cloudy weather</title>
+<link>https://example.org/lantern/cloudy-lamp</link>
+<description><![CDATA[<p>Lantern Works released a solar lamp on Tuesday that keeps charging under thick cloud cover. The lamp uses a new coating that gathers scattered light from every direction instead of only direct sun. In field trials across four northern towns the lamp ran for six hours each night after grey days. The team says the coating costs less than the glass it replaces and can be added to older lamps. Schools in two of the towns plan to fit the lamps along their walking routes before winter.</p>]]></description>
+<pubDate>Tue, 04 Mar 2025 09:00:00 GMT</pubDate>
+</item>
+<item>
+<title>Why the coating works</title>
+<link>https://example.org/lantern/coating</link>
+<description><![CDATA[Scattered light reaches the panel from many angles at once. The coating bends that light toward the cells, so a cloudy hour still yields a useful charge. Engineers tested twelve coatings before they chose this one.]]></description>
+<pubDate>Wed, 05 Mar 2025 09:00:00 GMT</pubDate>
+</item>
+</channel>
+</rss>

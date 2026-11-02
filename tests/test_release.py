@@ -41,10 +41,19 @@ class ChangelogTests(unittest.TestCase):
         with self.assertRaises(self.rn.NoteError):
             self.rn.changelog_section("# Changelog\n\n## [1.0.0]\n\n- x\n", "2.0.0")
 
-    def test_repository_changelog_has_unreleased_and_0_1_0(self):
+    def test_repository_changelog_has_unreleased_0_2_0_and_0_1_0(self):
         text = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
         self.assertTrue(self.rn.changelog_section(text, "0.1.0"))
-        self.assertTrue(self.rn.changelog_section(text, "Unreleased"))
+        self.assertTrue(self.rn.changelog_section(text, "0.2.0"))
+        self.assertIn("\n## [Unreleased]\n", text)
+
+    def test_the_package_version_has_a_changelog_section(self):
+        import re
+        version = re.search(r'^version\s*=\s*"([^"]+)"', (ROOT / "pyproject.toml").read_text(encoding="utf-8"),
+                            re.M).group(1)
+        base = re.match(r"\d+\.\d+\.\d+", version).group(0)  # a release candidate (0.2.0rc1) reads 0.2.0
+        text = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+        self.assertTrue(self.rn.changelog_section(text, base), base)
 
     def test_tests_text_says_counts_and_skip_reasons(self):
         r = json.loads((FIX / "test-results.json").read_text(encoding="utf-8"))

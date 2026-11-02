@@ -1,0 +1,7 @@
+# The source release (sdist) is the whole project, so a downloaded release can run ./setup.sh like a clone can.
+include setup.sh CHANGELOG.md SECURITY.md THIRD-PARTY.md Dockerfile compose.yaml Caddyfile .env.example .dockerignore
+graft docs
+graft examples
+graft scripts
+graft tests
+global-exclude __pycache__ *.py[cod]

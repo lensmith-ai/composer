@@ -4,7 +4,9 @@
                   the usage the provider reported (no prices, nothing estimated), which model wrote the brief and
                   which checked it (`models`; with a separate checker its calls are in `checker_calls` and
                   `model_calls` holds the writer's), the check summary and, when a
-                  lens from the registry or the lens store was used, that lens's revision and the prompt's digest
+                  lens from the registry or the lens store was used, that lens's revision and the prompt's digest;
+                  and the quote rule's note (`quotes`): quoted runs and passages found, and whether the brief was
+                  repaired or parts were dropped for copying too much of an article (counts only, no text)
   transcript.txt  the narration script the model wrote with the brief, the same words the page's transcript
                   sheet shows and narration reads; a brief without one gets no transcript file
 
@@ -41,6 +43,8 @@ def build_receipt(run: dict, *, requested: list | None = None) -> dict:
                                     "same_as_writer": checker is None}}
     if checker is not None:
         output["checker_calls"] = dict(checker)
+    if isinstance(edition.get("quotes"), dict):
+        output["quotes"] = dict(edition["quotes"])  # the quote rule: what was found, repaired or dropped (no text)
     lens_definition = edition.get("lens_definition")
     if isinstance(lens_definition, dict):
         output["lens_definition"] = {key: lens_definition[key] for key in

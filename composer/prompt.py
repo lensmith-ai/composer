@@ -66,6 +66,10 @@ RULES:
   plausible or weak. Never invent a connection.
 - Say only what the material supports. Do not add numbers, names or dates that are not in it.
   A detail may say what the source does NOT establish.
+- Write in your own words. Quote an article only when its exact words matter, and then in
+  quotation marks: at most 25 words in one quote, at most 2 quotes from one article in the whole
+  brief (transcript included), and never the article's opening sentence. Copying words without
+  quotation marks counts as quoting. Naming an article's title is fine.
 - READING LEVEL: {reading_level}. {reading_text}
   Simpler words must never change a claim: keep every fact, number, name and source as the
   material gives it, no stronger and no weaker.{register_rule}
@@ -229,6 +233,14 @@ def label_single_source(obj: dict) -> int:
             it["why_it_matters"] = f"{SINGLE_SOURCE} {why.lstrip()}"
             stamped += 1
     return stamped
+
+
+def quote_repair_prompt(prompt: str, reply: str, problems: list[str]) -> str:
+    """Ask the writer to fix only the parts that copy too much of an article, keeping everything else."""
+    return (prompt + "\n\nYOUR LAST ANSWER WAS:\n" + reply.strip()[:60000]
+            + "\n\nIT BREAKS THE QUOTE RULE: " + "; ".join(problems[:12])
+            + ". Rewrite those parts in your own words (keep each claim, its sources and its exact cited titles), "
+              "change nothing else, and answer with the whole strict JSON object again.")
 
 
 def retry_prompt(prompt: str, problems: list[str]) -> str:

@@ -7,66 +7,68 @@ Each release note is written from this file and checked against it by claim-seal
 
 ## [Unreleased]
 
+## [0.2.0] - not released yet
+
+The full app, on your computer or your own server. In plain words:
+
 ### Added
 
-- A container image (`Dockerfile`): a pinned Python base, an unprivileged user, a read-only root filesystem and one
-  data volume at /data. Optional narration is not in it; the narration image is a separate opt-in target.
-- Always-on setup (`compose.yaml` and `Caddyfile`): Caddy in front for HTTPS and one login; the app publishes no port
-  of its own.
-- A step-by-step guide for running Composer on a server (`docs/deploy-vps.md`), with a local trial that uses a local
-  certificate authority.
-- Continuous integration: the offline tests on Linux, macOS (Apple silicon) and Windows with Python 3.10 and 3.13,
-  the banned-text test over the full history, a secret scan (gitleaks) and a lint of the workflows (actionlint).
-- A nightly workflow that runs the always-on proof (`tests/deploy/proof.sh`) and a browser check of the pages
-  in Chromium and WebKit.
-- A release workflow: the sdist and wheel, a CycloneDX SBOM, SHA256SUMS, GitHub artifact attestations for every
-  file and the container image, and a release note checked by claim-seal.
-- Issue and pull request templates, Dependabot for the pinned actions, Python build tools and base images.
-- `./setup.sh` and `composer setup`: the full app in one folder (`~/.lensmith-composer`) with a private environment,
-  questions one at a time or an answers file, every check before any write, the key stored 0600, and an install
-  manifest. No shell profile, PATH, sudo or global Python changes.
-- `composer up`: the app page at `/` with its engine, the daily brief (once per slot, late by up to 6 hours, never
-  stacked) and a weekly backup; behind a proxy it answers only the proxy network and its public address.
-- Optional narration: the model writes a short spoken script with each brief; Composer reads exactly that script
-  aloud with Kokoro after the text is final, and the transcript sheet shows the same words. An existing Kokoro is
-  reused read-only after a hash and three-voice check; any failure leaves the brief text-only. A separate
-  `narration` image ships the eSpeak NG GPL-3.0 licence text and a source offer.
-- `composer doctor` (`--online`, `--parity`, `--seals`), `composer backup` / `restore`, `composer update` / `rollback`
-  (a migrated copy, a journaled switch, undone on failure or after an interruption) and `composer uninstall`
-  (only what setup made; your data only with `--delete-data`).
-- Add a source from the app page: paste a blog's address and Composer lists the feeds behind it (the address itself,
-  the feeds the page advertises, the usual feed addresses), each with its newest titles, comment feeds marked and
-  duplicates folded; you pick one and name it, it is read once more and is live at once. Every request uses the
-  guarded fetch, with one time limit and a request cap for the whole check.
-- Source packages: the picker's package chips, from a bundled file (one package, the two bundled feeds) and your own
-  `packages.json`; a package naming an unknown or hidden source is set aside and reported.
-- Lenses from the app page: name, what to look for, register (earnest, sceptical or deadpan) and reading level. An
-  edit is a new revision of the same lens, linked to the one it replaces; a brief records the revision it used.
-- The reading level (and a saved lens's register) are written into the prompt as rules; `composer compose
-  --reading-level`.
-- An optional article parser for news pages without a feed: the setup question (or `--reconfigure parser`) installs
-  it and every package it needs from a hash-locked file, wheels only; there is no pip extra. Without it those pages
-  are read with the built-in parser and the receipt says so.
-- An optional separate checker model: setup asks "Check claims with the same model?" (or a `[checker]` table in the
-  answers file, `--reconfigure checker`); its key is stored in the same 0600 file under its own name. The checker
-  makes every claim-seal call, the writer only writes, and the edition and receipts record the two models
-  separately; `composer doctor` names the checker and whether its key is present.
-- Setup offers a short list of model ids for the chosen service (from `composer/data/models.json`, plus "type
-  another"), then makes one tiny test call per key that says plainly whether the key was refused, the model id was
-  not found or the endpoint could not be reached, and offers to enter them again; `--no-test-call` skips it.
+- One command installs the whole app: `./setup.sh`. It puts everything in one folder (`~/.lensmith-composer`), asks a
+  few questions one at a time (or reads an answers file), checks everything before it writes anything, and keeps
+  your key in a file only you can read. It does not touch your shell profile, PATH, sudo or system Python.
+- Setup offers a short list of model ids for your service (the default is still `claude-sonnet-5-5`, or type
+  another), then makes one tiny test call per key and says plainly if the key was refused, the model id was not
+  found or the endpoint could not be reached. `--no-test-call` skips it.
+- An optional second model to check the claims: setup asks "Check claims with the same model?". If you name another
+  model, it makes every check call and the writer only writes; each brief's receipt names both.
 - With no model key, Compose on the app page, `composer compose`, `composer doctor` and the daily brief all say
   "Composer needs a model key to write a brief. Run ./setup.sh --reconfigure provider." before any job starts or feed
-  is read; the recorded brief still shows. `./setup.sh --reconfigure PART` passes the part on to `composer setup`.
-- While `composer up` runs it re-verifies the seal of every saved brief once a day and logs the result; with no model
-  provider key set, the daily brief is skipped with the reason logged instead of failing.
-- The app page's menu lists your saved briefs, the compose screen offers to rejoin a brief that is still being
-  written, and the lens library counts the briefs made with each lens. They read a shelf index (`/data/index.json`)
-  that the server rewrites whole whenever a brief starts, finishes, is saved, moved to the trash, restored or swept
-  by retention, and at start; it lists titles, times, sources, lens ids and counts, never keys or file paths. The
-  page's Save and Delete buttons now reach the server (it refused them before).
-- A brief opens from its own link (`/app/?job=<id>`): the page recognises Composer's job ids and loads that brief
-  from the engine instead of replaying the recorded demo. The compose screen checks the engine with `/health`
-  instead of a route the engine does not have.
+  is read; the recorded brief still shows.
+- `composer up` starts the app at http://127.0.0.1:8765/: the phone-width page, your saved briefs, a daily brief if
+  you want one (run once per day, up to 6 hours late, never piled up; skipped, with the reason logged, when no key
+  is set) and a weekly backup. It also re-checks the seal of every saved brief once a day.
+- In the app: add a source by pasting a blog's address (Composer finds the feeds behind it and you pick one), start
+  from a package of sources, and make your own lenses (name, what to look for, tone, reading level). Editing a lens
+  makes a new revision, and each brief records the one it used. `composer compose --reading-level` does the same
+  on the command line.
+- In the app: the menu lists your saved briefs, the compose screen offers to rejoin a brief that is still being
+  written, and the lens library counts the briefs made with each lens, all from a shelf index (`/data/index.json`)
+  that lists titles, times, sources, lens ids and counts, never keys or file paths. Save and Delete reach the server,
+  and a brief opens from its own link (`/app/?job=<id>`).
+- An optional article parser (trafilatura) for news pages that have no feed, installed from a hash-locked file.
+- Optional narration: a Listen button that reads the brief's own spoken script aloud with Kokoro, made on your
+  computer after the text is final. A Kokoro you already have is reused, read-only, after a check. If anything
+  fails, the brief stays text-only. The separate `narration` container image carries the eSpeak NG licence text
+  and a source offer.
+- `composer doctor` checks the install one line at a time. `composer backup` and `restore`, `composer update` and
+  `rollback` (a migrated copy of your data, undone if it fails or is interrupted) and `composer uninstall` (only what
+  setup made; your data only if you ask). An update builds the new version where it will run and switches all or
+  nothing.
+- Run it on your own server: a container image (unprivileged, read-only, one data volume), a Compose file with
+  Caddy in front for HTTPS and one login, and a step-by-step guide (`docs/deploy-vps.md`).
+- A quote rule: the writer is asked for its own words, and a check after writing allows at most 25 words per
+  quote copied from an article, at most 2 quotes from one article per brief, and never an article's opening
+  sentence. A brief that breaks it is sent back once; if it still breaks it, those parts are dropped and the
+  receipt says so.
+- Every brief page and the app now say "AI-written summary; check the source."
+- Setup ends with the three ways to get a brief every day: this computer (only while it is awake), your own server
+  with a domain (always on, read anywhere), or the emailed brief on lensmith.ai (no setup). The README says the same.
+- The README has a new section, "Sources and your responsibility": check a source's terms, no paywalls, short
+  quotes, no logos, keep the AI note, fix and remove fast.
+- Releases you can check: SHA256SUMS, a CycloneDX SBOM, GitHub attestations for every file and the container
+  image, and a release note checked by claim-seal against this file. `scripts/release/rc.py` builds release
+  candidates the same way, from chosen commits, for testing before a release.
+- Tests on Linux, macOS and Windows with Python 3.10 and 3.13, a secret scan, a workflow lint, and a nightly check
+  of the server setup and the pages in two browsers.
+
+### Changed
+
+- Six default sources instead of two: the Google AI blog, the Google DeepMind blog, the Hugging Face blog, the
+  Microsoft Research blog, the PyTorch blog and arXiv cs.AI. The Google AI blog is read at the address its old one
+  now redirects to.
+- A brief can have 3 to 10 insights (it was 3 to 8).
+- `/health` lists the ids of the briefs being written (`active_jobs`) and their count (`active_count`), and HEAD
+  requests get the same answer as GET without the body.
 
 ## [0.1.0] - 2026-11-01
 
@@ -82,5 +84,6 @@ Each release note is written from this file and checked against it by claim-seal
 
 - Fixes from an adversarial security review and a second opinion before publication; see SECURITY.md.
 
-[Unreleased]: https://github.com/lensmith-ai/composer/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/lensmith-ai/composer/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/lensmith-ai/composer/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/lensmith-ai/composer/releases/tag/v0.1.0

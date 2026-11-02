@@ -716,4 +716,27 @@ def run(*, home: Path, data: Path | None, answers_file: str | None, assume_yes: 
         out(f"Check it:   {home}/bin/composer doctor")
         out("To run `composer` from anywhere, add this line to your shell profile yourself (setup does not):")
         out(f"  alias composer={shlex.quote(str(home / 'bin' / 'composer'))}")
+        out("")
+        for line in every_day_lines(home, cfg["schedule"]):
+            out(line)
     return 0
+
+
+DEPLOY_GUIDE = "https://github.com/lensmith-ai/composer/blob/main/docs/deploy-vps.md"
+EMAIL_SIGNUP = "https://lensmith.ai"
+
+
+def every_day_lines(home: Path, schedule: dict) -> list[str]:
+    """Setup's closing note: the three ways to get a brief every day, and what each one costs you."""
+    if schedule.get("enabled"):
+        laptop = (f"  1. This computer: your daily brief is on, at {schedule.get('time')}. It runs only while "
+                  "`composer up` runs and this computer is awake, and you read it on this computer.")
+    else:
+        laptop = ("  1. This computer: turn on the daily brief with "
+                  f"`{home / 'bin' / 'composer'} setup --reconfigure schedule`. It runs only while `composer up` "
+                  "runs and this computer is awake, and you read it on this computer.")
+    return ["To get this every day, pick one:",
+            laptop,
+            "  2. Your own server with a domain: always on, and you can read it from anywhere. "
+            f"How: {DEPLOY_GUIDE}",
+            f"  3. No setup: sign up for the daily brief by email at {EMAIL_SIGNUP}"]

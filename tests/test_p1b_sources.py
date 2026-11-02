@@ -8,6 +8,8 @@ from composer.registry import BUNDLED
 
 from helpers import ScriptedGet, fixture
 
+BUNDLED_IDS = [e.id for e in registry.read_file(BUNDLED)]  # the six default sources, in their file order
+
 
 class SourceServiceTests(unittest.TestCase):
     def source_payload(self, source_id="fixture-feed"):
@@ -25,7 +27,7 @@ class SourceServiceTests(unittest.TestCase):
         self.assertNotIn("description", result["headlines"][0])
         self.assertEqual(get.calls, ["https://example.org/feed.xml"])
 
-    def test_register_reloads_without_restart_and_preserves_two_bundled_sources(self):
+    def test_register_reloads_without_restart_and_preserves_the_bundled_sources(self):
         get = ScriptedGet({"https://example.org/feed.xml": fixture("feed-rss.xml")})
         with tempfile.TemporaryDirectory() as d:
             target = Path(d) / "sources.json"
@@ -34,8 +36,8 @@ class SourceServiceTests(unittest.TestCase):
             entry = service.register(self.source_payload())
             after = service.options()
             self.assertEqual(entry["id"], "fixture-feed")
-            self.assertEqual([row["id"] for row in before["sources"]], ["google-ai", "deepmind"])
-            self.assertEqual([row["id"] for row in after["sources"]], ["google-ai", "deepmind", "fixture-feed"])
+            self.assertEqual([row["id"] for row in before["sources"]], BUNDLED_IDS)
+            self.assertEqual([row["id"] for row in after["sources"]], BUNDLED_IDS + ["fixture-feed"])
             self.assertGreater(after["generation"], before["generation"])
             self.assertEqual(json.loads(target.read_text())["schema"], "composer-sources/v1")
 
@@ -45,7 +47,7 @@ class SourceServiceTests(unittest.TestCase):
             service = sources_registry.SourceService(target, bundled=BUNDLED, get=ScriptedGet({}))
             target.write_text("{", encoding="utf-8")
             snapshot = service.options()
-        self.assertEqual([row["id"] for row in snapshot["sources"]], ["google-ai", "deepmind"])
+        self.assertEqual([row["id"] for row in snapshot["sources"]], BUNDLED_IDS)
         self.assertEqual(snapshot["reload"]["state"], "degraded")
         self.assertTrue(snapshot["reload"]["reason"])
 

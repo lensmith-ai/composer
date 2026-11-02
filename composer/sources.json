@@ -5,9 +5,9 @@
       "id": "google-ai",
       "label": "Google AI blog",
       "kind": "rss-or-atom",
-      "url": "https://blog.google/technology/ai/rss/",
+      "url": "https://blog.google/innovation-and-ai/technology/ai/rss/",
       "max_items": 5,
-      "note": "The public RSS feed of Google's AI blog."
+      "note": "The public RSS feed of Google's AI blog: a short excerpt per post."
     },
     {
       "id": "deepmind",
@@ -15,7 +15,39 @@
       "kind": "rss-or-atom",
       "url": "https://deepmind.google/blog/rss.xml",
       "max_items": 5,
-      "note": "The public RSS feed of the Google DeepMind blog."
+      "note": "The public RSS feed of the Google DeepMind blog: a short excerpt per post, sometimes none."
+    },
+    {
+      "id": "huggingface",
+      "label": "Hugging Face blog",
+      "kind": "rss-or-atom",
+      "url": "https://huggingface.co/blog/feed.xml",
+      "max_items": 5,
+      "note": "The public RSS feed of the Hugging Face blog: titles and links only. Many posts are by guest authors."
+    },
+    {
+      "id": "microsoft-research",
+      "label": "Microsoft Research blog",
+      "kind": "rss-or-atom",
+      "url": "https://www.microsoft.com/en-us/research/blog/feed/",
+      "max_items": 5,
+      "note": "The public RSS feed of the Microsoft Research blog. Composer keeps only a short excerpt of each post."
+    },
+    {
+      "id": "pytorch",
+      "label": "PyTorch blog",
+      "kind": "rss-or-atom",
+      "url": "https://pytorch.org/blog/feed/",
+      "max_items": 5,
+      "note": "The public RSS feed of the PyTorch blog."
+    },
+    {
+      "id": "arxiv-cs-ai",
+      "label": "arXiv cs.AI",
+      "kind": "rss-or-atom",
+      "url": "https://rss.arxiv.org/rss/cs.AI",
+      "max_items": 5,
+      "note": "arXiv's daily RSS listing for cs.AI (Artificial Intelligence): titles and abstracts, which arXiv offers under CC0."
     }
   ]
 }

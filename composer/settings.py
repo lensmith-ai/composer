@@ -1,7 +1,7 @@
 """Your settings (non-secret, inside the current data generation) and your model key (a separate file, 0600).
 
   <data>/generations/<g>/config.json    provider, model, sources, narration, schedule, port, backups
-  <data>/generations/<g>/sources.json   sources you added (the two bundled ones are always there)
+  <data>/generations/<g>/sources.json   sources you added (the bundled ones are always there)
   <data>/secrets.env                    NAME=value lines, mode 0600, in a folder only you can open (0700)
 
 The key file is read when a model call is made, never copied into the process environment, never printed,

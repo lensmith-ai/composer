@@ -3,14 +3,17 @@
     1 read     each chosen source through its adapter (composer.adapters)
     2 screen   every string cleaned (composer.sanitize); counts kept per source
     3 write    one model call under your lens (composer.prompt); one retry if the answer
-               cannot be used
+               cannot be used; then the quote rule (composer.quotes): at most 25 words per quoted
+               run copied from an article, at most 2 quotes per article, never its opening
+               sentence. A brief that breaks it is sent back once; if that does not fix it, the
+               parts that break it are dropped and the receipt says so
     4 check    claim-seal: every cited title must exist (plain code), then one model call per
                claim (each insight, and the connection) to judge support, sentence by sentence
     5 seal     claim-seal's SHA-256 chain over the claim-evidence rows
 
 Model calls per brief: 1 to write, plus 1 per insight, plus 1 for the connection. With the
-default 5 insights that is 7. A retry, or a brief with fewer items, changes the count; the
-edition records the real number. With a separate checker model (optional), the writer makes the
+default 5 insights that is 7. A retry, a quote-rule repair, or a brief with fewer items changes the
+count; the edition records the real number. With a separate checker model (optional), the writer makes the
 write call(s) and the checker makes every check call (each insight and the connection); the
 edition and the receipt record the two separately.
 
@@ -24,7 +27,7 @@ import hashlib
 import time
 from datetime import datetime, timezone
 
-from . import adapters, lenses, prompt as P
+from . import adapters, lenses, prompt as P, quotes as Q
 from .fetch import http_get
 from .providers import Counted
 
@@ -88,11 +91,60 @@ def write(lens: str, sources: list, fetched: dict, model, count: int, log=lambda
             problems = [str(exc)]
         if not problems:
             info["attempts"] = attempt
+            brief, info["quotes"] = quote_rule(brief, reply, text, sources, fetched, model, valid, count, log,
+                                               lens_definition=lens_definition)
             info["single_source_labels_added"] = P.label_single_source(brief)
             log("lens.applied", f"brief written · {len(brief['items'])} insights")
             return brief, info
         log("lens.retry", "the answer could not be used: " + "; ".join(problems[:3]))
     raise ComposeError("the model's answer could not be used twice: " + "; ".join(problems[:5]))
+
+
+def quote_rule(brief: dict, reply: str, prompt: str, sources: list, fetched: dict, model, valid: set, count: int,
+               log=lambda *_: None, *, lens_definition: lenses.Lens | None = None) -> tuple[dict, dict]:
+    """Hold the brief to the quote rule (composer.quotes) while the articles are still in memory.
+
+    A brief that breaks it is sent back to the writer once (one more model call) to put those parts in its own
+    words. If the answer cannot be used or still breaks the rule, the parts of the first brief that break it are
+    dropped: those insights, the connection, or the transcript (then no narration). Returns (brief, note); the note
+    goes into the edition and the receipt, with counts and positions only, never an article's words."""
+    first = Q.check(brief, sources, fetched)
+    note = {"rule": dict(Q.RULES), "runs": first["runs"], "passages": first["passages"],
+            "breaches": len(first["breaches"]), "repaired": False, "repair_call": False}
+    if not first["breaches"]:
+        return brief, note
+    arts = {(a["source"], a["item"]): a for a in Q.articles(sources, fetched)}
+    problems = [Q.describe(b, arts) for b in first["breaches"]]
+    log("quote.repair", f"the brief copies too much of an article in {len(first['breaches'])} place(s); "
+                        "asking the writer to use its own words")
+    note["repair_call"] = True
+    try:
+        again = P.parse_reply(model(P.quote_repair_prompt(prompt, reply, problems)))
+        shape = P.check_shape(again, valid, count)
+        if not shape and lens_definition is not None:
+            shape = lenses.check_shape(lens_definition, again, count)
+    except P.ShapeError as exc:
+        again, shape = None, [str(exc)]
+    if again is not None and not shape:
+        second = Q.check(again, sources, fetched)
+        if not second["breaches"]:
+            note.update(repaired=True, runs=second["runs"], passages=second["passages"])
+            log("quote.repaired", "the writer put those parts in its own words")
+            return again, note
+        note["breaches_after_repair"] = len(second["breaches"])
+    else:
+        note["repair_unusable"] = "; ".join(shape[:3])
+    dropped = Q.drop(brief, first["breaches"])
+    note["dropped"] = dropped
+    if not brief.get("items"):
+        raise ComposeError("every insight copied too much of an article, even after one request to rewrite; "
+                           "nothing was kept")
+    n = len(dropped["dropped_items"])
+    parts = ([f"{n} insight{'s' if n != 1 else ''}"] if n else []) + (
+        ["the connection"] if dropped["dropped_connection"] else []) + (
+        ["the transcript"] if dropped["dropped_transcript"] else [])
+    log("quote.dropped", "dropped " + " and ".join(parts) + " that copied too much of an article")
+    return brief, note
 
 
 def check(brief: dict, sealed_sources: dict, model, log=lambda *_: None) -> dict:
@@ -178,6 +230,8 @@ def edition(*, lens: str, sources: list, fetched: dict, result: dict, model: Cou
                              "state": cv.get("verdict") if cv.get("verdict") in STATE_LABELS else "unchecked"}
     if brief.get("honest_note"):
         out["honest_note"] = str(brief["honest_note"])
+    if isinstance(write_info.get("quotes"), dict):
+        out["quotes"] = write_info["quotes"]  # the quote rule's note: counts and positions, no article text
     if isinstance(brief.get("transcript"), str) and brief["transcript"].strip():
         out["transcript"] = brief["transcript"].strip()  # the narration script, in our own words
     ce = result.get("claim_evidence") or {}

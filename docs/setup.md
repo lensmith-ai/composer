@@ -23,7 +23,9 @@ asks, what it creates, what it never touches, and how to update, back up and rem
 One at a time, with a default in [brackets]. Press Enter to take it.
 
 1. **Model provider**: Anthropic, an OpenAI-compatible endpoint (OpenAI, OpenRouter, a local Ollama or LM Studio
-   server), or skip for now (the app then shows the recorded brief). Then the model: for Anthropic a short numbered
+   server), or skip for now (the app then shows the recorded brief; a compose stops with an error until you add a
+   key with `composer setup --reconfigure provider`, and the daily brief is skipped with the reason logged). Then
+   the model: for Anthropic a short numbered
    list (`claude-sonnet-5-5`, the default, `claude-opus-5-5`, `claude-haiku-5-5`) and "type another model id"; for an
    OpenAI-compatible endpoint you type the id it uses (OpenRouter's look like `anthropic/claude-opus-5-5`). The list
    is `composer/data/models.json`; edit it to change what is offered. An answers file takes any id.
@@ -42,7 +44,8 @@ One at a time, with a default in [brackets]. Press Enter to take it.
    then makes every check call (each insight and the connection) and the writer only writes. A different model can
    catch mistakes the writer would repeat when it checks its own work; it costs whatever that model costs for those
    calls. Each brief's `receipts.json` says which model wrote it and which checked it.
-4. **Sources**: the two bundled feeds are always there; add Hacker News, or paste any RSS or Atom address. Each one
+4. **Sources**: the six bundled feeds are always there (the Google AI, Google DeepMind, Hugging Face, Microsoft
+   Research and PyTorch blogs, and arXiv cs.AI); add Hacker News, or paste any RSS or Atom address. Each one
    is read once and shown before it is added.
 5. **Article parser** (optional, default no): trafilatura (Apache-2.0) and the packages it needs,
    installed into the app's own environment from the hash-locked `composer/extraction-requirements.lock` (wheels
@@ -61,9 +64,18 @@ One at a time, with a default in [brackets]. Press Enter to take it.
    set, that day's brief is skipped and the log and `/schedule` say why.
 8. **Port** on this computer.
 
-Then it prints what it chose and how to start the app. Run `./setup.sh` (or `composer setup`) again at any time: it
+Then it prints what it chose, how to start the app, and the three ways to get a brief every day (below). Run `./setup.sh` (or `composer setup`) again at any time: it
 keeps your key, sources, lenses and briefs, and `--reconfigure provider|checker|sources|parser|narration|schedule|port` asks one
 part again.
+
+## To get this every day
+
+Setup's last lines name three ways:
+
+1. **This computer**: turn on the daily brief (setup asks; later, `composer setup --reconfigure schedule`). It
+   runs only while `composer up` runs and the computer is awake, and you read it on that computer.
+2. **Your own server with a domain**: always on, and you can read it from anywhere. See [deploy-vps.md](deploy-vps.md).
+3. **No setup**: sign up on [lensmith.ai](https://lensmith.ai) for the daily brief by email.
 
 ## With no questions: an answers file
 

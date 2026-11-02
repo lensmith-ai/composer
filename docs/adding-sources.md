@@ -1,7 +1,7 @@
 # Adding your own sources
 
-Yes, you can read any source you like. Composer ships with two public feeds (the Google AI blog
-and the Google DeepMind blog). Your own sources go in a file next to where you run Composer,
+Yes, you can read any source you like. Composer ships with six public feeds (the Google AI, Google
+DeepMind, Hugging Face, Microsoft Research and PyTorch blogs, and arXiv cs.AI). Your own sources go in a file next to where you run Composer,
 `composer-sources.json`. Composer reads the bundled list first, then your file. An entry in
 your file with the same id as a bundled one replaces it.
 
@@ -132,4 +132,6 @@ of what it cites, not the descriptions or the article text (its sentences may qu
 read, `composer compose --keep-sources` saves it next to the brief; keep that file to yourself.
 
 Respect each site's terms. Some sites block automated readers; `composer sources check` will
-show the error if so.
+show the error if so. Before you share briefs made from a source, read
+[Sources and your responsibility](../README.md#sources-and-your-responsibility): check its terms and `robots.txt`,
+never add a source behind a paywall or a log-in, keep quotes short, and keep the AI note on what you publish.

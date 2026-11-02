@@ -35,6 +35,30 @@ The workflow then:
 | image | the default image (no narration) for linux/amd64 and linux/arm64 to ghcr.io; its SBOM (syft, CycloneDX); provenance and SBOM attested to the image digest | a failed build or push |
 | publish | SHA256SUMS over every file; build provenance for every file; an SBOM attestation for the wheel and sdist; the GitHub Release with the note as its text | |
 
+## Release candidates, for a test before a release
+
+`scripts/release/rc.py` builds candidates from chosen commits the way the workflow builds a release, so a test on
+a real computer (install one candidate, then update to the next) uses real release files, not a working copy:
+
+```sh
+python scripts/release/rc.py --version 0.2.0 --rc 1=<commit> --rc 2=<commit> --out rc-0.2.0
+```
+
+For each candidate it makes a fresh shallow clone of that commit, runs the test job (`pip install .` into an empty
+environment, then `scripts/release/test_results.py`) and the build job (the hash-locked release tools, then
+`scripts/release/build.py --tag v0.2.0rc<N>`), and writes the publish job's SHA256SUMS. The commit must already say
+version `0.2.0rc<N>`, as the workflow requires; `--stamp-version` writes it into the clone instead, for a test build,
+and the manifest says so. A failing test stops it, as it stops a release; `--keep-going` builds anyway and records
+the failures. It does not make the release note, the container image or the attestations, which need the release
+environment's key, the registry and GitHub's signing.
+
+The output folder holds every candidate's files side by side with one SHA256SUMS for all of them (so
+`shasum -a 256 -c SHA256SUMS` checks everything, and `composer update --from-file` finds each file's sum next to
+it), a folder per candidate with its own SHA256SUMS, test results and build log, and `rc-manifest.json` (commit,
+version, whether it was stamped, test counts, file hashes). Run it in a clean `python:3.13` container, like the
+dry run below, for the workflow's Python. The source release (sdist) is the whole project (`MANIFEST.in`), so an
+unpacked candidate can run `./setup.sh`.
+
 ## What the SBOM says, and why CycloneDX
 
 The SBOM is CycloneDX 1.6 JSON. It is made by `cyclonedx-py` from the virtual environment the release actually

@@ -10,15 +10,33 @@ from composer.registry import Registry, RegistryError, parse_entry
 
 from helpers import ROOT
 
+DEFAULT_IDS = ("google-ai", "deepmind", "huggingface", "microsoft-research", "pytorch", "arxiv-cs-ai")
+DEFAULT_URLS = {
+    "google-ai": "https://blog.google/innovation-and-ai/technology/ai/rss/",
+    "deepmind": "https://deepmind.google/blog/rss.xml",
+    "huggingface": "https://huggingface.co/blog/feed.xml",
+    "microsoft-research": "https://www.microsoft.com/en-us/research/blog/feed/",
+    "pytorch": "https://pytorch.org/blog/feed/",
+    "arxiv-cs-ai": "https://rss.arxiv.org/rss/cs.AI",
+}
+
 
 class BundledTests(unittest.TestCase):
-    def test_bundled_sources_are_the_two_public_feeds(self):
+    def test_bundled_sources_are_the_six_public_feeds(self):
         with tempfile.TemporaryDirectory() as d, mock.patch("pathlib.Path.cwd", return_value=Path(d)), \
                 mock.patch.dict(os.environ, {"COMPOSER_SOURCES": ""}):
             reg = Registry.load()
-        self.assertEqual(reg.ids, ("google-ai", "deepmind"))
-        self.assertEqual(reg.get("google-ai").url, "https://blog.google/technology/ai/rss/")
-        self.assertEqual(reg.get("deepmind").url, "https://deepmind.google/blog/rss.xml")
+        self.assertEqual(reg.ids, DEFAULT_IDS)
+        self.assertEqual({sid: reg.get(sid).url for sid in reg.ids}, DEFAULT_URLS)
+        for sid in reg.ids:
+            self.assertEqual(reg.get(sid).kind, "rss-or-atom", sid)
+
+    def test_no_bundled_source_comes_from_a_publisher_that_opted_out(self):
+        # These publishers' terms or robots.txt opt out of automated or AI use; a default must never point at them.
+        denied = ("technologyreview.com", "machinelearning.apple.com", "bair.berkeley.edu")
+        raw = (ROOT / "composer" / "sources.json").read_text(encoding="utf-8").lower()
+        for host in denied:
+            self.assertNotIn(host, raw)
 
     def test_example_file_is_valid(self):
         entries = registry.read_file(ROOT / "examples" / "composer-sources.example.json")
@@ -61,7 +79,7 @@ class LocalFileTests(unittest.TestCase):
             doc = json.loads(path.read_text())
             self.assertEqual(doc["schema"], "composer-sources/v1")
             reg = Registry.load(str(path))
-        self.assertEqual(reg.ids, ("google-ai", "deepmind", "my-feed"))
+        self.assertEqual(reg.ids, DEFAULT_IDS + ("my-feed",))
         self.assertEqual(reg.get("deepmind").label, "DeepMind (mine)")
 
     def test_env_and_cwd_default(self):
@@ -76,7 +94,7 @@ class LocalFileTests(unittest.TestCase):
 
     def test_unknown_source_and_bad_file(self):
         reg = Registry(registry.read_file(registry.BUNDLED))
-        with self.assertRaisesRegex(RegistryError, "known sources: google-ai, deepmind"):
+        with self.assertRaisesRegex(RegistryError, "known sources: " + ", ".join(DEFAULT_IDS)):
             reg.pick(["nope"])
         with tempfile.TemporaryDirectory() as d:
             bad = Path(d) / "bad.json"

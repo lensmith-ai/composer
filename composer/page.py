@@ -13,6 +13,10 @@ import json
 from pathlib import Path
 
 WEB = Path(__file__).with_name("web")
+# Shown with every brief, on this page and on the app page (composer/web/app/index.html): the brief is written by a
+# model, and so is the check. EU AI Act Article 50(4) asks for this on AI-written text published about matters of
+# public interest.
+AI_NOTE = "AI-written summary; check the source."
 
 TEMPLATE = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
@@ -31,6 +35,7 @@ TEMPLATE = """<!doctype html>
 </form>
 <div class="bar"><button type="button" id="replay">Replay</button><span class="meta">{note}</span></div>
 <div class="log" id="log" aria-live="polite"></div>
+<p class="meta ai-note" id="ai-note">{ai_note}</p>
 <main class="edition" id="edition"></main>
 </div>
 <script type="application/json" id="edition-data">{data}</script>
@@ -68,6 +73,7 @@ def build(edition: dict, *, live: bool = False, sources: list | None = None, nee
                   if live and needs_pass else "")
     title = "Composer, replayed" if recorded and not live else "Composer"
     return TEMPLATE.format(csp=html.escape(csp, quote=True), title=title, css=css, badge=badge, note=note,
+                           ai_note=html.escape(AI_NOTE),
                            pass_field=pass_field, data=_json_for_script(edition),
                            config=_json_for_script(config), js=js)
 
