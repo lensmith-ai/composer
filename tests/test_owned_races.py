@@ -13,7 +13,7 @@ from unittest import mock
 from install_helpers import fake_home, snapshot
 from test_lifecycle import install
 
-from composer import home as H, installer, lifecycle as L
+from composer import home as H, installer, lifecycle as L, narration as N
 
 ANSWERS = """
 [provider]
@@ -80,14 +80,13 @@ def wheel(folder: Path, version: str) -> Path:
 
 @unittest.skipUnless(os.name == "posix", "symbolic links and folder descriptors: POSIX")
 class VersionRemovalRaceTests(unittest.TestCase):
-    def test_the_app_folder_swapped_for_a_link_just_before_an_old_try_is_removed(self):
+    def test_the_app_folder_swapped_for_a_link_just_before_a_failed_try_is_removed(self):
         with fake_home() as home:
             target = install(home)
             app = target / "app"
             (app / "1.0" / "venv" / "bin").mkdir(parents=True)
             (app / "1.0" / "venv" / "bin" / "python").write_text("", encoding="utf-8")
             os.symlink("1.0", app / "current")
-            (app / "2.0").mkdir()  # an earlier, unfinished try at 2.0: update removes it first
             # outside: a whole app folder of its own, with a 2.0 that must survive
             ext_root = home / "external-root"
             (ext_root / "app" / "1.0").mkdir(parents=True)
@@ -99,7 +98,7 @@ class VersionRemovalRaceTests(unittest.TestCase):
             real_open = os.open
             swapped = []
 
-            def swap_at_open(path, flags, *a, **k):  # the moment the removal opens the app folder
+            def swap_at_open(path, flags, *a, **k):  # the moment the clean-up opens the app folder
                 if not swapped and str(path).endswith("app") and any(
                         f.function == "_remove_version" for f in inspect.stack()[1:6]):
                     os.rename(target, home / "aside")  # the whole app folder moves away...
@@ -108,14 +107,52 @@ class VersionRemovalRaceTests(unittest.TestCase):
                 return real_open(path, flags, *a, **k)
             before = snapshot(ext_root)
 
-            def probe(argv, **kw):
-                raise Stop("reached a subprocess")
+            def probe(argv, **kw):  # makes the new environment, then the install fails: update cleans up 2.0
+                if "-m" in argv and argv[argv.index("-m") + 1] == "venv":
+                    Path(argv[-1]).mkdir(parents=True)
+                    return mock.Mock(returncode=0, stdout="", stderr="")
+                raise Stop("the install failed")
             with mock.patch("os.open", swap_at_open):
                 with self.assertRaises(BaseException):
                     L.update(target, target / "data", release, sha256=sha, run=probe, log=lambda *_: None)
             self.assertTrue(swapped)
             self.assertTrue((ext_root / "app" / "2.0" / "KEEP").is_file())
             self.assertEqual(snapshot(ext_root), before)
+            self.assertFalse((home / "aside" / "app" / "2.0").exists())  # the failed try was removed where it was
+
+
+class ExistingVersionTests(unittest.TestCase):
+    def test_an_existing_version_folder_is_never_removed_by_update(self):
+        # app/current could be switched to 2.0 right after update read it, so 2.0 is not touched at all
+        with fake_home() as home:
+            target = install(home)
+            app = target / "app"
+            (app / "1.0" / "venv" / "bin").mkdir(parents=True)
+            (app / "1.0" / "venv" / "bin" / "python").write_text("", encoding="utf-8")
+            os.symlink("1.0", app / "current")
+            (app / "2.0").mkdir()
+            (app / "2.0" / "KEEP").write_text("in use, perhaps", encoding="utf-8")
+            release = wheel(home.parent, "2.0")
+            calls = []
+            with self.assertRaises(L.LifecycleError) as ctx:
+                L.update(target, target / "data", release, sha256=hashlib.sha256(release.read_bytes()).hexdigest(),
+                         run=lambda argv, **kw: calls.append(argv), log=lambda *_: None)
+            self.assertIn("already exists", str(ctx.exception))
+            self.assertTrue((app / "2.0" / "KEEP").is_file())
+            self.assertEqual(calls, [])
+            self.assertEqual(os.readlink(app / "current"), "1.0")
+
+class NarrationFallbackTests(unittest.TestCase):
+    def test_without_folder_descriptors_narration_removes_nothing_by_path(self):
+        with fake_home() as home:
+            work = home / ".lensmith-composer" / "tmp" / "narration-check"
+            work.mkdir(parents=True)
+            (work / "KEEP").write_text("left in place", encoding="utf-8")
+            notes = []
+            with mock.patch.object(N, "CONFINED", False):
+                N._remove_owned_tree(home / ".lensmith-composer", ("tmp",), "narration-check", *(
+                    [notes.append] if "log" in inspect.signature(N._remove_owned_tree).parameters else []))
+            self.assertTrue((work / "KEEP").is_file())
 
 
 if __name__ == "__main__":

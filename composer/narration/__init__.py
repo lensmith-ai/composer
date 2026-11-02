@@ -28,7 +28,6 @@ import json
 import os
 import queue
 import re
-import shutil
 import subprocess
 import sys
 import threading
@@ -184,18 +183,21 @@ def _owned(home: Path, *parts: str) -> Path:
         raise NarrationError(str(exc)) from None
 
 
-def _remove_owned_tree(home: Path, parts: tuple, name: str) -> None:
-    """Remove <home>/<parts>/<name> through open folders (or, where folders cannot be opened so, by its checked
-    path); a missing folder is fine."""
+def _remove_owned_tree(home: Path, parts: tuple, name: str, log=lambda *_: None) -> bool:
+    """Remove <home>/<parts>/<name> through open folders; a missing folder is fine. Where folders cannot be opened
+    that way (CONFINED is False), nothing is removed by path: the folder is left, with a note. True when removed."""
+    if not CONFINED:
+        log(f"  left {Path(home).joinpath(*parts, name)}: this system cannot remove it through open folders; "
+            "remove it yourself")
+        return False
     try:
-        if CONFINED:
-            with open_owned(home, *parts, create=False) as at:
-                if at.exists(name):
-                    at.remove_tree(name)
-        else:
-            shutil.rmtree(_owned(home, *parts) / name, ignore_errors=True)
+        with open_owned(home, *parts, create=False) as at:
+            if at.exists(name):
+                at.remove_tree(name)
+                return True
     except (FileNotFoundError, HomeError):
         pass
+    return False
 
 
 def download(home: Path, *, log=print, opener=None) -> tuple[Path, Path]:
@@ -329,7 +331,7 @@ def install_runtime(home: Path, *, log=print, base_python: str | None = None) ->
         atomic_write(venv / ".runtime-ok", "installed from requirements.lock\n", mode=0o600)
     except (subprocess.CalledProcessError, OSError) as exc:
         if made:
-            _remove_owned_tree(home, ("narration",), "venv")  # a half-made runtime would look installed next time
+            _remove_owned_tree(home, ("narration",), "venv", log)  # a half-made runtime would look installed
         raise NarrationError(f"the narration runtime did not install ({exc})") from None
     return python
 

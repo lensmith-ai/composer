@@ -145,6 +145,7 @@ class NativeUpdateTests(unittest.TestCase):
             self.composer("doctor")
             self.composer("rollback")
             self.assertEqual((self.current(), self.version()), (A, f"composer {A}"))
+            self.assertEqual(sorted(os.listdir(self.target / "app")), [A, "current"])  # rollback removes B
             self.update_b()
             self.assertEqual((self.current(), self.version()), (B, f"composer {B}"))
             self.composer("uninstall")

@@ -192,7 +192,9 @@ the new version into its own environment in `app/<version>` and checks that it s
 your data if the new version needs it (the original stays as it was), switches, runs `composer doctor` with the new
 version, and undoes itself if anything fails: your data and the version you had stay current. An update that
 stopped half way is undone the next time Composer starts, or by `composer rollback`. Rollback first exports every
-brief made since the update to `data/recovery/exports/`. If the current version's environment cannot start at all,
+brief made since the update to `data/recovery/exports/`, then removes the version it rolled back from. An update
+never removes a version folder it did not make: if `app/<version>` is already there (an earlier try that stopped
+before it could clean up), it refuses and leaves that folder for you to look at and remove. If the current version's environment cannot start at all,
 `bin/composer` still runs `rollback`, `uninstall`, `backup` and `doctor`, with another installed version or your
 system `python3`. Stop `composer up` before restore, update, rollback or uninstall; they refuse
 while it runs.

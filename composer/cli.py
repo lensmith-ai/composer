@@ -316,6 +316,8 @@ def cmd_rollback(args) -> int:
         print(f"briefs made since the update were exported to {result['export_directory']}: "
               + (", ".join(result["exported_jobs"]) or "none"))
     print("rolled back" + (f" to {result['code']}" if result["code"] else " the data (now start the previous image)"))
+    if result.get("removed_version"):
+        print(f"removed version {result['removed_version']} (to install it again, update to it again)")
     return 0
 
 

@@ -558,12 +558,11 @@ def _update(home: Path, data: Path, release: Path, *, sha256, run, crash_after, 
         raise LifecycleError(f"refused: the release is version {new_version!r}, which is already installed")
     folder = _owned(home, "app") / new_version
     if os.path.lexists(folder):
-        if folder.is_symlink() or not folder.is_dir():
-            raise LifecycleError(f"refused: {folder} is not a folder Composer made; nothing was installed")
-        # an earlier, unfinished try at this same version (never the current)
-        if not _remove_version(home, new_version, home_at, log) and os.path.lexists(folder):
-            raise LifecycleError(f"refused: an earlier try at {new_version} is still in {folder}; nothing was "
-                                 "installed")
+        # an earlier, unfinished try at this version, or a folder that something may point at: never removed here
+        # (whether app/current points at it can change while it is removed). The person decides what to do with it.
+        raise LifecycleError(f"refused: {folder} already exists (an earlier, unfinished try at {new_version}?); "
+                             "nothing was installed or removed. If no version runs from it, remove it yourself "
+                             "and update again")
     venv = folder / "venv"
     base = Path(os.path.realpath(_venv_python(home / "app" / old_version / "venv")))
     if not base.is_file():  # the Python the old environment was made from is gone: use the one running this
@@ -702,6 +701,10 @@ def _rollback(home: Path | None, data: Path, *, data_only: bool) -> dict:
                                  "image tag and run `docker compose up -d`")
         _point_code(home, fields["old_version"])
         out["code"] = fields["old_version"]
+        # the version rolled back from is no longer used: rollback removes it (through the app folder's descriptor),
+        # so the same release can be installed again; update itself never removes a version folder it did not make
+        out["removed_version"] = fields["new_version"] if _remove_version(
+            home, fields["new_version"], None, lambda *_: None) else None
     store.record("update", "rolled_back", **fields)
     return out
 
