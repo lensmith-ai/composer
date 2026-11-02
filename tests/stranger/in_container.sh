@@ -331,7 +331,8 @@ version)
 
 update)
   wheel=$1
-  as_tester "$H/bin/composer update --from-file $DL/b/$wheel" > /tmp/update.log 2>&1; rc=$?
+  # the local feeds need FIXENV here too: update runs the new version's doctor, which checks the sources file
+  as_tester "$FIXENV $H/bin/composer update --from-file $DL/b/$wheel" > /tmp/update.log 2>&1; rc=$?
   cp /tmp/update.log "$T/out/" 2>/dev/null
   if [ "$rc" = 0 ]; then
     rec lifecycle.update pass "composer update --from-file $wheel (SHA256SUMS next to it) rc 0: $(tail_of /tmp/update.log 2)"
@@ -341,7 +342,7 @@ update)
   ;;
 
 rollback)
-  as_tester "$H/bin/composer rollback" > /tmp/rollback.log 2>&1; rc=$?
+  as_tester "$FIXENV $H/bin/composer rollback" > /tmp/rollback.log 2>&1; rc=$?
   cp /tmp/rollback.log "$T/out/" 2>/dev/null
   if [ "$rc" = 0 ]; then
     rec lifecycle.rollback pass "composer rollback rc 0: $(tail_of /tmp/rollback.log 2)"

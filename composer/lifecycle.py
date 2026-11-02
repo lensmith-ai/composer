@@ -442,6 +442,13 @@ def verify_file(path: Path, sha256: str | None) -> str:
     return got
 
 
+def _parser_installed_by_setup(data: Path) -> bool:
+    try:
+        return S.load(data)["extraction"]["trafilatura"] is True
+    except Exception:  # no settings or unreadable settings: doctor reports that on its own
+        return False
+
+
 def _query(python: Path, home: Path, code: str, run) -> str:
     return _started([str(python), "-I", "-c", code], home, run)
 
@@ -509,6 +516,16 @@ def _update(home: Path, data: Path, release: Path, *, sha256, run, crash_after, 
         said = _started([str(_venv_script(venv, "composer")), "--version"], home, run)
         if said != f"composer {new_version}":
             raise LifecycleError(f"the new version does not start: `composer --version` said {said[-200:]!r}")
+        if _parser_installed_by_setup(data):
+            # setup installed the optional article parser into the old version's environment; the new one gets it
+            # the same way (its own hash-locked file), or doctor would fail and the update be undone
+            log("  installing the optional article parser into it (hash-checked, as setup did)")
+            r = run([str(_venv_python(venv)), "-I", "-c",
+                     "from composer import html_extract as X; X.install_trafilatura(log=lambda *a: None)"],
+                    env=env, capture_output=True, text=True)
+            if r.returncode != 0:
+                raise LifecycleError("the new version's article parser did not install: "
+                                     f"{(r.stderr or r.stdout or '').strip()[-300:]}; nothing was changed")
         new_schema = _query(_venv_python(venv), home,
                             "import composer.cli, composer.lifecycle; from composer import job_store as j; "
                             "print(getattr(j, 'DATA_SCHEMA', '1'))", run)

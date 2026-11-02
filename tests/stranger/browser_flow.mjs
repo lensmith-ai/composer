@@ -212,7 +212,16 @@ async function combo(browser, engine, width, height, n) {
     if (r.status() >= 400) badResponses.push(`${r.status()} ${r.request().method()} ${new URL(r.url()).pathname}`);
   });
   page.on('pageerror', (e) => errors.push(String(e).slice(0, 200)));
-  page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(m.text().slice(0, 200)); });
+  // WebKit logs one CSP refusal of an inline stylesheet for each Playwright screenshot (the style Playwright injects
+  // while it takes the picture; measured: 0 with no screenshot, 1 per screenshot, none in Chromium). They are kept
+  // apart and at most one per screenshot is excused in page_health; any beyond that count as the page's own.
+  const SHOT_STYLE = /^Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src directive/;
+  const shotStyleRefusals = [];
+  page.on('console', (m) => {
+    if (m.type() !== 'error') return;
+    if (engine === 'webkit' && SHOT_STYLE.test(m.text())) shotStyleRefusals.push(m.text().slice(0, 200));
+    else consoleErrors.push(m.text().slice(0, 200));
+  });
   page.on('request', (r) => {
     const u = r.url();
     if (!/^(data|blob|about):/.test(u) && new URL(u).origin !== new URL(base).origin) outside.push(u.slice(0, 160));
@@ -658,12 +667,15 @@ async function combo(browser, engine, width, height, n) {
 
   async function finish() {
     const problems = [];
+    const excused = Math.min(shotStyleRefusals.length, shotNo);
+    consoleErrors.push(...shotStyleRefusals.slice(excused));
     if (errors.length) problems.push(`${errors.length} page errors: ${errors.slice(0, 3).join(' | ')}`);
     if (outside.length) problems.push(`${outside.length} requests left this machine: ${outside.slice(0, 3).join(' | ')}`);
     if (badResponses.length) problems.push(`${badResponses.length} failed requests: ${[...new Set(badResponses)].slice(0, 6).join(' | ')}`);
     if (consoleErrors.length) problems.push(`${consoleErrors.length} console errors: ${consoleErrors.slice(0, 3).join(' | ')}`);
     await rec('page_health', problems.length ? 'fail' : 'pass',
-      problems.length ? problems.join('; ') : '0 page errors, 0 console errors, 0 requests that left this machine');
+      problems.length ? problems.join('; ') : '0 page errors, 0 console errors, 0 requests that left this machine'
+        + (excused ? ` (${excused} WebKit stylesheet refusals from this test's own ${shotNo} screenshots set aside)` : ''));
     await ctx.close();
   }
 }

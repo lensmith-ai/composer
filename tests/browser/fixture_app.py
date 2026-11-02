@@ -62,6 +62,12 @@ SITE = {
         ("Lab B explains how it labels audio", "Each clip is labelled by two people who must agree.")]),
         "application/rss+xml"),
 }
+# every other bundled source gets a local feed too, so no compose here ever reads the internet
+for _letter in "cdefgh":
+    SITE[f"/lab-{_letter}/feed.xml"] = (rss(f"Lab {_letter.upper()}", [
+        (f"Lab {_letter.upper()} posts its weekly build notes", "The notes list what changed in the build this week."),
+        (f"Lab {_letter.upper()} opens its test results", "Every test result is now public on the lab's page.")]),
+        "application/rss+xml")
 
 
 class Site(BaseHTTPRequestHandler):
@@ -154,9 +160,14 @@ if __name__ == "__main__":
 
     base = f"https://127.0.0.1:{port}"
     sources_file = WORK / "sources.json"
+    from composer.registry import BUNDLED, read_file
+    # the bundled sources, each pointed at a local feed of this site (the first two keep their Lab A / Lab B names)
+    bundled = [e.id for e in read_file(BUNDLED)]
+    letters = "abcdefgh"
+    assert len(bundled) <= len(letters), "add more local feeds for the bundled sources"
     sources_file.write_text(json.dumps({"schema": "composer-sources/v1", "sources": [
-        {"id": "google-ai", "label": "Lab A notes", "kind": "rss-or-atom", "url": f"{base}/lab-a/feed.xml"},
-        {"id": "deepmind", "label": "Lab B notes", "kind": "rss-or-atom", "url": f"{base}/lab-b/feed.xml"}]}))
+        {"id": sid, "label": f"Lab {letters[n].upper()} notes", "kind": "rss-or-atom",
+         "url": f"{base}/lab-{letters[n]}/feed.xml"} for n, sid in enumerate(bundled)]}))
     service = sources_registry.SourceService(sources_file,
                                              packages=sources_registry.PackageService(WORK / "packages.json"))
     model = FixtureModel()

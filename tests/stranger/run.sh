@@ -45,7 +45,7 @@ done
 
 HERE=$(cd "$(dirname "$0")" && pwd)
 REPO=$(git -C "$HERE" rev-parse --show-toplevel)
-OUT=${STRANGER_OUT:-$(mktemp -d "${TMPDIR:-/tmp}/stranger.XXXXXX")}
+OUT=${STRANGER_OUT:-$(mktemp -d "${TMPDIR:-/tmp}/stranger.XXXXX")}
 mkdir -p "$OUT/shots" "$OUT/stage" "$OUT/logs"
 RES=$OUT/results.jsonl
 : > "$RES"
@@ -121,7 +121,8 @@ fi
 # which file does a stranger download? the release's tarball with setup.sh in it
 REL=""; RELDIR="$OUT/dist-a"
 for f in "$OUT"/dist-a/*.tar.gz; do
-  if tar -tzf "$f" | grep -qE '^[^/]+/setup\.sh$'; then REL=$(basename "$f"); break; fi
+  # grep reads the whole list (no -q): with pipefail, grep -q stopping early made tar fail on SIGPIPE
+  if tar -tzf "$f" | grep -E '^[^/]+/setup\.sh$' > /dev/null; then REL=$(basename "$f"); break; fi
 done
 if [ -n "$REL" ]; then
   rec artifact.setup_tarball pass "the release has $REL with setup.sh in it"

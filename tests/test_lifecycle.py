@@ -249,15 +249,17 @@ class FakeRun:
     starts the new `composer --version` (or not: `starts`), and answers the new version's doctor with `doctor_rc`
     (or raises `doctor_raises`, as a script whose interpreter is gone does)."""
 
-    def __init__(self, version="0.3.0", schema="1", doctor_rc=0, starts=True, doctor_raises=None):
+    def __init__(self, version="0.3.0", schema="1", doctor_rc=0, starts=True, doctor_raises=None, parser_rc=0):
         self.version, self.schema, self.doctor_rc = version, schema, doctor_rc
-        self.starts, self.doctor_raises = starts, doctor_raises
+        self.starts, self.doctor_raises, self.parser_rc = starts, doctor_raises, parser_rc
         self.calls = []
 
     def __call__(self, argv, **kw):
         self.calls.append(argv)
         out, rc = "", 0
-        if "-m" in argv and argv[argv.index("-m") + 1] == "venv":
+        if "-c" in argv and "install_trafilatura" in argv[-1]:
+            rc = self.parser_rc
+        elif "-m" in argv and argv[argv.index("-m") + 1] == "venv":
             venv = Path(argv[-1])
             (venv / "bin").mkdir(parents=True)
             (venv / "bin" / "python").write_text("", encoding="utf-8")
@@ -336,6 +338,40 @@ class UpdateRollbackTests(unittest.TestCase):
             self.assertEqual(sorted(os.listdir(target / "app")), ["0.2.0", "0.3.0", "current"])
             doctor = next(argv for argv in run.calls if "doctor" in argv)
             self.assertEqual(doctor[0], str(L._venv_script(target / "app" / "0.3.0" / "venv", "composer")))
+
+    def parser_on(self, data):
+        cfg = S.load(data)
+        cfg["extraction"] = {"trafilatura": True}
+        S.save(data, cfg)
+
+    def test_the_article_parser_setup_installed_is_installed_into_the_new_version(self):
+        with fake_home() as home:
+            target, data, release = self.native(home)
+            run = FakeRun()
+            L.update(target, data, release, sha256=self.sha(release), run=run, log=lambda *_: None)
+            self.assertFalse([a for a in run.calls if "install_trafilatura" in a[-1]])  # not asked for: not installed
+        with fake_home() as home:
+            target, data, release = self.native(home)
+            self.parser_on(data)
+            run = FakeRun()
+            L.update(target, data, release, sha256=self.sha(release), run=run, log=lambda *_: None)
+            parser = [a for a in run.calls if "install_trafilatura" in a[-1]]
+            self.assertEqual(len(parser), 1)
+            self.assertEqual(parser[0][0], str(L._venv_python(target / "app" / "0.3.0" / "venv")))
+            doctor = next(i for i, a in enumerate(run.calls) if "doctor" in a)
+            self.assertLess(run.calls.index(parser[0]), doctor)  # before the new version's doctor checks it
+            self.assertEqual(os.readlink(target / "app" / "current"), "0.3.0")
+
+    def test_a_parser_that_does_not_install_leaves_the_old_version(self):
+        with fake_home() as home:
+            target, data, release = self.native(home)
+            self.parser_on(data)
+            with self.assertRaises(L.LifecycleError) as ctx:
+                L.update(target, data, release, sha256=self.sha(release), run=FakeRun(parser_rc=1),
+                         log=lambda *_: None)
+            self.assertIn("article parser", str(ctx.exception))
+            self.assertEqual(os.readlink(target / "app" / "current"), "0.2.0")
+            self.assertEqual(sorted(os.listdir(target / "app")), ["0.2.0", "current"])
 
     def test_a_new_version_that_does_not_start_is_never_switched_to(self):
         for run in (FakeRun(starts=False), FakeRun(version="9.9.9")):
