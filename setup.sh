@@ -26,6 +26,32 @@ NEED_KB=307200
 say() { printf '%s\n' "$*"; }
 die() { printf 'setup.sh: %s\n' "$*" >&2; exit 2; }
 has_tty() { (: < /dev/tty) 2>/dev/null; }
+# The folders setup and Composer make in the app folder must be real folders: a symbolic link planted there could
+# send a write or a removal outside it. The only link allowed is app/current, naming a real version folder beside it.
+# Prints why not and returns 1; prints nothing and returns 0 when every one is a real folder (or not there yet).
+owned_ok() {
+  for n in bin app python bootstrap narration models cache tmp narration/venv models/kokoro; do
+    if [ -L "$H/$n" ]; then say "$H/$n is a symbolic link"; return 1; fi
+    if [ -e "$H/$n" ] && [ ! -d "$H/$n" ]; then say "$H/$n is not a folder"; return 1; fi
+  done
+  [ -d "$H/app" ] || return 0
+  for p in "$H/app"/* "$H/app"/.[!.]*; do
+    [ -e "$p" ] || [ -L "$p" ] || continue
+    case "${p##*/}" in
+      current|.current.tmp)
+        t=$(readlink "$p" 2>/dev/null || true)
+        case "$t" in ""|.*|*/*) say "$p must be a link to a version folder beside it"; return 1 ;; esac
+        if [ ! -d "$H/app/$t" ] || [ -L "$H/app/$t" ]; then say "$p must be a link to a version folder beside it"; return 1; fi ;;
+      *)
+        if [ -L "$p" ]; then say "$p is a symbolic link"; return 1; fi
+        if [ -L "$p/venv" ]; then say "$p/venv is a symbolic link"; return 1; fi ;;
+    esac
+  done
+  return 0
+}
+check_owned() {
+  why=$(owned_ok) || die "refused: $why; setup works only in its own real folders, so nothing was written or removed. Remove the link (or the file) and run it again."
+}
 
 H=${COMPOSER_HOME:-${HOME:-}/.lensmith-composer}
 ANSWERS=""
@@ -74,6 +100,7 @@ if [ -e "$H" ]; then
          ! grep -Fq "\"home\": \"$H\"" "$H/install-manifest.json"; then
         die "refused: $H holds a Composer install made for another folder (moved or copied). Nothing was written."
       fi
+      check_owned
       STATE=ours
     else
       die "refused: $H already holds files that are not a Composer install. Nothing was written. Pick an empty or new folder with --home."
@@ -159,6 +186,10 @@ FREE_KB=$(df -Pk "$PARENT" | awk 'NR==2 {print $4}')
 cleanup() {
   status=$?
   if [ "$status" != 0 ]; then
+    if ! why=$(owned_ok); then
+      say "setup.sh: stopped; nothing it made was removed, because $why" >&2
+      return
+    fi
     [ "$MADE_VERSION" = 1 ] && [ "$(readlink "$H/app/current" 2>/dev/null)" != "$VERSION" ] && rm -rf -- "$H/app/$VERSION"
     if [ "$STATE" != ours ] && [ ! -e "$H/data" ]; then
       rm -rf -- "$H/bootstrap" "$H/python" "$H/app" "$H/cache" "$H/tmp" "$H/bin"
@@ -173,8 +204,10 @@ trap cleanup EXIT
 
 umask 077
 mkdir -p -- "$H"
+check_owned  # again at the writes: the checks above may have taken a while
 [ -e "$H/.composer-home" ] || printf 'lensmith-composer home v1\n' > "$H/.composer-home"
 mkdir -p -- "$H/cache" "$H/tmp" "$H/app"
+check_owned
 export TMPDIR="$H/tmp" PIP_CACHE_DIR="$H/cache/pip" UV_CACHE_DIR="$H/cache/uv" UV_PYTHON_INSTALL_DIR="$H/python" \
   XDG_CACHE_HOME="$H/cache/xdg" XDG_CONFIG_HOME="$H/cache/xdg-config" XDG_DATA_HOME="$H/cache/xdg-data" \
   HF_HOME="$H/cache/hf" PYTHONPYCACHEPREFIX="$H/cache/pycache" PIP_REQUIRE_VIRTUALENV=1 PIP_CONFIG_FILE=/dev/null \
@@ -182,6 +215,7 @@ export TMPDIR="$H/tmp" PIP_CACHE_DIR="$H/cache/pip" UV_CACHE_DIR="$H/cache/uv" U
   COMPOSER_HOME="$H"
 
 if [ -z "$PY" ]; then
+  check_owned
   mkdir -p -- "$H/bootstrap"
   url="https://github.com/astral-sh/uv/releases/download/$UV_VERSION/$UV_ASSET.tar.gz"
   say "downloading uv $UV_VERSION"
@@ -203,10 +237,12 @@ if [ -x "$VENV/bin/composer" ] && "$VENV/bin/composer" --version >/dev/null 2>&1
   say "Composer $VERSION is already installed in $H/app/$VERSION"
 else
   say "making a private environment with $("$PY" -c 'import sys; print("Python %d.%d.%d" % sys.version_info[:3])')"
+  check_owned
   MADE_VERSION=1
   "$PY" -m venv "$VENV"
   say "installing Composer $VERSION into it (and its one dependency, claim-seal, checked by SHA-256)"
   # pip builds in the folder it installs from, so it gets a copy inside $H/tmp: your checkout stays as it is.
+  check_owned
   rm -rf -- "$H/tmp/source"
   mkdir -p -- "$H/tmp/source"
   cp -R -- "$SRC/pyproject.toml" "$SRC/README.md" "$SRC/LICENSE" "$SRC/composer" "$H/tmp/source/"
@@ -215,6 +251,7 @@ else
   rm -rf -- "$H/tmp/source"
   "$VENV/bin/composer" --version >/dev/null
 fi
+check_owned
 "$VENV/bin/python" -c 'import os, sys
 link = os.path.join(sys.argv[1], "current"); tmp = link + ".tmp"
 if os.path.lexists(tmp): os.unlink(tmp)

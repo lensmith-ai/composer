@@ -33,6 +33,9 @@ MANIFEST_SCHEMA = "composer-install/v1"
 DATA_DIR = "data"
 # The only top-level names Composer itself ever creates in its folder (setup.sh uses the same list).
 OWNED_NAMES = ("bin", "app", "python", "bootstrap", "narration", "models", "cache", "tmp", MARKER)
+OWNED_DIRS = tuple(n for n in OWNED_NAMES if n != MARKER)
+# folders Composer makes inside its own folders; like the top-level ones, each must be a real folder
+OWNED_SUBDIRS = (("narration", "venv"), ("models", "kokoro"))
 MIN_FREE_BYTES = 300 * 1024 * 1024
 
 
@@ -93,6 +96,7 @@ def guard(home: Path, *, need_bytes: int = MIN_FREE_BYTES) -> str:
         if not names:
             state = "empty"
         elif MARKER in names and is_ours(home):
+            check_owned(home)
             state = "ours"
         else:
             shown = ", ".join(names[:5]) + (" ..." if len(names) > 5 else "")
@@ -113,6 +117,67 @@ def guard(home: Path, *, need_bytes: int = MIN_FREE_BYTES) -> str:
         raise HomeError(f"refused: {free // (1024 * 1024)} MB free next to {home}; setup needs "
                         f"{need_bytes // (1024 * 1024)} MB")
     return state
+
+
+def _plain_name(name: str) -> bool:
+    return bool(name) and name not in (".", "..") and "/" not in name and os.sep not in name and "\0" not in name
+
+
+def owned_dir(base: Path, *parts: str, create: bool = True) -> Path:
+    """<base>/<parts...>, where base and every part is a real folder (never a symbolic link), made 0700 when it is
+    missing (unless create is False). Composer writes and removes only inside folders checked this way, at the
+    moment it uses them, so a link planted in its folder cannot lead a write or a removal elsewhere."""
+    path = Path(os.path.normpath(str(base)))
+    if os.path.islink(path):
+        raise HomeError(f"refused: {path} is a symbolic link; Composer works only in its own real folders")
+    if create and parts and not os.path.lexists(path):
+        os.makedirs(path, mode=0o700, exist_ok=True)
+    for part in parts:
+        if not _plain_name(part):
+            raise HomeError(f"refused: {part!r} is not a plain folder name")
+        path = path / part
+        if os.path.islink(path):
+            raise HomeError(f"refused: {path} is a symbolic link; Composer works only in its own real folders, "
+                            "so nothing was written or removed. Remove the link (or the folder) and run it again.")
+        if os.path.lexists(path):
+            if not path.is_dir():
+                raise HomeError(f"refused: {path} is not a folder")
+        elif create:
+            os.mkdir(path, 0o700)
+            if os.path.islink(path) or not path.is_dir():  # made by someone else in between
+                raise HomeError(f"refused: {path} changed while Composer made it")
+    return path
+
+
+def check_owned(home: Path) -> None:
+    """Refuse an app folder whose own parts lead elsewhere: every folder Composer makes in it (bin, app, python,
+    bootstrap, narration, models, cache, tmp and the ones inside them) must be a real folder, not a symbolic link,
+    and the only link allowed is app/current, which must name a real app/<version> folder beside it. Call it before
+    any write or removal in the app folder; it only reads."""
+    home = Path(os.path.normpath(str(home)))
+    if os.path.islink(home):
+        raise HomeError(f"refused: {home} is a symbolic link; give the real folder")
+    if not home.exists():
+        return
+    for name in OWNED_DIRS:
+        owned_dir(home, name, create=False)
+    for parts in OWNED_SUBDIRS:
+        owned_dir(home, *parts, create=False)
+    app = home / "app"
+    if not app.is_dir():
+        return
+    for entry in sorted(os.listdir(app)):
+        path = app / entry
+        if entry in ("current", ".current.tmp"):  # the version pointer (and its temporary name while it changes)
+            target = os.readlink(path) if os.path.islink(path) else ""
+            if not (_plain_name(target) and not target.startswith(".") and os.path.isdir(app / target)
+                    and not os.path.islink(app / target)):
+                raise HomeError(f"refused: {path} must be a link to a version folder beside it (it points at "
+                                f"{target or 'nothing'!r}); nothing was written or removed")
+        elif os.path.islink(path):
+            raise HomeError(f"refused: {path} is a symbolic link; Composer works only in its own real folders")
+        elif path.is_dir():
+            owned_dir(path, "venv", create=False)
 
 
 def is_ours(home: Path) -> bool:
@@ -318,4 +383,4 @@ def private_env(home: Path, base: dict | None = None) -> dict:
 
 def ensure_private_dirs(home: Path) -> None:
     for name in ("cache", "tmp"):
-        (home / name).mkdir(mode=0o700, exist_ok=True)
+        owned_dir(home, name)

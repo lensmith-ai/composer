@@ -366,13 +366,14 @@ def _current_version(home: Path) -> str | None:
 
 def _point_code(home: Path, version: str) -> None:
     """Atomically point app/current at app/<version>."""
-    if not VERSION_NAME.fullmatch(version) or not (home / "app" / version).is_dir():
+    app = _owned(home, "app", create=False)
+    if not VERSION_NAME.fullmatch(version) or not (app / version).is_dir() or os.path.islink(app / version):
         raise LifecycleError(f"no installed version {version!r}")
-    tmp = home / "app" / ".current.tmp"
+    tmp = app / ".current.tmp"
     if os.path.lexists(tmp):
         os.unlink(tmp)
     os.symlink(version, tmp)
-    os.replace(tmp, home / "app" / "current")
+    os.replace(tmp, app / "current")
 
 
 def _venv_python(venv: Path) -> Path:
@@ -417,11 +418,41 @@ def release_version(path: Path) -> str:
     return version
 
 
+def _owned(home: Path, *parts: str, create: bool = True) -> Path:
+    try:
+        return H.owned_dir(home, *parts, create=create)
+    except H.HomeError as exc:
+        raise LifecycleError(str(exc)) from None
+
+
+def _check_owned(home: Path | None) -> None:
+    if home is None:
+        return
+    try:
+        H.check_owned(home)
+    except H.HomeError as exc:
+        raise LifecycleError(str(exc)) from None
+
+
 def _remove_version(home: Path, version: str) -> None:
-    """Remove app/<version>, never app/current's target, and only a real folder with a version's name."""
-    folder = home / "app" / version
-    if (VERSION_NAME.fullmatch(version) and version != "current" and version != _current_version(home)
-            and folder.is_dir() and not folder.is_symlink()):
+    """Remove app/<version>, never app/current's target, and only a real folder with a version's name inside the
+    real app folder (checked here, at the removal, not only when the command started)."""
+    if not VERSION_NAME.fullmatch(version) or version == "current" or version == _current_version(home):
+        return
+    app = _owned(home, "app", create=False)
+    folder = app / version
+    if not folder.is_dir() or folder.is_symlink():
+        return
+    if shutil.rmtree.avoids_symlink_attacks and sys.version_info >= (3, 11):
+        # remove it by name inside the app folder opened without following links: a link swapped in for
+        # app (or for the folder) after the check above cannot send the removal elsewhere
+        fd = os.open(app, os.O_RDONLY | os.O_DIRECTORY | getattr(os, "O_NOFOLLOW", 0))
+        try:
+            if os.path.samestat(os.fstat(fd), os.lstat(app)):
+                shutil.rmtree(version, dir_fd=fd)
+        finally:
+            os.close(fd)
+    else:
         shutil.rmtree(folder)
 
 
@@ -481,6 +512,7 @@ def update(home: Path, data: Path, release: Path, *, sha256: str | None = None, 
 
 
 def _update(home: Path, data: Path, release: Path, *, sha256, run, crash_after, log) -> dict:
+    _check_owned(home)  # before anything is made or removed in the app folder
     old_version = _current_version(home)
     if old_version is None:
         raise LifecycleError("this is not a native install with app/current; in Docker, change the image tag "
@@ -489,7 +521,7 @@ def _update(home: Path, data: Path, release: Path, *, sha256, run, crash_after, 
     new_version = release_version(release)
     if new_version == old_version:
         raise LifecycleError(f"refused: the release is version {new_version!r}, which is already installed")
-    folder = home / "app" / new_version
+    folder = _owned(home, "app") / new_version
     if os.path.lexists(folder):
         if folder.is_symlink() or not folder.is_dir():
             raise LifecycleError(f"refused: {folder} is not a folder Composer made; nothing was installed")
@@ -588,6 +620,7 @@ def recover(home: Path | None, data: Path, *, log=print) -> str | None:
     restored = _recover_restore(data, log)
     if not (data / "current").exists():
         return restored
+    _check_owned(home)
     store = JobStore(data, worker=None)  # the store's own recovery runs first (unfinished copies, temp pointers)
     last = store.last("update")
     if not last or last["stage"] in ("committed", "undone", "rolled_back"):
@@ -615,6 +648,7 @@ def rollback(home: Path | None, data: Path, *, data_only: bool = False, log=prin
 
 
 def _rollback(home: Path | None, data: Path, *, data_only: bool) -> dict:
+    _check_owned(None if data_only else home)
     store = JobStore(data, worker=None)
     last = store.last("update")
     if not last or last["stage"] != "committed":
@@ -680,6 +714,7 @@ def uninstall(home: Path, data: Path, *, delete_data: bool = False, confirm=lamb
 
 
 def _uninstall(home: Path, data: Path, *, delete_data: bool, confirm) -> dict:
+    # no owned-folder refusal here: uninstall removes a link as a link and checks every manifest path (see H)
     doc = H.load_manifest(home)
     problems = H.check_manifest(home, doc, data)
     problems += [p for p in H.check_manifest(home, doc, home / H.DATA_DIR) if p not in problems]

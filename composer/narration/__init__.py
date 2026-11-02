@@ -38,7 +38,7 @@ import urllib.request
 from pathlib import Path
 from urllib.parse import urlsplit
 
-from ..home import private_env
+from ..home import HomeError, owned_dir, private_env
 
 VOICES = ("af_heart", "am_michael", "bf_emma")
 VOICE_LABELS = {"af_heart": "Heart", "am_michael": "Michael", "bf_emma": "Emma"}
@@ -176,10 +176,17 @@ def check_files(model: str | Path, voices: str | Path) -> tuple[bool, str, dict]
     return True, "matches the pinned release", info
 
 
+def _owned(home: Path, *parts: str) -> Path:
+    """A folder of Composer's own under home, checked to be real folders all the way down, made when missing."""
+    try:
+        return owned_dir(home, *parts)
+    except HomeError as exc:
+        raise NarrationError(str(exc)) from None
+
+
 def download(home: Path, *, log=print, opener=None) -> tuple[Path, Path]:
     """Download the pinned model pair into <home>/models/kokoro, checking size and SHA-256 before keeping it."""
-    target = home / "models" / "kokoro"
-    target.mkdir(parents=True, exist_ok=True)
+    target = _owned(home, "models", "kokoro")
     open_url = opener or urllib.request.urlopen
     for name, (want_sha, want_size) in PINNED.items():
         final = target / name
@@ -236,7 +243,9 @@ def has_runtime_here() -> bool:
 
 def install_runtime(home: Path, *, log=print, base_python: str | None = None) -> Path:
     """Make <home>/narration/venv and install the hash-locked runtime into it (wheels only)."""
-    venv = home / "narration" / "venv"
+    venv = _owned(home, "narration") / "venv"
+    if os.path.islink(venv):
+        raise NarrationError(f"refused: {venv} is a symbolic link; nothing was installed")
     env = private_env(home)
     made = not venv.exists()
     python = venv / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
@@ -260,7 +269,7 @@ def install_runtime(home: Path, *, log=print, base_python: str | None = None) ->
 def run_worker(python: Path, request: dict, *, home: Path, timeout: float) -> dict:
     """Run worker.py in the narration runtime; its JSON answer, or NarrationError with a short reason."""
     env = private_env(home)
-    (home / "tmp").mkdir(parents=True, exist_ok=True)
+    _owned(home, "tmp")
     try:  # the worker lowers its own priority (forking hooks are unsafe in a threaded server)
         proc = subprocess.run([str(python), "-I", str(WORKER)], input=json.dumps({**request, "nice": 10}),
                               capture_output=True, text=True, timeout=timeout, env=env)
@@ -280,8 +289,7 @@ def run_worker(python: Path, request: dict, *, home: Path, timeout: float) -> di
 
 def check_render(python: Path, model: str, voices: str, *, home: Path, timeout: float = 120) -> dict:
     """The capability check: load the pair, then render one sentence with each of the three voices."""
-    work = home / "tmp" / "narration-check"
-    work.mkdir(parents=True, exist_ok=True)
+    work = _owned(home, "tmp", "narration-check")
     try:
         req = {"mode": "check", "model": str(model), "voices": str(voices), "out_dir": str(work), "want": list(VOICES)}
         env = private_env(home)
@@ -352,8 +360,7 @@ def check_server(url: str, *, home: Path, timeout: float = 60, opener=None) -> d
     voices = server_voices(url, opener=opener)
     missing = [v for v in VOICES if v not in voices]
     rendered = []
-    work = home / "tmp" / "narration-check"
-    work.mkdir(parents=True, exist_ok=True)
+    work = _owned(home, "tmp", "narration-check")
     try:
         for voice in VOICES:
             if voice in voices:

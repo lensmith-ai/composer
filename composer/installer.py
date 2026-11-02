@@ -508,8 +508,7 @@ def write_launcher(home: Path) -> Path:
     in_app = Path(sys.prefix).parent.parent == home / "app"
     command = (APP_LAUNCH.replace("__APP__", shlex.quote(str(home / "app"))) if in_app
                else f"exec {shlex.quote(sys.executable)} -m composer \"$@\"")
-    path = home / "bin" / "composer"
-    path.parent.mkdir(mode=0o700, exist_ok=True)
+    path = H.owned_dir(home, "bin") / "composer"
     H.atomic_write(path, _launcher_text(home, command), mode=0o700)
     return path
 
@@ -637,6 +636,7 @@ def run(*, home: Path, data: Path | None, answers_file: str | None, assume_yes: 
     # 2. Writes: the folder, the marker and manifest, the data, the settings, the key, the extras.
     if not data_only:
         home.mkdir(mode=0o700, exist_ok=True)
+        H.check_owned(home)  # again at the write: the answers above may have taken a while
         if not (home / H.MARKER).exists():
             H.atomic_write(home / H.MARKER, H.MARKER_TEXT, mode=0o600)
         doc = H.load_manifest(home) if (home / H.MANIFEST).exists() else H.new_manifest(
