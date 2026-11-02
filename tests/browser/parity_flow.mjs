@@ -11,6 +11,12 @@
 //      it, which makes revision 2 of the same lens.
 //   3. Compose: the package chip is offered; picks the new source and one more, picks the new lens, composes, and
 //      waits for the brief, which must cite the new source's items.
+//   4. Saves it with the page's Save button, opens the menu drawer and finds it under Recents (title from the shelf
+//      index, insight count, sources); the lens library shows "0 briefs" for the built-in lens it was not made with.
+//   5. Opens the saved brief from its own link (?job=<id>): the page asks the engine for it and shows its first
+//      insight (not the recorded demo).
+//   6. Composes again with the default lens and the default sources; the lens library then counts 1 brief for it.
+// Also fails on any request to a route the engine does not have (/status/liveness-probe) or a 404 for the shelf index.
 // Fails on any page error, any request that leaves this machine, or any step that does not happen.
 // Prints one PASS / FAIL line per engine and width; exits 1 if any failed.
 import { spawn } from 'node:child_process';
@@ -47,14 +53,45 @@ async function step(page, name, fn, log) {
   }
 }
 
-async function openDrawerAction(page, id) {
+async function openDrawer(page) {
   // the compose screen has its own menu button over the brief's; a library page has a third
   const menus = ['#cmpMenu', '#sourcesMenu', '#lensesMenu', '#menuBtn'];
   for (const menu of menus) {
     if (await page.locator(menu).isVisible()) { await page.click(menu); break; }
   }
+}
+
+async function openDrawerAction(page, id) {
+  await openDrawer(page);
   await page.locator(`#${id}`).waitFor({ state: 'visible', timeout: 10000 });
   await page.click(`#${id}`);
+}
+
+async function waitVerified(app, job) {
+  let phase = '';
+  for (let i = 0; i < 240 && !['verified', 'verification_failed', 'failed'].includes(phase); i += 1) {
+    const res = await fetch(new URL(`/status/${job}`, app));
+    phase = (await res.json()).phase || '';
+    if (!['verified', 'verification_failed', 'failed'].includes(phase)) await new Promise((r) => setTimeout(r, 500));
+  }
+  if (phase !== 'verified') throw new Error(`the brief ended as ${phase || 'unknown'}, not verified`);
+}
+
+async function shelfIndex(app) {
+  const res = await fetch(new URL('/data/index.json', app));
+  if (res.status !== 200) throw new Error(`/data/index.json answered ${res.status}`);
+  return res.json();
+}
+
+// Opens the lens library from the drawer, opens a built-in lens and reads its "N briefs using this lens" line.
+async function lensCount(page, title) {
+  await openDrawerAction(page, 'dLensesAction');
+  await page.locator('#lensesGrid .lens-tile', { hasText: title }).first().click();
+  const handle = await page.waitForFunction(() => {
+    const m = /(\d+) briefs using this lens/.exec(document.body.innerText);
+    return m && m[1];
+  }, null, { timeout: 15000 });
+  return Number(await handle.jsonValue());
 }
 
 // A picker sheet is taken out of the page 300 ms after it closes; a person does not tap the next word that fast.
@@ -170,15 +207,74 @@ async function flow(page, server, log) {
       .test(document.body.innerText), null, { timeout: 120000 });
     // the engine finishes the check and seal; the page then shows the checked brief under the lens's name
     const job = new URL(page.url()).searchParams.get('job');
-    let phase = '';
-    for (let i = 0; i < 240 && !['verified', 'verification_failed', 'failed'].includes(phase); i += 1) {
-      const res = await fetch(new URL(`/status/${job}`, app));
-      phase = (await res.json()).phase || '';
-      if (!['verified', 'verification_failed', 'failed'].includes(phase)) await new Promise((r) => setTimeout(r, 500));
-    }
-    if (phase !== 'verified') throw new Error(`the brief ended as ${phase || 'unknown'}, not verified`);
+    await waitVerified(app, job);
     await page.waitForFunction(() => /River desk/.test(document.body.innerText)
       && !/checks running/i.test(document.body.innerText), null, { timeout: 60000 });
+  }, log);
+
+  const options = await (await fetch(new URL('/data/options.json', app))).json();
+  const defaultTitle = (options.lens_meta[options.default_lens] || {}).title || options.default_lens;
+
+  let saved = '';
+  await step(page, 'save it and find it in the drawer', async () => {
+    const job = new URL(page.url()).searchParams.get('job');
+    saved = job;
+    const save = page.locator('button.cw-save:visible').first();
+    await save.waitFor({ timeout: 30000 });
+    await save.click();
+    await page.waitForFunction(() => [...document.querySelectorAll('button.cw-save')].some((b) => /SAVED/.test(b.textContent)),
+      null, { timeout: 15000 });
+    const entry = (await shelfIndex(app)).briefs.find((b) => b.job === job);
+    if (!entry || entry.commit.state !== 'saved') throw new Error(`the shelf index does not list ${job} as saved`);
+    await page.goto(server.app, { waitUntil: 'load' });
+    await page.locator('#cmpGo').waitFor({ state: 'visible', timeout: 15000 });
+    await openDrawer(page);
+    const row = page.locator('#dBriefs li', { hasText: entry.title });
+    await row.waitFor({ state: 'visible', timeout: 10000 });
+    const text = await row.textContent();
+    if (!new RegExp(`${entry.items} insights?`).test(text) || !text.includes('tidewater-notes')) {
+      throw new Error(`the drawer row reads: ${text}`);
+    }
+    const badge = (await page.locator('#ctBriefs').textContent()).trim();
+    if (badge !== '1') throw new Error(`the Recents count reads ${badge}`);
+  }, log);
+
+  await step(page, 'open the saved brief from its link', async () => {
+    const doc = await (await fetch(new URL(`/data/live/${saved}/composed.json`, app))).json();
+    const first = String(doc.items[0].insight).slice(0, 40);
+    const asked = [];
+    const watch = (r) => { if (r.url().includes(saved)) asked.push(new URL(r.url()).pathname); };
+    page.on('request', watch);
+    // the brief page also loads its receipts and checks the engine; the next step leaves the page only after both
+    // answered, because WebKit reports a fetch cut off by leaving the page as a page error
+    const settled = Promise.all([
+      page.waitForResponse((r) => new URL(r.url()).pathname === `/data/live/${saved}/receipts.json`, { timeout: 60000 }),
+      page.waitForResponse((r) => new URL(r.url()).pathname === '/health', { timeout: 60000 })]);
+    await page.goto(new URL(`/app/?job=${saved}`, app).href, { waitUntil: 'load' });
+    await page.waitForFunction((t) => document.body.innerText.includes(t), first, { timeout: 60000 })
+      .catch(() => { throw new Error(`the page at ?job= does not show "${first}"; it asked for: ${asked.join(', ') || 'nothing'}`); });
+    page.off('request', watch);
+    if (!asked.includes(`/data/live/${saved}/composed.json`)) throw new Error(`the page did not load the brief: ${asked.join(', ')}`);
+    await settled;
+  }, log);
+
+  await step(page, 'the lens library counts no brief for an unused lens', async () => {
+    await page.goto(server.app, { waitUntil: 'load' });
+    await page.locator('#cmpGo').waitFor({ state: 'visible', timeout: 15000 });
+    const n = await lensCount(page, defaultTitle);
+    if (n !== 0) throw new Error(`${defaultTitle}: ${n} briefs`);
+  }, log);
+
+  await step(page, 'compose with the default lens; the lens library counts it', async () => {
+    await page.goto(server.app, { waitUntil: 'load' });
+    await page.locator('#cmpGo').waitFor({ state: 'visible', timeout: 15000 });
+    await page.click('#cmpGo');
+    await page.waitForURL(/[?&]job=/, { timeout: 30000 });
+    await waitVerified(app, new URL(page.url()).searchParams.get('job'));
+    await page.goto(server.app, { waitUntil: 'load' });
+    await page.locator('#cmpGo').waitFor({ state: 'visible', timeout: 15000 });
+    const n = await lensCount(page, defaultTitle);
+    if (n !== 1) throw new Error(`${defaultTitle}: ${n} briefs`);
   }, log);
 }
 
@@ -194,6 +290,12 @@ for (const engine of engines) {
     const log = [];
     const local = new URL(server.app).origin;
     page.on('pageerror', (e) => problems.push(`page error: ${String(e).slice(0, 200)}`));
+    page.on('response', (r) => {
+      const path = new URL(r.url()).pathname;
+      if (path === '/status/liveness-probe' || (path === '/data/index.json' && r.status() === 404)) {
+        problems.push(`${r.status()} ${path}`);
+      }
+    });
     if (process.env.PARITY_DEBUG) {
       page.on('request', (r) => console.error(`> ${r.method()} ${r.url().slice(0, 120)}`));
       page.on('console', (m) => console.error(`console ${m.type()}: ${m.text().slice(0, 200)}`));

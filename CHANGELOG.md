@@ -59,6 +59,14 @@ Each release note is written from this file and checked against it by claim-seal
   is read; the recorded brief still shows. `./setup.sh --reconfigure PART` passes the part on to `composer setup`.
 - While `composer up` runs it re-verifies the seal of every saved brief once a day and logs the result; with no model
   provider key set, the daily brief is skipped with the reason logged instead of failing.
+- The app page's menu lists your saved briefs, the compose screen offers to rejoin a brief that is still being
+  written, and the lens library counts the briefs made with each lens. They read a shelf index (`/data/index.json`)
+  that the server rewrites whole whenever a brief starts, finishes, is saved, moved to the trash, restored or swept
+  by retention, and at start; it lists titles, times, sources, lens ids and counts, never keys or file paths. The
+  page's Save and Delete buttons now reach the server (it refused them before).
+- A brief opens from its own link (`/app/?job=<id>`): the page recognises Composer's job ids and loads that brief
+  from the engine instead of replaying the recorded demo. The compose screen checks the engine with `/health`
+  instead of a route the engine does not have.
 
 ## [0.1.0] - 2026-11-01
 

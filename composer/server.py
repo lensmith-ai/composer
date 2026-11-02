@@ -287,6 +287,9 @@ class App:
         denied = self._authorize(headers)
         if denied:
             return denied
+        shelf = self._shelf_request(body)
+        if shelf is not None:
+            return shelf
         checked, refused = self._compose_request(body, {"voice"})
         if refused:
             return refused
@@ -306,6 +309,33 @@ class App:
             return 202, self.jobs.submit(request)
         except RuntimeError:
             return 409, {"error": "compose capacity is full"}
+
+    def _shelf_request(self, body: bytes) -> tuple[int, dict] | None:
+        """The page's Save and Delete buttons post {"save_job": id} or {"delete_job": id} to /compose; the answer,
+        or None when the body is not one of them (then it is a compose request)."""
+        try:
+            req = json.loads(body.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            return None
+        if not isinstance(req, dict):
+            return None
+        modes = [key for key in ("save_job", "delete_job") if key in req]
+        if not modes:
+            return None
+        if len(req) != 1:
+            return 400, {"error": f"{modes[0]} must be the only key in the request"}
+        job_id = req[modes[0]]
+        if not isinstance(job_id, str) or not live_files.JOB_ID.match(job_id):
+            return 400, {"error": f"{modes[0]} must be a job id"}
+        try:
+            if modes[0] == "save_job":
+                return 200, self.jobs.save(job_id)
+            self.jobs.delete(job_id)
+            return 200, {"deleted_job": job_id}
+        except StoreError as exc:
+            return 400, {"error": str(exc)}
+        except (OSError, ValueError):
+            return 404, {"error": "no such brief"}
 
     def change_job(self, headers, path: str, request: object) -> tuple[int, dict]:
         denied = self._authorize(headers)
@@ -584,6 +614,8 @@ def handler_for(app: App, *, local_only: bool = True, trusted=None, public_origi
                 self._send(200, app.page(), "text/html; charset=utf-8")
             elif self.path == "/data/options.json":
                 self._json(200, app.options())
+            elif self.path == "/data/index.json":
+                self._send(200, app.jobs.brief_index(), "application/json")
             elif self.path.startswith(live_files.PREFIX):
                 self._live_file()
             elif self.path == "/schedule":

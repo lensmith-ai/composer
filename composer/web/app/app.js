@@ -2299,7 +2299,6 @@ if(IS_LIVE){
               ["insights",(R.insights!=null?R.insights:"—")],
               ["reading level",R.reading_level||"—"],
               ["voice",(L.voice[R.voice]||R.voice||"—")]];
-    if(R.topic)rows.push(["topic",R.topic]);
     var k=document.createElement("div");k.className="rk";k.textContent="settings used";
     var d=document.createElement("div");d.className="rcp";d.id="aboutSettings";
     rows.forEach(function(r){
@@ -2784,7 +2783,7 @@ window.__buildLoom=buildLoom;
     var m=location.search.match(new RegExp("[?&]"+name+"=([^&]+)"));
     return m?decodeURIComponent(m[1]):null;
   }
-  var JOB_RE=/^[0-9]{8}T[0-9]{6}Z-[0-9a-f]{6}$/;
+  var JOB_RE=/^job-[0-9a-f]{16}$/;
   function headline(sentence){
     var s=(sentence||"").trim();
     if(!s)return "untitled insight";
@@ -2965,7 +2964,7 @@ window.__buildLoom=buildLoom;
       generated_at:when,
       summary:items.length+" insight"+(items.length===1?"":"s")+" composed from "
         +(reqSources.map(feedName).join(", ")||"no sources")
-        +" under the "+(c.lens||"?")+" lens"+(c.topic?", focused on "+c.topic:"")+".",
+        +" under the "+(c.lens||"?")+" lens.",
       footer:"Composed "+when+" (UTC) · run "+job+(c.fixture?" · FIXTURE RUN (no model or voice spend)":""),
       sections:sections,
       actions:[],
@@ -3195,8 +3194,8 @@ window.__buildLoom=buildLoom;
     });
   }
   var CMP={el:null,opts:null,pkg:null,
-    sel:{sources:{},lens:null,voice:null,insights:5,reading_level:"standard",topic:""}};
-  function cmpSeedSel(o){if(!o||CMP.selSeeded)return;CMP.sel={sources:{},lens:o.default_lens,voice:cwNarrationOn(o)?(o.voices||[])[0]:null,insights:((o.insights||{}).default||5),reading_level:o.default_reading_level||"standard",topic:""};(o.sources||[]).forEach(function(id){var st=sourceStatusFor(id,o);if(st.available&&!st.hidden&&!(st.paid&&!st.isDefault))CMP.sel.sources[id]=1;}); CMP.selSeeded=true;}
+    sel:{sources:{},lens:null,voice:null,insights:5,reading_level:"standard"}};
+  function cmpSeedSel(o){if(!o||CMP.selSeeded)return;CMP.sel={sources:{},lens:o.default_lens,voice:cwNarrationOn(o)?(o.voices||[])[0]:null,insights:((o.insights||{}).default||5),reading_level:o.default_reading_level||"standard"};(o.sources||[]).forEach(function(id){var st=sourceStatusFor(id,o);if(st.available&&!st.hidden&&!(st.paid&&!st.isDefault))CMP.sel.sources[id]=1;}); CMP.selSeeded=true;}
   function closeDrawerSafe(){
     var d=document.getElementById("drawer"),sc=document.getElementById("scrim"),
         mb=document.getElementById("menuBtn");
@@ -3253,7 +3252,7 @@ window.__buildLoom=buildLoom;
   }
   function cmpChosen(){
     return {sources:selSources(),lens:CMP.sel.lens,voice:CMP.sel.voice,
-            insights:CMP.sel.insights,reading_level:CMP.sel.reading_level,topic:CMP.sel.topic};
+            insights:CMP.sel.insights,reading_level:CMP.sel.reading_level};
   }
   function setRowText(){
     var link=document.getElementById("cmpSetLink");
@@ -3337,14 +3336,13 @@ window.__buildLoom=buildLoom;
     var note=document.getElementById("cmpNote");
     jget(DATA_ROOT+"/options.json").then(function(o){
       try{localStorage.setItem("cmp-opts-cache",JSON.stringify(o));}catch(e){}
-      return fetch("/status/liveness-probe",{credentials:"same-origin"}).then(function(res){
+      return fetch("/health",{credentials:"same-origin",cache:"no-store"}).then(function(res){
         if(res.status>=500)throw new Error("engine unreachable (HTTP "+res.status+")");
         return o;
       });
     }).then(function(o){
       CMP.opts=o;adoptSourceLabels(o,true);cmpSeedSel(o);
       refreshOpenSheet();
-      CMP.maxTopic=o.max_topic_chars||120;
       if(note)note.textContent="up to "+(o.capacity||2)+" at once · the engine stops itself at "
         +(o.wall_clock_cap_s||300)+"s · about a minute and a half in practice";
       renderSentence();
@@ -3524,8 +3522,7 @@ window.__buildLoom=buildLoom;
       var m=(CMP.opts.lens_meta||{})[CMP.sel.lens]||{};
       return (m.title||CMP.sel.lens||"a lens").toLowerCase();
     }
-    if(kind==="voice")return VOICE_LABEL[CMP.sel.voice]||CMP.sel.voice||"a voice";
-    return CMP.sel.topic?"“"+CMP.sel.topic+"”":"anything";
+    return VOICE_LABEL[CMP.sel.voice]||CMP.sel.voice||"a voice";
   }
   function sentencePlan(){
     if(!cwNarrationOn(CMP.opts))return [{t:"Compose from "},{slot:"sources"},{t:" through the "},{slot:"lens"},{t:" lens"}];
@@ -3629,14 +3626,13 @@ window.__buildLoom=buildLoom;
     var head=document.createElement("div");head.className="cmpshead";
     var h=document.createElement("h4");
     h.textContent={sources:"What goes in",lens:"Through which lens",
-                   voice:"Read by",topic:"About"}[kind];
+                   voice:"Read by"}[kind];
     var done=document.createElement("button");done.className="cmpdone";done.textContent="Done";
     done.onclick=closeSlot;head.appendChild(h);head.appendChild(done);sh.appendChild(head);
     CMP.sheetKind=kind;
     if(kind==="sources")fillSources(sh);
     else if(kind==="lens")fillLens(sh);
-    else if(kind==="voice")fillVoice(sh);
-    else fillTopic(sh);
+    else fillVoice(sh);
     requestAnimationFrame(function(){sc.classList.add("on");sh.classList.add("on");});
   }
   function row(host,opts){
@@ -3811,18 +3807,6 @@ window.__buildLoom=buildLoom;
       row(sh,{label:VOICE_LABEL[v]||v,desc:v,mark:CMP.sel.voice===v?"✓":"",
         onclick:function(){CMP.sel.voice=v;closeSlot();}});
     });
-  }
-  function fillTopic(sh){
-    var i=document.createElement("input");i.className="cmpsearch";
-    i.maxLength=CMP.maxTopic||120;i.value=CMP.sel.topic||"";
-    i.placeholder="narrow it to one thing, or leave empty";
-    i.addEventListener("input",function(){CMP.sel.topic=i.value;});
-    sh.appendChild(i);
-    var n=document.createElement("div");n.className="cmpnote";
-    n.textContent="Optional. With a topic the engine prefers material about it — it never "
-      +"invents material to match.";
-    sh.appendChild(n);
-    setTimeout(function(){i.focus();},120);
   }
   var VOICE_LABEL=window.__LABELS.voice;
   function normalizeComposerProgress(jobId,status,seenKeys){
@@ -4351,13 +4335,11 @@ window.__buildLoom=buildLoom;
     var entryEntry=entryTransition&&entryTransition.begin({sources:c.sources});
     var body={sources:c.sources,lens:c.lens,voice:c.voice,insights:c.insights,
       reading_level:c.reading_level};
-    var tp=(c.topic||"").trim();if(tp)body.topic=tp;
     var step=document.getElementById("cmpStep"),
         clock=document.getElementById("cmpClock"),
         fixed=document.getElementById("cmpFixed");
     fixed.textContent=c.sources.map(function(s){return SRC_LABEL[s]||s;}).join(" · ")
-      +" · "+c.lens+" lens · voice "+(VOICE_LABEL[c.voice]||c.voice)
-      +(tp?" · on \""+tp+"\"":"");
+      +" · "+c.lens+" lens · voice "+(VOICE_LABEL[c.voice]||c.voice);
     stopTyping();
     closeSlot();
     closeSetSheet();
@@ -4579,7 +4561,7 @@ window.__buildLoom=buildLoom;
           +(b.fixture?" · fixture":""))
           :stateLabel+" · "+(b.progress||[]).slice(-1)[0]
             +(b.error?" · "+b.error:""));
-        if(briefs)row(briefs,(stateLabel?stateLabel+" · ":"")+(b.title||b.topic||when),meta,
+        if(briefs)row(briefs,(stateLabel?stateLabel+" · ":"")+(b.title||when),meta,
           b.job===currentJob?"#ffb020":state==="failed"?"#ff6b8b":state==="running"?"#ffb84a":"#48d1a0",b.job,b.job===currentJob,true);
         if(runs)row(runs,b.job,(stateLabel?stateLabel+" · ":"")+(b.lens||"saved run")
           +(state==="done"?" · "+b.words+" words":""),state==="failed"?"#ff6b8b":state==="running"?"#ffb84a":"#48d1a0",b.job,b.job===currentJob);

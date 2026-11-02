@@ -12,6 +12,8 @@ import threading
 import time
 import uuid
 
+from . import shelf_index
+
 
 DATA_SCHEMA = "1"  # the data schema this code reads and writes; a newer generation is refused at start
 AUDIO_STATES = ("off", "generating", "ready", "failed")
@@ -93,6 +95,7 @@ class JobStore:
                    "commit": {"state": "unsaved", "saved_at_utc": None, "expires_at_utc": None}}
             self.active.add(job_id)
             self._write_job(job)
+            self._project()  # the shelf index lists it as running, so a reopened page can rejoin it
             watchdog = threading.Timer(self.wall_cap_s, self._expire, args=(job_id,))
             watchdog.daemon = True
             self.watchdogs[job_id] = watchdog
@@ -144,6 +147,14 @@ class JobStore:
             path = self.generation_path(self.current_generation()) / "index.json"
             return json.loads(path.read_text(encoding="utf-8"))
 
+    def brief_index(self) -> bytes:
+        """The shelf index the page reads at /data/index.json, as written by the last change to the store."""
+        with self.lock:
+            path = self.generation_path(self.current_generation()) / shelf_index.FILE
+            if not path.is_file():
+                self._project()
+            return path.read_bytes()
+
     def latest(self) -> dict | None:
         with self.lock:
             self._project()
@@ -181,6 +192,10 @@ class JobStore:
             return {"restored": job_id}
 
     def retention(self, *, apply: bool = False, now: datetime | None = None) -> dict:
+        with self.lock:  # it moves job folders and rewrites the shelf index, like save, delete and restore
+            return self._retention(apply=apply, now=now)
+
+    def _retention(self, *, apply: bool, now: datetime | None) -> dict:
         now = now or datetime.now(timezone.utc)
         trash, purge = [], []
         live = self.generation_path(self.current_generation()) / "jobs"
@@ -250,6 +265,8 @@ class JobStore:
         self._checkpoint("switch", "pointer_replaced", crash_after, source=source, target=target)
         self._checkpoint("switch", "pointer_parent_synced", crash_after, source=source, target=target)
         self._checkpoint("switch", "switch_committed", crash_after, source=source, target=target)
+        with self.lock:
+            self._project()  # the shelf index and latest pointer of the generation now in use
 
     def rollback(self) -> dict:
         if self.active:
@@ -266,6 +283,8 @@ class JobStore:
             exported.append(path.name)
         self._replace_current(pair["old_generation"])
         self._journal("rollback", "pointer_restored", source=source, target=pair["old_generation"])
+        with self.lock:
+            self._project()
         return {"export_directory": str(export), "exported_jobs": exported}
 
     def _run(self, job_id: str) -> None:
@@ -408,6 +427,7 @@ class JobStore:
             self._atomic_text(self.generation_path("g1") / "VERSION", "1\n")
             self._atomic_json(self.pairs, [])
             self._replace_current("g1")
+            self._project()
             return
         self._recover()
 
@@ -452,6 +472,8 @@ class JobStore:
                 items.append({"job": folder.name, "phase": "unreadable", "saved_at_utc": None, "readable": False})
         items.sort(key=lambda item: item.get("saved_at_utc") or "", reverse=True)
         self._atomic_json(generation / "index.json", {"schema": "composer-shelf/v1", "items": items})
+        # the page's shelf index (/data/index.json): every brief, saved or not, with what the drawer shows
+        self._atomic_json(generation / shelf_index.FILE, shelf_index.build(generation / "jobs"))
         readable = [item for item in items if item["readable"]]
         latest = {"job": readable[0]["job"], "composed_at": readable[0]["saved_at_utc"]} if readable else None
         latest_path = generation / "latest.json"
