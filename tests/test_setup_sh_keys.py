@@ -17,10 +17,8 @@ SECRETS = ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "COMPOSER_CHECKER_API_KEY", "C
 
 STAND_IN = r"""#!/bin/sh
 log=__LOG__
-seen=""
-for k in ANTHROPIC_API_KEY OPENAI_API_KEY COMPOSER_CHECKER_API_KEY COMPOSER_SERVER_PASS; do
-  if eval "[ -n \"\${$k+x}\" ]"; then seen="$seen $k"; fi
-done
+# the names of every variable in this program's environment whose value is one of the test's secrets
+seen=$(env | sed -n 's/^\([A-Za-z_][A-Za-z0-9_]*\)=FAKE-.*-0308$/\1/p' | sort | tr '\n' ' ')
 printf '%s|%s\n' "$*" "$seen" >> "$log"
 case "$*" in
   *"-m venv "*)
@@ -36,6 +34,15 @@ esac
 @unittest.skipUnless(os.name == "posix" and shutil.which("sh"), "setup.sh is a POSIX shell script")
 class SetupShKeysTests(unittest.TestCase):
     def test_only_composer_setup_gets_the_keys(self):
+        self.check(extra={})
+
+    def test_a_holding_name_handed_in_by_the_caller_does_not_carry_a_key_to_pip(self):
+        # setup.sh holds each key in held_<NAME>; if the caller already exported that name, it must not stay exported
+        for name in SECRETS:
+            with self.subTest(holding=name):
+                self.check(extra={f"held_{name}": "preexisting-variable"})
+
+    def check(self, extra):
         with fake_home() as home:
             bindir = home.parent / "stand-in-bin"
             bindir.mkdir()
@@ -44,7 +51,7 @@ class SetupShKeysTests(unittest.TestCase):
             fake.write_text(STAND_IN.replace("__LOG__", str(log)), encoding="utf-8")
             fake.chmod(fake.stat().st_mode | stat.S_IXUSR)
             env = dict(os.environ, PATH=f"{bindir}{os.pathsep}{os.environ.get('PATH', '')}",
-                       **{k: f"FAKE-{k}-0308" for k in SECRETS})
+                       **{k: f"FAKE-{k}-0308" for k in SECRETS}, **extra)
             run = subprocess.run(["sh", str(ROOT / "setup.sh"), "--home", str(home / "shellhome"), "--yes",
                                   "--no-test-call"], capture_output=True, text=True, timeout=120, env=env)
             self.assertNotEqual(run.returncode, 0)  # the stand-in pip stops it

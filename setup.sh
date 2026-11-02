@@ -79,6 +79,9 @@ done
 # gets them. They are taken out of the environment here and handed back only to `composer setup`.
 HELD=""
 for k in ANTHROPIC_API_KEY OPENAI_API_KEY COMPOSER_CHECKER_API_KEY COMPOSER_SERVER_PASS; do
+  # a variable of the holding name handed in by the caller would stay exported (and so reach every program run
+  # below) once it holds the key: it is removed first, so the holding variable is this script's alone
+  unset "held_$k"
   if eval "[ -n \"\${$k+x}\" ]"; then eval "held_$k=\$$k"; HELD="$HELD $k"; unset "$k"; fi
 done
 with_keys() { ( for k in $HELD; do eval "export $k=\"\$held_$k\""; done; exec "$@" ) }
