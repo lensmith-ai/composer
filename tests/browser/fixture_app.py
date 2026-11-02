@@ -4,7 +4,7 @@
 
 What it starts, all on 127.0.0.1 and in a new temporary folder:
   - a local HTTPS site with a made-up blog: a page that advertises its feed (and a comments feed), the two feeds, and
-    the feeds of the two bundled sources (their ids are pointed at this site, so nothing leaves this machine). Its
+    a feed for every bundled source (their ids are pointed at this site, so nothing leaves this machine). Its
     certificate is made for this run with `openssl` and trusted only by this process (SSL_CERT_FILE);
     COMPOSER_ALLOW_PRIVATE_FETCH=1 lets the guarded fetch read 127.0.0.1 on purpose. Every other fetch rule (https
     only, redirects, size and time limits, no proxies) is the same as for a real feed;

@@ -12,6 +12,7 @@
 // every skip into a failure). A step that cannot run because an earlier one failed is a failure that says so.
 import { appendFileSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { screenshotRefusals } from './screenshot_refusals.mjs';
 
 const cfg = JSON.parse(readFileSync(process.argv[2], 'utf8'));
 const pw = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
@@ -212,16 +213,12 @@ async function combo(browser, engine, width, height, n) {
     if (r.status() >= 400) badResponses.push(`${r.status()} ${r.request().method()} ${new URL(r.url()).pathname}`);
   });
   page.on('pageerror', (e) => errors.push(String(e).slice(0, 200)));
-  // WebKit logs a CSP refusal of an inline stylesheet while Playwright takes a screenshot (the style it injects for
-  // the picture, once per frame; measured on /app/: 0 with no screenshot, 1 per screenshot, none in Chromium). Only
-  // such a refusal that arrives while this test is taking a screenshot is set aside; any other one is the page's own.
-  const SHOT_STYLE = /^Refused to apply a stylesheet because its hash, its nonce, or 'unsafe-inline' does not appear in the style-src directive/;
-  let shooting = false;
-  let shotStyleRefusals = 0;
+  // WebKit's refusals of Playwright's own screenshot style: at most one per frame of each screenshot is set aside
+  // (screenshot_refusals.mjs); anything more, or at any other time, is the page's own
+  const refusals = screenshotRefusals(engine);
   page.on('console', (m) => {
     if (m.type() !== 'error') return;
-    if (engine === 'webkit' && shooting && SHOT_STYLE.test(m.text())) shotStyleRefusals += 1;
-    else consoleErrors.push(m.text().slice(0, 200));
+    if (!refusals.take(m.text())) consoleErrors.push(m.text().slice(0, 200));
   });
   page.on('request', (r) => {
     const u = r.url();
@@ -231,10 +228,10 @@ async function combo(browser, engine, width, height, n) {
   const shot = async (name) => {
     shotNo += 1;
     const file = join(cfg.shots, `${tag}-${String(shotNo).padStart(2, '0')}-${name}.png`);
-    shooting = true;
+    refusals.begin(page.frames().length);
     await page.screenshot({ path: file }).catch(() => {});
     await sleep(150);  // the console message can arrive just after the picture
-    shooting = false;
+    refusals.end();
     return file;
   };
   const rec = async (id, status, reason, name) => {
@@ -671,7 +668,7 @@ async function combo(browser, engine, width, height, n) {
 
   async function finish() {
     const problems = [];
-    const excused = shotStyleRefusals;
+    const excused = refusals.setAside;
     if (errors.length) problems.push(`${errors.length} page errors: ${errors.slice(0, 3).join(' | ')}`);
     if (outside.length) problems.push(`${outside.length} requests left this machine: ${outside.slice(0, 3).join(' | ')}`);
     if (badResponses.length) problems.push(`${badResponses.length} failed requests: ${[...new Set(badResponses)].slice(0, 6).join(' | ')}`);
