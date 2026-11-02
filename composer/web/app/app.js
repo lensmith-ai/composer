@@ -4223,7 +4223,7 @@ window.__buildLoom=buildLoom;
     if(first){html+='<div class="icw cw-lite-insight"><div class="card-head cws-head">insight 1 of '+items.length+'</div><div class="cws-ins">'+esc(first.insight||first.title||"")+'</div>'+(first.why_it_matters?'<div class="cws-why">'+esc(first.why_it_matters)+'</div>':'')+'</div>';}
     html+='<button type="button" id="cwGoBrief" class="cw-go-brief cws-go">GO TO THE FINISHED BRIEF →</button><div class="cws-gonote">'+items.length+' insights · narration · sources — all interactive on the brief page</div>';
     wrap.innerHTML=html;slot.appendChild(wrap);
-    var btn=wrap.querySelector("#cwGoBrief");btn.addEventListener("click",function(){btn.disabled=true;btn.textContent="OPENING…";var stg=document.getElementById("cmpStage");if(stg)stg.style.viewTransitionName="brief-card";var stash={composed:self.turnDoc||doc,opts:(window.CMP&&CMP.opts)||null,receipts:null},stashKey="turn-cache:"+self.job;var go=function(){try{sessionStorage.setItem(stashKey,JSON.stringify(stash));}catch(e){}location.replace(location.pathname+"?job="+encodeURIComponent(self.job)+"&replay=1");};Promise.race([jget(DATA_ROOT+"/live/"+self.job+"/receipts.json").then(function(r){stash.receipts=r;}),new Promise(function(res){setTimeout(res,700);})]).then(go,go);});
+    var btn=wrap.querySelector("#cwGoBrief");btn.addEventListener("click",function(){btn.disabled=true;btn.textContent="OPENING…";var stg=document.getElementById("cmpStage");if(stg)stg.style.viewTransitionName="brief-card";var stash={composed:self.turnDoc||doc,opts:(window.CMP&&CMP.opts)||null,receipts:null},stashKey="turn-cache:"+self.job;var go=function(){try{sessionStorage.setItem(stashKey,JSON.stringify(stash));}catch(e){}location.replace(location.pathname+"?job="+encodeURIComponent(self.job)+"&replay=1");};Promise.race([jget(DATA_ROOT+"/live/"+self.job+"/receipts.json").then(function(r){stash.receipts=r;},function(){}),new Promise(function(res){setTimeout(res,700);})]).then(go,go);});
     requestAnimationFrame(function(){wrap.setAttribute("data-completion-assembly","settled");slot.setAttribute("data-completion-assembly","settled");window.dispatchEvent(new Event("composition:assembly-settled"));});
     return Promise.resolve();
   }
@@ -4266,7 +4266,7 @@ window.__buildLoom=buildLoom;
         var go=function(){try{sessionStorage.setItem(stashKey,JSON.stringify(stash));}catch(e){}
           location.replace(location.pathname+"?job="+encodeURIComponent(self.job)+"&replay=1");};
         Promise.race([
-          jget(DATA_ROOT+"/live/"+self.job+"/receipts.json").then(function(r){stash.receipts=r;}),
+          jget(DATA_ROOT+"/live/"+self.job+"/receipts.json").then(function(r){stash.receipts=r;},function(){}),
           new Promise(function(res){setTimeout(res,700);})
         ]).then(go,go);
       },1200);}
