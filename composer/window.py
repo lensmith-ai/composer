@@ -379,7 +379,20 @@ STANDALONE_JS = ("(function(){'use strict';try{if(window.top===window&&window.ma
                  "{location.replace('../index.html');}}catch(e){}})();\n")
 
 
-def site_index_html() -> str:
+NUMBER_WORDS = ("no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten")
+
+
+def provenance(ed: dict) -> str:
+    """What the landing page says it replays, from the recorded edition itself: its date, its sources and its lens."""
+    labels = [x["label"] for x in ed["sources"]]
+    n = len(labels)
+    count = NUMBER_WORDS[n] if n < len(NUMBER_WORDS) else str(n)
+    names = labels[0] if n == 1 else ", ".join(labels[:-1]) + " and " + labels[-1]
+    return (f"replaying a brief it wrote on {long_date(ed['composed_on'])} from {count} public "
+            f"feed{'' if n == 1 else 's'} ({names}), read through the lens “{ed['lens']}”")
+
+
+def site_index_html(ed: dict) -> str:
     return ('<!doctype html>\n<html lang="en"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer">'
             '<meta http-equiv="Content-Security-Policy" content="' + e(SITE_CSP, quote=True) + '">'
@@ -395,8 +408,7 @@ def site_index_html() -> str:
             f'width="{WINDOW_SIZE[0]}" height="{WINDOW_SIZE[1]}"></iframe></div>'
             '<div class="bar"><button type="button" class="play" id="replay" hidden>Replay</button></div></div></section>'
             '<section class="about" aria-labelledby="about-h"><h2 id="about-h">What you are looking at</h2>'
-            '<p>Composer\'s own phone screen, replaying a brief it wrote on 25 October 2026 from two public feeds, the '
-            'Google AI blog and the Google DeepMind blog, read through the lens “system improvements”.</p>'
+            '<p>Composer\'s own phone screen, ' + e(provenance(ed)) + '.</p>'
             '<p>Nothing is composed here: no model is called and the page makes no outside request. When the replay '
             'ends, open a card to see which of its words each article backs, and the checker\'s verdict.</p>'
             '<ul class="links"><li><a href="brief.html">The same brief as a plain page</a></li>'
@@ -416,7 +428,7 @@ def write_site(directory, ed: dict, picker_rows: list[str] | None = None) -> lis
     for name in WINDOW_FILES:
         shutil.copyfile(WINDOW_ASSETS / name, win / name)
         written.append(win / name)
-    files = {win / "index.html": window_html(ed, picker_rows), out / "index.html": site_index_html(),
+    files = {win / "index.html": window_html(ed, picker_rows), out / "index.html": site_index_html(ed),
              out / "site.css": SITE_CSS, out / "frame.js": FRAME_JS, out / "brief.html": page.build(ed),
              win / "standalone.js": STANDALONE_JS}
     for path, text in files.items():

@@ -87,6 +87,20 @@ class WindowTests(unittest.TestCase):
         self.assertIn("fingerprint 5e45f9194e69", self.html)
         self.assertIn('href="https://huggingface.co/blog/ibm-granite/granite-switch-4-1-1"', self.html)
 
+    def test_the_landing_page_says_what_the_recording_is(self):
+        # the page around the replay names the recording's own date, sources and lens (it once kept the old ones)
+        landing = (SITE / "index.html").read_text(encoding="utf-8")
+        text = re.sub(r"<[^>]+>", " ", landing).replace("&#x27;", "'")
+        self.assertIn(window.long_date(self.ed["composed_on"]), text)
+        for label in (x["label"] for x in self.ed["sources"]):
+            self.assertIn(label, text)
+        self.assertIn(f"from {window.NUMBER_WORDS[len(self.ed['sources'])]} public feeds", text)
+        self.assertIn(self.ed["lens"], text)
+        self.assertNotIn("25 October 2026", text)
+        older = dict(self.ed, composed_on="2026-10-25", sources=self.ed["sources"][:2])
+        self.assertIn("25 October 2026 from two public feeds (Google AI blog and Google DeepMind blog)",
+                      window.site_index_html(older))
+
     def test_six_spools_keep_their_names_apart(self):
         # six sources share the drawing's width: each name must fit its own share, or the names print over each other
         names = re.findall(r'<text class="lname" x="([\d.]+)" y="(\d+)">([^<]*)</text>', self.html)
