@@ -12,7 +12,6 @@
 // every skip into a failure). A step that cannot run because an earlier one failed is a failure that says so.
 import { appendFileSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { screenshotRefusals } from './screenshot_refusals.mjs';
 
 const cfg = JSON.parse(readFileSync(process.argv[2], 'utf8'));
 const pw = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
@@ -212,26 +211,31 @@ async function combo(browser, engine, width, height, n) {
   page.on('response', (r) => {
     if (r.status() >= 400) badResponses.push(`${r.status()} ${r.request().method()} ${new URL(r.url()).pathname}`);
   });
-  page.on('pageerror', (e) => errors.push(String(e).slice(0, 200)));
-  // WebKit's refusals of Playwright's own screenshot style: at most one per frame of each screenshot is set aside
-  // (screenshot_refusals.mjs); anything more, or at any other time, is the page's own
-  const refusals = screenshotRefusals(engine);
-  page.on('console', (m) => {
-    if (m.type() !== 'error') return;
-    if (!refusals.take(m.text())) consoleErrors.push(m.text().slice(0, 200));
-  });
+  // Before the flow leaves a page it lets that page's own requests finish: WebKit reports a request cut off by a
+  // navigation as a page error ("Fetch API cannot load ... due to access control checks"), which would blame the
+  // page for what the test did (a person tapping away mid-load sees no error). Seen in the trash step, which left a
+  // just-opened brief while its receipts and /health were loading.
+  const settle = async () => { await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {}); };
+  const go = async (url, opts) => { await settle(); return page.goto(url, opts); };
+  let step = 'start';  // which check was running when an error came, so a failure says where
+  page.on('pageerror', (e) => errors.push(`[${step}] ${String(e).slice(0, 200)}`));
+  // Every console error counts against page_health; none is set aside.
+  page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(`[${step}] ${m.text().slice(0, 200)}`); });
   page.on('request', (r) => {
     const u = r.url();
     if (!/^(data|blob|about):/.test(u) && new URL(u).origin !== new URL(base).origin) outside.push(u.slice(0, 160));
   });
+  // Playwright's screenshot in WebKit always adds an inline <style> to every frame (it toggles a style sheet to keep
+  // animations in step, whatever the screenshot options say), and the page's Content-Security-Policy rightly refuses
+  // it, which reads exactly like a refusal the page caused. So that page_health can count every console error with
+  // no exception, the WebKit runs take no screenshot until page_health is recorded (Chromium's take them all).
+  let healthRecorded = false;
   let shotNo = 0;
   const shot = async (name) => {
+    if (engine === 'webkit' && !healthRecorded) return '';
     shotNo += 1;
     const file = join(cfg.shots, `${tag}-${String(shotNo).padStart(2, '0')}-${name}.png`);
-    refusals.begin(page.frames().length);
     await page.screenshot({ path: file }).catch(() => {});
-    await sleep(150);  // the console message can arrive just after the picture
-    refusals.end();
     return file;
   };
   const rec = async (id, status, reason, name) => {
@@ -240,6 +244,7 @@ async function combo(browser, engine, width, height, n) {
     console.log(`${status.toUpperCase()} ${tag} ${id}: ${reason}`);
   };
   const check = async (id, fn) => {
+    step = id;
     try {
       const out = await fn();
       if (out && out.status) await rec(id, out.status, out.reason);
@@ -320,7 +325,7 @@ async function combo(browser, engine, width, height, n) {
 
   // 4. the source picker: the public default sources
   const goCompose = async () => {
-    await page.goto(base + '/app/', { waitUntil: 'load', timeout: 30000 });
+    await go(base + '/app/', { waitUntil: 'load', timeout: 30000 });
     await page.locator('#cmpGo').waitFor({ state: 'visible', timeout: 30000 });
   };
   await check('source_picker', async () => {
@@ -492,7 +497,7 @@ async function combo(browser, engine, width, height, n) {
     const asked = [];
     const watch = (r) => { if (r.url().includes(job)) asked.push(new URL(r.url()).pathname); };
     page.on('request', watch);
-    await page.goto(`${base}/app/?job=${encodeURIComponent(job)}`, { waitUntil: 'load', timeout: 30000 });
+    await go(`${base}/app/?job=${encodeURIComponent(job)}`, { waitUntil: 'load', timeout: 30000 });
     // the page may play the composition before it lands on the brief; give it the length of a replay
     const shown = await showsBrief(90);
     page.off('request', watch);
@@ -590,6 +595,7 @@ async function combo(browser, engine, width, height, n) {
     for (let i = 0; i < 30 && !onShelf; i += 1) { onShelf = (await shelfJobs()).includes(job); if (!onShelf) await sleep(500); }
     const note = (await page.locator('.cw-save-note').first().textContent().catch(() => '')) || '';
     if (!onShelf) throw new Error(`Save did not put the brief on the shelf; the page says: ${note.slice(0, 160)}`);
+    await settle();
     await page.reload({ waitUntil: 'load' });
     if (!(await waitSeen(page, first.slice(0, 40), 90))) throw new Error('after a reload the saved brief is not on screen');
     const label = (await page.locator('.cw-save').first().textContent().catch(() => '')) || '';
@@ -624,7 +630,7 @@ async function combo(browser, engine, width, height, n) {
   }
   if (savedOk || shelfVia) {
     const listed = await check('shelf', async () => {
-      await page.goto(`${base}/app/`, { waitUntil: 'load' });
+      await go(`${base}/app/`, { waitUntil: 'load' });
       await page.locator('#cmpGo').waitFor({ state: 'visible', timeout: 30000 }).catch(() => {});
       for (const menu of ['#cmpMenu', '#menuBtn']) {
         if (await page.locator(menu).isVisible().catch(() => false)) { await page.click(menu); break; }
@@ -644,7 +650,7 @@ async function combo(browser, engine, width, height, n) {
     });
     if (listed) {
       await check('trash', async () => {
-        await page.goto(`${base}/app/`, { waitUntil: 'load' });
+        await go(`${base}/app/`, { waitUntil: 'load' });
         for (const menu of ['#cmpMenu', '#menuBtn']) {
           if (await page.locator(menu).isVisible().catch(() => false)) { await page.click(menu); break; }
         }
@@ -668,14 +674,14 @@ async function combo(browser, engine, width, height, n) {
 
   async function finish() {
     const problems = [];
-    const excused = refusals.setAside;
     if (errors.length) problems.push(`${errors.length} page errors: ${errors.slice(0, 3).join(' | ')}`);
     if (outside.length) problems.push(`${outside.length} requests left this machine: ${outside.slice(0, 3).join(' | ')}`);
     if (badResponses.length) problems.push(`${badResponses.length} failed requests: ${[...new Set(badResponses)].slice(0, 6).join(' | ')}`);
     if (consoleErrors.length) problems.push(`${consoleErrors.length} console errors: ${consoleErrors.slice(0, 3).join(' | ')}`);
+    healthRecorded = true;  // counted above; a WebKit screenshot from here on cannot change the result
     await rec('page_health', problems.length ? 'fail' : 'pass',
       problems.length ? problems.join('; ') : '0 page errors, 0 console errors, 0 requests that left this machine'
-        + (excused ? ` (${excused} WebKit stylesheet refusals from this test's own ${shotNo} screenshots set aside)` : ''));
+        + (engine === 'webkit' ? ' (no screenshots before this check in WebKit, so every console error counted)' : ''));
     await ctx.close();
   }
 }

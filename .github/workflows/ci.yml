@@ -36,9 +36,6 @@ jobs:
       - name: Install (fetches claim-seal at its pinned commit; pip checks its SHA-256)
         run: python -m pip install .
       - name: Offline tests
-        env:
-          # the stranger test's console-error quota is checked with node; on Linux it must run, not skip
-          COMPOSER_REQUIRE_NODE: ${{ matrix.os == 'ubuntu-latest' && '1' || '' }}
         run: python -m unittest discover -s tests -t tests -v
 
   banned-text:
