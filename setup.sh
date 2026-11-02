@@ -18,6 +18,9 @@
 # app folder (every cache and temporary file is pointed inside it). It needs curl or wget, and CA certificates,
 # only when it has to download Python.
 set -eu
+# Private from the first program it runs (Python's version checks write bytecode next to an existing install's code):
+# nothing setup or what it starts makes may be writable by other accounts (the trust contract refuses that).
+umask 077
 
 UV_VERSION=0.5.29
 PY_VERSION=3.12.9

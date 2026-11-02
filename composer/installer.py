@@ -452,11 +452,17 @@ def ask_port(q: Asker, plan: dict) -> None:
 def _launcher_text(home: Path, target: str) -> str:
     env = H.private_env(home, base={})
     lines = ["#!/bin/sh", "# Lensmith Composer launcher, made by `composer setup`. It changes nothing outside "
-             "this folder:", "# every cache and temporary file goes inside it."]
+             "this folder:", "# every cache and temporary file goes inside it.",
+             "# Nothing it starts makes a file other accounts can write (Python's bytecode included), whatever the",
+             "# umask: the app folder is refused if anything in it is group- or other-writable (SECURITY.md).",
+             UMASK_LINE]
     for key in sorted(env):
         lines.append(f"{key}={shlex.quote(env[key])}; export {key}")
     lines.append(target)
     return "\n".join(lines) + "\n"
+
+
+UMASK_LINE = "umask \"$(printf '%o' $(( $(umask) | 022 )))\""
 
 
 # Runs app/current's own python (never its scripts, so nothing depends on the folder an environment was made in).
