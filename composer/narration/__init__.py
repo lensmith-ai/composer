@@ -194,7 +194,12 @@ def _handed_env(home: Path) -> dict:
     return private_env(home)
 
 
-def _remove_owned_tree(home: Path, parts: tuple, name: str, log=lambda *_: None) -> bool:
+def _note(message: str) -> None:
+    """Where a note goes when the caller gives no log of its own: standard error, so it is seen, never dropped."""
+    print(message, file=sys.stderr, flush=True)
+
+
+def _remove_owned_tree(home: Path, parts: tuple, name: str, log=_note) -> bool:
     """Remove <home>/<parts>/<name> through open folders; a missing folder is fine. Where folders cannot be opened
     that way (CONFINED is False), nothing is removed by path: the folder is left, with a note. True when removed."""
     if not CONFINED:
@@ -369,7 +374,7 @@ def run_worker(python: Path, request: dict, *, home: Path, timeout: float) -> di
     return answer
 
 
-def check_render(python: Path, model: str, voices: str, *, home: Path, timeout: float = 120) -> dict:
+def check_render(python: Path, model: str, voices: str, *, home: Path, timeout: float = 120, log=_note) -> dict:
     """The capability check: load the pair, then render one sentence with each of the three voices."""
     work = _owned(home, "tmp", "narration-check")
     try:
@@ -385,7 +390,7 @@ def check_render(python: Path, model: str, voices: str, *, home: Path, timeout: 
     except subprocess.TimeoutExpired:
         raise NarrationError(f"the test render took longer than {timeout:.0f} s") from None
     finally:
-        _remove_owned_tree(home, ("tmp",), "narration-check")
+        _remove_owned_tree(home, ("tmp",), "narration-check", log)
 
 
 # ------------------------------------------------------------------------------------------------ server engine
@@ -441,7 +446,7 @@ def server_render(url: str, voice: str, text: str, out_base: Path, *, timeout: f
     return {"ok": True, "file": str(path), "format": "mp3", "seconds": round(time.monotonic() - started, 2)}
 
 
-def check_server(url: str, *, home: Path, timeout: float = 60, opener=None) -> dict:
+def check_server(url: str, *, home: Path, timeout: float = 60, opener=None, log=_note) -> dict:
     voices = server_voices(url, opener=opener)
     missing = [v for v in VOICES if v not in voices]
     rendered = []
@@ -454,7 +459,7 @@ def check_server(url: str, *, home: Path, timeout: float = 60, opener=None) -> d
                 Path(out["file"]).unlink(missing_ok=True)
                 rendered.append(voice)
     finally:
-        _remove_owned_tree(home, ("tmp",), "narration-check")
+        _remove_owned_tree(home, ("tmp",), "narration-check", log)
     return {"ok": not missing, "rendered": rendered, "missing": missing}
 
 
