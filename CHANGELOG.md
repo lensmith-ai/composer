@@ -69,6 +69,8 @@ The full app, on your computer or your own server. In plain words:
 - A brief can have 3 to 10 insights (it was 3 to 8).
 - `/health` lists the ids of the briefs being written (`active_jobs`) and their count (`active_count`), and HEAD
   requests get the same answer as GET without the body.
+- claim-seal is pinned to commit b0fdf61: a citation's evidence window now stops at the end of the cited item,
+  entry or article, so a claim can no longer be backed by a sentence from the next article in the same feed.
 
 ## [0.1.0] - 2026-11-01
 
