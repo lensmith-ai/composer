@@ -15,22 +15,43 @@ import sys
 import time
 
 
-def _write(samples, rate, base):
-    import soundfile as sf
+def _fresh(path):
+    """A new, empty file at a temporary name next to `path`, made here: whatever already has that name (a leftover,
+    or a hard link to a file elsewhere) is unlinked first, and the new file is never opened through a link."""
+    folder, name = os.path.split(path)
+    tmp = os.path.join(folder, ".%s.%d.tmp" % (name, os.getpid()))
     try:
-        sf.write(base + ".mp3", samples, rate, format="MP3")
-        with open(base + ".mp3", "rb") as handle:
-            head = handle.read(3)
-        if head == b"ID3" or head[:1] == b"\xff":
-            return base + ".mp3", "mp3"
-        os.unlink(base + ".mp3")
-    except Exception:
+        os.unlink(tmp)
+    except FileNotFoundError:
+        pass
+    os.close(os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0), 0o644))
+    return tmp
+
+
+def _write(samples, rate, base):
+    """Write the audio as MP3 (or WAV where this soundfile cannot write MP3), always into a fresh file that is then
+    renamed into place: an existing file of the final name, or one hard-linked to it, is replaced, never written
+    through."""
+    import soundfile as sf
+    for suffix, fmt in ((".mp3", "MP3"), (".wav", "WAV")):
+        final = base + suffix
+        tmp = _fresh(final)
         try:
-            os.unlink(base + ".mp3")
-        except OSError:
-            pass
-    sf.write(base + ".wav", samples, rate, format="WAV")
-    return base + ".wav", "wav"
+            sf.write(tmp, samples, rate, format=fmt)
+            if fmt == "MP3":
+                with open(tmp, "rb") as handle:
+                    head = handle.read(3)
+                if not (head == b"ID3" or head[:1] == b"\xff"):
+                    raise ValueError("this soundfile did not write MP3")
+            os.replace(tmp, final)
+            return final, fmt.lower()
+        except Exception:
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
+            if fmt == "WAV":
+                raise
 
 
 def main():
