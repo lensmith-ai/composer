@@ -74,11 +74,15 @@ The full app, on your computer or your own server. In plain words:
 
 ### Security
 
-- Composer works only in a folder no other account can change: before setup, update, rollback, recovery or
-  narration writes or removes anything, the app folder and every folder above it must belong to you or root and be
-  writable by no one else (see "Where Composer works" in SECURITY.md); otherwise it refuses and says how to fix it.
-- Downloads and temporary files are always written as fresh files, so a file of that name linked elsewhere is never
-  written through. An update never removes a version folder it did not make; rollback removes the version it rolled
+- Composer works only in a folder no other account can change: before setup, update, rollback, restore, recovery or
+  narration writes, removes or starts anything, the app folder and the data folder, every folder above them, and
+  every folder and file inside them must belong to you or root and be writable by no one else, and the path to
+  them may not go through a symbolic link (see "Where Composer works" in SECURITY.md); otherwise it refuses, before
+  it takes the run lock or recovers anything, and says how to fix it. Composer and the programs it starts never make
+  group-writable files, whatever the umask. Recovery acts only on its own folders inside the data folder, never on
+  a path its journal names elsewhere.
+- Downloads, temporary files and narration audio are always written as fresh files, so a file of that name linked
+  elsewhere is never written through. An update never removes a version folder it did not make; rollback removes the version it rolled
   back from.
 - Setup (`composer setup` and `./setup.sh`), update, rollback, recovery and narration refuse to work through a
   symbolic link planted in place of one of Composer's own folders (bin, app, python, bootstrap, narration, models,
