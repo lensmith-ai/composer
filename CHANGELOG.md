@@ -77,11 +77,14 @@ The full app, on your computer or your own server. In plain words:
 - Setup (`composer setup` and `./setup.sh`), update, rollback, recovery and narration refuse to work through a
   symbolic link planted in place of one of Composer's own folders (bin, app, python, bootstrap, narration, models,
   cache, tmp, a version's environment); the only link allowed is app/current, naming a version folder beside it.
+  Writes and removals there go through open folders, not paths, so a folder swapped for a link while setup or an
+  update is running cannot redirect them either.
 - `./setup.sh` gives the model keys and the server pass phrase only to `composer setup`, not to Python discovery,
-  venv, pip or the build tools pip runs.
+  venv, pip or the build tools pip runs, even when a variable of its holding name was handed in already exported.
 - A model endpoint's success reply cannot put the key into a brief's receipts: a reported model id that is malformed
   or holds the key is replaced by the configured one, token counts are kept only as whole numbers, and a reply whose
-  text holds the key is refused.
+  text holds the key is refused. "Holds the key" means the whole key or any run of 12 or more of its characters
+  (see SECURITY.md).
 - The release workflow pushes the container image only under a candidate tag and gives it the version tag only
   after the tests, the build, the claim-sealed release note and the image's own attestations have all passed.
 
