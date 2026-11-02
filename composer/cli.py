@@ -233,9 +233,11 @@ def cmd_up(args) -> int:
     if not (data / "current").exists() and not container:
         print(f"composer: no Composer data at {data}; run setup.sh (or `composer setup`) first", file=sys.stderr)
         return 2
+    native = home if (home / "app").is_dir() else None
+    lifecycle.admit(native, data)  # read-only trust admission, before the lock, recovery or any write
     data.mkdir(parents=True, exist_ok=True)
     lock = lifecycle.hold_run_lock(data)  # noqa: F841  (held for as long as the server runs, taken before recovery)
-    lifecycle.recover(home if (home / "app").is_dir() else None, data)
+    lifecycle.recover(native, data)
     S.generation_dir(data)
     lifecycle.migrate_on_start(data)
     lifecycle.check_data_schema(data)

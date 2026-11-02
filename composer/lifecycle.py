@@ -257,6 +257,7 @@ def read_backup(archive: Path) -> dict:
 
 
 def restore(data: Path, archive: Path, *, include_secrets: bool = False, crash_after: str | None = None) -> dict:
+    admit(None, data)  # read-only, before the lock or recovery changes anything
     with exclusive(data, "restore"):
         _recover_restore(data)
         meta = read_backup(archive)  # everything is checked before anything is written
@@ -341,13 +342,84 @@ def _journal_append(data: Path, operation: str, stage: str, **fields) -> None:
         os.fsync(handle.fileno())
 
 
+def _same_folder(recorded: Path, expected: Path) -> bool:
+    if os.path.normpath(str(recorded)) == os.path.normpath(str(expected)):
+        return True
+    try:
+        return os.path.samefile(recorded, expected)
+    except OSError:
+        return False
+
+
+def _restore_paths(data: Path, last: dict) -> tuple[Path, Path, Path]:
+    """The three folders an unfinished restore record names, rebuilt inside THIS data folder from their checked
+    names: the generation (<data>/generations/g1|g2), where it was moved (<data>/recovery/replaced/<stamp>-gN) and
+    the staged copy (<data>/tmp/restore-<id>/generation). The journal's own paths are never acted on; one that
+    names anything else is refused, so a journal cannot make recovery move or remove a folder elsewhere."""
+    def bad(what) -> LifecycleError:
+        return LifecycleError(f"refused: the recovery journal ({_journal_path(data)}) names {what!r} for an "
+                              "unfinished restore, which is not where Composer keeps it inside the data folder; "
+                              "nothing was moved or removed. If you did not make this record, look at the journal "
+                              "before running Composer again")
+    fields = {}
+    for key in ("generation", "replaced", "staged"):
+        value = last.get(key)
+        if not isinstance(value, str) or not os.path.isabs(value) or "\0" in value:
+            raise bad(value)
+        fields[key] = Path(os.path.normpath(value))
+    gen, replaced, staged = fields["generation"], fields["replaced"], fields["staged"]
+    if gen.name not in ("g1", "g2") or not _same_folder(gen.parent, data / "generations"):
+        raise bad(str(gen))
+    if (not re.fullmatch(r"\d{8}T\d{6}Z-g[12]", replaced.name)
+            or not _same_folder(replaced.parent, data / "recovery" / "replaced")):
+        raise bad(str(replaced))
+    if (staged.name != "generation" or not re.fullmatch(r"restore-[0-9a-f]{32}", staged.parent.name)
+            or not _same_folder(staged.parent.parent, data / "tmp")):
+        raise bad(str(staged))
+    return (data / "generations" / gen.name, data / "recovery" / "replaced" / replaced.name,
+            data / "tmp" / staged.parent.name / "generation")
+
+
+def _unfinished_restore(data: Path) -> dict | None:
+    try:
+        last = _journal_last(data, "restore")
+    except (ValueError, OSError, AttributeError) as exc:
+        raise LifecycleError(f"refused: the recovery journal {_journal_path(data)} cannot be read ({exc}); nothing "
+                             "was moved or removed") from None
+    if not last or last.get("stage") in ("done", "undone"):
+        return None
+    return last
+
+
+def admit(home: Path | None, data: Path) -> None:
+    """Trust admission, read-only, BEFORE the run lock is taken or any recovery runs (update, rollback, restore,
+    recovery at `composer up`): the app folder all the way down (home.check_owned), the data folder, every folder
+    above it and everything in it (journal included), and the folders an unfinished restore record names. A
+    refusal here has changed nothing."""
+    try:
+        if home is not None:
+            H.check_owned(home)
+        H.check_trust(data)
+        try:
+            H.check_tree(data)
+        except H.HomeError as exc:
+            raise H.HomeError(f"{exc}. To fix a data folder made under a permissive umask: chmod -R go-w {data}") \
+                from None
+    except H.HomeError as exc:
+        raise LifecycleError(str(exc)) from None
+    last = _unfinished_restore(data)
+    if last is not None:
+        _restore_paths(data, last)
+
+
 def _recover_restore(data: Path, log=print) -> str | None:
     """A restore that stopped between its two renames: put the data that was there back. Runs before the job
-    store opens, because the current generation's folder may be missing at that moment."""
-    last = _journal_last(data, "restore")
-    if not last or last["stage"] in ("done", "undone"):
+    store opens, because the current generation's folder may be missing at that moment. Acts only on the folders
+    _restore_paths rebuilt inside this data folder."""
+    last = _unfinished_restore(data)
+    if last is None:
         return None
-    gen, replaced, staged = Path(last["generation"]), Path(last["replaced"]), Path(last["staged"])
+    gen, replaced, staged = _restore_paths(data, last)
     if not gen.exists() and replaced.exists():
         os.replace(replaced, gen)
         log("recovered an interrupted restore: your data from before it is back in place")
@@ -528,6 +600,7 @@ def _step(store: JobStore, stage: str, crash_after: str | None, fields: dict) ->
 
 def update(home: Path, data: Path, release: Path, *, sha256: str | None = None, run=subprocess.run,
            crash_after: str | None = None, log=print) -> dict:
+    admit(home, data)  # read-only, before the lock or recovery changes anything
     with exclusive(data, "update"):
         recover(home, data, log=log)
         _check_owned(home)  # before anything is made or removed in the app folder
@@ -667,11 +740,12 @@ def _undo(home: Path, store: JobStore, fields: dict, log=print) -> None:
 
 def recover(home: Path | None, data: Path, *, log=print) -> str | None:
     """Undo an update or a restore that stopped half way. Returns what was done, or None. Call it while holding
-    the run lock (`exclusive`, or `composer up`'s own)."""
+    the run lock (`exclusive`, or `composer up`'s own), after admit() (`composer up` admits before it takes the
+    lock); admitted again here, so no path into recovery skips it."""
+    admit(home, data)
     restored = _recover_restore(data, log)
     if not (data / "current").exists():
         return restored
-    _check_owned(home)
     store = JobStore(data, worker=None)  # the store's own recovery runs first (unfinished copies, temp pointers)
     last = store.last("update")
     if not last or last["stage"] in ("committed", "undone", "rolled_back"):
@@ -688,6 +762,7 @@ def recover(home: Path | None, data: Path, *, log=print) -> str | None:
 
 
 def rollback(home: Path | None, data: Path, *, data_only: bool = False, log=print) -> dict:
+    admit(home, data)  # read-only, before the lock or recovery changes anything
     with exclusive(data, "roll back"):
         _recover_restore(data, log)  # before the store opens (see there)
         last = JobStore(data, worker=None).last("update") if (data / "current").exists() else None
