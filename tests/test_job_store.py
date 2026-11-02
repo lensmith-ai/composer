@@ -98,7 +98,7 @@ class JobStoreTests(unittest.TestCase):
         result = store.wait(accepted["job"], 1)
         self.assertEqual("compose_failed", result["phase"])
         self.assertEqual("failed", result["state"])
-        self.assertEqual(0, store.health()["active_jobs"])
+        self.assertEqual([], store.health()["active_jobs"])
         release.set()
         time.sleep(0.1)
         self.assertEqual("compose_failed", store.status(accepted["job"])["phase"])

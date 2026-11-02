@@ -121,7 +121,9 @@ class JobStore:
 
     def health(self) -> dict:
         with self.lock:
-            return {"ok": True, "active_jobs": len(self.active), "capacity": self.capacity,
+            # active_jobs lists the running job ids (the app page offers to rejoin the first one), as the live app does
+            return {"ok": True, "active_jobs": sorted(self.active), "active_count": len(self.active),
+                    "capacity": self.capacity,
                     "available": self.capacity - len(self.active), "generation": self.current_generation(),
                     "memo_jobs": self.memo_jobs()}
 

@@ -77,9 +77,11 @@ class JobRouteTests(unittest.TestCase):
         self.assertEqual("compose capacity is full", full["error"])
         status, health = self.request("GET", "/health")
         self.assertEqual(200, status)
-        self.assertEqual({"ok", "active_jobs", "capacity", "available", "generation", "memo_jobs"}, set(health))
+        self.assertEqual({"ok", "active_jobs", "active_count", "capacity", "available", "generation", "memo_jobs"},
+                         set(health))
         self.assertEqual(2, health["capacity"])
-        self.assertEqual(2, health["active_jobs"])
+        self.assertEqual(sorted([first, second]), health["active_jobs"])
+        self.assertEqual(2, health["active_count"])
         self.assertEqual(0, health["available"])
         self.release.set()
         self.assertEqual("verified", self.finish(first)["phase"])
@@ -138,7 +140,7 @@ class JobRouteTests(unittest.TestCase):
             with self.subTest(guard=name):
                 self.assertEqual(403, self.request("POST", "/compose", body, headers)[0])
                 self.assertEqual(403, self.request("POST", "/retention", "{}", headers)[0])
-        self.assertEqual(0, self.app.jobs.health()["active_jobs"])
+        self.assertEqual([], self.app.jobs.health()["active_jobs"])
 
     def test_save_refuses_mixed_payload_and_is_idempotent(self):
         job_id = self.compose()

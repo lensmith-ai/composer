@@ -519,6 +519,7 @@ def handler_for(app: App, *, local_only: bool = True, trusted=None, public_origi
     class Handler(BaseHTTPRequestHandler):
         server_version = "composer"
         sys_version = ""
+        head_only = False  # a HEAD request: answered like GET, without the body
         timeout = 30  # a client that stops sending is dropped, not waited on forever
 
         def _refused(self, method: str) -> bool:
@@ -544,7 +545,8 @@ def handler_for(app: App, *, local_only: bool = True, trusted=None, public_origi
             self.send_header("Referrer-Policy", "no-referrer")
             self.send_header("X-Frame-Options", "DENY")
             self.end_headers()
-            self.wfile.write(body)
+            if not self.head_only:
+                self.wfile.write(body)
 
         def _live_file(self) -> None:
             found = live_files.parse(self.path)
@@ -589,6 +591,8 @@ def handler_for(app: App, *, local_only: bool = True, trusted=None, public_origi
             self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header("Cross-Origin-Resource-Policy", "same-origin")
             self.end_headers()
+            if self.head_only:
+                return
             handle.seek(start)
             while length > 0:
                 block = handle.read(min(length, 1 << 16))
@@ -603,7 +607,7 @@ def handler_for(app: App, *, local_only: bool = True, trusted=None, public_origi
         def do_GET(self):  # noqa: N802
             if self._refused("GET"):
                 return
-            if app_static.send(self, self.path):
+            if app_static.send(self, self.path, head=self.head_only):
                 return
             if self.path == "/":
                 self.send_response(302)  # the app page; the 0.1 page with its compose form stays at /classic
@@ -636,6 +640,14 @@ def handler_for(app: App, *, local_only: bool = True, trusted=None, public_origi
                     self._json(404, {"error": "not found"})
             else:
                 self._json(404, {"error": "not found"})
+
+        def do_HEAD(self):  # noqa: N802
+            """The same answer as GET without the body (players and link checkers ask for the size first)."""
+            self.head_only = True
+            try:
+                self.do_GET()
+            finally:
+                self.head_only = False
 
         def do_POST(self):  # noqa: N802
             if self._refused("POST"):
