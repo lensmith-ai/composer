@@ -32,7 +32,8 @@ The workflow then:
 | test | the offline suite, recorded as `test-results.json` | any failure or error |
 | build | sdist and wheel with hash-locked tools; the wheel installed into an empty venv and run; a CycloneDX SBOM of that venv; SHA256SUMS | the tag not matching `pyproject.toml`; any step failing |
 | release-note | `scripts/release/release_note.py`: every line of the draft checked by claim-seal against this version's changelog section and `test-results.json`; the seal verified | any line partly supported, unsupported, unchecked or citing an unknown title; a missing draft |
-| image | the default image (no narration) for linux/amd64 and linux/arm64 to ghcr.io; its SBOM (syft, CycloneDX); provenance and SBOM attested to the image digest | a failed build or push |
+| image | after test, build and release-note: the default image (no narration) for linux/amd64 and linux/arm64 to ghcr.io under a candidate tag only (`candidate-<commit>`, a staging image, never named as a release); its SBOM (syft, CycloneDX); provenance and SBOM attested to the image digest | a failed build, push or attestation |
+| promote | after test, build, release-note and image: the version tag (`<version>`) put on the attested candidate's digest, with no rebuild. This is the only step that gives an image a release's tag | no digest from the image job |
 | publish | SHA256SUMS over every file; build provenance for every file; an SBOM attestation for the wheel and sdist; the GitHub Release with the note as its text | |
 
 ## Release candidates, for a test before a release

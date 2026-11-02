@@ -4,8 +4,11 @@
 #                 a CycloneDX SBOM of that venv (+ the optional narration parts, scope "excluded"); SHA256SUMS
 #   release-note  the note, every line checked by claim-seal against CHANGELOG.md and test-results.json;
 #                 any line that is not supported stops the release
-#   image         the default image (no narration) for linux/amd64 and linux/arm64 to ghcr.io, its SBOM (syft,
-#                 CycloneDX) and both attested to the image digest
+#   image         the default image (no narration) for linux/amd64 and linux/arm64, pushed to ghcr.io ONLY under an
+#                 unreleased candidate tag (candidate-<commit>), its SBOM (syft, CycloneDX) and both attested to the
+#                 image digest. A candidate tag is a staging image, not a release: nothing names it as one.
+#   promote       the release's own image tag (<version>) is put on the candidate's digest only here, after test,
+#                 build, release-note and image (with its attestations) are all green
 #   publish       GitHub artifact attestations (build provenance + SBOM) for every file, then the GitHub Release
 # Nothing is published unless every job before it is green. Write permissions exist only in the jobs that need them.
 name: release
@@ -98,7 +101,7 @@ jobs:
           if-no-files-found: error
 
   image:
-    needs: test
+    needs: [test, build, release-note]
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
@@ -119,12 +122,13 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Image name and tag
+      - name: Image name and tags
         id: name
         run: |
           echo "ref=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
           echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
-      - name: Build and push the default image (no narration)
+          echo "candidate=candidate-${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+      - name: Build and push the default image (no narration) under its candidate tag only
         id: push
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
@@ -132,7 +136,7 @@ jobs:
           target: default
           platforms: linux/amd64,linux/arm64
           build-args: COMPOSER_VERSION=${{ steps.name.outputs.version }}
-          tags: ${{ steps.name.outputs.ref }}:${{ steps.name.outputs.version }}
+          tags: ${{ steps.name.outputs.ref }}:${{ steps.name.outputs.candidate }}
           push: true
       - name: Image SBOM (syft, CycloneDX)
         uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
@@ -167,9 +171,34 @@ jobs:
           name: image
           path: image/
           if-no-files-found: error
+    outputs:
+      ref: ${{ steps.name.outputs.ref }}
+      digest: ${{ steps.push.outputs.digest }}
+
+  promote:
+    # The only step that puts the release's version tag on an image, and only once every gate is green.
+    needs: [test, build, release-note, image]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      packages: write
+    steps:
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Tag the attested candidate digest with the release version (no rebuild)
+        env:
+          REF: ${{ needs.image.outputs.ref }}
+          DIGEST: ${{ needs.image.outputs.digest }}
+        run: |
+          case "$DIGEST" in sha256:*) ;; *) echo "no image digest from the image job" >&2; exit 1 ;; esac
+          docker buildx imagetools create --tag "$REF:${GITHUB_REF_NAME#v}" "$REF@$DIGEST"
 
   publish:
-    needs: [build, release-note, image]
+    needs: [test, build, release-note, image, promote]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
