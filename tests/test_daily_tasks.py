@@ -106,8 +106,12 @@ class NoKeyTests(unittest.TestCase):
             self.assertTrue(any(line.endswith("brief: Composer needs a model key to write a brief. Run ./setup.sh "
                                               "--reconfigure provider.") for line in logs), logs)
             self.assertIsNone(sched.tick())  # the slot is used up: one line, not one every 30 seconds
-            # the same scheduler also ran the daily seal re-check (nothing saved yet)
-            self.assertEqual(sched.state()["last_seal_outcome"], "0 saved brief(s) re-verified")
+            # the same scheduler also ran the daily seal re-check (nothing saved yet); in a source checkout without
+            # claim-seal installed it runs too, and says plainly why it could not check
+            import importlib.util
+            expected = ("0 saved brief(s) re-verified" if importlib.util.find_spec("claim_seal") is not None
+                        else "could not run: claim-seal is not installed")
+            self.assertEqual(sched.state()["last_seal_outcome"], expected)
 
     def test_with_a_key_the_brief_starts(self):
         with fake_home(ANTHROPIC_API_KEY=FAKE_KEY) as home:
