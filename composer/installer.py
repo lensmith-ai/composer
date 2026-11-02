@@ -508,9 +508,12 @@ def write_launcher(home: Path) -> Path:
     in_app = Path(sys.prefix).parent.parent == home / "app"
     command = (APP_LAUNCH.replace("__APP__", shlex.quote(str(home / "app"))) if in_app
                else f"exec {shlex.quote(sys.executable)} -m composer \"$@\"")
-    path = H.owned_dir(home, "bin") / "composer"
-    H.atomic_write(path, _launcher_text(home, command), mode=0o700)
-    return path
+    if not H.CONFINED:  # no folder descriptors on this system (Windows): checked by path, as before
+        path = H.owned_dir(home, "bin") / "composer"
+        H.atomic_write(path, _launcher_text(home, command), mode=0o700)
+        return path
+    with H.open_owned(home, "bin") as bin_dir:  # written inside the bin folder that was opened, never by path
+        return bin_dir.write("composer", _launcher_text(home, command), mode=0o700)
 
 
 def setup_narration(q: Asker, plan: dict, base: Path, home: Path, log, *, check=None, install=None,
@@ -637,14 +640,26 @@ def run(*, home: Path, data: Path | None, answers_file: str | None, assume_yes: 
     if not data_only:
         home.mkdir(mode=0o700, exist_ok=True)
         H.check_owned(home)  # again at the write: the answers above may have taken a while
-        if not (home / H.MARKER).exists():
-            H.atomic_write(home / H.MARKER, H.MARKER_TEXT, mode=0o600)
-        doc = H.load_manifest(home) if (home / H.MANIFEST).exists() else H.new_manifest(
-            home, home_created=(state == "new" or home_created_by_bootstrap), version=__version__)
-        doc["version"] = __version__
-        doc["state"] = "installed"
-        H.save_manifest(home, doc)
-        H.ensure_private_dirs(home)
+        at = H.open_home(home) if H.CONFINED else None  # the marker, manifest and folders: inside the opened folder
+        try:
+            if not (home / H.MARKER).exists():
+                if at is not None:
+                    at.write(H.MARKER, H.MARKER_TEXT, mode=0o600)
+                else:
+                    H.atomic_write(home / H.MARKER, H.MARKER_TEXT, mode=0o600)
+            doc = H.load_manifest(home) if (home / H.MANIFEST).exists() else H.new_manifest(
+                home, home_created=(state == "new" or home_created_by_bootstrap), version=__version__)
+            doc["version"] = __version__
+            doc["state"] = "installed"
+            H.save_manifest(home, doc, at=at)
+            if at is not None:
+                for name in ("cache", "tmp"):
+                    at.child(name).close()
+            else:
+                H.ensure_private_dirs(home)
+        finally:
+            if at is not None:
+                at.close()
     data.mkdir(parents=True, exist_ok=True)
     os.chmod(data, 0o700)
     S.generation_dir(data)

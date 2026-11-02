@@ -149,6 +149,122 @@ def owned_dir(base: Path, *parts: str, create: bool = True) -> Path:
     return path
 
 
+# ------------------------------------------------------------------------------------------- confined operations
+# A check on a path, then a write by that path, leaves a gap: a folder swapped for a link in between sends the write
+# elsewhere. So writes and removals in Composer's own folders go through open folder descriptors: the app folder is
+# opened once (not following a link), each folder below it is opened relative to the one above (again not following
+# links), and files are created, renamed and removed by name inside an open folder. A folder renamed or swapped after
+# it was opened cannot redirect anything: the descriptor still names the folder that was checked.
+_DIR_FLAGS = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0)
+CONFINED = (hasattr(os, "O_NOFOLLOW") and hasattr(os, "O_DIRECTORY") and os.open in os.supports_dir_fd
+            and os.mkdir in os.supports_dir_fd and os.unlink in os.supports_dir_fd and os.rmdir in os.supports_dir_fd
+            and os.rename in os.supports_dir_fd and os.scandir in os.supports_fd)
+
+
+class Owned:
+    """An open folder of Composer's own: `fd` stays on the folder that was checked for as long as it is open."""
+
+    def __init__(self, fd: int, path: Path):
+        self.fd, self.path = fd, path
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        self.close()
+        return False
+
+    def close(self) -> None:
+        if self.fd is not None:
+            os.close(self.fd)
+            self.fd = None
+
+    def write(self, name: str, text: str, *, mode: int = 0o644) -> Path:
+        """Write a file by name in this folder: a new temporary file (never following a link), then a rename."""
+        if not _plain_name(name):
+            raise HomeError(f"refused: {name!r} is not a plain file name")
+        tmp = f".{name}.{os.getpid()}.tmp"
+        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, mode, dir_fd=self.fd)
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as handle:
+                handle.write(text)
+                handle.flush()
+                os.fchmod(handle.fileno(), mode)
+                os.fsync(handle.fileno())
+            os.rename(tmp, name, src_dir_fd=self.fd, dst_dir_fd=self.fd)
+        except BaseException:
+            try:
+                os.unlink(tmp, dir_fd=self.fd)
+            except OSError:
+                pass
+            raise
+        return self.path / name
+
+    def child(self, name: str, *, create: bool = True) -> "Owned":
+        """The folder `name` inside this one, opened without following a link (made 0700 when missing)."""
+        if not _plain_name(name):
+            raise HomeError(f"refused: {name!r} is not a plain folder name")
+        if create:
+            try:
+                os.mkdir(name, 0o700, dir_fd=self.fd)
+            except FileExistsError:
+                pass
+        try:
+            fd = os.open(name, _DIR_FLAGS, dir_fd=self.fd)
+        except FileNotFoundError:
+            raise
+        except OSError:
+            raise HomeError(f"refused: {self.path / name} is a symbolic link or not a folder; Composer works only in "
+                            "its own real folders, so nothing was written or removed") from None
+        return Owned(fd, self.path / name)
+
+    def exists(self, name: str) -> bool:
+        try:
+            os.stat(name, dir_fd=self.fd, follow_symlinks=False)
+            return True
+        except FileNotFoundError:
+            return False
+
+    def remove_tree(self, name: str) -> None:
+        """Remove the folder `name` in this one and everything in it, entirely through open folder descriptors: a
+        link inside is removed as a link, never followed."""
+        if not _plain_name(name):
+            raise HomeError(f"refused: {name!r} is not a plain folder name")
+        with self.child(name, create=False) as sub:
+            for entry in list(os.scandir(sub.fd)):
+                if entry.is_dir(follow_symlinks=False):
+                    sub.remove_tree(entry.name)
+                else:
+                    os.unlink(entry.name, dir_fd=sub.fd)
+        os.rmdir(name, dir_fd=self.fd)
+
+
+def open_home(home: Path) -> Owned:
+    """The app folder itself, opened without following a link. Everything later is done relative to it."""
+    if not CONFINED:
+        raise HomeError("refused: this system cannot open folders without following links, which Composer needs "
+                        "to write and remove safely in its own folder; nothing was written or removed")
+    home = Path(os.path.normpath(str(home)))
+    try:
+        return Owned(os.open(home, _DIR_FLAGS), home)
+    except OSError:
+        raise HomeError(f"refused: {home} is a symbolic link or not a folder; give the real folder") from None
+
+
+def open_owned(home: Path, *parts: str, create: bool = True) -> Owned:
+    """<home>/<parts...>, each opened relative to the one above without following links."""
+    current = open_home(home)
+    try:
+        for part in parts:
+            nxt = current.child(part, create=create)
+            current.close()
+            current = nxt
+        return current
+    except BaseException:
+        current.close()
+        raise
+
+
 def check_owned(home: Path) -> None:
     """Refuse an app folder whose own parts lead elsewhere: every folder Composer makes in it (bin, app, python,
     bootstrap, narration, models, cache, tmp and the ones inside them) must be a real folder, not a symbolic link,
@@ -225,10 +341,14 @@ def load_manifest(home: Path) -> dict:
     return doc
 
 
-def save_manifest(home: Path, doc: dict) -> None:
+def save_manifest(home: Path, doc: dict, *, at: "Owned | None" = None) -> None:
     doc["updated_at"] = now()
     # ensure_ascii=False keeps the folder's name as written, so setup.sh can match it ("home": "<path>")
-    atomic_write(home / MANIFEST, json.dumps(doc, indent=2, sort_keys=True, ensure_ascii=False) + "\n", mode=0o600)
+    text = json.dumps(doc, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+    if at is not None:
+        at.write(MANIFEST, text, mode=0o600)  # inside the app folder as it was opened
+    else:
+        atomic_write(home / MANIFEST, text, mode=0o600)
 
 
 def add_entry(doc: dict, path: str, kind: str, **extra) -> None:
@@ -383,4 +503,7 @@ def private_env(home: Path, base: dict | None = None) -> dict:
 
 def ensure_private_dirs(home: Path) -> None:
     for name in ("cache", "tmp"):
-        owned_dir(home, name)
+        if CONFINED:
+            open_owned(home, name).close()
+        else:
+            owned_dir(home, name)

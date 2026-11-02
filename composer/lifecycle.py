@@ -28,6 +28,7 @@ import json
 import os
 import re
 import shutil
+import stat
 import subprocess
 import sys
 import tarfile
@@ -369,6 +370,13 @@ def _point_code(home: Path, version: str) -> None:
     app = _owned(home, "app", create=False)
     if not VERSION_NAME.fullmatch(version) or not (app / version).is_dir() or os.path.islink(app / version):
         raise LifecycleError(f"no installed version {version!r}")
+    if H.CONFINED:  # the pointer is made and renamed inside the app folder as opened, never by path
+        with H.open_owned(home, "app", create=False) as at:
+            if at.exists(".current.tmp"):
+                os.unlink(".current.tmp", dir_fd=at.fd)
+            os.symlink(version, ".current.tmp", dir_fd=at.fd)
+            os.rename(".current.tmp", "current", src_dir_fd=at.fd, dst_dir_fd=at.fd)
+        return
     tmp = app / ".current.tmp"
     if os.path.lexists(tmp):
         os.unlink(tmp)
@@ -434,26 +442,40 @@ def _check_owned(home: Path | None) -> None:
         raise LifecycleError(str(exc)) from None
 
 
-def _remove_version(home: Path, version: str) -> None:
-    """Remove app/<version>, never app/current's target, and only a real folder with a version's name inside the
-    real app folder (checked here, at the removal, not only when the command started)."""
+def _remove_version(home: Path, version: str, home_at: "H.Owned | None" = None, log=print) -> bool:
+    """Remove app/<version>, never app/current's target, and only a real folder with a version's name, through the
+    app folder's open descriptor (`home_at`, opened when the command started): a folder or an ancestor swapped for a
+    link after the checks cannot lead the removal elsewhere. Returns False when it left the folder."""
     if not VERSION_NAME.fullmatch(version) or version == "current" or version == _current_version(home):
-        return
-    app = _owned(home, "app", create=False)
-    folder = app / version
-    if not folder.is_dir() or folder.is_symlink():
-        return
-    if shutil.rmtree.avoids_symlink_attacks and sys.version_info >= (3, 11):
-        # remove it by name inside the app folder opened without following links: a link swapped in for
-        # app (or for the folder) after the check above cannot send the removal elsewhere
-        fd = os.open(app, os.O_RDONLY | os.O_DIRECTORY | getattr(os, "O_NOFOLLOW", 0))
+        return False
+    if not H.CONFINED:
+        log(f"  left {home / 'app' / version}: this system cannot remove it through open folders; remove it yourself")
+        return False
+    own = home_at is None
+    home_at = H.open_home(home) if own else home_at
+    try:
         try:
-            if os.path.samestat(os.fstat(fd), os.lstat(app)):
-                shutil.rmtree(version, dir_fd=fd)
-        finally:
-            os.close(fd)
-    else:
-        shutil.rmtree(folder)
+            app = home_at.child("app", create=False)
+        except (FileNotFoundError, H.HomeError):
+            return False
+        with app:
+            try:
+                current = os.readlink("current", dir_fd=app.fd)  # the pointer in this folder, not by path
+            except OSError:
+                current = None
+            if version == current:
+                return False
+            try:
+                st = os.stat(version, dir_fd=app.fd, follow_symlinks=False)
+            except FileNotFoundError:
+                return False
+            if not stat.S_ISDIR(st.st_mode):
+                return False
+            app.remove_tree(version)
+            return True
+    finally:
+        if own:
+            home_at.close()
 
 
 def verify_file(path: Path, sha256: str | None) -> str:
@@ -508,10 +530,23 @@ def update(home: Path, data: Path, release: Path, *, sha256: str | None = None, 
            crash_after: str | None = None, log=print) -> dict:
     with exclusive(data, "update"):
         recover(home, data, log=log)
-        return _update(home, data, release, sha256=sha256, run=run, crash_after=crash_after, log=log)
+        _check_owned(home)  # before anything is made or removed in the app folder
+        # the app folder as checked, held open for the whole update: removals go through it, not through its path
+        home_at = None
+        if H.CONFINED:
+            try:
+                home_at = H.open_home(home)
+            except H.HomeError as exc:
+                raise LifecycleError(str(exc)) from None
+        try:
+            return _update(home, data, release, sha256=sha256, run=run, crash_after=crash_after, log=log,
+                           home_at=home_at)
+        finally:
+            if home_at is not None:
+                home_at.close()
 
 
-def _update(home: Path, data: Path, release: Path, *, sha256, run, crash_after, log) -> dict:
+def _update(home: Path, data: Path, release: Path, *, sha256, run, crash_after, log, home_at=None) -> dict:
     _check_owned(home)  # before anything is made or removed in the app folder
     old_version = _current_version(home)
     if old_version is None:
@@ -525,7 +560,10 @@ def _update(home: Path, data: Path, release: Path, *, sha256, run, crash_after, 
     if os.path.lexists(folder):
         if folder.is_symlink() or not folder.is_dir():
             raise LifecycleError(f"refused: {folder} is not a folder Composer made; nothing was installed")
-        _remove_version(home, new_version)  # an earlier, unfinished try at this same version (never the current)
+        # an earlier, unfinished try at this same version (never the current)
+        if not _remove_version(home, new_version, home_at, log) and os.path.lexists(folder):
+            raise LifecycleError(f"refused: an earlier try at {new_version} is still in {folder}; nothing was "
+                                 "installed")
     venv = folder / "venv"
     base = Path(os.path.realpath(_venv_python(home / "app" / old_version / "venv")))
     if not base.is_file():  # the Python the old environment was made from is gone: use the one running this
@@ -562,7 +600,7 @@ def _update(home: Path, data: Path, release: Path, *, sha256, run, crash_after, 
                             "import composer.cli, composer.lifecycle; from composer import job_store as j; "
                             "print(getattr(j, 'DATA_SCHEMA', '1'))", run)
     except BaseException as exc:
-        _remove_version(home, new_version)
+        _remove_version(home, new_version, home_at, log)
         if isinstance(exc, (OSError, subprocess.SubprocessError)):
             raise LifecycleError(f"the release did not install ({exc}); nothing was changed") from None
         raise
@@ -597,7 +635,7 @@ def _update(home: Path, data: Path, release: Path, *, sha256, run, crash_after, 
         log(f"  the update did not finish ({type(exc).__name__}); undoing it")
         _undo(home, store, fields, log)
         if _current_version(home) == old_version:
-            _remove_version(home, new_version)  # this process runs the old version, so the new one can go
+            _remove_version(home, new_version, home_at, log)  # this process runs the old version: the new can go
         if isinstance(exc, Exception) and not isinstance(exc, LifecycleError):
             raise LifecycleError(f"the update was undone: {exc}") from exc
         raise

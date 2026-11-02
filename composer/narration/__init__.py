@@ -38,7 +38,7 @@ import urllib.request
 from pathlib import Path
 from urllib.parse import urlsplit
 
-from ..home import HomeError, owned_dir, private_env
+from ..home import CONFINED, HomeError, open_owned, owned_dir, private_env
 
 VOICES = ("af_heart", "am_michael", "bf_emma")
 VOICE_LABELS = {"af_heart": "Heart", "am_michael": "Michael", "bf_emma": "Emma"}
@@ -184,9 +184,25 @@ def _owned(home: Path, *parts: str) -> Path:
         raise NarrationError(str(exc)) from None
 
 
+def _remove_owned_tree(home: Path, parts: tuple, name: str) -> None:
+    """Remove <home>/<parts>/<name> through open folders (or, where folders cannot be opened so, by its checked
+    path); a missing folder is fine."""
+    try:
+        if CONFINED:
+            with open_owned(home, *parts, create=False) as at:
+                if at.exists(name):
+                    at.remove_tree(name)
+        else:
+            shutil.rmtree(_owned(home, *parts) / name, ignore_errors=True)
+    except (FileNotFoundError, HomeError):
+        pass
+
+
 def download(home: Path, *, log=print, opener=None) -> tuple[Path, Path]:
     """Download the pinned model pair into <home>/models/kokoro, checking size and SHA-256 before keeping it."""
     target = _owned(home, "models", "kokoro")
+    if CONFINED:
+        return _download_at(home, target, log=log, opener=opener)
     open_url = opener or urllib.request.urlopen
     for name, (want_sha, want_size) in PINNED.items():
         final = target / name
@@ -217,6 +233,53 @@ def download(home: Path, *, log=print, opener=None) -> tuple[Path, Path]:
             raise NarrationError(f"{name} did not match its pinned size and SHA-256; nothing was kept")
         os.replace(part, final)
     return target / MODEL_FILE, target / VOICES_FILE
+
+
+def _download_at(home: Path, target: Path, *, log, opener) -> tuple[Path, Path]:
+    """download(), writing only inside the models/kokoro folder as opened (never by path)."""
+    open_url = opener or urllib.request.urlopen
+    try:
+        at = open_owned(home, "models", "kokoro")
+    except HomeError as exc:
+        raise NarrationError(str(exc)) from None
+    with at:
+        for name, (want_sha, want_size) in PINNED.items():
+            final = target / name
+            if final.is_file() and final.stat().st_size == want_size and sha256_file(final) == want_sha:
+                log(f"  {name}: already here and checked")
+                continue
+            part = name + ".part"
+            log(f"  downloading {name} ({want_size / 1_000_000:.0f} MB)")
+            h, got = hashlib.sha256(), 0
+            try:
+                fd = os.open(part, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o600, dir_fd=at.fd)
+                with open_url(RELEASE + name, timeout=60) as resp, os.fdopen(fd, "wb") as out:
+                    if not resp.geturl().startswith("https://"):
+                        raise NarrationError("the download left HTTPS; stopped")
+                    while True:
+                        block = resp.read(1 << 20)
+                        if not block:
+                            break
+                        got += len(block)
+                        if got > want_size:
+                            break
+                        h.update(block)
+                        out.write(block)
+            except BaseException:
+                _unlink_at(at.fd, part)  # nothing half-downloaded is left behind
+                raise
+            if got != want_size or h.hexdigest() != want_sha:
+                _unlink_at(at.fd, part)
+                raise NarrationError(f"{name} did not match its pinned size and SHA-256; nothing was kept")
+            os.rename(part, name, src_dir_fd=at.fd, dst_dir_fd=at.fd)
+    return target / MODEL_FILE, target / VOICES_FILE
+
+
+def _unlink_at(dir_fd: int, name: str) -> None:
+    try:
+        os.unlink(name, dir_fd=dir_fd)
+    except FileNotFoundError:
+        pass
 
 
 # ------------------------------------------------------------------------------------------------ runtime
@@ -261,7 +324,7 @@ def install_runtime(home: Path, *, log=print, base_python: str | None = None) ->
         (venv / ".runtime-ok").write_text("installed from requirements.lock\n", encoding="utf-8")
     except (subprocess.CalledProcessError, OSError) as exc:
         if made:
-            shutil.rmtree(venv, ignore_errors=True)  # a half-made runtime would look installed next time
+            _remove_owned_tree(home, ("narration",), "venv")  # a half-made runtime would look installed next time
         raise NarrationError(f"the narration runtime did not install ({exc})") from None
     return python
 
@@ -303,7 +366,7 @@ def check_render(python: Path, model: str, voices: str, *, home: Path, timeout: 
     except subprocess.TimeoutExpired:
         raise NarrationError(f"the test render took longer than {timeout:.0f} s") from None
     finally:
-        shutil.rmtree(work, ignore_errors=True)
+        _remove_owned_tree(home, ("tmp",), "narration-check")
 
 
 # ------------------------------------------------------------------------------------------------ server engine
@@ -369,7 +432,7 @@ def check_server(url: str, *, home: Path, timeout: float = 60, opener=None) -> d
                 Path(out["file"]).unlink(missing_ok=True)
                 rendered.append(voice)
     finally:
-        shutil.rmtree(work, ignore_errors=True)
+        _remove_owned_tree(home, ("tmp",), "narration-check")
     return {"ok": not missing, "rendered": rendered, "missing": missing}
 
 
