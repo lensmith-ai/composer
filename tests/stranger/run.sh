@@ -204,8 +204,8 @@ docker cp "$OUT/stage/." "$NAME:/stranger/"
 cx prep
 cx bundle
 TH=$(docker exec "$NAME" getent passwd tester | cut -d: -f6)
-docker cp "$RELDIR/$REL" "$NAME:$TH/downloads/"
-docker cp "$RELDIR/SHA256SUMS" "$NAME:$TH/downloads/"
+# a person downloads the release's files and its SHA256SUMS, which covers all of them (docs/releasing.md)
+for f in "$RELDIR"/*; do docker cp "$f" "$NAME:$TH/downloads/"; done
 docker exec "$NAME" chown -R tester:tester "$TH/downloads"
 cx snapshot before
 cx verify "$REL"

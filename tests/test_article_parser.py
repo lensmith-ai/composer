@@ -77,7 +77,9 @@ class PinnedInstallTests(unittest.TestCase):
         self.assertEqual(calls[0][:3], ["/app/python", "-m", "pip"])
         for flag in ("--require-hashes", "--no-deps", "--only-binary", ":all:"):
             self.assertIn(flag, calls[0])
-        self.assertEqual(Path(calls[0][-1]), ROOT / "composer" / html_extract.LOCK)
+        # the lock shipped next to the module that runs (an installed release reads its own copy, not this folder's)
+        self.assertEqual(Path(calls[0][-1]), Path(html_extract.__file__).with_name(html_extract.LOCK))
+        self.assertEqual(Path(calls[0][-1]).read_bytes(), (ROOT / "composer" / html_extract.LOCK).read_bytes())
 
 
 class SetupOfferTests(unittest.TestCase):

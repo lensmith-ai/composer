@@ -35,11 +35,16 @@ class StrangerHarnessTests(unittest.TestCase):
             line = next(x for x in inside.splitlines() if command in x and "as_tester" in x)
             self.assertIn("$FIXENV", line)
 
-    def test_only_webkits_screenshot_refusals_are_set_aside_one_per_screenshot(self):
+    def test_only_webkits_refusals_during_a_screenshot_are_set_aside(self):
         flow = (STRANGER / "browser_flow.mjs").read_text(encoding="utf-8")
-        self.assertIn("engine === 'webkit' && SHOT_STYLE.test(m.text())", flow)
-        self.assertIn("Math.min(shotStyleRefusals.length, shotNo)", flow)
-        self.assertIn("consoleErrors.push(...shotStyleRefusals.slice(excused))", flow)
+        self.assertIn("engine === 'webkit' && shooting && SHOT_STYLE.test(m.text())", flow)
+        shot = flow[flow.index("const shot = async"):flow.index("const rec = async")]
+        self.assertLess(shot.index("shooting = true"), shot.index("page.screenshot"))
+        self.assertLess(shot.index("page.screenshot"), shot.index("shooting = false"))
+
+    def test_the_clean_machine_gets_every_file_its_sha256sums_names(self):
+        run = (STRANGER / "run.sh").read_text(encoding="utf-8")
+        self.assertIn('for f in "$RELDIR"/*; do docker cp "$f" "$NAME:$TH/downloads/"; done', run)
 
 
 class BrowserFixtureTests(unittest.TestCase):
