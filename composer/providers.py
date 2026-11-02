@@ -124,6 +124,27 @@ def checked_endpoint(url: str) -> str:
 _BEARER = re.compile(r"(?i)\b(bearer)\s+\S+")
 
 
+_MODEL_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:/@+-]{0,127}")
+
+
+def _token_count(value):
+    return value if isinstance(value, int) and not isinstance(value, bool) and 0 <= value < 10**12 else None
+
+
+def _checked_reply(text: str, reported_model, usage: dict, configured_model: str, key: str) -> Reply:
+    """A success reply, made safe to record: what the endpoint says about itself (the model id, the token counts)
+    is kept only when it has the right shape and does not hold the key the call was made with; otherwise the
+    configured model id stands in and the count is unknown. A reply whose text holds the key is refused, so the key
+    can never reach a brief, its receipts or anything served."""
+    if key and key in text:
+        raise ProviderError("the reply contains the key the call was made with; it was not used (check the "
+                            "endpoint: it echoes what it is sent)")
+    model = reported_model if (isinstance(reported_model, str) and _MODEL_ID.fullmatch(reported_model)
+                               and not (key and key in reported_model)) else configured_model
+    return Reply(text, model=model, usage={"input_tokens": _token_count(usage.get("input_tokens")),
+                                           "output_tokens": _token_count(usage.get("output_tokens"))})
+
+
 def _error_text(status: int, data: bytes, secret: str = "") -> str:
     """The endpoint's error, short. An endpoint that echoes the key back (some proxies do) does
     not get it printed or sent on: the key, and anything after "Bearer", is replaced."""
@@ -224,9 +245,9 @@ class Anthropic:
                                 "raise COMPOSER_MAX_TOKENS")
         if not text.strip():
             raise ProviderError("the reply has no text")
-        u = doc.get("usage") or {}
+        u = doc.get("usage") if isinstance(doc.get("usage"), dict) else {}
         usage = {"input_tokens": u.get("input_tokens"), "output_tokens": u.get("output_tokens")}
-        return Reply(text, model=doc.get("model") or self.model, usage=usage)
+        return _checked_reply(text, doc.get("model"), usage, self.model, key)
 
 
 @dataclass
@@ -272,9 +293,9 @@ class OpenAICompatible:
                                 "raise COMPOSER_MAX_TOKENS")
         if not text.strip():
             raise ProviderError("the reply has no text")
-        u = doc.get("usage") or {}
+        u = doc.get("usage") if isinstance(doc.get("usage"), dict) else {}
         usage = {"input_tokens": u.get("prompt_tokens"), "output_tokens": u.get("completion_tokens")}
-        return Reply(text, model=doc.get("model") or self.model, usage=usage)
+        return _checked_reply(text, doc.get("model"), usage, self.model, key)
 
 
 def _max_tokens(env) -> int:
@@ -404,7 +425,11 @@ class Counted:
                                       "seconds": round(time.monotonic() - started, 1)})
             raise
         usage = getattr(reply, "usage", {}) or {}
+        usage = {k: _token_count(usage.get(k)) for k in ("input_tokens", "output_tokens")} if isinstance(usage, dict) \
+            else {}
         model = getattr(reply, "model", None)
+        if not (isinstance(model, str) and _MODEL_ID.fullmatch(model)):
+            model = None  # only a well-formed model id is recorded (the providers already check it against the key)
         with self._lock:
             self.per_call.append({"call": number, "ok": True, "model": model,
                                   "input_tokens": usage.get("input_tokens"),

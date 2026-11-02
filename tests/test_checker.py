@@ -286,7 +286,8 @@ class OnlineReflectionTests(unittest.TestCase):
                        get=lambda url, timeout: (_ for _ in ()).throw(OSError("offline")))
         online = [ln for ln in lines if "online: model" in ln or "online: checker" in ln]
         self.assertEqual(len(online), 2, lines)
-        self.assertTrue(all(ln.startswith("PASS") for ln in online), online)
+        # an endpoint that echoes the key back is not a working endpoint: doctor says so, and never prints the key
+        self.assertTrue(all(ln.startswith("FAIL") and "echoes what it is sent" in ln for ln in online), online)
         self.assertFalse(any(FAKE_KEY in ln or CHECKER_VALUE in ln for ln in lines), lines)
 
 
