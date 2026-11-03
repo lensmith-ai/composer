@@ -89,6 +89,10 @@ The full app, on your computer or your own server. In plain words:
   sources file from those folders and calls no model, checker or source with them, so settings another account
   wrote cannot send your key to an endpoint it chose. No command calls a model or a source, or uses your key, with
   settings from a folder that failed the check. `composer serve --out` writes to exactly the folder it checked.
+- `composer doctor --online` checks the app folder again just before its narration check writes a scratch folder
+  there, so an app folder that appeared after the trust row (in a folder other accounts can write) is refused,
+  not written in. SECURITY.md now says that `composer up` and `composer doctor --online` read `COMPOSER_SOURCES`
+  or `./composer-sources.json` when the data folder has no sources file of its own.
 - Downloads, temporary files and narration audio are always written as fresh files, so a file of that name linked
   elsewhere is never written through. An update never removes a version folder it did not make; rollback removes the version it rolled
   back from.

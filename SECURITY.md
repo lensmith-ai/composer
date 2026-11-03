@@ -88,6 +88,12 @@ What Composer does to stay safe, and where its limits are:
   and `--page`, `composer sources add --file`, and `composer serve`, which keeps the sources, packages and lenses you
   save on its page in `composer-sources.json`, `composer-packages.json` and `composer-lenses/` in the current folder,
   or next to the file you name with `--sources-file` (or `COMPOSER_SOURCES`). Run these in a folder of your own.
+  The same user-named sources file is read, not checked, by `composer compose`, `composer sources check` and
+  `composer serve`, and also by `composer up` and `composer doctor --online` when the data folder has no sources
+  file of its own (the usual case after setup): then they read `COMPOSER_SOURCES`, or else `composer-sources.json`
+  in the current folder, on top of the bundled list. Its feeds are fetched with no key, and nothing in it is run; it
+  decides which public addresses are read and whose text reaches your brief. So start `composer up` and
+  `composer doctor --online` from a folder of your own too.
   `composer serve`'s job store (`--out`, default `~/.lensmith-composer/data`) is checked like the data folder, and
   serve writes to exactly the path it checked.
 - **Your key.** The API key is read from the environment when each call is made. It is never
