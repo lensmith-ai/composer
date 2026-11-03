@@ -18,7 +18,7 @@
 > **AI;DR (AI, didn't read)**
 > Claude wrote this code and this README. I haven't read either line by line.
 > What people have checked: the private version of Composer writes briefs I read, and I click through to the cited articles to see that what a claim says is really there.
-> What tools have checked, for this repository: 568 offline tests pass on Python 3.10 and 3.13 in clean containers; the commands in this README were run there (the compose command, which needs a key, on 3.13 only); a secret scanner (gitleaks) found nothing in any commit; one test fails if private names, server paths or key shapes appear anywhere in the files or the history; and a security review on 2026-11-01 attacked it as a hostile feed, a hostile web page and a hostile network would, and fixed what it found, and a second reviewer attacked those fixes (see [SECURITY.md](SECURITY.md)).
+> What tools have checked, for this repository: 572 offline tests pass on Python 3.10 and 3.13 in clean containers; the commands in this README were run there (the compose command, which needs a key, on 3.13 only); a secret scanner (gitleaks) found nothing in any commit; one test fails if private names, server paths or key shapes appear anywhere in the files or the history; and a security review on 2026-11-01 attacked it as a hostile feed, a hostile web page and a hostile network would, and fixed what it found, and a second reviewer attacked those fixes (see [SECURITY.md](SECURITY.md)).
 > What was checked live: one brief, written from a fresh install in a clean Python 3.13 container with a real Anthropic key and the default model. It made 7 calls in 29 seconds and cost about 8 cents; every insight got a claim-seal verdict and the seal verified. The OpenAI-compatible path has not been run live; it is tested against the documented request and reply shapes only. Treat it as a working experiment, and open an issue if something's off. (Arya)
 
 **Composer reads a few feeds, writes a short brief through a lens you choose, and checks every
@@ -320,4 +320,6 @@ repository, one regular expression per line.
 ## Licence
 
 MIT, see [LICENSE](LICENSE). claim-seal is MIT. See [THIRD-PARTY.md](THIRD-PARTY.md) for every
-dependency, its version and its licence.
+dependency, its version and its licence. The core install has no GPL code. Optional narration brings two parts under
+GPL-3.0-or-later (the eSpeak NG library and phonemizer-fork); THIRD-PARTY.md says what that means if you pass a copy
+on.

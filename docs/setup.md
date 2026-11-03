@@ -54,8 +54,9 @@ One at a time, with a default in [brackets]. Press Enter to take it.
    brief's receipt says so; feeds are not affected. This lock file is the only way it is installed (there is no pip
    extra, which could not hash-check the packages it needs); `composer setup --reconfigure parser` adds it later.
 6. **Narration** (optional): a Listen button and three voices, made on your computer. Setup shows what it needs and
-   the licences (the Kokoro-82M model and voices are Apache-2.0; kokoro-onnx, onnxruntime and espeakng-loader are
-   MIT; espeakng-loader bundles eSpeak NG, which is GPL-3.0; soundfile is BSD-3-Clause). Then it looks for a Kokoro
+   the licences (the Kokoro-82M model and voices are Apache-2.0; kokoro-onnx and onnxruntime are MIT; espeakng-loader
+   bundles eSpeak NG, and kokoro-onnx uses phonemizer-fork, both GPL-3.0-or-later; soundfile is BSD-3-Clause;
+   [THIRD-PARTY.md](../THIRD-PARTY.md) lists every package and what the GPL means for you). Then it looks for a Kokoro
    you already have (below) and offers: use it, download the model into the app folder, or skip. Without narration
    briefs are text-only and the page shows no player and no voice picker.
 7. **Daily brief** (optional): a time, your time zone or UTC, and a lens. It runs while `composer up` runs, and

@@ -69,8 +69,9 @@ narration parts are listed with scope `excluded` (not in this artifact), each wi
 model files as `data` components with their download address and SHA-256. Both formats are accepted by GitHub's
 SBOM attestations; one format for the package and the image keeps them comparable.
 
-**Narration and the GPL.** Optional narration uses espeakng-loader, which bundles eSpeak NG (GPL-3.0). It is never
-in the default image or the package. The narration image (the Dockerfile's `narration` target) is a separate tag; it
+**Narration and the GPL.** Optional narration uses espeakng-loader, which bundles eSpeak NG (GPL-3.0-or-later), and
+phonemizer-fork (GPL-3.0-or-later, pure Python, so the installed package is its source). Neither is ever in the
+default image or the package. The narration image (the Dockerfile's `narration` target) is a separate tag; it
 ships eSpeak NG's licence text and a source offer (`composer/narration/SOURCE-OFFER.txt`), and the exact eSpeak NG
 source must be attached to the same release for as long as that image is offered. The release workflow does not
 build or publish the narration image yet; adding it there must add that source attachment in the same change.

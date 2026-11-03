@@ -71,6 +71,10 @@ The full app, on your computer or your own server. In plain words:
   requests get the same answer as GET without the body.
 - claim-seal is pinned to commit b0fdf61: a citation's evidence window now stops at the end of the cited item,
   entry or article, so a claim can no longer be backed by a sentence from the next article in the same feed.
+- THIRD-PARTY.md lists every package Composer installs or ships, optional parts included, with its version and
+  licence. It had left out most of narration's packages, among them phonemizer-fork, which is GPL-3.0-or-later. It
+  now says plainly which parts are GPL and what that means for you, setup's narration question names
+  phonemizer-fork, and a test fails if a package in a lock file is missing from THIRD-PARTY.md.
 
 ### Security
 

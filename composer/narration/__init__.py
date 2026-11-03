@@ -1,10 +1,11 @@
 """Optional narration: a Listen button and three voices, made on this machine with Kokoro.
 
 Off by default. Turning it on needs about 354 MB of model files (unless a Kokoro you already have passes the
-check below) and a small private runtime. Licences: the Kokoro-82M model and voices are Apache-2.0; kokoro-onnx,
-onnxruntime and espeakng-loader are MIT; espeakng-loader bundles the eSpeak NG speech library, which is
-GPL-3.0 (source: https://github.com/espeak-ng/espeak-ng); soundfile is BSD-3-Clause and bundles libsndfile
-(LGPL-2.1).
+check below) and a small private runtime. Licences: the Kokoro-82M model and voices are Apache-2.0; kokoro-onnx
+and onnxruntime are MIT; espeakng-loader 0.2.4 states no licence (its project has since added MIT) and bundles the
+eSpeak NG speech library, which is GPL-3.0-or-later (source: https://github.com/espeak-ng/espeak-ng); kokoro-onnx
+uses phonemizer-fork, which is GPL-3.0-or-later; soundfile is BSD-3-Clause and bundles libsndfile (LGPL-2.1). The
+other packages the runtime needs, numpy among them, are listed with their licences in THIRD-PARTY.md.
 
 Coexisting with a Kokoro you already have:
   - detect() only looks (read-only, bounded in depth and time): KOKORO_MODEL_PATH, kokoro-v1.0 model pairs under
@@ -55,10 +56,13 @@ RUNTIME_LOCK = Path(__file__).with_name("requirements.lock")
 WORKER = Path(__file__).with_name("worker.py")
 LICENCES = (
     "Kokoro-82M model and voices: Apache-2.0",
-    "kokoro-onnx, onnxruntime, espeakng-loader: MIT",
-    "eSpeak NG (bundled inside espeakng-loader): GPL-3.0, a separate library; "
+    "kokoro-onnx, onnxruntime: MIT",
+    "espeakng-loader: no licence stated in 0.2.4 (its project has since added MIT)",
+    "eSpeak NG (bundled inside espeakng-loader): GPL-3.0-or-later, a separate library; "
     "source: https://github.com/espeak-ng/espeak-ng",
+    "phonemizer-fork (used by kokoro-onnx): GPL-3.0-or-later",
     "soundfile: BSD-3-Clause, with libsndfile: LGPL-2.1",
+    "numpy and the other packages these need: see THIRD-PARTY.md",
 )
 SERVER_HINTS = ("http://127.0.0.1:8880/v1",)
 SEARCH_UNDER = (".cache", "Library/Application Support", "models", "Downloads", "")

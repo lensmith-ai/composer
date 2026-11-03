@@ -1,5 +1,5 @@
 {
-  "about": "Parts of OPTIONAL narration. None of them is in the wheel, the sdist or the default container image. build.py adds them to every release SBOM with scope 'excluded' (not in this artifact) so their licences are on record. eSpeak NG is GPL-3.0: any published image that includes it must ship the licence text and a source offer (see the narration target in the Dockerfile). The install pins are composer/narration/requirements.lock (universal, hash-locked; on Python 3.10 it resolves onnxruntime 1.24.3 and numpy 2.2.6, from 3.11 the versions below). The optional article parser (trafilatura and the packages it needs) is not in the wheel, the sdist or the image either; it is installed only when chosen in setup, from composer/extraction-requirements.lock (hash-locked, wheels only); there is no pip extra.",
+  "about": "Parts of OPTIONAL narration. None of them is in the wheel, the sdist or the default container image. build.py adds them to every release SBOM with scope 'excluded' (not in this artifact) so their licences are on record. eSpeak NG is GPL-3.0: any published image that includes it must ship the licence text and a source offer (see the narration target in the Dockerfile). The install pins are composer/narration/requirements.lock (universal, hash-locked; on Python 3.10 it resolves onnxruntime 1.24.3 and numpy 2.2.6, from 3.11 the versions below). The other packages the narration runtime needs are pinned in that lock file and listed with their licences in THIRD-PARTY.md. The optional article parser (trafilatura and the packages it needs) is not in the wheel, the sdist or the image either; it is installed only when chosen in setup, from composer/extraction-requirements.lock (hash-locked, wheels only); there is no pip extra.",
   "components": [
     {
       "type": "library",
@@ -14,7 +14,7 @@
       "name": "espeakng-loader",
       "version": "0.2.4",
       "purl": "pkg:pypi/espeakng-loader@0.2.4",
-      "licenses": [{"license": {"id": "MIT"}}],
+      "licenses": [{"license": {"name": "none stated in the 0.2.4 package; its project added an MIT licence in November 2025"}}],
       "delivery": "installed only with narration; it bundles the eSpeak NG library listed next"
     },
     {
@@ -23,6 +23,14 @@
       "version": "1.52.0",
       "licenses": [{"license": {"id": "GPL-3.0-or-later"}}],
       "delivery": "native library inside the espeakng-loader wheel; GPL-3.0 licence text and a source offer ship with any image that includes it"
+    },
+    {
+      "type": "library",
+      "name": "phonemizer-fork",
+      "version": "3.3.2",
+      "purl": "pkg:pypi/phonemizer-fork@3.3.2",
+      "licenses": [{"license": {"id": "GPL-3.0-or-later"}}],
+      "delivery": "installed only with narration (kokoro-onnx uses it); pure Python, so the installed package is its source"
     },
     {
       "type": "library",

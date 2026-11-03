@@ -299,9 +299,11 @@ docker volume rm composer_composer-data composer_caddy-data composer_caddy-confi
 ## Narration (optional, not in the default image)
 
 The default image has no narration. Narration reads a brief aloud with
-[Kokoro](https://github.com/thewh1teagle/kokoro-onnx), and it brings parts under other licences: kokoro-onnx (MIT),
-espeakng-loader (MIT), which bundles the eSpeak NG library (**GPL-3.0**), and the Kokoro model and voices
-(Apache-2.0, about 354 MB). So narration is opt-in, in two ways:
+[Kokoro](https://github.com/thewh1teagle/kokoro-onnx), and it brings parts under other licences: kokoro-onnx (MIT);
+espeakng-loader, which bundles the eSpeak NG library (**GPL-3.0-or-later**); phonemizer-fork, which kokoro-onnx uses
+(**GPL-3.0-or-later**); and the Kokoro model and voices (Apache-2.0, about 354 MB).
+[THIRD-PARTY.md](../THIRD-PARTY.md) lists every package and what the GPL means if you pass a copy on. So narration
+is opt-in, in two ways:
 
 - the narration runtime is a separate image (`--target narration`, published as `<version>-narration`), never the
   default. It ships eSpeak NG's GPL-3.0 licence text and a source offer in `/usr/share/doc/composer-narration/`, and

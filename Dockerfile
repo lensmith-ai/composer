@@ -56,9 +56,11 @@ CMD ["up", "--host", "0.0.0.0", "--port", "8765"]
 # ---------------------------------------------------------------------------------------------------------------
 # Narration is NOT in the default image, and never will be by default.
 #
-# Optional narration uses kokoro-onnx (MIT) and espeakng-loader (MIT), and espeakng-loader bundles the eSpeak NG
-# library, which is GPL-3.0. The Kokoro model and voices (Apache-2.0, about 354 MB) are downloaded into the /data
-# volume only when you turn narration on (`composer setup --data-only`); they are never baked into an image.
+# Optional narration uses kokoro-onnx (MIT) and espeakng-loader, which bundles the eSpeak NG library
+# (GPL-3.0-or-later); kokoro-onnx also uses phonemizer-fork (GPL-3.0-or-later). THIRD-PARTY.md lists every package
+# in the narration runtime with its licence. The Kokoro model and voices (Apache-2.0, about 354 MB) are downloaded
+# into the /data volume only when you turn narration on (`composer setup --data-only`); they are never baked into an
+# image.
 #
 # The narration image is a separate, opt-in target and tag (`docker build --target narration`, published as
 # `<version>-narration`). It:

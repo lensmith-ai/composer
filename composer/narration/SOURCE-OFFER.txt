@@ -2,13 +2,21 @@ Lensmith Composer narration image: licences and source offer
 =============================================================
 
 This image adds optional narration to Lensmith Composer. Most of it is under permissive licences:
-kokoro-onnx, onnxruntime and espeakng-loader (MIT), soundfile (BSD-3-Clause) with libsndfile (LGPL-2.1).
-The Kokoro-82M model and voices (Apache-2.0) are NOT in this image; Composer downloads them into your data
-volume only when you turn narration on.
+kokoro-onnx and onnxruntime (MIT), soundfile (BSD-3-Clause) with libsndfile (LGPL-2.1). espeakng-loader 0.2.4
+states no licence (its project has since added MIT). Every package in the narration runtime is listed with its
+licence in THIRD-PARTY.md (https://github.com/lensmith-ai/composer/blob/main/THIRD-PARTY.md). The Kokoro-82M model
+and voices (Apache-2.0) are NOT in this image; Composer downloads them into your data volume only when you turn
+narration on.
 
 espeakng-loader 0.2.4 bundles the eSpeak NG speech library, version 1.52.0, which is licensed under the GNU
 General Public License, version 3 or later. Its licence text is in this folder:
 eSpeak-NG-1.52.0-COPYING.txt.
+
+phonemizer-fork 3.3.2, which kokoro-onnx uses, is also licensed under the GNU General Public License, version 3 or
+later. It is pure Python: its complete source is the package installed in this image
+(/venv/lib/python3.13/site-packages/phonemizer/), and its licence text is
+/venv/lib/python3.13/site-packages/phonemizer_fork-3.3.2.dist-info/licenses/LICENSE. It is also available from
+https://pypi.org/project/phonemizer-fork/3.3.2/#files.
 
 Source offer. For as long as we offer this image, the complete corresponding source of eSpeak NG 1.52.0 and the
 espeakng-loader 0.2.4 source distribution that built the bundled library are attached to the same GitHub
