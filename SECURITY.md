@@ -83,6 +83,13 @@ What Composer does to stay safe, and where its limits are:
   against it crosses no boundary), root, and systems without POSIX owners and permission bits (on Windows the check
   does not run, and a version or narration folder that cannot be removed through a folder descriptor is left in
   place with a note on standard error).
+  *Places you name, outside the contract:* some commands write only where you point them, never in the app or data
+  folder, and those places are not checked: `composer compose --out` (a new or empty folder), `composer demo --site`
+  and `--page`, `composer sources add --file`, and `composer serve`, which keeps the sources, packages and lenses you
+  save on its page in `composer-sources.json`, `composer-packages.json` and `composer-lenses/` in the current folder,
+  or next to the file you name with `--sources-file` (or `COMPOSER_SOURCES`). Run these in a folder of your own.
+  `composer serve`'s job store (`--out`, default `~/.lensmith-composer/data`) is checked like the data folder, and
+  serve writes to exactly the path it checked.
 - **Your key.** The API key is read from the environment when each call is made. It is never
   stored, logged or written to a file, and an error message that repeats it is cut before it is
   shown. A call that carries the key refuses redirects and refuses a plain `http://` endpoint

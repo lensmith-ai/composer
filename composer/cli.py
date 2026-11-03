@@ -153,9 +153,12 @@ def cmd_seal(args) -> int:
 
 def cmd_serve(args) -> int:
     from . import home as H, lifecycle, server
-    # read-only trust admission of the folder the job store writes in, before anything else
-    lifecycle.admit(None, H.given_path(args.out) if args.out else Path.home() / ".lensmith-composer" / "data",
-                    what="brief folder")  # a refusal names --out, serve's own option
+    # the folder the job store writes in, normalised once (as written, never resolved): the path admitted below is
+    # the path every write uses, so a `..` after a link cannot send the writes somewhere the check did not look
+    out = H.given_path(args.out) if args.out else None
+    data_root = out or Path.home() / ".lensmith-composer" / "data"
+    # read-only trust admission of that folder, before anything else
+    lifecycle.admit(None, data_root, what="brief folder")  # a refusal names --out, serve's own option
     reg = _registry(args)
     passphrase = server.passphrase_from_env()
     server.check_bind(args.host, passphrase)
@@ -163,10 +166,9 @@ def cmd_serve(args) -> int:
         from_env(args.provider, args.model).ready()  # the key itself is read again on every call
     except ProviderError as exc:
         print(f"note: {exc}. The page will show the recorded brief; Compose will fail until a key is set.", flush=True)
-    data_root = Path(args.out) if args.out else Path.home() / ".lensmith-composer" / "data"
     source_path = registry.local_path(args.sources_file) or Path(args.sources_file or registry.LOCAL_DEFAULT)
     app = server.App(reg, lambda: from_env(args.provider, args.model), make_checker=lambda: checker_from_env(),
-                     out_dir=Path(args.out) if args.out else None, data_root=data_root, passphrase=passphrase,
+                     out_dir=out, data_root=data_root, passphrase=passphrase,
                      source_service=sources_registry.SourceService(
                          source_path, packages=sources_registry.PackageService(
                              source_path.parent / "composer-packages.json")),
