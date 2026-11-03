@@ -339,8 +339,15 @@ def online_checks(r: Report, home: Path, data: Path, cfg: dict | None, *, transp
         return
     from . import narration as N
     base = H.runtime_base(home, data)
-    H.make_dirs(base / "tmp")
-    work = Path(tempfile.mkdtemp(prefix="doctor-", dir=str(base / "tmp")))
+    try:
+        # checked now, not only at the trust row: the app folder may not have existed then (only the data folder was
+        # checked) and may have been made since, so it gets the same trust check before anything is written in it
+        tmp = H.owned_dir(base, "tmp")
+    except H.HomeError as exc:
+        r.add("FAIL", "online: narration", str(exc)[:600], "follow the fix named above, then run `composer doctor "
+              "--online` again")
+        return
+    work = Path(tempfile.mkdtemp(prefix="doctor-", dir=str(tmp)))
     try:
         narrator = N.Narrator(n, base, render=render)
         started = time.monotonic()
