@@ -62,6 +62,8 @@ def _mode(path: Path) -> int:
 
 
 INTEGRITY = ("python", "version", "manifest", "trust", "data", "settings", "sources")
+ONLINE_ROWS = ("online: model", "online: checker", "online: sources", "online: narration")
+NOT_TRUSTED = "not run: the trust check failed (no settings were read, nothing was called, written or started)"
 
 
 def run(home: Path, data: Path, *, online: bool = False, parity: bool = False, seals: bool = False, out=print,
@@ -70,17 +72,25 @@ def run(home: Path, data: Path, *, online: bool = False, parity: bool = False, s
     not a reason to undo an update); the others still print."""
     r = Report(out)
     offline_checks(r, home, data)
-    cfg = None
-    try:
-        cfg = S.load(data)
-    except S.SettingsError:
-        pass
-    if online:
-        online_checks(r, home, data, cfg, transport=transport, get=get, render=render)
-    if parity:
-        parity_checks(r, H.runtime_base(home, data), cfg, render=render)
-    if seals:
-        seal_checks(r, data, verify=verify)
+    if not r.trusted:
+        # the folders failed the trust check: their settings may have been written by another account, so doctor
+        # reads none of them, calls no model or source with them (your key would go where they say) and starts or
+        # writes nothing. It reports the refusal and stops.
+        for wanted, names in ((online, ONLINE_ROWS), (parity, ("parity",)), (seals, ("seals",))):
+            for name in names if wanted else ():
+                r.add("SKIP", name, NOT_TRUSTED)
+    else:
+        cfg = None
+        try:
+            cfg = S.load(data)
+        except S.SettingsError:
+            pass
+        if online:
+            online_checks(r, home, data, cfg, transport=transport, get=get, render=render)
+        if parity:
+            parity_checks(r, H.runtime_base(home, data), cfg, render=render)
+        if seals:
+            seal_checks(r, data, verify=verify)
     out(f"doctor: {sum(1 for x in r.rows if x[0] == 'PASS')} passed, {sum(1 for x in r.rows if x[0] == 'FAIL')} "
         f"failed, {sum(1 for x in r.rows if x[0] == 'SKIP')} skipped")
     if integrity_only:
@@ -92,7 +102,8 @@ def run(home: Path, data: Path, *, online: bool = False, parity: bool = False, s
 
 def trust_check(r: Report, home: Path | None, data: Path) -> None:
     """The trust contract (SECURITY.md), read-only, as update and `composer up` admit an install. When it fails,
-    doctor writes nothing and starts nothing afterwards (the narration and parity checks are skipped)."""
+    doctor stops there: it reads no settings, key or sources file from those folders, makes no model, checker or
+    source call (--online), and writes and starts nothing (--parity, narration)."""
     from .lifecycle import LifecycleError, admit
     try:
         admit(home, data)
@@ -132,6 +143,9 @@ def offline_checks(r: Report, home: Path, data: Path) -> None:
         except H.HomeError as exc:
             r.add("FAIL", "manifest", str(exc), "run setup.sh")
     trust_check(r, None if container or not home.is_dir() else home, data)
+    if not r.trusted:
+        r.add("SKIP", "the other checks", NOT_TRUSTED)
+        return
     if not (data / "current").exists():
         r.add("FAIL", "data", f"no Composer data at {data}", "run `composer setup`")
         return
@@ -273,6 +287,10 @@ def narration_offline(r: Report, home: Path, cfg: dict) -> None:
 
 def online_checks(r: Report, home: Path, data: Path, cfg: dict | None, *, transport=None, get=None,
                   render=None) -> None:
+    if not r.trusted:  # settings from a folder that failed the trust check could send your key anywhere
+        for name in ONLINE_ROWS:
+            r.add("SKIP", name, NOT_TRUSTED)
+        return
     if cfg is None:
         r.add("SKIP", "online: model", "no settings")
         return
@@ -319,9 +337,6 @@ def online_checks(r: Report, home: Path, data: Path, cfg: dict | None, *, transp
     if not n["enabled"]:
         r.add("SKIP", "online: narration", "narration is off")
         return
-    if not r.trusted:
-        r.add("SKIP", "online: narration", "not run: the trust check failed (nothing was written or started)")
-        return
     from . import narration as N
     base = H.runtime_base(home, data)
     H.make_dirs(base / "tmp")
@@ -364,7 +379,7 @@ def parity_checks(r: Report, home: Path, cfg: dict | None, *, render=None) -> No
     from .server import App, handler_for
 
     if not r.trusted:
-        r.add("SKIP", "parity", "not run: the trust check failed (nothing was written or started)")
+        r.add("SKIP", "parity", NOT_TRUSTED)
         return
     edition = demo.load()
     problems = demo.validate(edition)
@@ -463,6 +478,9 @@ def parity_checks(r: Report, home: Path, cfg: dict | None, *, render=None) -> No
 # ------------------------------------------------------------------------------------------------ --seals
 
 def seal_checks(r: Report, data: Path, *, verify=None) -> None:
+    if not r.trusted:
+        r.add("SKIP", "seals", NOT_TRUSTED)
+        return
     if not (data / "current").exists():
         r.add("SKIP", "seals", "no data")
         return

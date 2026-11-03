@@ -52,7 +52,10 @@ What Composer does to stay safe, and where its limits are:
     it starts (`TMPDIR`, the caches) just before that program starts.
   - *Before anything changes.* Setup, update, rollback, restore, uninstall, backup and recovery run all of these
     checks before they take the run lock or write, remove or recover anything, so a refusal has changed nothing
-    (`composer doctor` reports a refusal as its "trust" check and then writes and starts nothing). The run lock is
+    (`composer doctor` reports a refusal as its "trust" check and stops there: it reads no settings, key or sources
+    file from those folders, makes no model, checker or source call with them, even with `--online`, and writes
+    and starts nothing; settings another account wrote could otherwise send your key to an endpoint it chose). No
+    command calls a model or a source, or uses your key, with settings from a folder that failed this check. The run lock is
     opened inside the data folder as opened, never through a link; uninstall removes by name inside the app folder
     it opened, and backup writes inside the backups folder it opened (a `--out` folder must pass the same check).
     Recovery acts only inside the data folder: it rebuilds the folders an unfinished restore names from their
