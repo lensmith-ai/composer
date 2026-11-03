@@ -152,7 +152,9 @@ def cmd_seal(args) -> int:
 
 
 def cmd_serve(args) -> int:
-    from . import server
+    from . import home as H, lifecycle, server
+    # read-only trust admission of the folder the job store writes in, before anything else
+    lifecycle.admit(None, H.given_path(args.out) if args.out else Path.home() / ".lensmith-composer" / "data")
     reg = _registry(args)
     passphrase = server.passphrase_from_env()
     server.check_bind(args.host, passphrase)

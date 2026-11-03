@@ -55,16 +55,42 @@ class LifecycleError(RuntimeError):
     pass
 
 
+class AlreadyRunning(LifecycleError):
+    """The run lock is held: `composer up` (or another lifecycle command) is running with this data folder."""
+
+
 def _stamp() -> str:
     return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
 
 # ------------------------------------------------------------------------------------------------ running?
 
+def _open_lock(data: Path, *, create: bool):
+    """The run lock file, opened inside the data folder as opened (never following a link at either), made 0600 when
+    missing and `create`. None when it is missing and not `create`."""
+    flags = os.O_RDWR | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0) | (os.O_CREAT if create else 0)
+    try:
+        if H.CONFINED:
+            with H.open_home(data) as folder:
+                fd = os.open(RUN_LOCK, flags, 0o600, dir_fd=folder.fd)
+        else:
+            fd = os.open(data / RUN_LOCK, flags, 0o600)
+    except FileNotFoundError:
+        if create:
+            raise
+        return None
+    except H.HomeError as exc:
+        raise LifecycleError(str(exc)) from None
+    except OSError as exc:
+        raise LifecycleError(f"refused: {data / RUN_LOCK} cannot be opened ({exc.strerror or exc}): Composer's run "
+                             "lock must be a plain file in the data folder, never a link; nothing was written") from None
+    return os.fdopen(fd, "r+")
+
+
 def hold_run_lock(data: Path):
     """Taken by `composer up` for as long as it runs; backup is fine meanwhile, restore/update/uninstall wait."""
-    data.mkdir(parents=True, exist_ok=True)
-    handle = open(data / RUN_LOCK, "a+")
+    H.make_dirs(data)
+    handle = _open_lock(data, create=True)
     try:
         import fcntl
     except ImportError:
@@ -73,19 +99,21 @@ def hold_run_lock(data: Path):
         fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
     except OSError:
         handle.close()
-        raise LifecycleError("Composer is already running with this data folder (`composer up`)") from None
+        raise AlreadyRunning("Composer is already running with this data folder (`composer up`)") from None
     return handle
 
 
 def app_running(data: Path) -> bool:
-    path = data / RUN_LOCK
-    if not path.exists():
+    if not os.path.lexists(data / RUN_LOCK):
         return False
     try:
         import fcntl
     except ImportError:
         return False
-    with open(path, "a+") as handle:
+    handle = _open_lock(data, create=False)
+    if handle is None:
+        return False
+    with handle:
         try:
             fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
         except OSError:
@@ -110,7 +138,7 @@ class exclusive:
         if self.data.is_dir():
             try:
                 self.handle = hold_run_lock(self.data)
-            except LifecycleError:
+            except AlreadyRunning:
                 raise LifecycleError(f"stop `composer up` first (Ctrl+C, or `docker compose stop composer`), "
                                      f"then {self.what}") from None
         return self
@@ -135,46 +163,65 @@ def backup(data: Path, *, include_secrets: bool = False, out_dir: Path | None = 
            tag: str = "") -> Path:
     """Each file is read once, hashed and added from the same bytes, so a brief that changes while the app runs
     cannot make the archive disagree with its own list. `keep` prunes only backups with the same tag."""
-    gen = S.generation_dir(data, create=False)
-    out_dir = out_dir or data / "backups"
-    if not out_dir.exists():
-        out_dir.mkdir(parents=True, mode=0o700)  # only a folder made here is set private; yours is left as it is
+    admit(None, data)  # read-only, before anything is written: the data folder, above it and all the way down
     if tag and not re.fullmatch(r"[a-z]+", tag):
         raise LifecycleError("a backup tag is lower-case letters")
+    gen = S.generation_dir(data, create=False)
+    if out_dir is not None:
+        out_dir = H.given_path(out_dir)
+        try:
+            H.check_trust(out_dir)  # a folder of yours: the archive may hold your key
+        except H.HomeError as exc:
+            raise LifecycleError(f"{exc}. Pick a folder of your own for --out") from None
     name = f"composer-backup-{_stamp()}{'-' + tag if tag else ''}.tar.gz"
+    if not H.CONFINED:
+        return _backup_by_path(data, gen, out_dir or data / "backups", name, include_secrets=include_secrets,
+                               keep=keep, tag=tag)
+    try:
+        if out_dir is None:  # <data>/backups, opened inside the data folder as opened: a link there is refused
+            with H.open_home(data) as folder:
+                at = folder.child("backups")
+        else:
+            if not os.path.lexists(out_dir):
+                H.make_dirs(out_dir)  # only a folder made here is set private; yours is left as it is
+            at = H.open_home(out_dir)
+    except H.HomeError as exc:
+        raise LifecycleError(str(exc)) from None
+    with at:
+        return _backup_into(at, data, gen, name, include_secrets=include_secrets, keep=keep, tag=tag)
+
+
+def _backup_into(at: "H.Owned", data: Path, gen: Path, name: str, *, include_secrets: bool, keep, tag: str) -> Path:
+    """Write the archive inside the folder `at` as it was opened: a fresh temporary file (never following a link),
+    renamed into place in that same folder; pruning removes names in that folder only."""
+    tmp = "." + name + "." + uuid.uuid4().hex[:8] + ".tmp"
+    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600, dir_fd=at.fd)
+    try:
+        _write_archive(fd, data, gen, include_secrets=include_secrets)
+        os.replace(tmp, name, src_dir_fd=at.fd, dst_dir_fd=at.fd)
+    except BaseException:
+        try:
+            os.unlink(tmp, dir_fd=at.fd)
+        except OSError:
+            pass
+        raise
+    if keep:
+        suffix = f"-{tag}.tar.gz" if tag else None
+        ours = sorted(n for n in os.listdir(at.fd) if BACKUP_NAME.match(n) and suffix and n.endswith(suffix))
+        for old in ours[:-keep]:
+            os.unlink(old, dir_fd=at.fd)
+    return at.path / name
+
+
+def _backup_by_path(data: Path, gen: Path, out_dir: Path, name: str, *, include_secrets: bool, keep, tag: str) -> Path:
+    """Systems without folder descriptors (Windows): the same archive, by path."""
+    if not out_dir.exists():
+        out_dir.mkdir(parents=True, mode=0o700)
     final = out_dir / name
     tmp = out_dir / ("." + name + "." + uuid.uuid4().hex[:8] + ".tmp")
     fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0), 0o600)
-    files = {}
-    now_s = int(datetime.now(timezone.utc).timestamp())
-
-    def add(tar, arcname: str, blob: bytes) -> None:
-        info = tarfile.TarInfo(arcname)
-        info.size, info.mode, info.mtime = len(blob), 0o600, now_s
-        tar.addfile(info, io.BytesIO(blob))
-
     try:
-        with os.fdopen(fd, "wb") as raw, tarfile.open(fileobj=raw, mode="w:gz") as tar:
-            for path in sorted(gen.rglob("*")):
-                if path.is_symlink() or not path.is_file():
-                    continue
-                rel = path.relative_to(gen).as_posix()
-                if rel.endswith(".tmp"):
-                    continue  # a write in progress; the finished file is what counts
-                try:
-                    blob = path.read_bytes()
-                except FileNotFoundError:
-                    continue  # removed while the backup ran (a brief moved to the trash)
-                files[rel] = hashlib.sha256(blob).hexdigest()
-                add(tar, "generation/" + rel, blob)
-            secrets = S.secrets_path(data)
-            with_secrets = include_secrets and secrets.is_file()
-            if with_secrets:
-                add(tar, "secrets.env", secrets.read_bytes())
-            meta = {"schema": BACKUP_SCHEMA, "created_at": H.now(), "generation": gen.name,
-                    "data_schema": (gen / "VERSION").read_text(encoding="utf-8").strip(), "files": files,
-                    "includes_secrets": with_secrets}
-            add(tar, "backup.json", json.dumps(meta, indent=1, sort_keys=True).encode("utf-8"))
+        _write_archive(fd, data, gen, include_secrets=include_secrets)
         os.replace(tmp, final)
     except BaseException:
         tmp.unlink(missing_ok=True)
@@ -185,6 +232,39 @@ def backup(data: Path, *, include_secrets: bool = False, out_dir: Path | None = 
         for old in ours[:-keep]:
             old.unlink()
     return final
+
+
+def _write_archive(fd: int, data: Path, gen: Path, *, include_secrets: bool) -> None:
+    """The archive itself, written to the open file `fd` (closed here)."""
+    files = {}
+    now_s = int(datetime.now(timezone.utc).timestamp())
+
+    def add(tar, arcname: str, blob: bytes) -> None:
+        info = tarfile.TarInfo(arcname)
+        info.size, info.mode, info.mtime = len(blob), 0o600, now_s
+        tar.addfile(info, io.BytesIO(blob))
+
+    with os.fdopen(fd, "wb") as raw, tarfile.open(fileobj=raw, mode="w:gz") as tar:
+        for path in sorted(gen.rglob("*")):
+            if path.is_symlink() or not path.is_file():
+                continue
+            rel = path.relative_to(gen).as_posix()
+            if rel.endswith(".tmp"):
+                continue  # a write in progress; the finished file is what counts
+            try:
+                blob = path.read_bytes()
+            except FileNotFoundError:
+                continue  # removed while the backup ran (a brief moved to the trash)
+            files[rel] = hashlib.sha256(blob).hexdigest()
+            add(tar, "generation/" + rel, blob)
+        secrets = S.secrets_path(data)
+        with_secrets = include_secrets and secrets.is_file()
+        if with_secrets:
+            add(tar, "secrets.env", secrets.read_bytes())
+        meta = {"schema": BACKUP_SCHEMA, "created_at": H.now(), "generation": gen.name,
+                "data_schema": (gen / "VERSION").read_text(encoding="utf-8").strip(), "files": files,
+                "includes_secrets": with_secrets}
+        add(tar, "backup.json", json.dumps(meta, indent=1, sort_keys=True).encode("utf-8"))
 
 
 def _check_member_name(name: str) -> list[str]:
@@ -391,14 +471,19 @@ def _unfinished_restore(data: Path) -> dict | None:
     return last
 
 
-def admit(home: Path | None, data: Path) -> None:
-    """Trust admission, read-only, BEFORE the run lock is taken or any recovery runs (update, rollback, restore,
-    recovery at `composer up`): the app folder all the way down (home.check_owned), the data folder, every folder
-    above it and everything in it (journal included), and the folders an unfinished restore record names. A
-    refusal here has changed nothing."""
+def admit(home: Path | None, data: Path, *, structure: bool = True) -> None:
+    """Trust admission, read-only, BEFORE the run lock is taken or anything is written, removed or recovered (setup,
+    update, rollback, restore, uninstall, backup, doctor, and recovery at `composer up`): the app folder all the way
+    down (home.check_owned), the data folder, every folder above it and everything in it (journal included), and the
+    folders an unfinished restore record names. A refusal here has changed nothing. structure=False (uninstall)
+    checks the app folder with the same trust rule but lets Composer's own folders be links, which uninstall removes
+    as links through the opened folder."""
     try:
         if home is not None:
-            H.check_owned(home)
+            if structure:
+                H.check_owned(home)
+            else:
+                H.check_install_tree(Path(os.path.normpath(str(home))))
         H.check_trust(data)
         try:
             H.check_tree(data)
@@ -839,13 +924,37 @@ def check_data_schema(data: Path) -> None:
 
 def uninstall(home: Path, data: Path, *, delete_data: bool = False, confirm=lambda question: False,
               log=print) -> dict:
+    admit(home, data, structure=False)  # read-only, before the lock is taken or anything is removed
     with exclusive(data if (data / "current").exists() else data / "nonexistent", "uninstall"):
-        return _uninstall(home, data, delete_data=delete_data, confirm=confirm)
+        if not H.CONFINED:
+            return _uninstall(home, data, delete_data=delete_data, confirm=confirm, at=None)
+        if not os.path.lexists(home):
+            raise H.HomeError(f"no install manifest at {home / H.MANIFEST}")
+        try:
+            at = H.open_home(home)  # the app folder as admitted: every removal below is made inside it, by name
+        except H.HomeError as exc:
+            raise LifecycleError(str(exc)) from None
+        with at:
+            return _uninstall(home, data, delete_data=delete_data, confirm=confirm, at=at)
 
 
-def _uninstall(home: Path, data: Path, *, delete_data: bool, confirm) -> dict:
-    # no owned-folder refusal here: uninstall removes a link as a link and checks every manifest path (see H)
-    doc = H.load_manifest(home)
+def _remove_at(at: "H.Owned", name: str) -> bool:
+    """Remove the entry `name` of the opened folder `at`: a link or a file is unlinked, a folder removed through
+    open folder descriptors (a link inside is removed as a link, never followed). True when something was removed."""
+    try:
+        st = os.stat(name, dir_fd=at.fd, follow_symlinks=False)
+    except FileNotFoundError:
+        return False
+    if stat.S_ISDIR(st.st_mode):
+        at.remove_tree(name)
+    else:
+        os.unlink(name, dir_fd=at.fd)
+    return True
+
+
+def _uninstall(home: Path, data: Path, *, delete_data: bool, confirm, at: "H.Owned | None") -> dict:
+    # admitted above with the trust rule (a link among Composer's own folders is allowed here: it is removed as a link)
+    doc = H.load_manifest(home, at=at)
     problems = H.check_manifest(home, doc, data)
     problems += [p for p in H.check_manifest(home, doc, home / H.DATA_DIR) if p not in problems]
     if problems:
@@ -860,32 +969,42 @@ def _uninstall(home: Path, data: Path, *, delete_data: bool, confirm) -> dict:
         if not confirm(f"Delete your data folder {data}, with every brief, setting, backup and your key? "
                        "This cannot be undone. Type DELETE to confirm: "):
             raise LifecycleError("not confirmed; nothing was removed")
+
+    def remove(name: str) -> bool:
+        # check_manifest allows only Composer's own top-level names, so `name` is one entry of the app folder
+        return _remove_at(at, name) if at is not None else H.remove_entry(home, name)
+
+    def listing() -> list:
+        if at is not None:
+            return sorted(os.listdir(at.fd))
+        return sorted(os.listdir(home)) if home.exists() else []
+
     removed, kept_reused = [], []
     created = [e for e in doc["entries"] if e["kind"] == "created"]
     for entry in sorted(created, key=lambda e: e["path"].count("/"), reverse=True):
         if entry["path"] == H.MARKER and not delete_data:
             continue  # keeps the folder recognisable as a Composer install, so setup can pick your data up again
-        if H.remove_entry(home, entry["path"]):
+        if remove(entry["path"]):
             removed.append(entry["path"])
     kept_reused = [e["path"] for e in doc["entries"] if e["kind"] == "reused"]
     if delete_data:
         if os.path.islink(home / H.DATA_DIR):
             link_to = os.readlink(home / H.DATA_DIR)
-            H.remove_entry(home, H.DATA_DIR)
+            remove(H.DATA_DIR)
             removed.append(f"{H.DATA_DIR} (a link; the folder it pointed to, {link_to}, was left as it is)")
-        elif H.remove_entry(home, H.DATA_DIR):
+        elif remove(H.DATA_DIR):
             removed.append(H.DATA_DIR)
-        H.remove_entry(home, H.MARKER)
-        (home / H.MANIFEST).unlink(missing_ok=True)
-        left = sorted(os.listdir(home)) if home.exists() else []
+        remove(H.MARKER)
+        remove(H.MANIFEST)
+        left = listing()
         if not left and doc.get("home_created"):
-            home.rmdir()
+            home.rmdir()  # empty: rmdir removes nothing else, and refuses a link
             removed.append(str(home))
     else:
         doc["entries"] = [e for e in doc["entries"] if e["kind"] == "user-data" or e["path"] == H.MARKER]
         doc["state"] = "uninstalled-data-kept"
-        H.save_manifest(home, doc)
-        left = sorted(os.listdir(home))
+        H.save_manifest(home, doc, at=at)
+        left = listing()
     others = [n for n in (left if home.exists() else []) if n not in (H.DATA_DIR, H.MARKER, H.MANIFEST)]
     return {"removed": removed, "kept_data": None if delete_data else str(data), "reused_untouched": kept_reused,
             "not_ours_left_alone": others}

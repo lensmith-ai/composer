@@ -43,6 +43,7 @@ class Report:
     def __init__(self, out=print):
         self.rows: list[tuple[str, str, str, str]] = []
         self.out = out
+        self.trusted = True  # the trust check passed: doctor may write scratch files and start programs
 
     def add(self, status: str, name: str, detail: str, fix: str = "") -> None:
         self.rows.append((status, name, detail, fix))
@@ -60,7 +61,7 @@ def _mode(path: Path) -> int:
     return os.stat(path).st_mode & 0o777
 
 
-INTEGRITY = ("python", "version", "manifest", "data", "settings", "sources")
+INTEGRITY = ("python", "version", "manifest", "trust", "data", "settings", "sources")
 
 
 def run(home: Path, data: Path, *, online: bool = False, parity: bool = False, seals: bool = False, out=print,
@@ -89,6 +90,20 @@ def run(home: Path, data: Path, *, online: bool = False, parity: bool = False, s
 
 # ------------------------------------------------------------------------------------------------ offline
 
+def trust_check(r: Report, home: Path | None, data: Path) -> None:
+    """The trust contract (SECURITY.md), read-only, as update and `composer up` admit an install. When it fails,
+    doctor writes nothing and starts nothing afterwards (the narration and parity checks are skipped)."""
+    from .lifecycle import LifecycleError, admit
+    try:
+        admit(home, data)
+    except LifecycleError as exc:
+        r.trusted = False
+        r.add("FAIL", "trust", str(exc)[:600], "follow the fix named above, then run `composer doctor` again")
+        return
+    r.add("PASS", "trust", "no other account can change the " + ("app folder or the " if home else "")
+          + "data folder")
+
+
 def offline_checks(r: Report, home: Path, data: Path) -> None:
     v = sys.version_info
     in_venv = sys.prefix != getattr(sys, "base_prefix", sys.prefix)
@@ -116,6 +131,7 @@ def offline_checks(r: Report, home: Path, data: Path) -> None:
                 r.add("PASS", "manifest", f"{len(doc['entries'])} entries, every path inside {home} or reused read-only")
         except H.HomeError as exc:
             r.add("FAIL", "manifest", str(exc), "run setup.sh")
+    trust_check(r, None if container or not home.is_dir() else home, data)
     if not (data / "current").exists():
         r.add("FAIL", "data", f"no Composer data at {data}", "run `composer setup`")
         return
@@ -303,9 +319,12 @@ def online_checks(r: Report, home: Path, data: Path, cfg: dict | None, *, transp
     if not n["enabled"]:
         r.add("SKIP", "online: narration", "narration is off")
         return
+    if not r.trusted:
+        r.add("SKIP", "online: narration", "not run: the trust check failed (nothing was written or started)")
+        return
     from . import narration as N
     base = H.runtime_base(home, data)
-    (base / "tmp").mkdir(parents=True, exist_ok=True)
+    H.make_dirs(base / "tmp")
     work = Path(tempfile.mkdtemp(prefix="doctor-", dir=str(base / "tmp")))
     try:
         narrator = N.Narrator(n, base, render=render)
@@ -344,6 +363,9 @@ def parity_checks(r: Report, home: Path, cfg: dict | None, *, render=None) -> No
     from .scheduler import chain
     from .server import App, handler_for
 
+    if not r.trusted:
+        r.add("SKIP", "parity", "not run: the trust check failed (nothing was written or started)")
+        return
     edition = demo.load()
     problems = demo.validate(edition)
     r.add("PASS" if not problems else "FAIL", "parity: recorded edition",

@@ -476,6 +476,26 @@ def open_home(home: Path) -> Owned:
     return _checked(fd, home)
 
 
+def touch_private(folder: Path, name: str) -> None:
+    """Create the file `name` in `folder` (0600) when it is missing, inside the folder as opened and never following
+    a link at that name (the run lock: a link planted there would make Composer create a file wherever it names)."""
+    if not _plain_name(name):
+        raise HomeError(f"refused: {name!r} is not a plain file name")
+    flags = os.O_WRONLY | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0)
+    try:
+        if CONFINED:
+            with open_home(folder) as at:
+                fd = os.open(name, flags, 0o600, dir_fd=at.fd)
+        else:
+            fd = os.open(Path(folder) / name, flags, 0o600)
+    except HomeError:
+        raise
+    except OSError as exc:
+        raise HomeError(f"refused: {Path(folder) / name} cannot be made ({exc.strerror or exc}): it is a symbolic link "
+                        "or not a file; nothing was written") from None
+    os.close(fd)
+
+
 def open_owned(home: Path, *parts: str, create: bool = True) -> Owned:
     """<home>/<parts...>, each opened relative to the one above without following links."""
     current = open_home(home)
@@ -498,15 +518,8 @@ def check_owned(home: Path) -> None:
     written by group or others: an existing install is checked, never adopted as it is. Call it before any write
     or removal in the app folder; it only reads."""
     home = Path(os.path.normpath(str(home)))
-    if os.path.islink(home):
-        raise HomeError(f"refused: {home} is a symbolic link; give the real folder")
-    check_trust(home)
-    if not home.exists():
+    if not check_install_tree(home):
         return
-    try:
-        check_tree(home)
-    except HomeError as exc:
-        raise HomeError(f"{exc}. To fix a whole install made under a permissive umask: chmod -R go-w {home}") from None
     for name in OWNED_DIRS:
         owned_dir(home, name, create=False)
     for parts in OWNED_SUBDIRS:
@@ -526,6 +539,23 @@ def check_owned(home: Path) -> None:
             raise HomeError(f"refused: {path} is a symbolic link; Composer works only in its own real folders")
         elif path.is_dir():
             owned_dir(path, "venv", create=False)
+
+
+def check_install_tree(home: Path) -> bool:
+    """The trust rule for an app folder, read-only: no link on its path, it and every folder above it yours or root's
+    and writable by no one else, and everything in it (folders, files and links, all the way down) the same. Unlike
+    check_owned it does not ask Composer's own folders to be real folders: uninstall removes a link there as a link,
+    through the opened folder. False when the folder does not exist."""
+    if os.path.islink(home):
+        raise HomeError(f"refused: {home} is a symbolic link; give the real folder")
+    check_trust(home)
+    if not home.exists():
+        return False
+    try:
+        check_tree(home)
+    except HomeError as exc:
+        raise HomeError(f"{exc}. To fix a whole install made under a permissive umask: chmod -R go-w {home}") from None
+    return True
 
 
 def is_ours(home: Path) -> bool:
@@ -560,10 +590,16 @@ def new_manifest(home: Path, *, home_created: bool, version: str) -> dict:
             "created_at": now(), "updated_at": now(), "state": "installed", "entries": [], "changes_outside": []}
 
 
-def load_manifest(home: Path) -> dict:
+def load_manifest(home: Path, *, at: "Owned | None" = None) -> dict:
+    """The install manifest; with `at`, read inside the app folder as it was opened (never following a link)."""
     path = home / MANIFEST
     try:
-        doc = json.loads(path.read_text(encoding="utf-8"))
+        if at is not None:
+            fd = os.open(MANIFEST, os.O_RDONLY | os.O_NOFOLLOW, dir_fd=at.fd)
+            with os.fdopen(fd, "r", encoding="utf-8") as handle:
+                doc = json.loads(handle.read())
+        else:
+            doc = json.loads(path.read_text(encoding="utf-8"))
     except FileNotFoundError:
         raise HomeError(f"no install manifest at {path}") from None
     except (OSError, json.JSONDecodeError) as exc:

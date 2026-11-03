@@ -29,9 +29,11 @@ this repository, not in a public issue.
 What Composer does to stay safe, and where its limits are:
 
 - **Where Composer works (the trust contract).** Composer trusts your own account and root, and no other account.
-  Before setup (`./setup.sh` and `composer setup`), update, rollback, restore, recovery after an interrupted update
-  or restore (`composer up` runs it first), and narration's downloads, checks and clean-ups write, remove or start
-  anything, Composer checks, only reading, that no other account can change what it is about to use:
+  Before setup (`./setup.sh` and `composer setup`, with or without `--data`), update, rollback, restore, uninstall,
+  backup, recovery after an interrupted update or restore (`composer up` runs it first), `composer doctor`'s checks
+  that write or start something, `composer serve`'s job store, and narration's downloads, checks and clean-ups
+  write, remove or start anything, Composer checks, only reading, that no other account can change what it is about
+  to use:
   - *Above the folder.* The app folder (and the data folder) and every folder above it, up to `/`, on the path as
     given and on its real path, must belong to you or root and be writable by no one else: no group or other write
     bit. A folder every account can write, such as `/tmp`, is always refused.
@@ -44,13 +46,17 @@ What Composer does to stay safe, and where its limits are:
     `models`, `cache`, `tmp`, the marker and the install manifest, and the data folder with everything in it (its
     settings, key, generations, backups and recovery journal). An existing install or data folder that breaks this
     is refused, never adopted as it is, with the fix (`chmod -R go-w <folder>`, `chown`). The check runs over the
-    whole app folder and data folder at setup, update, rollback, restore and recovery, and again on each folder
+    whole app folder and data folder at setup, update, rollback, restore, uninstall, backup, doctor and recovery,
+    and again on each folder
     where Composer walks into it (through the folder it actually opened) and on the folders it hands to a program
     it starts (`TMPDIR`, the caches) just before that program starts.
-  - *Before anything changes.* Update, rollback, restore and recovery run all of these checks before they take the
-    run lock or recover anything, so a refusal has changed nothing. Recovery acts only inside the data folder: it
-    rebuilds the folders an unfinished restore names from their checked names, and refuses a recovery record that
-    names any other place.
+  - *Before anything changes.* Setup, update, rollback, restore, uninstall, backup and recovery run all of these
+    checks before they take the run lock or write, remove or recover anything, so a refusal has changed nothing
+    (`composer doctor` reports a refusal as its "trust" check and then writes and starts nothing). The run lock is
+    opened inside the data folder as opened, never through a link; uninstall removes by name inside the app folder
+    it opened, and backup writes inside the backups folder it opened (a `--out` folder must pass the same check).
+    Recovery acts only inside the data folder: it rebuilds the folders an unfinished restore names from their
+    checked names, and refuses a recovery record that names any other place.
 
   Composer and the programs it starts (venv, pip, the narration runtime) never make a group- or other-writable file,
   whatever your umask. Inside the folder it writes and removes through open folder descriptors, never follows a

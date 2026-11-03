@@ -695,7 +695,7 @@ def _run(*, home: Path, data: Path | None, answers_file: str | None, assume_yes:
     H.private_folder(data)  # 0700, set through the folder as opened (a link in its place is refused, not followed)
     S.generation_dir(data)
     from .lifecycle import RUN_LOCK
-    (data / RUN_LOCK).touch(mode=0o600, exist_ok=True)  # the lock `composer up` and the lifecycle commands share
+    H.touch_private(data, RUN_LOCK)  # the lock `composer up` and the lifecycle commands share (never through a link)
     cfg = existing or json.loads(json.dumps(S.DEFAULTS))
     if "provider" in plan:
         cfg["provider"] = plan["provider"]

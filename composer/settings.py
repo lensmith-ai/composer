@@ -16,7 +16,7 @@ import re
 import stat
 from pathlib import Path
 
-from .home import atomic_write, private_folder
+from .home import atomic_write, private_folder, touch_private
 
 CONFIG_SCHEMA = "composer-config/v1"
 SECRETS = "secrets.env"
@@ -53,7 +53,7 @@ def generation_dir(data: Path, *, create: bool = True) -> Path:
             raise SettingsError(f"no Composer data at {data} yet; run `composer setup`")
         from .job_store import JobStore
         private_folder(data)  # 0700, set through the folder as opened: a link in its place is refused
-        (data / "up.lock").touch(mode=0o600, exist_ok=True)  # the run lock (composer.lifecycle.RUN_LOCK)
+        touch_private(data, "up.lock")  # the run lock (composer.lifecycle.RUN_LOCK), never made through a link
         JobStore(data, worker=None)
     value = pointer.read_text(encoding="utf-8").strip()
     if not re.fullmatch(r"g[0-9]+", value) or not (data / "generations" / value).is_dir():
