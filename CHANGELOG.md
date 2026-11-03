@@ -79,12 +79,16 @@ The full app, on your computer or your own server. In plain words:
   writes, removes or starts anything, the app folder and the data folder, every folder above them, and every folder
   and file inside them must belong to you or root and be writable by no one else, and the path to them may not go
   through a symbolic link (see "Where Composer works" in SECURITY.md); otherwise it refuses, before it takes the run
-  lock or recovers anything, and says how to fix it (naming `--home` or `--data`, and saying when a disk has no
-  permission bits for `chmod` to change). Composer gives every folder and file it makes an explicit private mode,
+  lock or recovers anything, and says how to fix it (naming the option you used, `--home`, `--data` or `--out`, and
+  saying when a disk has no permission bits for `chmod` to change). Composer gives every folder and file it makes an explicit private mode,
   whatever the umask or a default ACL; the programs it starts never make group-writable files under any umask.
   Recovery acts only on its own folders inside the data folder, never on a path its journal names elsewhere;
   uninstall removes and backup writes only inside the folders they opened, and the run lock is never opened
   through a link.
+- When that check fails, `composer doctor` reports it and stops: even with `--online` it reads no settings, key or
+  sources file from those folders and calls no model, checker or source with them, so settings another account
+  wrote cannot send your key to an endpoint it chose. No command calls a model or a source, or uses your key, with
+  settings from a folder that failed the check. `composer serve --out` writes to exactly the folder it checked.
 - Downloads, temporary files and narration audio are always written as fresh files, so a file of that name linked
   elsewhere is never written through. An update never removes a version folder it did not make; rollback removes the version it rolled
   back from.
