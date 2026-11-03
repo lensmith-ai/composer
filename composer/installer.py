@@ -669,7 +669,7 @@ def _run(*, home: Path, data: Path | None, answers_file: str | None, assume_yes:
         return 0
     # 2. Writes: the folder, the marker and manifest, the data, the settings, the key, the extras.
     if not data_only:
-        home.mkdir(mode=0o700, exist_ok=True)
+        H.make_dirs(home)  # 0700, set explicitly
         H.check_owned(home)  # again at the write: the answers above may have taken a while
         at = H.open_home(home) if H.CONFINED else None  # the marker, manifest and folders: inside the opened folder
         try:

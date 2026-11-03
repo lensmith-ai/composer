@@ -272,7 +272,7 @@ def owned_dir(base: Path, *parts: str, create: bool = True) -> Path:
         raise HomeError(f"refused: {path} is a symbolic link; Composer works only in its own real folders")
     check_trust(path)
     if create and parts and not os.path.lexists(path):
-        os.makedirs(path, mode=0o700, exist_ok=True)
+        make_dirs(path)
     for part in parts:
         if not _plain_name(part):
             raise HomeError(f"refused: {part!r} is not a plain folder name")
@@ -287,6 +287,7 @@ def owned_dir(base: Path, *parts: str, create: bool = True) -> Path:
             os.mkdir(path, 0o700)
             if os.path.islink(path) or not path.is_dir():  # made by someone else in between
                 raise HomeError(f"refused: {path} changed while Composer made it")
+            _set_folder_mode(path, 0o700)  # explicit: a default ACL above would otherwise decide
         else:
             continue
         check_entry(path)  # each folder on the way, not only the base: a writable one lets another account swap
@@ -341,12 +342,14 @@ def _set_folder_mode(path: Path, mode: int) -> None:
         os.close(fd)
 
 
-def make_dirs(path: Path, *, mode: int = 0o700) -> Path:
+def make_dirs(path: Path, *, mode: int = 0o700, exist_ok: bool = True) -> Path:
     """`mkdir -p` for Composer's own folders: each folder it makes is set to `mode` (0700) explicitly once it exists,
     through the folder as opened. mkdir's own mode is narrowed by the umask, but under a default POSIX ACL on the
     folder above the ACL decides instead (0777 comes out 0775); an explicit mode is the same whatever the umask or
-    the ACL. Folders that already exist are left as they are."""
+    the ACL. Folders that already exist are left as they are (exist_ok=False: `path` itself must be new)."""
     path = Path(os.path.normpath(str(path)))
+    if not exist_ok and os.path.lexists(path):
+        raise FileExistsError(f"{path} already exists")
     missing = []
     probe = path
     while not os.path.lexists(probe) and probe != probe.parent:
@@ -416,9 +419,11 @@ class Owned:
         """The folder `name` inside this one, opened without following a link (made 0700 when missing)."""
         if not _plain_name(name):
             raise HomeError(f"refused: {name!r} is not a plain folder name")
+        made = False
         if create:
             try:
                 os.mkdir(name, 0o700, dir_fd=self.fd)
+                made = True
             except FileExistsError:
                 pass
         try:
@@ -428,6 +433,12 @@ class Owned:
         except OSError:
             raise HomeError(f"refused: {self.path / name} is a symbolic link or not a folder; Composer works only in "
                             "its own real folders, so nothing was written or removed") from None
+        if made:
+            try:
+                os.fchmod(fd, 0o700)  # explicit, on the folder as opened: a default ACL above would otherwise decide
+            except BaseException:
+                os.close(fd)
+                raise
         return _checked(fd, self.path / name)
 
     def exists(self, name: str) -> bool:
@@ -732,7 +743,7 @@ def remove_entry(home: Path, rel: str) -> bool:
 
 def atomic_write(path: Path, text: str, *, mode: int = 0o644) -> None:
     """Write text to a temporary file next to `path` (created with `mode` from the start), then rename it."""
-    path.parent.mkdir(parents=True, exist_ok=True)
+    make_dirs(path.parent)
     tmp = path.with_name("." + path.name + f".{os.getpid()}.tmp")
     try:
         os.unlink(tmp)  # a leftover of that name (or a hard link to a file elsewhere) is never reused
@@ -743,8 +754,11 @@ def atomic_write(path: Path, text: str, *, mode: int = 0o644) -> None:
         with os.fdopen(fd, "w", encoding="utf-8") as handle:
             handle.write(text)
             handle.flush()
+            if hasattr(os, "fchmod"):
+                os.fchmod(handle.fileno(), mode)  # the file as opened, not whatever has its name by now
             os.fsync(handle.fileno())
-        os.chmod(tmp, mode)
+        if not hasattr(os, "fchmod"):
+            os.chmod(tmp, mode)
         os.replace(tmp, path)
     except BaseException:
         try:

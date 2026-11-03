@@ -58,8 +58,12 @@ What Composer does to stay safe, and where its limits are:
     Recovery acts only inside the data folder: it rebuilds the folders an unfinished restore names from their
     checked names, and refuses a recovery record that names any other place.
 
-  Composer and the programs it starts (venv, pip, the narration runtime) never make a group- or other-writable file,
-  whatever your umask. Inside the folder it writes and removes through open folder descriptors, never follows a
+  Composer never makes a group- or other-writable folder or file of its own, whatever your umask or a default ACL on
+  a folder above: it gives each one an explicit mode (folders 0700, set again on the folder as opened once it exists;
+  files 0600, the launcher 0700). The programs it starts (venv, pip, the narration
+  runtime) run under a umask with no group or other write bit; a default POSIX ACL on a folder above the app folder
+  still decides what those programs make, and Composer then refuses the result at its next check, with the fix
+  (`chmod -R go-w <folder>`), rather than use it. Inside the folder it writes and removes through open folder descriptors, never follows a
   link where it keeps its own folders (only `app/current` is a link), and writes downloads, temporary files and
   narration audio (the local runtime's included) as fresh files renamed into place. An update never removes a
   version folder it did not make itself in that run (rollback, the explicit command, removes the version it rolled
@@ -68,7 +72,8 @@ What Composer does to stay safe, and where its limits are:
   folder, above it, or on a link on the way to it, to make Composer write, remove or run something else.
   *Assumed:* the guarantee holds where the filesystem, its access-control model and its mounts enforce the owners
   and permission bits Composer checks. Linux POSIX ACLs were checked: a grant to another account shows in the group
-  write bit (the ACL mask), and Composer refuses it. macOS and NFSv4 ACLs, network and FUSE filesystems, and
+  write bit (the ACL mask), and Composer refuses it; a default ACL on a folder above is inherited by what is made
+  below it, and Composer's explicit modes mask such a grant off on everything it makes itself. macOS and NFSv4 ACLs, network and FUSE filesystems, and
   filesystems without POSIX owners are not certified; an access-control entry the permission bits do not show, or
   a mount another account administers, is outside what Composer can see.
   *Not defended:* a program already running as you (it can change your files and Composer's directly, so a race

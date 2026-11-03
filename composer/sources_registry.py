@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from . import adapters, discovery, fetch, registry
+from .home import make_dirs
 
 
 # A probe of a full registry entry (and the re-read before it is saved): an html-index entry may list up to 40
@@ -299,7 +300,7 @@ class SourceService:
         """Write one entry to the sources file. The whole read, check, merge and write happens under the file's lock,
         shared by every process and command that writes it, so two writers cannot lose each other's entry. With
         `new`, an entry whose id or address appeared meanwhile is refused instead of replaced."""
-        self.path.parent.mkdir(parents=True, exist_ok=True)
+        make_dirs(self.path.parent)
         try:
             with registry.file_lock(self.path):
                 if self.path.exists():

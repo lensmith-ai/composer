@@ -349,7 +349,7 @@ def restore(data: Path, archive: Path, *, include_secrets: bool = False, crash_a
         safety = backup(data, tag="prerestore")
         stage = data / "tmp" / ("restore-" + uuid.uuid4().hex)
         staged = stage / "generation"
-        staged.mkdir(parents=True)
+        H.make_dirs(staged)
         secret_blob = None
         try:
             with tarfile.open(archive, mode="r:gz") as tar:
@@ -364,9 +364,10 @@ def restore(data: Path, archive: Path, *, include_secrets: bool = False, crash_a
                     if parts[0] != "generation":
                         continue
                     target = stage.joinpath(*parts)
-                    target.parent.mkdir(parents=True, exist_ok=True)
+                    H.make_dirs(target.parent)
                     h = hashlib.sha256()
-                    with open(target, "xb") as out:
+                    fresh = os.open(target, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0), 0o600)
+                    with os.fdopen(fresh, "wb") as out:
                         for block in iter(lambda: handle.read(1 << 20), b""):
                             h.update(block)
                             out.write(block)
@@ -378,7 +379,7 @@ def restore(data: Path, archive: Path, *, include_secrets: bool = False, crash_a
             shutil.rmtree(stage, ignore_errors=True)
             raise
         replaced = data / "recovery" / "replaced" / f"{_stamp()}-{gen.name}"
-        replaced.parent.mkdir(parents=True, exist_ok=True)
+        H.make_dirs(replaced.parent)
         fields = {"generation": str(gen), "replaced": str(replaced), "staged": str(staged)}
         _journal_append(data, "restore", "intent", **fields)
         os.replace(gen, replaced)
@@ -415,8 +416,9 @@ def _journal_last(data: Path, operation: str) -> dict | None:
 def _journal_append(data: Path, operation: str, stage: str, **fields) -> None:
     """The same append-and-fsync the job store uses, for a step taken before the store can open."""
     path = _journal_path(data)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("a", encoding="utf-8") as handle:
+    H.make_dirs(path.parent)
+    fd = os.open(path, os.O_WRONLY | os.O_APPEND | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0), 0o600)
+    with os.fdopen(fd, "a", encoding="utf-8") as handle:
         handle.write(json.dumps({"operation": operation, "stage": stage, **fields}, sort_keys=True) + "\n")
         handle.flush()
         os.fsync(handle.fileno())

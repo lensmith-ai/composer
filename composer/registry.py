@@ -26,6 +26,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 from . import fetch
+from .home import make_dirs
 
 SCHEMA = "composer-sources/v1"
 BUNDLED = Path(__file__).with_name("sources.json")
@@ -242,8 +243,9 @@ def file_lock(path, wait_s: float = LOCK_WAIT_S, *, lock_file=None):
     `composer up` process, `composer sources add`, setup) takes it for the whole read, check, merge and write; the lens
     store uses the same lock for its own folder."""
     lock_path = Path(lock_file) if lock_file is not None else Path(str(path) + ".lock")
-    lock_path.parent.mkdir(parents=True, exist_ok=True)
-    handle = open(lock_path, "a+b")
+    make_dirs(lock_path.parent)
+    # 0600 explicitly (a default ACL above would make open()'s 0666 group-writable), never through a link
+    handle = os.fdopen(os.open(lock_path, os.O_RDWR | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0), 0o600), "r+b")
     deadline = time.monotonic() + wait_s
     try:
         while True:
@@ -301,7 +303,7 @@ def write_document(path, doc: dict) -> None:
 def add_to_file(path, entry: Source) -> None:
     """Add (or replace) one entry in your own sources file, creating it if needed (under the file's lock)."""
     p = Path(path)
-    p.parent.mkdir(parents=True, exist_ok=True)
+    make_dirs(p.parent)
     with file_lock(p):
         if p.exists():
             doc = json.loads(p.read_text(encoding="utf-8"))

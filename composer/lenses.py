@@ -11,6 +11,8 @@ import threading
 from dataclasses import dataclass
 from pathlib import Path
 
+from .home import make_dirs
+
 READING_LEVELS = ("plain", "standard", "technical")
 LOCK_NAME = ".lens-store.lock"
 REGISTERS = ("earnest", "sceptical", "deadpan")
@@ -149,7 +151,7 @@ class LensStore:
         folder shared by every process that writes it (two `composer serve` on one folder, `composer up`), so an
         edit's check that it names the newest revision cannot be overtaken by another process's edit."""
         from . import registry
-        self.root.mkdir(parents=True, exist_ok=True)
+        make_dirs(self.root)
         with self._lock:
             try:
                 with registry.file_lock(self.root / LOCK_NAME, lock_file=self.root / LOCK_NAME):
@@ -161,7 +163,7 @@ class LensStore:
         encoded = json.dumps(recipe, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
         revision = hashlib.sha256(encoded).hexdigest()
         target = self.root / revision
-        target.mkdir(parents=True, exist_ok=True)
+        make_dirs(target)
         path = target / "recipe.json"
         if not path.exists():  # a temporary file of its own, flushed, then renamed into place
             fd, temporary = tempfile.mkstemp(prefix=".recipe.", suffix=".tmp", dir=str(target))

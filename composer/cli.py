@@ -239,7 +239,7 @@ def cmd_up(args) -> int:
         return 2
     native = home if (home / "app").is_dir() else None
     lifecycle.admit(native, data)  # read-only trust admission, before the lock, recovery or any write
-    data.mkdir(parents=True, exist_ok=True)
+    H.make_dirs(data)
     lock = lifecycle.hold_run_lock(data)  # noqa: F841  (held for as long as the server runs, taken before recovery)
     lifecycle.recover(native, data)
     S.generation_dir(data)

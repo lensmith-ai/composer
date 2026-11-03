@@ -13,6 +13,7 @@ import time
 import uuid
 
 from . import shelf_index
+from .home import make_dirs
 
 
 DATA_SCHEMA = "1"  # the data schema this code reads and writes; a newer generation is refused at start
@@ -173,7 +174,7 @@ class JobStore:
             target = self.generation_path(self.current_generation()) / "trash" / job_id
             if target.exists():
                 raise StoreError("brief already in trash")
-            target.parent.mkdir(parents=True, exist_ok=True)
+            make_dirs(target.parent)
             os.replace(source, target)
             self._atomic_json(target / "trash.json", {"job": job_id, "deleted_at": self._now(), "reason": "user-delete"})
             self._project()
@@ -187,7 +188,7 @@ class JobStore:
                 raise StoreError("no such trashed brief")
             if target.exists():
                 raise StoreError("brief already restored")
-            target.parent.mkdir(parents=True, exist_ok=True)
+            make_dirs(target.parent)
             os.replace(source, target)
             (target / "trash.json").unlink(missing_ok=True)
             self._project()
@@ -218,7 +219,7 @@ class JobStore:
         for job_id in trash:
             source = self.job_path(job_id)
             target = self.generation_path(self.current_generation()) / "trash" / job_id
-            target.parent.mkdir(parents=True, exist_ok=True)
+            make_dirs(target.parent)
             os.replace(source, target)
             self._atomic_json(target / "trash.json", {"job": job_id, "deleted_at": self._now(), "reason": "retention"})
             result["trashed"].append(job_id)
@@ -278,7 +279,7 @@ class JobStore:
         if not pair:
             raise StoreError("no rollback pair")
         export = self.recovery / "exports" / ("rollback-" + uuid.uuid4().hex)
-        export.mkdir(parents=True)
+        make_dirs(export, exist_ok=False)
         exported = []
         for path in sorted((self.generation_path(source) / "jobs").glob("job-*")):
             shutil.copytree(path, export / path.name)
@@ -423,9 +424,10 @@ class JobStore:
 
     def _initialize_or_recover(self) -> None:
         if not (self.root / "current").exists():
-            (self.generations / "g1" / "jobs").mkdir(parents=True)
-            (self.recovery / "journal").mkdir(parents=True)
-            (self.recovery / "exports").mkdir(parents=True)
+            # every folder made 0700 explicitly: a default ACL above would otherwise make them group-writable
+            make_dirs(self.generations / "g1" / "jobs")
+            make_dirs(self.recovery / "journal")
+            make_dirs(self.recovery / "exports")
             self._atomic_text(self.generation_path("g1") / "VERSION", "1\n")
             self._atomic_json(self.pairs, [])
             self._replace_current("g1")
@@ -486,15 +488,16 @@ class JobStore:
         return json.loads((self.job_path(job_id) / "job.json").read_text(encoding="utf-8"))
 
     def _write_job(self, job: dict) -> None:
-        path = self.job_path(job["job"]) / "job.json"; path.parent.mkdir(parents=True, exist_ok=True); self._atomic_json(path, job)
+        path = self.job_path(job["job"]) / "job.json"; make_dirs(path.parent); self._atomic_json(path, job)
 
     def _checkpoint(self, operation: str, stage: str, crash_after: str | None, **fields) -> None:
         self._journal(operation, stage, **fields)
         if crash_after == stage: raise SimulatedCrash(stage)
 
     def _journal(self, operation: str, stage: str, **fields) -> None:
-        self.journal.parent.mkdir(parents=True, exist_ok=True)
-        with self.journal.open("a", encoding="utf-8") as handle:
+        make_dirs(self.journal.parent)
+        fd = os.open(self.journal, os.O_WRONLY | os.O_APPEND | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0), 0o600)
+        with os.fdopen(fd, "a", encoding="utf-8") as handle:
             handle.write(json.dumps({"operation": operation, "stage": stage, **fields}, sort_keys=True) + "\n"); handle.flush(); os.fsync(handle.fileno())
 
     def _last(self, operation: str) -> dict | None:
@@ -517,7 +520,7 @@ class JobStore:
 
     @staticmethod
     def _atomic_text(path: Path, value: str) -> None:
-        path.parent.mkdir(parents=True, exist_ok=True); tmp = path.with_name("." + path.name + ".tmp")
+        make_dirs(path.parent); tmp = path.with_name("." + path.name + ".tmp")
         tmp.unlink(missing_ok=True)  # a fresh file: an existing one (or a hard link elsewhere) is never truncated
         fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0), 0o600)
         with os.fdopen(fd, "w", encoding="utf-8") as handle: handle.write(value); handle.flush(); os.fsync(handle.fileno())
