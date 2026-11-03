@@ -573,6 +573,18 @@ def setup_narration(q: Asker, plan: dict, base: Path, home: Path, log, *, check=
         return dict(S.DEFAULTS["narration"]), []
 
 
+def admit_data(data: Path) -> None:
+    """The data folder under the trust contract, read-only, before setup writes anything in it: no symbolic link on
+    its path, and it, every folder above it and everything in it belong to you or root and are writable by no one
+    else (lifecycle.admit, the check update and `composer up` make). Without it, another account that can write the
+    folder above --data could plant a link there and choose where setup writes, or which folder it chmods."""
+    from .lifecycle import LifecycleError, admit
+    try:
+        admit(None, data)
+    except LifecycleError as exc:
+        raise SetupError(str(exc)) from None
+
+
 def run(*, home: Path, data: Path | None, answers_file: str | None, assume_yes: bool, reconfigure: list,
         data_only: bool, home_created_by_bootstrap: bool = False, check_only: bool = False, out=print, read=input,
         secret=getpass.getpass, interactive: bool | None = None, detect=N.detect, get=None, check=None,
@@ -601,6 +613,7 @@ def _run(*, home: Path, data: Path | None, answers_file: str | None, assume_yes:
     if data_only:
         data = data or H.data_root(None)
         base = data
+        admit_data(data)
         if data.exists() and any(data.iterdir()) and not (data / "current").exists():
             names = [n for n in os.listdir(data) if n not in ("lost+found",)]
             if names:
@@ -610,6 +623,7 @@ def _run(*, home: Path, data: Path | None, answers_file: str | None, assume_yes:
         state = H.guard(home)
         data = data or home / H.DATA_DIR  # native: inside the app folder unless --data says otherwise
         base = home
+        admit_data(data)
         real_home, real_data = Path(os.path.realpath(home)), Path(os.path.realpath(data))
         if real_data != Path(os.path.realpath(home / H.DATA_DIR)) and (
                 real_data == real_home or real_home in real_data.parents):
@@ -677,8 +691,8 @@ def _run(*, home: Path, data: Path | None, answers_file: str | None, assume_yes:
         finally:
             if at is not None:
                 at.close()
-    data.mkdir(parents=True, exist_ok=True)
-    os.chmod(data, 0o700)
+    admit_data(data)  # again at the write: the answers above may have taken a while
+    H.private_folder(data)  # 0700, set through the folder as opened (a link in its place is refused, not followed)
     S.generation_dir(data)
     from .lifecycle import RUN_LOCK
     (data / RUN_LOCK).touch(mode=0o600, exist_ok=True)  # the lock `composer up` and the lifecycle commands share

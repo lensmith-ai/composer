@@ -59,9 +59,15 @@ def data_root(home: Path | None = None, explicit: str | os.PathLike | None = Non
     """The persistent data root: --data, else COMPOSER_DATA (the container sets /data), else <home>/data."""
     raw = explicit or os.environ.get(DATA_ENV)
     if raw:
-        path = Path(os.path.expanduser(str(raw)))
-        return Path(os.path.normpath(str(path if path.is_absolute() else Path.cwd() / path)))
+        return given_path(raw)
     return (home or resolve_home()) / DATA_DIR
+
+
+def given_path(raw: str | os.PathLike) -> Path:
+    """A folder named on the command line, made absolute and normalised as written: never resolved, so a symbolic
+    link on the way stays visible to the trust check (which refuses it and names the real path)."""
+    path = Path(os.path.expanduser(str(raw)))
+    return Path(os.path.normpath(str(path if path.is_absolute() else Path.cwd() / path)))
 
 
 def runtime_base(home: Path, data: Path) -> Path:
@@ -316,6 +322,51 @@ _DIR_FLAGS = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLL
 CONFINED = (hasattr(os, "O_NOFOLLOW") and hasattr(os, "O_DIRECTORY") and os.open in os.supports_dir_fd
             and os.mkdir in os.supports_dir_fd and os.unlink in os.supports_dir_fd and os.rmdir in os.supports_dir_fd
             and os.rename in os.supports_dir_fd and os.scandir in os.supports_fd)
+
+
+def _set_folder_mode(path: Path, mode: int) -> None:
+    """chmod a folder through the folder itself, opened without following a link (fchmod): a link put in its place
+    is refused, never followed, so the mode of the folder a link names is never changed."""
+    if os.name != "posix" or not hasattr(os, "O_NOFOLLOW") or not hasattr(os, "fchmod"):
+        os.chmod(path, mode)
+        return
+    try:
+        fd = os.open(path, _DIR_FLAGS)
+    except OSError:
+        raise HomeError(f"refused: {path} is a symbolic link or not a folder; Composer sets the mode of its own real "
+                        "folders only, so nothing was changed") from None
+    try:
+        os.fchmod(fd, mode)
+    finally:
+        os.close(fd)
+
+
+def make_dirs(path: Path, *, mode: int = 0o700) -> Path:
+    """`mkdir -p` for Composer's own folders: each folder it makes is set to `mode` (0700) explicitly once it exists,
+    through the folder as opened. mkdir's own mode is narrowed by the umask, but under a default POSIX ACL on the
+    folder above the ACL decides instead (0777 comes out 0775); an explicit mode is the same whatever the umask or
+    the ACL. Folders that already exist are left as they are."""
+    path = Path(os.path.normpath(str(path)))
+    missing = []
+    probe = path
+    while not os.path.lexists(probe) and probe != probe.parent:
+        missing.append(probe)
+        probe = probe.parent
+    for folder in reversed(missing):
+        try:
+            os.mkdir(folder, mode)
+        except FileExistsError:
+            continue  # made meanwhile (only this account can write here): left as it is
+        _set_folder_mode(folder, mode)
+    return path
+
+
+def private_folder(path: Path) -> Path:
+    """The data folder: made (with any missing folder above it) and set to 0700 through the folder as opened, never
+    by path, so a link put in its place cannot make Composer change the mode of the folder that link names."""
+    path = make_dirs(path)
+    _set_folder_mode(path, 0o700)
+    return path
 
 
 class Owned:

@@ -180,8 +180,10 @@ def _where(args):
 
 def cmd_setup(args) -> int:
     from . import installer
+    from . import home as H
     home, _ = _where(args)
-    data = Path(args.data).resolve() if args.data else None
+    # as written, made absolute, never resolved: setup checks the path it is given (a link on it is refused)
+    data = H.given_path(args.data) if args.data else None
     import os
     from .providers import test_call
     skip = args.no_test_call or os.environ.get("COMPOSER_NO_TEST_CALL", "").strip() == "1"

@@ -16,7 +16,7 @@ import re
 import stat
 from pathlib import Path
 
-from .home import atomic_write
+from .home import atomic_write, private_folder
 
 CONFIG_SCHEMA = "composer-config/v1"
 SECRETS = "secrets.env"
@@ -52,8 +52,7 @@ def generation_dir(data: Path, *, create: bool = True) -> Path:
         if not create:
             raise SettingsError(f"no Composer data at {data} yet; run `composer setup`")
         from .job_store import JobStore
-        data.mkdir(parents=True, exist_ok=True)
-        os.chmod(data, 0o700)
+        private_folder(data)  # 0700, set through the folder as opened: a link in its place is refused
         (data / "up.lock").touch(mode=0o600, exist_ok=True)  # the run lock (composer.lifecycle.RUN_LOCK)
         JobStore(data, worker=None)
     value = pointer.read_text(encoding="utf-8").strip()
@@ -167,8 +166,7 @@ def write_secret(data: Path, name: str, value: str) -> Path:
     value = value.strip()
     if not value or any(c in value for c in "\r\n\0") or len(value) > 512:
         raise SettingsError("the key is empty or has characters a key cannot have")
-    data.mkdir(parents=True, exist_ok=True)
-    os.chmod(data, 0o700)
+    private_folder(data)
     current = {k: v for k, v in read_secrets(data, strict=True).items() if k != name}  # loose mode: refuse
     current[name] = value
     body = "".join(f"{k}={v}\n" for k, v in sorted(current.items()))
