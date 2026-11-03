@@ -71,7 +71,7 @@ def _open_lock(data: Path, *, create: bool):
     flags = os.O_RDWR | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0) | (os.O_CREAT if create else 0)
     try:
         if H.CONFINED:
-            with H.open_home(data) as folder:
+            with H.open_home(data, "data folder") as folder:
                 fd = os.open(RUN_LOCK, flags, 0o600, dir_fd=folder.fd)
         else:
             fd = os.open(data / RUN_LOCK, flags, 0o600)
@@ -179,12 +179,12 @@ def backup(data: Path, *, include_secrets: bool = False, out_dir: Path | None = 
                                keep=keep, tag=tag)
     try:
         if out_dir is None:  # <data>/backups, opened inside the data folder as opened: a link there is refused
-            with H.open_home(data) as folder:
+            with H.open_home(data, "data folder") as folder:
                 at = folder.child("backups")
         else:
             if not os.path.lexists(out_dir):
                 H.make_dirs(out_dir)  # only a folder made here is set private; yours is left as it is
-            at = H.open_home(out_dir)
+            at = H.open_home(out_dir, "backup folder")  # a refusal names --out, the option you used
     except H.HomeError as exc:
         raise LifecycleError(str(exc)) from None
     with at:
@@ -473,24 +473,25 @@ def _unfinished_restore(data: Path) -> dict | None:
     return last
 
 
-def admit(home: Path | None, data: Path, *, structure: bool = True) -> None:
+def admit(home: Path | None, data: Path, *, structure: bool = True, what: str = "data folder") -> None:
     """Trust admission, read-only, BEFORE the run lock is taken or anything is written, removed or recovered (setup,
     update, rollback, restore, uninstall, backup, doctor, and recovery at `composer up`): the app folder all the way
     down (home.check_owned), the data folder, every folder above it and everything in it (journal included), and the
     folders an unfinished restore record names. A refusal here has changed nothing. structure=False (uninstall)
     checks the app folder with the same trust rule but lets Composer's own folders be links, which uninstall removes
-    as links through the opened folder."""
+    as links through the opened folder. `what` names the data folder in a refusal, with its option ("brief folder"
+    for `composer serve --out`)."""
     try:
         if home is not None:
             if structure:
                 H.check_owned(home)
             else:
                 H.check_install_tree(Path(os.path.normpath(str(home))))
-        H.check_trust(data, "data folder")
+        H.check_trust(data, what)
         try:
-            H.check_tree(data, "data folder")
+            H.check_tree(data, what)
         except H.HomeError as exc:
-            raise H.HomeError(f"{exc}. To fix a data folder made under a permissive umask: chmod -R go-w {data}") \
+            raise H.HomeError(f"{exc}. To fix a {what} made under a permissive umask: chmod -R go-w {data}") \
                 from None
     except H.HomeError as exc:
         raise LifecycleError(str(exc)) from None

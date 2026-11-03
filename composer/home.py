@@ -97,7 +97,8 @@ def now() -> str:
 # without POSIX owners and permission bits (on Windows this check does not run).
 _OTHERS_WRITE = stat.S_IWGRP | stat.S_IWOTH
 # how to name another folder on the command line, for each kind of folder Composer checks
-_OPTION = {"app folder": ("--home", HOME_ENV), "data folder": ("--data", DATA_ENV), "backup folder": ("--out", None)}
+_OPTION = {"app folder": ("--home", HOME_ENV), "data folder": ("--data", DATA_ENV), "backup folder": ("--out", None),
+           "brief folder": ("--out", None)}  # brief folder: `composer serve --out`
 # filesystems with no POSIX owners or permission bits of their own: the mount decides them, and chmod has no effect
 NO_POSIX_MODES = ("vfat", "msdos", "fat", "exfat", "ntfs", "ntfs3", "fuseblk", "cifs", "smb3")
 
@@ -515,17 +516,18 @@ def _checked(fd: int, path: Path) -> Owned:
     return Owned(fd, path)
 
 
-def open_home(home: Path) -> Owned:
-    """The app folder itself, opened without following a link. Everything later is done relative to it."""
+def open_home(home: Path, what: str = "app folder") -> Owned:
+    """The app folder itself (or the folder `what` names: a data or backup folder), opened without following a link.
+    Everything later is done relative to it. A refusal names `what` and its option (--home, --data or --out)."""
     if not CONFINED:
         raise HomeError("refused: this system cannot open folders without following links, which Composer needs "
                         "to write and remove safely in its own folder; nothing was written or removed")
     home = Path(os.path.normpath(str(home)))
-    check_trust(home)
+    check_trust(home, what)
     try:
         fd = os.open(home, _DIR_FLAGS)
     except OSError:
-        raise HomeError(f"refused: {home} is a symbolic link or not a folder; give the real folder") from None
+        raise HomeError(f"refused: {home} is a symbolic link or not a folder; give the {what}'s real path") from None
     return _checked(fd, home)
 
 
@@ -537,7 +539,7 @@ def touch_private(folder: Path, name: str) -> None:
     flags = os.O_WRONLY | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0)
     try:
         if CONFINED:
-            with open_home(folder) as at:
+            with open_home(folder, "data folder") as at:
                 fd = os.open(name, flags, 0o600, dir_fd=at.fd)
         else:
             fd = os.open(Path(folder) / name, flags, 0o600)
