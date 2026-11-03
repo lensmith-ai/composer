@@ -95,8 +95,11 @@ parser for news pages without a feed, a daily brief, and a port. In the app you 
 address (it finds the feeds and you pick one), start from a package of sources, and make and edit your own lenses
 (name, what to look for, register, reading level; each edit is a new revision, and a brief records the one it
 used). `./setup.sh --answers answers.toml` asks nothing. `composer doctor` checks the install one line at a time;
-`composer uninstall` removes what setup made and keeps your briefs unless you add `--delete-data`. Everything,
-including updates, backups and what each command may touch: [docs/setup.md](docs/setup.md).
+`composer uninstall` removes what setup made and keeps your briefs unless you add `--delete-data`. Composer works
+only in folders no other account can change; if setup refuses yours (a home reached through a link, as on Fedora
+Silverblue; a group-writable folder under umask 002; a FAT or exFAT disk), the refusal says what to do, and
+[docs/setup.md](docs/setup.md) lists the common cases. Everything, including updates, backups and what each command
+may touch: [docs/setup.md](docs/setup.md).
 
 ## Bring your own model
 

@@ -141,7 +141,19 @@ install-manifest.json   what was created, and what is reused read-only from else
 ```
 
 Setup refuses, before writing anything, a folder that already holds other files, your home folder itself, a
-symbolic link, or a folder it cannot write to. Every program it starts gets a private environment that points
+symbolic link, or a folder it cannot write to. It also refuses an app folder or data folder that another account
+could change (SECURITY.md, "the trust contract"), and says what to do. The common cases:
+
+- **Your home folder is reached through a link** (Fedora Silverblue and Kinoite: `/home` -> `var/home`; FreeBSD:
+  `/home` -> `usr/home`). The refusal names the real path; pass it: `./setup.sh --home /var/home/you/.lensmith-composer`
+  (or `--data <real path>` for a data folder, or `COMPOSER_HOME` / `COMPOSER_DATA`).
+- **A group-writable folder** above or inside the app folder, common where every account gets umask 002 (a folder
+  you made at 0775, a file copied in at 0664): `chmod -R go-w <folder>`, as the refusal says. Composer's own files
+  never come out that way. This is stricter than OpenSSH's StrictModes as Debian patches it, which accepts a
+  group-writable folder when you are the only member of its group; Composer does not look at group members.
+- **A disk without permission bits** (FAT, exFAT, NTFS: most USB sticks and external disks; on Linux they are often
+  mounted 0777): `chmod` has no effect there. Use a POSIX filesystem (ext4, btrfs, xfs, APFS), or mount the disk with
+  `uid=$(id -u),dmask=077,fmask=177`. Every program it starts gets a private environment that points
 `TMPDIR`, pip's and uv's caches, the XDG folders and Python's bytecode cache inside the app folder and ignores your
 pip settings. It never edits your shell profile, PATH, login items or Homebrew: to run `composer` from anywhere it
 prints the alias line for you to add yourself.

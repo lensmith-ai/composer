@@ -96,30 +96,68 @@ def now() -> str:
 # What is not defended: a process already running as you (it can change your files directly), root, and systems
 # without POSIX owners and permission bits (on Windows this check does not run).
 _OTHERS_WRITE = stat.S_IWGRP | stat.S_IWOTH
+# how to name another folder on the command line, for each kind of folder Composer checks
+_OPTION = {"app folder": ("--home", HOME_ENV), "data folder": ("--data", DATA_ENV), "backup folder": ("--out", None)}
+# filesystems with no POSIX owners or permission bits of their own: the mount decides them, and chmod has no effect
+NO_POSIX_MODES = ("vfat", "msdos", "fat", "exfat", "ntfs", "ntfs3", "fuseblk", "cifs", "smb3")
 
 
-def trust_problem(path, st: os.stat_result, uid: int) -> str | None:
+def _option(what: str) -> str:
+    flag, env = _OPTION.get(what, _OPTION["app folder"])
+    return f"{flag} <a folder of your own>" + (f" (or {env})" if env else "")
+
+
+def filesystem_type(path, mountinfo: str | None = None) -> str | None:
+    """The filesystem type of the mount `path` is on, from /proc/self/mountinfo (Linux); None when unknown. Only
+    reads. `mountinfo` is that file's text, for tests."""
+    if mountinfo is None:
+        try:
+            with open("/proc/self/mountinfo", encoding="utf-8", errors="replace") as handle:
+                mountinfo = handle.read()
+        except OSError:
+            return None
+    real = os.path.realpath(str(path))
+    best, kind = "", None
+    for line in mountinfo.splitlines():
+        fields = line.split(" ")
+        if " - " not in line or len(fields) < 5:
+            continue
+        point = fields[4].replace("\\040", " ").replace("\\011", "\t").replace("\\134", "\\")
+        after = line.split(" - ", 1)[1].split(" ")
+        if (real == point or real.startswith(point.rstrip("/") + "/")) and len(point) >= len(best):
+            best, kind = point, after[0] if after else None
+    return kind
+
+
+def trust_problem(path, st: os.stat_result, uid: int, what: str = "app folder") -> str | None:
     """The rule for one folder or file, from its stat result: why another account could change it, or None. It must
     belong to you (uid) or root, and a folder or file must have no group or other write bit (a link's own bits mean
-    nothing, so only its owner counts). Pure: it only reads `st`."""
+    nothing, so only its owner counts). `what` names the folder being checked ("app folder" or "data folder") in the
+    advice. Pure: it only reads `st` (and, for the advice on a refusal, the mount table)."""
     if st.st_uid not in (uid, 0):
         return (f"{path} belongs to another account (uid {st.st_uid}). Fix: chown $(id -un) {path}, or put the "
-                "app folder somewhere else (the default is ~/.lensmith-composer)")
+                f"{what} somewhere else: {_option(what)}")
     if stat.S_ISLNK(st.st_mode) or not st.st_mode & _OTHERS_WRITE:
         return None
     mode = f"{stat.S_IMODE(st.st_mode):04o}"
     if stat.S_ISDIR(st.st_mode) and st.st_mode & stat.S_ISVTX:
-        return (f"{path} is a folder shared by every account (mode {mode}, like /tmp). Put the app folder under "
-                "your own home instead (the default is ~/.lensmith-composer)")
-    return (f"{path} can be written by other accounts (mode {mode}). Fix: chmod go-w {path}, or put the app "
-            "folder somewhere else (the default is ~/.lensmith-composer)")
+        return (f"{path} is a folder shared by every account (mode {mode}, like /tmp). Put the {what} in a folder "
+                f"of your own instead: {_option(what)}")
+    kind = filesystem_type(path)
+    if kind in NO_POSIX_MODES:
+        return (f"{path} can be written by other accounts (mode {mode}): it is on a {kind} filesystem, which has no "
+                "permission bits of its own, so chmod has no effect there (the mount sets them for every file). Put "
+                f"the {what} on a POSIX filesystem (such as ext4, btrfs, xfs or APFS): {_option(what)}; or mount "
+                "that disk with uid=$(id -u),dmask=077,fmask=177")
+    return (f"{path} can be written by other accounts (mode {mode}). Fix: chmod go-w {path}, or put the {what} "
+            f"somewhere else: {_option(what)}")
 
 
 def _uid() -> int | None:
     return os.getuid() if os.name == "posix" and hasattr(os, "getuid") else None
 
 
-def check_trust(path: Path) -> None:
+def check_trust(path: Path, what: str = "app folder") -> None:
     """Refuse when `path` (or, if it does not exist yet, its nearest existing folder) or any folder above it is owned
     by another account or writable by group or others, or when any of them is a symbolic link. A link is refused
     because the folders it leads through (and the ones its target's own links lead through) are on neither the path
@@ -134,9 +172,12 @@ def check_trust(path: Path) -> None:
         start = start.parent
     for folder in (start, *start.parents):
         if os.path.islink(folder):
-            raise HomeError(f"refused: {folder} is a symbolic link. Give the real path instead "
-                            f"({os.path.realpath(path)}): Composer checks every folder on the path it is given, and "
-                            "the folders a link leads through are not on it")
+            flag, env = _OPTION.get(what, _OPTION["app folder"])
+            real = os.path.realpath(path)
+            also = f" (or {env}={real}" + ("; ./setup.sh takes --home too)" if flag == "--home" else ")") if env else ""
+            raise HomeError(f"refused: {folder} is a symbolic link (to {os.readlink(folder)}). Give the {what}'s real "
+                            f"path instead: {flag} {real}{also}. Composer checks every folder on the path it is given, "
+                            "and the folders a link leads through are not on it")
     real = Path(os.path.realpath(start))
     seen = set()
     for folder in (start, *start.parents, real, *real.parents):
@@ -147,10 +188,11 @@ def check_trust(path: Path) -> None:
             st = os.stat(folder)
         except OSError as exc:
             raise HomeError(f"refused: cannot check {folder} ({exc.strerror or exc})") from None
-        why = trust_problem(folder, st, uid)
+        why = trust_problem(folder, st, uid, what)
         if why:
-            raise HomeError(f"refused: {why}. Composer's folder and every folder above it must belong to you or root "
-                            "and be writable only by you or root, so no other account can change what it runs")
+            raise HomeError(f"refused: {why}. The {what} and every folder above it must belong to you or root and be "
+                            "writable only by you or root, so no other account can change what Composer runs or "
+                            "keeps there")
 
 
 class no_group_write:
@@ -170,7 +212,7 @@ class no_group_write:
         return False
 
 
-def check_entry(path: Path, st: os.stat_result | None = None) -> None:
+def check_entry(path: Path, st: os.stat_result | None = None, what: str = "app folder") -> None:
     """The rule for one folder or file inside Composer's folders (lstat unless `st` is given). Only reads."""
     uid = _uid()
     if uid is None:
@@ -180,14 +222,14 @@ def check_entry(path: Path, st: os.stat_result | None = None) -> None:
             st = os.lstat(path)
         except FileNotFoundError:
             return
-    why = trust_problem(path, st, uid)
+    why = trust_problem(path, st, uid, what)
     if why:
-        raise HomeError(f"refused: {why}. Every folder and file in Composer's folder must belong to you or root and "
-                        "be writable only by you or root, so no other account can change what it writes, runs or "
+        raise HomeError(f"refused: {why}. Every folder and file in the {what} must belong to you or root and be "
+                        "writable only by you or root, so no other account can change what Composer writes, runs or "
                         "reads; nothing was written or removed")
 
 
-def check_tree(root: Path) -> None:
+def check_tree(root: Path, what: str = "app folder") -> None:
     """check_entry for `root` and everything below it, links included but never followed: folders, files and
     links. Only reads. Refuses at the first entry that another account could change."""
     if _uid() is None:
@@ -197,7 +239,7 @@ def check_tree(root: Path) -> None:
         st = os.lstat(root)
     except FileNotFoundError:
         return
-    check_entry(root, st)
+    check_entry(root, st, what)
     if not stat.S_ISDIR(st.st_mode):
         return
     stack = [root]
@@ -210,7 +252,7 @@ def check_tree(root: Path) -> None:
                             "removed") from None
         for entry in entries:
             st = entry.stat(follow_symlinks=False)
-            check_entry(Path(entry.path), st)
+            check_entry(Path(entry.path), st, what)
             if stat.S_ISDIR(st.st_mode):
                 stack.append(Path(entry.path))
 
@@ -558,7 +600,7 @@ def check_install_tree(home: Path) -> bool:
     check_owned it does not ask Composer's own folders to be real folders: uninstall removes a link there as a link,
     through the opened folder. False when the folder does not exist."""
     if os.path.islink(home):
-        raise HomeError(f"refused: {home} is a symbolic link; give the real folder")
+        raise HomeError(f"refused: {home} is a symbolic link; give the real folder: --home {os.path.realpath(home)}")
     check_trust(home)
     if not home.exists():
         return False

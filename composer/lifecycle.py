@@ -170,7 +170,7 @@ def backup(data: Path, *, include_secrets: bool = False, out_dir: Path | None = 
     if out_dir is not None:
         out_dir = H.given_path(out_dir)
         try:
-            H.check_trust(out_dir)  # a folder of yours: the archive may hold your key
+            H.check_trust(out_dir, "backup folder")  # a folder of yours: the archive may hold your key
         except H.HomeError as exc:
             raise LifecycleError(f"{exc}. Pick a folder of your own for --out") from None
     name = f"composer-backup-{_stamp()}{'-' + tag if tag else ''}.tar.gz"
@@ -486,9 +486,9 @@ def admit(home: Path | None, data: Path, *, structure: bool = True) -> None:
                 H.check_owned(home)
             else:
                 H.check_install_tree(Path(os.path.normpath(str(home))))
-        H.check_trust(data)
+        H.check_trust(data, "data folder")
         try:
-            H.check_tree(data)
+            H.check_tree(data, "data folder")
         except H.HomeError as exc:
             raise H.HomeError(f"{exc}. To fix a data folder made under a permissive umask: chmod -R go-w {data}") \
                 from None

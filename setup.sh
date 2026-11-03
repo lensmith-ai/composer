@@ -76,8 +76,14 @@ trust_one() {  # trust_one FOLDER: prints why not, returns 1
   mode=$(printf '%s' "$2" | awk '{print $1}'); owner=$(printf '%s' "$2" | awk '{print $3}')
   if [ "$owner" != "$(id -u)" ] && [ "$owner" != 0 ]; then say "$1 belongs to another account (uid $owner); fix: chown $(id -un) $1"; return 1; fi
   case "$mode" in
-    *[tT]) case "$mode" in ?????w*|????????w*) say "$1 is a folder shared by every account ($mode); put the app folder under your own home instead"; return 1 ;; esac ;;
-    ?????w*|????????w*) say "$1 can be written by other accounts ($mode); fix: chmod go-w $1"; return 1 ;;
+    *[tT]) case "$mode" in ?????w*|????????w*) say "$1 is a folder shared by every account ($mode); put the app folder in a folder of your own instead: ./setup.sh --home DIR"; return 1 ;; esac ;;
+    ?????w*|????????w*)
+      fs=$(stat -f -c %T -- "$1" 2>/dev/null || true)  # GNU stat; elsewhere this prints nothing
+      case "$fs" in
+        msdos|vfat|fat|exfat|fuseblk|ntfs|ntfs3|cifs|smb2|smb3|*0x2011bab0*)
+          say "$1 can be written by other accounts ($mode): it is on a $fs filesystem, which has no permission bits of its own, so chmod has no effect there; put the app folder on a POSIX filesystem (./setup.sh --home DIR), or mount that disk with uid=$(id -u),dmask=077,fmask=177"; return 1 ;;
+      esac
+      say "$1 can be written by other accounts ($mode); fix: chmod go-w $1"; return 1 ;;
   esac
   return 0
 }
@@ -87,7 +93,7 @@ trust_ok() {
   # no symbolic link on the way: the folders a link leads through are on neither path, so they would go unchecked
   p=$d
   while :; do
-    if [ -L "$p" ]; then say "$p is a symbolic link; give the real path instead ($(cd "$d" 2>/dev/null && pwd -P)${H#"$d"})"; return 1; fi
+    if [ -L "$p" ]; then say "$p is a symbolic link; give the real path instead: ./setup.sh --home $(cd "$d" 2>/dev/null && pwd -P)${H#"$d"}"; return 1; fi
     [ "$p" = / ] && break
     p=$(dirname "$p")
   done
@@ -103,7 +109,7 @@ trust_ok() {
   return 0
 }
 check_trust() {
-  why=$(trust_ok) || die "refused: $why. Composer's folder and every folder above it must be writable only by you (or root), so no other account can change what it runs; or put the app folder somewhere else (the default is ~/.lensmith-composer). Nothing was written."
+  why=$(trust_ok) || die "refused: $why. Composer's folder and every folder above it must be writable only by you (or root), so no other account can change what it runs; or put the app folder in a folder of your own: ./setup.sh --home DIR. Nothing was written."
 }
 
 H=${COMPOSER_HOME:-${HOME:-}/.lensmith-composer}
