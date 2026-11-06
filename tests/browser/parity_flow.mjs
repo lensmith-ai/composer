@@ -136,6 +136,29 @@ async function flow(page, server, log) {
     await page.locator('#sourcesGrid .source-tile', { hasText: 'Tidewater notes' }).waitFor({ timeout: 10000 });
   }, log);
 
+  await step(page, 'a blog with no feed: the app offers its article links and saves nothing', async () => {
+    await openDrawerAction(page, 'dSourcesAction');
+    await page.locator('#sourcesPage .source-new').click();
+    const modal = page.locator('#sourceModal');
+    await modal.locator('input[type=url]').fill(server.notes);
+    await modal.locator('button.source-test').click();
+    await modal.locator('.probe-cand').first().waitFor({ timeout: 60000 });
+    const rows = await modal.locator('.probe-cand').allTextContents();
+    if (rows.length !== 1) throw new Error(`expected 1 offer, saw ${rows.length}: ${rows.join(' | ')}`);
+    for (const want of ['3 articles read just now', 'Dredging the channel', 'Counting the herons', '/notes/']) {
+      if (!rows[0].includes(want)) throw new Error(`the offer lacks "${want}": ${rows[0]}`);
+    }
+    if (rows[0].includes('elsewhere')) throw new Error(`the offer lists another site: ${rows[0]}`);
+    const said = await modal.locator('.source-result').textContent();
+    if (!/No feed was found/.test(said) || !/Nothing is saved until you add it/.test(said)) throw new Error(said);
+    await modal.locator('.probe-cand').first().click();
+    if (!(await modal.locator('input[type=text]').inputValue())) throw new Error('no suggested name');
+    await page.click('#sourceClose');
+    if (await page.locator('#sourcesGrid .source-tile', { hasText: 'Harbor Notes' }).count()) {
+      throw new Error('the page-links source was saved before it was added');
+    }
+  }, log);
+
   await step(page, 'make a lens, then edit it', async () => {
     await openDrawerAction(page, 'dLensesAction');
     await page.locator('#lensesGrid .lens-new').click();

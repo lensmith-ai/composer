@@ -19,6 +19,17 @@ marked and listed last; addresses that gave exactly the same items are shown onc
 one you recognise, give it a name, and **Add to my sources**: Composer reads that feed once more, adds it to your
 sources file with a note of when and from which address, and it is in the picker at once, with no restart.
 
+If no feed is found but the page itself could be read, the check says so and offers to read the page's own article
+links instead: an `html-index` source (see "The three kinds of source"). Nothing is saved yet. The offer shows exactly
+what it would read: the host (only that host), the folder (the page's own path, so `https://example.org/blog` allows
+addresses under `/blog/` and nothing else on the site), that it follows at most 10 links from the page and reads the
+first 5 articles for a brief, and the titles of the first articles, read just now through the same reader a brief uses.
+Tap it, give it a name and **Add to my sources**, as with a feed. You get no such offer for the front page of a site
+(its links are not a list of articles; paste the address of the page that lists them), for a pasted `http://` address,
+for an address with a `user:password@` part or an odd path (dots, an encoded slash), or for a page that leads to
+another site. Only links on the same port as the page are followed. The check makes up to 10 more requests and takes up to 30 more seconds for the
+preview, only when no feed was found.
+
 The check uses the same guarded fetch as a brief (below): https only (a pasted `http://` address is tried as
 `https://`; if only plain http answers, the page says so and why: a feed read without encryption can be changed on
 its way, and the claim check would then vouch for the changed text), public addresses only, checked again on the address actually connected to and after every redirect, no

@@ -21,6 +21,14 @@ the address actually connected to and after every redirect, no proxies, at most 
 shares one time limit (TOTAL_S) and makes at most MAX_REQUESTS requests. A plain http:// address is tried as
 https://; when no https feed answers, the check is refused with PLAIN_HTTP, a sentence the page shows, because a
 feed read without encryption can be altered on the way and the claim check would then vouch for the altered text.
+
+When no feed answered at all but the page itself was read, the answer also carries a `page_index` offer: read the
+page's own article links instead (an html-index source, composer.adapters.html_index). The offer is built here, from
+the address alone: the one host of the page, the page's own folder as the only path prefix, and fixed small limits.
+It is shown with the links the reader found and the titles of the first articles it read (through the same reader a
+brief uses, on its own small request and time budget), and nothing is saved until a person confirms it; the server
+rebuilds the entry from the address again when it is confirmed (composer.sources_registry), so a browser can never
+widen it.
 """
 from __future__ import annotations
 
@@ -32,7 +40,7 @@ import urllib.parse
 import xml.etree.ElementTree as ET
 
 from . import adapters, fetch, registry
-from .adapters import rss_or_atom
+from .adapters import html_index, rss_or_atom
 
 URL_MAX_CHARS = 2048
 TOTAL_S = 60  # the whole check, every request included
@@ -53,6 +61,15 @@ _GENERIC_TITLES = {"", "feed", "rss", "rss feed", "atom", "atom feed", "main sit
                    "news", "articles", "posts", "all posts", "untitled"}
 _GENERIC_LEAD = re.compile(r"^(blog|home|news|feed|articles|posts)\s*[-–—|:·]\s+", re.I)
 PAGE_SCAN_CHARS = 512 * 1024  # the part of a page searched for feed links
+
+# The html-index offer: how much it may read, and how long the preview of it may take (on top of the feed check).
+INDEX_MAX_CANDIDATES = 10  # links on the page that may be followed
+INDEX_MAX_ITEMS = 5  # articles one brief reads
+INDEX_PREVIEW_S = 30
+INDEX_NO_ROOT = ("This is the front page of the site, so its links are not a list of articles. Paste the address "
+                 "of the page that lists them, such as https://example.com/blog.")
+_SEGMENT = re.compile(r"[A-Za-z0-9._~!$&'()*+,;=:@%-]+")
+_ENCODED_DOT_OR_SLASH = re.compile(r"%(2e|2f|5c|00)", re.I)
 
 
 class DiscoveryError(ValueError):
@@ -226,6 +243,83 @@ def _try_feed(url: str, origin: str, advertised: str, get: _Budget) -> dict:
     return row
 
 
+def index_entry(address: object) -> dict:
+    """The raw html-index registry entry for reading the article links on one page, built from its address alone.
+
+    The browser never supplies any part of the scope: the allowed host is the page's own host, the only allowed path
+    prefix is the page's own folder ("/blog" and "/blog/" both give "/blog/"; a file name such as /blog/index.html
+    gives its folder), and the limits are fixed. A DiscoveryError, written for a person, says why an address cannot be
+    used: not https, a user:password part, an address on this machine or a private network, a port that is not a
+    number, a path with dot segments, encoded slashes or odd characters, or the front page of a site (its links are
+    not a list of articles, and a prefix of "/" would allow the whole host)."""
+    try:
+        value = registry.public_https(address, "that address")
+    except registry.RegistryError as exc:
+        raise DiscoveryError(str(exc)) from None
+    if len(value) > URL_MAX_CHARS:
+        raise DiscoveryError(f"that address is longer than {URL_MAX_CHARS} characters")
+    parts = urllib.parse.urlsplit(value)
+    try:
+        parts.port
+    except ValueError:
+        raise DiscoveryError("that address has a port number that is not valid") from None
+    host = (parts.hostname or "").lower()
+    segments = parts.path.split("/")[1:] if parts.path.startswith("/") else []
+    ends_in_slash = bool(segments) and segments[-1] == ""
+    if ends_in_slash:
+        segments.pop()
+    for segment in segments:
+        if (not segment or segment in (".", "..") or not _SEGMENT.fullmatch(segment)
+                or _ENCODED_DOT_OR_SLASH.search(segment)):
+            raise DiscoveryError("the path of that address has a part Composer will not use as a folder to read "
+                                 "(an empty part, dots, an encoded slash or an unusual character)")
+    if segments and not ends_in_slash and "." in segments[-1]:
+        segments.pop()  # the address of a file (index.html): its folder is the scope
+    if not segments:
+        raise DiscoveryError(INDEX_NO_ROOT)
+    page = urllib.parse.urlunsplit((parts.scheme, parts.netloc, parts.path, parts.query, ""))
+    return {"id": "candidate", "label": "candidate", "kind": "html-index", "url": page, "max_items": INDEX_MAX_ITEMS,
+            "discovery": {"allowed_hosts": [host], "allowed_path_prefixes": ["/" + "/".join(segments) + "/"],
+                          "max_candidates": INDEX_MAX_CANDIDATES}}
+
+
+def _page_index_offer(url: str, page, get, clock) -> dict:
+    """What reading this page's own article links would do, shown before anything is saved. Reads the first articles
+    through the same reader a brief uses, with its own small request and time budget (the page is not fetched again)."""
+    offer = {"offered": False, "reason": "", "url": url, "allowed_host": "", "allowed_path_prefix": "",
+             "max_candidates": INDEX_MAX_CANDIDATES, "max_items": INDEX_MAX_ITEMS, "links": [], "ok": False,
+             "items": 0, "articles": [], "suggested_label": "", "refusal": ""}
+    if page is None or page.status != 200:
+        offer["reason"] = "the page itself could not be read, so there are no article links to follow"
+        return offer
+    try:
+        raw = index_entry(url)
+        source = registry.parse_entry(raw)
+    except (DiscoveryError, registry.RegistryError) as exc:
+        offer["reason"] = str(exc)
+        return offer
+    host, prefix = raw["discovery"]["allowed_hosts"][0], raw["discovery"]["allowed_path_prefixes"][0]
+    offer.update(allowed_host=host, allowed_path_prefix=prefix)
+    landed = (urllib.parse.urlsplit(page.url or url).hostname or "").lower()
+    if landed != host:
+        offer["reason"] = f"this address leads to another site ({landed[:100]}); paste that address instead"
+        return offer
+    markup = page.body.decode("utf-8", "replace")
+    found = html_index.links(markup, url, source)
+    if not found:
+        offer["reason"] = f"no links to articles were found on this page: no link to {host} under {prefix}"
+        return offer
+    offer.update(offered=True, links=found, suggested_label=suggest_label("", html_index.extract(markup)[0], url))
+    preview = _Budget(get, INDEX_PREVIEW_S, INDEX_MAX_CANDIDATES, clock)
+    preview.seen[source.url] = page
+    items, receipt = adapters.fetch(source, preview)
+    if receipt.get("status") != "ok" or not items:
+        offer["refusal"] = str(receipt.get("error") or "the articles could not be read")[:300]
+        return offer
+    offer.update(ok=True, items=len(items), articles=[{"title": item["title"], "url": item["url"]} for item in items])
+    return offer
+
+
 def discover(address: object, *, get=fetch.http_get, total_s: float = TOTAL_S,
              max_requests: int = MAX_REQUESTS, clock=time.monotonic) -> dict:
     """{"input", "checked", "note", "page": {"fetched", "refusal"}, "candidates": [...], "selected": None, "rule"}.
@@ -237,12 +331,13 @@ def discover(address: object, *, get=fetch.http_get, total_s: float = TOTAL_S,
     try:
         budget = _Budget(get, total_s, max_requests, clock)
         result = {"input": address.strip(), "checked": url, "note": note,
-                  "page": {"fetched": False, "refusal": ""}, "candidates": [], "selected": None, "rule": RULE}
+                  "page": {"fetched": False, "refusal": ""}, "candidates": [], "selected": None, "rule": RULE,
+                  "page_index": {"offered": False, "reason": "a feed was found"}}
         rows = []
         first = _try_feed(url, "as-pasted", "", budget)
         if first["ok"]:
             rows.append(first)
-        body, page_url = "", url
+        body, page_url, page = "", url, None
         try:
             page = budget(url, adapters.common.TIMEOUT_S)
             if page.status == 200:
@@ -280,6 +375,9 @@ def discover(address: object, *, get=fetch.http_get, total_s: float = TOTAL_S,
         if note and not any(r["ok"] for r in rows):
             # a pasted http:// address with no https feed behind it: say why in words the page shows
             raise DiscoveryError(PLAIN_HTTP)
+        if not any(r["ok"] for r in rows):
+            # no feed at all: offer the page's own article links (never when a feed answered, never for pasted http)
+            result["page_index"] = _page_index_offer(url, page, get, clock)
         if budget.spent and not any(r["ok"] for r in rows):
             result["page"]["refusal"] = result["page"]["refusal"] or "the check ran out of time or requests"
         return result

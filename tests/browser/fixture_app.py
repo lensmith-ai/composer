@@ -53,6 +53,18 @@ SITE = {
         "application/rss+xml"),
     "/blog/comments/feed/": (rss("Comments", [("Comment on the gauges by a reader", "Nice work.")]),
                              "application/rss+xml"),
+    # a blog with no feed at all: the page links its posts (relative, beside navigation), so the app offers to read them
+    "/notes": (b'<!doctype html><html><head><title>Harbor Notes</title></head><body>'
+               b'<a href="./">Home</a><a href="./about">About</a>'
+               b'<a href="./notes/dredging-the-channel">Dredging the channel</a>'
+               b'<a href="./notes/counting-the-herons">Counting the herons</a>'
+               b'<a href="./notes/a-new-tide-table">A new tide table</a>'
+               b'<a href="https://example.org/notes/elsewhere">Elsewhere</a></body></html>', "text/html"),
+    **{f"/notes/{slug}": (f"<!doctype html><html><head><title>{title}</title>"
+                          f'<meta name="description" content="A made-up note for a test."></head>'
+                          f"<body><h1>{title}</h1></body></html>".encode(), "text/html")
+       for slug, title in (("dredging-the-channel", "Dredging the channel"),
+                           ("counting-the-herons", "Counting the herons"), ("a-new-tide-table", "A new tide table"))},
     "/lab-a/feed.xml": (rss("Lab A", [
         ("Lab A releases a small open model for phones", "The model runs on a phone with no network."),
         ("Lab A publishes its evaluation notes", "The notes list every test the model was given.")]),
@@ -176,7 +188,7 @@ if __name__ == "__main__":
                      lens_store=lenses.LensStore(WORK / "lenses"))
     quiet_handler = type("Quiet", (server.handler_for(app),), {"log_message": lambda *a: None})
     httpd = server.ThreadingHTTPServer(("127.0.0.1", 0), quiet_handler)
-    print(json.dumps({"app": f"http://127.0.0.1:{httpd.server_address[1]}/", "blog": f"{base}/blog",
+    print(json.dumps({"app": f"http://127.0.0.1:{httpd.server_address[1]}/", "blog": f"{base}/blog", "notes": f"{base}/notes",
                       "work": str(WORK)}), flush=True)
     try:
         httpd.serve_forever()

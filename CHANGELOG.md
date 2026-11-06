@@ -35,6 +35,12 @@ The full app, on your computer or your own server. In plain words:
   written, and the lens library counts the briefs made with each lens, all from a shelf index (`/data/index.json`)
   that lists titles, times, sources, lens ids and counts, never keys or file paths. Save and Delete reach the server,
   and a brief opens from its own link (`/app/?job=<id>`).
+- In the app: when no feed is found at a pasted address but the page itself can be read, "Add a source" offers to
+  read the page's article links instead (an `html-index` source). It shows what it would read before anything is
+  saved: the host, the folder (for https://example.com/blog, only addresses under `/blog/` on example.com), at most
+  10 links followed and 5 articles in a brief, and the titles of the first articles, read just now. Nothing is saved
+  until you name it and press add. The front page of a site, an `http://` address, an address with a
+  `user:password@` part, and a page that leads to another site get no offer.
 - An optional article parser (trafilatura) for news pages that have no feed, installed from a hash-locked file.
 - Optional narration: a Listen button that reads the brief's own spoken script aloud with Kokoro, made on your
   computer after the text is final. A Kokoro you already have is reused, read-only, after a check. If anything
@@ -114,6 +120,10 @@ The full app, on your computer or your own server. In plain words:
   exempt (see SECURITY.md).
 - The release workflow pushes the container image only under a candidate tag and gives it the version tag only
   after the tests, the build, the claim-sealed release note and the image's own attestations have all passed.
+- An `html-index` source now follows a link only if it is on the same port as its index page (before, a
+  link to the same host on another port was followed) and its path has no dot segments, no encoded dot, slash or
+  backslash and no space or control character. The scope the app offers for a page with no feed is built on the
+  server from the address alone (the page's own host and folder, fixed limits), never from what the browser sends.
 
 ## [0.1.0] - 2026-11-01
 

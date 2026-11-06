@@ -124,7 +124,12 @@ What Composer does to stay safe, and where its limits are:
   arrives (name lookup, connecting, handshake, headers or body).
   Feeds that declare XML entities are refused, in any encoding. Markup is read with scans that
   take time in proportion to its size, so a page full of unclosed tags cannot stall a brief. An
-  `html-index` source only follows links on the hosts and paths you list.
+  `html-index` source only follows links on the hosts and paths you list, on the same port as
+  the page, with no dot segments, encoded slashes or control characters in the path. When the app finds no
+  feed at a pasted address it can offer an `html-index` source for the page: the server builds it
+  from the address alone (that one host, the page's own folder as the only prefix, 10 links and 5
+  articles at most, never the front page), shows the links and article titles it read, and saves
+  nothing until you confirm; the browser's copy of the offer is not used for the scope.
 - **Output.** The brief file and the page keep the brief's own words, the cited titles and links,
   the verdicts and SHA-256 digests. They do not store the articles' text (a sentence may quote a
   few words, as any summary does). `check.json` also holds the judge's one-line reasons, which

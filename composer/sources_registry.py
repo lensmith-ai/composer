@@ -371,22 +371,36 @@ class SourceService:
             url = registry.public_https(url, "that address")
         except registry.RegistryError as exc:
             raise SourceServiceError(str(exc)) from None
+        # A page whose own article links are read (no feed): the browser only says so; the host, the path prefix and
+        # the limits are built here from the address, exactly as the check offered them, never taken from the browser.
+        page_links, raw = candidate.get("kind") == "html-index", None
+        if page_links:
+            try:
+                raw = discovery.index_entry(url)
+            except discovery.DiscoveryError as exc:
+                raise SourceServiceError(str(exc)) from None
+            url = raw["url"]
         with self._lock:
             current = self.snapshot().entries()
         for existing in current:
             if existing.url == url:
-                raise SourceServiceError(f"that feed is already here as \u201c{existing.label}\u201d")
+                raise SourceServiceError(f"that {'page' if page_links else 'feed'} is already here as "
+                                         f"\u201c{existing.label}\u201d")
             if existing.label.lower() == label.lower():
                 raise SourceServiceError(f"a source called \u201c{label}\u201d already exists; pick another name")
-        entry = registry.parse_entry({"id": suggest_id(label, {e.id for e in current}), "label": label,
-                                      "kind": "rss-or-atom", "url": url, "max_items": 5})
+        base = {**raw, "id": suggest_id(label, {e.id for e in current}), "label": label} if page_links else {
+            "id": suggest_id(label, {e.id for e in current}), "label": label, "kind": "rss-or-atom", "url": url,
+            "max_items": 5}
+        entry = registry.parse_entry(base)
         checked = self.probe(entry.to_json())
         if checked["receipt"].get("status") != "ok":
             raise SourceServiceError("that address did not give any items when it was read again, so it was not "
                                      "added: " + (checked["receipt"].get("reason") or "no reason given"))
         titles = [h["title"] for h in checked["headlines"]]
         when = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-        note = (f"added from the app on {when} from {pasted[:300] or url}; it then gave {len(titles)} items"
+        reads = (f"; it reads the article links on that page ({raw['discovery']['allowed_hosts'][0]}"
+                 f"{raw['discovery']['allowed_path_prefixes'][0]} only)") if page_links else ""
+        note = (f"added from the app on {when} from {pasted[:300] or url}{reads}; it then gave {len(titles)} items"
                 + (f", newest \u201c{titles[0][:60]}\u201d" if titles else ""))
         entry = registry.parse_entry({**entry.to_json(), "note": note})
         with self._lock:

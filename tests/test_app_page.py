@@ -118,6 +118,17 @@ class AppFilesTests(unittest.TestCase):
         self.assertIn("'X-Composer-CSRF': 'same-origin'", boot)  # the engine's anti-forgery header
         self.assertIn("'Content-Type': 'application/json'", boot)
 
+    def test_the_page_links_offer_sends_only_the_kind_and_the_address_and_sets_text_not_markup(self):
+        js = text("app.js")
+        start = js.index("function showPageLinks(o){")
+        end = js.index("check.onclick=function()", start)
+        offer = js[start:end]
+        self.assertIn('picked={kind:"html-index",url:o.url}', offer)
+        self.assertEqual(offer.count("picked="), 1)  # the only thing a pick records is the kind and the address
+        self.assertNotIn("innerHTML", offer)
+        self.assertNotIn("href", offer)  # addresses are shown as text, never made links
+        self.assertIn("Nothing is saved until you add it.", offer)
+
     def test_escape_helpers_cover_quotes(self):
         js = text("app.js")
         self.assertIn('.replace(/"/g,"&quot;").replace(/\'/g,"&#39;")', js)

@@ -3462,13 +3462,31 @@ window.__buildLoom=buildLoom;
     var add=document.createElement("button");add.type="button";add.className="source-add";add.textContent="Add to my sources";nameWrap.appendChild(add);
     var picked=null;
     function post(path,body){return fetch(path,{method:"POST",credentials:"same-origin",headers:cwHeaders(),body:JSON.stringify(body)}).then(function(res){return res.json().then(function(doc){return {ok:res.ok,doc:doc};}).catch(function(){return {ok:false,doc:{error:"the engine sent an answer this page could not read"}};});});}
+    function showPageLinks(o){
+      var scope=o.allowed_host+o.allowed_path_prefix;
+      result.textContent="No feed was found at that address. Composer can read the article links on this page instead. It would read only addresses on "+scope+" (https only), "+o.max_items+" articles at most in each brief. Nothing is saved until you add it.";
+      var b=document.createElement("button");b.type="button";b.className="probe-cand";
+      var t=document.createElement("span");t.className="pc-title";t.textContent=o.suggested_label||o.allowed_host;b.appendChild(t);
+      var sub=document.createElement("span");sub.className="pc-sub";
+      sub.textContent=(o.ok?o.items+" article"+(o.items===1?"":"s")+" read just now · ":"")+(o.links||[]).length+" article link"+((o.links||[]).length===1?"":"s")+" found · reads the links on this page · "+o.url;b.appendChild(sub);
+      (o.articles||[]).forEach(function(a){var li=document.createElement("span");li.className="pc-head";li.textContent=a.title+" — "+a.url;b.appendChild(li);});
+      var fl=document.createElement("span");fl.className="pc-flag";fl.textContent="reads only "+scope+" · the page and up to "+o.max_candidates+" of its links are looked at, the first "+o.max_items+" that give an article are used";b.appendChild(fl);
+      if(!o.ok){b.disabled=true;var r=document.createElement("span");r.className="pc-refusal";r.textContent=o.refusal||"the articles could not be read";b.appendChild(r);result.classList.add("bad");}
+      else b.onclick=function(){picked={kind:"html-index",url:o.url};Array.prototype.forEach.call(cands.children,function(el){el.classList.remove("sel");});b.classList.add("sel");
+        if(!name.value.trim())name.value=(o.suggested_label||o.allowed_host).slice(0,48);
+        nameWrap.hidden=false;};
+      cands.appendChild(b);
+    }
     check.onclick=function(){var target=url.value.trim();picked=null;cands.innerHTML="";nameWrap.hidden=true;result.classList.remove("bad");
       if(!target){result.textContent="Paste an address first.";result.classList.add("bad");return;}
       check.disabled=true;check.textContent="Checking…";result.textContent="Asking the engine to fetch it once…";
       post("/source/probe",{url:target}).then(function(got){
         if(!got.ok){result.textContent=got.doc.error||"The check failed.";result.classList.add("bad");return;}
         var rows=(got.doc.candidates||[]);var usable=rows.filter(function(c){return c.ok;});
+        var offer=got.doc.page_index||null;
+        if(!usable.length&&offer&&offer.offered){showPageLinks(offer);return;}
         if(!usable.length){var why=rows.length?(rows[0].refusal||rows[0].error||"none of the addresses answered as a feed"):"no feed was found at that address";
+          if(offer&&offer.reason)why+=" · "+offer.reason;
           result.textContent="Checked — "+why;result.classList.add("bad");return;}
         result.textContent=usable.length===1?"One feed found. Tap it to continue.":usable.length+" feeds found. Read the recent headlines and tap the one you recognise.";
         rows.forEach(function(c){var b=document.createElement("button");b.type="button";b.className="probe-cand";

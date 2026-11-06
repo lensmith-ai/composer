@@ -13,6 +13,7 @@ The page text is only sent to the model for this brief. It is never written to d
 from __future__ import annotations
 
 import html
+import re
 from urllib.parse import urljoin, urlsplit, urlunsplit
 
 from ..sanitize import clean_text, clean_url
@@ -126,6 +127,9 @@ def _drop_blocks(markup: str) -> str:
     return "".join(out)
 
 
+_UNSAFE_PATH = re.compile(r"(?:^|/)\.{1,2}(?:/|$)|%(?:2e|2f|5c|00)|[\\\x00-\x20\x7f]", re.I)
+
+
 def canonical(url: str) -> str | None:
     p = urlsplit(url)
     if p.scheme != "https" or not p.hostname or p.username or p.password:
@@ -142,6 +146,15 @@ def eligible(url: str, source) -> str | None:
     d = source.discovery
     if p.hostname not in d["allowed_hosts"]:
         return None
+    try:
+        port = p.port or 443
+        index_port = urlsplit(source.url).port or 443
+    except ValueError:
+        return None
+    if port != index_port:
+        return None  # the same host on another port is another service, not the site that was allowed
+    if _UNSAFE_PATH.search(p.path):
+        return None  # a path that a server may read as a different folder than the one that was checked
     if not any(p.path.startswith(prefix) for prefix in d["allowed_path_prefixes"]):
         return None
     return url
