@@ -125,8 +125,9 @@ What Composer does to stay safe, and where its limits are:
   Feeds that declare XML entities are refused, in any encoding. Markup is read with scans that
   take time in proportion to its size, so a page full of unclosed tags cannot stall a brief. An
   `html-index` source only follows links on the hosts and paths you list, on the same port as
-  the page, with no dot segments, `;`, encoded slashes or control characters in the path, and an article that
-  leads to another host, port or folder is not read. When the app finds no
+  the page, with no dot segments, `;`, encoded slashes or control characters in the path, and a redirect of an
+  article to another host, port or folder is refused before anything is requested from it (the index page may only
+  move within its own host and port); each redirect hop counts as a request against the check's request limits. When the app finds no
   feed at a pasted address it can offer an `html-index` source for the page: the server builds it
   from the address alone (that one host, the page's own folder as the only prefix, 10 links and 5
   articles at most, never the front page), shows the links and article titles it read, and saves

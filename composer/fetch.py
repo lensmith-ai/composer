@@ -22,6 +22,7 @@ What a fetch will not do:
 """
 from __future__ import annotations
 
+import contextlib
 import http.client
 import ipaddress
 import os
@@ -233,12 +234,28 @@ class _GuardedHTTPSHandler(urllib.request.HTTPSHandler):
         return self.do_open(_GuardedHTTPSConnection, req, context=self._context)
 
 
+@contextlib.contextmanager
+def redirect_rules(rule):
+    """For fetches made by this thread inside the block: `rule(new_address)` is called for every redirect, BEFORE
+    anything is requested from the new address, and may raise FetchError to refuse it. Rules stack (the block's rule
+    runs after those of any enclosing block). A caller uses this to hold a fetch to a scope it chose, or to count each
+    hop as a request of its own; a `get` that never reaches http_get (a test's table) is not affected."""
+    outer = getattr(_local, "redirect_rules", ())
+    _local.redirect_rules = outer + (rule,)
+    try:
+        yield
+    finally:
+        _local.redirect_rules = outer
+
+
 class _HttpsOnlyRedirects(urllib.request.HTTPRedirectHandler):
     max_redirections = MAX_REDIRECTS
 
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         if urllib.parse.urlsplit(newurl).scheme != "https":
             raise FetchError(f"refused a redirect to a non-https address ({code})")
+        for rule in getattr(_local, "redirect_rules", ()):
+            rule(newurl)
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 

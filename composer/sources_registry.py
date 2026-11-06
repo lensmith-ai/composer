@@ -277,10 +277,18 @@ class SourceService:
             if spent["bytes"] >= PROBE_MAX_BYTES:
                 raise fetch.FetchError(f"the source probe read its {PROBE_MAX_BYTES // (1024 * 1024)} MB")
             spent["requests"] += 1
-            if self.get is fetch.http_get:
-                got = self.get(url, min(timeout, remaining), total_s=remaining)
-            else:
-                got = self.get(url, min(timeout, remaining))
+
+            def hop(_target: str) -> None:  # every redirect hop is a request of its own
+                if time.monotonic() >= deadline:
+                    raise fetch.FetchTimeout("the source probe ran out of time")
+                if spent["requests"] >= PROBE_MAX_REQUESTS:
+                    raise fetch.FetchError(f"the source probe made its {PROBE_MAX_REQUESTS} requests")
+                spent["requests"] += 1
+            with fetch.redirect_rules(hop):
+                if self.get is fetch.http_get:
+                    got = self.get(url, min(timeout, remaining), total_s=remaining)
+                else:
+                    got = self.get(url, min(timeout, remaining))
             spent["bytes"] += len(getattr(got, "body", b"") or b"")
             return got
 

@@ -122,8 +122,10 @@ The full app, on your computer or your own server. In plain words:
   after the tests, the build, the claim-sealed release note and the image's own attestations have all passed.
 - An `html-index` source now follows a link only if it is on the same port as its index page (before, a
   link to the same host on another port was followed) and its path has no dot segments (also `..;`), no `;`, no
-  encoded dot, slash, backslash or `%`, and no space or control character. An article that leads to another host,
-  port or folder than the one allowed is not read, and a link that cannot be read as an address is skipped instead
+  encoded dot, slash, backslash or `%`, and no space or control character. A redirect of an article that leads to another
+  host, port or folder than the one allowed is refused before it is requested (so an escape and a return never touch
+  the other site), and the index page may only move within its own host and port. Every redirect hop counts as a request
+  against the request limit of the address check, the page-links preview and a source probe. A link that cannot be read as an address is skipped instead
   of stopping the page. The scope the app offers for a page with no feed is built on the
   server from the address alone (the page's own host and folder, fixed limits), never from what the browser sends.
 

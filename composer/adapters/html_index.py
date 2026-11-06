@@ -16,6 +16,7 @@ import html
 import re
 from urllib.parse import urljoin, urlsplit, urlunsplit
 
+from .. import fetch as _fetch
 from ..sanitize import clean_text, clean_url
 from .common import DESC_CAP, TIMEOUT_S, TITLE_CAP, new_receipt, strip_html
 
@@ -166,6 +167,38 @@ def eligible(url: str, source) -> str | None:
     return url
 
 
+def _origin(url: str) -> tuple[str, int] | None:
+    p = urlsplit(url)
+    try:
+        port = 443 if p.port is None else p.port
+    except ValueError:
+        return None
+    return (p.hostname or "").lower().rstrip("."), port
+
+
+def _index_redirects(source):
+    """The rule for the index page's own redirects: only to the same host and port (its folder may change)."""
+    home = _origin(source.url)
+
+    def rule(target: str) -> None:
+        if _origin(target) != home:
+            raise _fetch.FetchError("the index page leads to another site; not followed")
+    return rule
+
+
+def _article_redirects(source):
+    """The rule for an article's redirects: every hop must itself be an address this source allows (host, port,
+    folder, safe path), checked before it is requested, so an escape and a return are refused at the escape."""
+    def rule(target: str) -> None:
+        try:
+            ok = eligible(target, source)
+        except ValueError:
+            ok = None
+        if not ok:
+            raise _fetch.FetchError("the article leads outside what this source allows; not followed")
+    return rule
+
+
 def links(markup: str, page_url: str, source) -> list[str]:
     found: list[str] = []
     markup = markup[:MARKUP_CAP * 4]
@@ -221,7 +254,8 @@ def fetch(source, get):
     receipt["fetch_tiers"] = {"native": 0, "trafilatura": 0}
     items: list[dict] = []
     try:
-        page = get(source.url, TIMEOUT_S)
+        with _fetch.redirect_rules(_index_redirects(source)):
+            page = get(source.url, TIMEOUT_S)
         receipt["bytes"] += len(page.body)
         if page.status != 200:
             raise ValueError(f"index page answered HTTP {page.status}")
@@ -232,7 +266,8 @@ def fetch(source, get):
             if len(items) >= source.max_items:
                 break
             try:
-                resp = get(url, TIMEOUT_S)
+                with _fetch.redirect_rules(_article_redirects(source)):
+                    resp = get(url, TIMEOUT_S)
             except TimeoutError:
                 receipt["note"] = "an article timed out; stopped asking this site"
                 break

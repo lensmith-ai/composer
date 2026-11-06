@@ -6,7 +6,9 @@ records every address asked for, so each refusal is shown by what was NOT reques
 The shape of the page is that of a site with no feed and a blog folder: no <link rel="alternate">, every usual feed
 address answers 404, and the blog index links its posts with relative addresses ("./blog/<post>") beside navigation,
 other hosts, plain http, credentials, another port, dot segments and a lookalike folder."""
+import email.message
 import http.client
+import io
 import json
 import tempfile
 import threading
@@ -14,7 +16,9 @@ import unittest
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 
-from composer import adapters, discovery, lenses, registry, server, sources_registry
+import urllib.request
+
+from composer import adapters, discovery, fetch, lenses, registry, server, sources_registry
 from composer.adapters import html_index
 from composer.fetch import Response
 from composer.registry import BUNDLED
@@ -63,6 +67,52 @@ class TableGet:
         if isinstance(value, tuple):
             return Response(value[2] if len(value) > 2 else url, value[0], value[1])
         return Response(url, 200, value)
+
+
+class TableResponse(io.BytesIO):
+    """What a connection answers: status, headers and a body, shaped as urllib's opener expects."""
+
+    def __init__(self, url, code, body=b"", location=""):
+        super().__init__(body)
+        self.url, self.code, self.status, self.msg = url, code, code, "answer"
+        self.headers = email.message.Message()
+        if location:
+            self.headers["Location"] = location
+        self.length = None
+
+    def info(self):
+        return self.headers
+
+    def geturl(self):
+        return self.url
+
+
+class RedirectingNet(urllib.request.BaseHandler):
+    """The real fetch.http_get with its real redirect handler (rules, hop limit), over a table instead of sockets.
+    A table value is bytes (200), (404,) or ("->", target) for a 302. `requests` lists every address that was
+    actually requested, one per connection."""
+    handler_order = 100
+
+    def __init__(self, table):
+        self.table = table
+        self.requests = []
+
+    def https_open(self, req):
+        self.requests.append(req.full_url)
+        value = self.table.get(req.full_url, (404,))
+        if isinstance(value, bytes):
+            return TableResponse(req.full_url, 200, value)
+        if value[0] == "->":
+            return TableResponse(req.full_url, 302, b"", value[1])
+        return TableResponse(req.full_url, value[0], b"gone")
+
+    def get(self, url, timeout):
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), fetch._HttpsOnlyRedirects(), self,
+                                             fetch._NoPlainHTTP())
+        return fetch.http_get(url, timeout, opener=opener)
+
+    def asked(self, fragment):
+        return [u for u in self.requests if fragment in u]
 
 
 def blog_site(**extra):
@@ -354,6 +404,146 @@ class OfferTests(unittest.TestCase):
         offer = discovery.discover("https://ledgerlight.example/blog/../enterprise", get=get)["page_index"]
         self.assertFalse(offer["offered"])
         self.assertFalse(any(url in get.calls for url in POSTS))
+
+
+OLD = "https://ledgerlight.example/blog/old"
+
+
+class RedirectTests(unittest.TestCase):
+    """Every redirect hop is held to the source's scope BEFORE it is requested, and counted as a request."""
+
+    INDEX = ('<html><head><title>Notes</title></head><body>'
+             + "".join(f'<a href="/blog/{n}">{n}</a>' for n in ("go", "port", "folder", "back", "old", "chain")) +
+             "</body></html>").encode()
+    ART = b"<html><head><title>An article</title></head><body></body></html>"
+    NEW = "https://ledgerlight.example/blog/new"
+    OUT = "https://elsewhere.example.net:8443/outside"
+
+    def table(self):
+        b = "https://ledgerlight.example/blog/"
+        return {BLOG: self.INDEX,
+                b + "go": ("->", self.OUT), self.OUT: ("->", b + "final"), b + "final": self.ART,
+                b + "port": ("->", "https://ledgerlight.example:8443/blog/x"),
+                "https://ledgerlight.example:8443/blog/x": self.ART,
+                b + "folder": ("->", "https://ledgerlight.example/enterprise/x"),
+                "https://ledgerlight.example/enterprise/x": self.ART,
+                b + "back": ("->", "https://ledgerlight.example/enterprise/y"),
+                "https://ledgerlight.example/enterprise/y": ("->", b + "final"),
+                b + "old": ("->", self.NEW), self.NEW: self.ART,
+                b + "chain": ("->", "https://ledgerlight.example/blog/%2e%2e/enterprise/z"),
+                "https://ledgerlight.example/blog/%2e%2e/enterprise/z": self.ART}
+
+    def source(self, url=BLOG):
+        return registry.parse_entry({**discovery.index_entry(url), "id": "x", "label": "x"})
+
+    def test_an_article_cannot_leave_its_scope_and_the_forbidden_targets_are_never_requested(self):
+        net = RedirectingNet(self.table())
+        items, receipt = adapters.fetch(self.source(), net.get)
+        self.assertEqual([i["url"] for i in items], [OLD])  # only the in-scope redirect was followed
+        self.assertEqual(receipt["item_errors"], 5)
+        for forbidden in (self.OUT, "https://ledgerlight.example:8443/blog/x", "https://ledgerlight.example/enterprise/x",
+                          "https://ledgerlight.example/enterprise/y", "https://ledgerlight.example/blog/final",
+                          "https://ledgerlight.example/blog/%2e%2e/enterprise/z"):
+            self.assertNotIn(forbidden, net.requests)
+        # the hop was refused after the article itself was asked for, and before anything was sent to the target
+        self.assertIn("https://ledgerlight.example/blog/go", net.requests)
+
+    def test_the_index_page_may_move_within_its_site_but_not_to_another(self):
+        b = "https://ledgerlight.example/"
+        net = RedirectingNet({BLOG: ("->", b + "en/blog"), b + "en/blog": self.INDEX, **{
+            b + "blog/old": ("->", self.NEW), self.NEW: self.ART}})
+        items, receipt = adapters.fetch(self.source(), net.get)
+        self.assertEqual(receipt["status"], "ok")
+        self.assertEqual([i["url"] for i in items], [OLD])
+        net = RedirectingNet({BLOG: ("->", self.OUT), self.OUT: self.INDEX})
+        items, receipt = adapters.fetch(self.source(), net.get)
+        self.assertEqual(items, [])
+        self.assertIn("another site", receipt["error"])
+        self.assertEqual(net.requests, [BLOG])
+        net = RedirectingNet({BLOG: ("->", "https://other.example.net/blog"), "https://other.example.net/blog": self.INDEX})
+        adapters.fetch(self.source(), net.get)
+        self.assertEqual(net.requests, [BLOG])
+
+    def test_the_preview_the_registration_and_a_brief_all_hold_the_same_scope(self):
+        # the preview (through discovery), the registration re-read (SourceService) and a brief (adapters.fetch)
+        for how in ("preview", "register", "brief"):
+            with self.subTest(how=how):
+                net = RedirectingNet(self.table())
+                if how == "preview":
+                    offer = discovery.discover(BLOG, get=net.get)["page_index"]
+                    self.assertEqual([a["url"] for a in offer["articles"]], [OLD])
+                elif how == "register":
+                    with tempfile.TemporaryDirectory() as d:
+                        service = sources_registry.SourceService(Path(d) / "sources.json", bundled=BUNDLED, get=net.get)
+                        service.register_candidate({"candidate": {"kind": "html-index", "url": BLOG},
+                                                    "label": "Notes", "pasted_url": BLOG})
+                else:
+                    adapters.fetch(self.source(), net.get)
+                for forbidden in (self.OUT, "https://ledgerlight.example:8443/blog/x",
+                                  "https://ledgerlight.example/enterprise/x", "https://ledgerlight.example/blog/final"):
+                    self.assertNotIn(forbidden, net.requests)
+
+    def test_every_redirect_hop_counts_against_the_previews_request_budget(self):
+        b = "https://ledgerlight.example/blog/"
+        table = {BLOG: ("<html><head><title>Notes</title></head><body>"
+                        + "".join(f'<a href="/blog/post-{n}">p</a>' for n in range(10)) + "</body></html>").encode()}
+        for n in range(10):  # each post redirects five times inside the folder, then answers 404
+            hops = [f"{b}post-{n}"] + [f"{b}post-{n}-hop{k}" for k in range(1, 6)]
+            for here, there in zip(hops, hops[1:]):
+                table[here] = ("->", there)
+        net = RedirectingNet(table)
+        offer = discovery.discover(BLOG, get=net.get)["page_index"]
+        self.assertTrue(offer["offered"])
+        self.assertFalse(offer["ok"])
+        self.assertLessEqual(len(net.asked("/blog/post-")), discovery.INDEX_PREVIEW_REQUESTS)
+        self.assertEqual(len(net.asked("/blog/post-")), discovery.INDEX_PREVIEW_REQUESTS)  # and the budget was used
+
+    def test_every_hop_counts_for_the_feed_check_and_the_probe_too(self):
+        # discovery: 14 requests in all, hops included
+        table = {"https://ledgerlight.example/blog": b"<html></html>"}
+        for suffix in discovery.SUFFIXES:
+            table["https://ledgerlight.example/blog" + suffix] = ("->", "https://ledgerlight.example/blog/elsewhere")
+        net = RedirectingNet(table)
+        discovery.discover("https://ledgerlight.example/blog", get=net.get)
+        self.assertLessEqual(len(net.requests), discovery.MAX_REQUESTS)
+        # the probe: 24 requests in all, hops included
+        b = "https://ledgerlight.example/blog/"
+        table = {BLOG: ("<html><body>" + "".join(f'<a href="/blog/p{n}">p</a>' for n in range(10)) + "</body></html>").encode()}
+        for n in range(10):
+            hops = [f"{b}p{n}"] + [f"{b}p{n}-h{k}" for k in range(1, 6)]
+            for here, there in zip(hops, hops[1:]):
+                table[here] = ("->", there)
+        net = RedirectingNet(table)
+        with tempfile.TemporaryDirectory() as d:
+            service = sources_registry.SourceService(Path(d) / "s.json", bundled=BUNDLED, get=net.get)
+            service.probe({**discovery.index_entry(BLOG), "id": "x", "label": "x"})
+        self.assertLessEqual(len(net.requests), sources_registry.PROBE_MAX_REQUESTS)
+
+    def test_a_get_that_never_reaches_the_transport_is_unaffected_and_the_after_the_fact_check_remains(self):
+        # a table answer that reports a final address outside the scope (no redirect handler runs): still refused
+        get = blog_site(**{"https://ledgerlight.example/blog/latency-per-decision":
+                           (200, b"<title>A</title>", "https://ledgerlight.example/enterprise/x")})
+        items, receipt = adapters.fetch(registry.parse_entry({**discovery.index_entry(BLOG), "id": "x", "label": "x"}), get)
+        self.assertNotIn("A", [i["title"] for i in items])
+
+    def test_the_rules_are_scoped_to_their_block_and_nest(self):
+        seen = []
+        net = RedirectingNet({BLOG: ("->", "https://ledgerlight.example/a"), "https://ledgerlight.example/a": b"x"})
+        with fetch.redirect_rules(lambda t: seen.append(("outer", t))):
+            with fetch.redirect_rules(lambda t: seen.append(("inner", t))):
+                net.get(BLOG, 5)
+        self.assertEqual(seen, [("outer", "https://ledgerlight.example/a"), ("inner", "https://ledgerlight.example/a")])
+        seen.clear()
+        net.get(BLOG, 5)
+        self.assertEqual(seen, [])
+        refuse = RedirectingNet({BLOG: ("->", "https://ledgerlight.example/a"), "https://ledgerlight.example/a": b"x"})
+
+        def no(target):
+            raise fetch.FetchError("no")
+        with fetch.redirect_rules(no):
+            with self.assertRaises(fetch.FetchError):
+                refuse.get(BLOG, 5)
+        self.assertEqual(refuse.requests, [BLOG])
 
 
 class RegisterTests(unittest.TestCase):

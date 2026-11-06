@@ -209,15 +209,23 @@ class _Budget:
             raise fetch.FetchError("the check has made as many requests as it may")
         self.left -= 1
         try:
-            if self.get is fetch.http_get:
-                got = self.get(url, min(timeout, remaining), total_s=remaining)
-            else:
-                got = self.get(url, min(timeout, remaining))
+            with fetch.redirect_rules(self._hop):  # every redirect hop is a request of its own
+                if self.get is fetch.http_get:
+                    got = self.get(url, min(timeout, remaining), total_s=remaining)
+                else:
+                    got = self.get(url, min(timeout, remaining))
         except Exception as exc:
             self.seen[url] = exc
             raise
         self.seen[url] = got
         return got
+
+    def _hop(self, _target: str) -> None:
+        if self.clock() >= self.deadline:
+            raise fetch.FetchTimeout("the check ran out of time")
+        if self.left <= 0:
+            raise fetch.FetchError("the check has made as many requests as it may")
+        self.left -= 1
 
     @property
     def spent(self) -> bool:
