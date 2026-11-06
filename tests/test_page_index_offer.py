@@ -91,6 +91,15 @@ class IndexEntryTests(unittest.TestCase):
         self.assertEqual(self.scope("https://ledgerlight.example/notes/2026/")[1], ["/notes/2026/"])
         self.assertEqual(self.scope(BLOG + "?page=1#x")[4], BLOG + "?page=1")  # no fragment is kept
 
+    def test_only_a_page_file_name_is_dropped_a_dotted_folder_stays_the_scope(self):
+        self.assertEqual(self.scope("https://ledgerlight.example/docs/api.v2")[1], ["/docs/api.v2/"])
+        self.assertEqual(self.scope("https://ledgerlight.example/blog/2024.11")[1], ["/blog/2024.11/"])
+        for page in ("index.html", "index.htm", "default.aspx", "index.php", "INDEX.HTML"):
+            self.assertEqual(self.scope(f"https://ledgerlight.example/blog/{page}")[1], ["/blog/"], page)
+
+    def test_a_host_spelled_with_a_trailing_dot_is_the_same_host(self):
+        self.assertEqual(self.scope("https://ledgerlight.example./blog")[0], ["ledgerlight.example"])
+
     def test_the_front_page_is_refused_because_a_prefix_of_slash_would_allow_the_whole_host(self):
         for address in ("https://ledgerlight.example", "https://ledgerlight.example/",
                         "https://ledgerlight.example/index.html", "https://ledgerlight.example/?x=1"):
@@ -112,6 +121,7 @@ class IndexEntryTests(unittest.TestCase):
     def test_a_path_that_could_name_a_folder_outside_the_prefix_is_refused(self):
         for path in ("/blog/../enterprise", "/blog/./x", "/blog//x", "/blog/%2e%2e/enterprise", "/blog/%2E%2E/x",
                      "/blog/..%2fenterprise", "/blog/x%2Fy", "/blog/x%5Cy", "/blog/x%00", "/blog\\x",
+                     "/blog/..;/admin", "/blog/x;jsessionid=1", "/blog/%252e%252e/x", "/blog/%u002e%u002e/x",
                      "/blog/café", "/blog/a b"):
             with self.subTest(path=path):
                 with self.assertRaises(discovery.DiscoveryError):
@@ -138,8 +148,7 @@ class EligibleTests(unittest.TestCase):
     def test_same_host_other_port_and_unsafe_paths_are_not_followed(self):
         good = "https://ledgerlight.example/blog/a-post"
         self.assertEqual(self.eligible(good), good)
-        self.assertEqual(self.eligible("https://ledgerlight.example:443/blog/a-post"),
-                         "https://ledgerlight.example:443/blog/a-post")
+        self.assertEqual(self.eligible("https://ledgerlight.example:443/blog/a-post"), good)  # the default port is implied
         for url in ("https://ledgerlight.example:8443/blog/a-post", "https://ledgerlight.example:80/blog/a-post",
                     "https://ledgerlight.example:99999/blog/a-post", "http://ledgerlight.example/blog/a-post",
                     "https://u:p@ledgerlight.example/blog/a-post", "https://other.example/blog/a-post",
@@ -147,9 +156,39 @@ class EligibleTests(unittest.TestCase):
                     "https://ledgerlight.example/blog/../enterprise", "https://ledgerlight.example/blog/%2e%2e/x",
                     "https://ledgerlight.example/blog/%2E%2e/x", "https://ledgerlight.example/blog/a%2fb",
                     "https://ledgerlight.example/blog/a%5cb", "https://ledgerlight.example/blog/a/./b",
-                    "https://ledgerlight.example/blog/a/.."):
+                    "https://ledgerlight.example/blog/a/..", "https://ledgerlight.example/blog/..;/admin",
+                    "https://ledgerlight.example/blog/x/..;/..;/admin", "https://ledgerlight.example/blog/a;b",
+                    "https://ledgerlight.example/blog/%252e%252e/admin", "https://ledgerlight.example/blog/%u002e%u002e/a",
+                    "https://ledgerlight.example/blog/a b", "https://ledgerlight.example/blog/a\\b",
+                    "https://ledgerlight.example/blog/a%00b", "https://ledgerlight.example/blog/a\x01b",
+                    "https://ledgerlight.example/blog/a\x7fb", "https://ledgerlight.example:0/blog/a-post"):
             with self.subTest(url=url):
                 self.assertIsNone(self.eligible(url))
+
+    def test_a_trailing_dot_host_and_the_default_port_are_the_same_site_and_one_link(self):
+        self.assertEqual(self.eligible("https://ledgerlight.example./blog/a"), "https://ledgerlight.example./blog/a")
+        source = registry.parse_entry({**discovery.index_entry(BLOG), "id": "x", "label": "x"})
+        page = ('<a href="/blog/a">A</a><a href="https://ledgerlight.example:443/blog/a">A</a>'
+                '<a href="https://LEDGERLIGHT.example/blog/a">A</a><a href="/blog/b">B</a>')
+        self.assertEqual(html_index.links(page, BLOG, source),
+                         ["https://ledgerlight.example/blog/a", "https://ledgerlight.example/blog/b"])
+
+    def test_a_link_that_cannot_be_read_as_an_address_is_skipped_not_fatal(self):
+        source = registry.parse_entry({**discovery.index_entry(BLOG), "id": "x", "label": "x"})
+        page = ('<a href="//[::1">bad</a><a href="https://[abc/blog/x">bad</a><a href="/blog/ok">ok</a>')
+        self.assertEqual(html_index.links(page, BLOG, source), ["https://ledgerlight.example/blog/ok"])
+
+    def test_an_article_that_leads_to_another_host_port_or_folder_is_not_read(self):
+        source = registry.parse_entry({**discovery.index_entry(BLOG), "id": "x", "label": "x"})
+        a, b, c = (f"https://ledgerlight.example/blog/{n}" for n in "abc")
+        page = f'<a href="{a}">a</a><a href="{b}">b</a><a href="{c}">c</a>'
+        table = {BLOG: page.encode(),
+                 a: (200, b"<title>A</title>", "https://elsewhere.example.net/blog/a"),
+                 b: (200, b"<title>B</title>", "https://ledgerlight.example/enterprise/b"),
+                 c: (200, b"<title>C</title>", "https://ledgerlight.example/blog/c/")}
+        items, receipt = html_index.fetch(source, TableGet(table))
+        self.assertEqual([i["title"] for i in items], ["C"])  # a redirect inside the folder is fine
+        self.assertEqual(receipt["item_errors"], 2)
 
 
 class OfferTests(unittest.TestCase):
@@ -199,6 +238,52 @@ class OfferTests(unittest.TestCase):
         posts = [url for url in get.calls if "/blog/post-" in url]
         self.assertLessEqual(len(posts), discovery.INDEX_MAX_CANDIDATES)
         self.assertLessEqual(len(get.calls), discovery.MAX_REQUESTS + discovery.INDEX_MAX_CANDIDATES)
+
+    def test_the_preview_stops_at_its_own_request_limit_and_its_own_time_limit(self):
+        from unittest import mock
+        get = TableGet({BLOG: fixture("blog-nofeed-index.html"), **{u: fixture(n) for u, n in POSTS.items()}})
+        with mock.patch.object(discovery, "INDEX_PREVIEW_REQUESTS", 2):
+            offer = discovery.discover(BLOG, get=get)["page_index"]
+        self.assertEqual(len([u for u in get.calls if u in POSTS]), 2)
+        self.assertEqual(len(offer["articles"]), 2)
+        # time: the clock jumps past the preview's limit while the first article is read, so no other is asked for
+        get = TableGet({BLOG: fixture("blog-nofeed-index.html"), **{u: fixture(n) for u, n in POSTS.items()}})
+        now = {"t": 0.0}
+
+        def clock():
+            return now["t"]
+
+        class Jumping(TableGet):
+            def __call__(self, url, timeout):
+                got = super().__call__(url, timeout)
+                if url in POSTS:
+                    now["t"] += discovery.INDEX_PREVIEW_S + 1  # one article took longer than the preview may
+                return got
+        slow = Jumping(get.table)
+        offer = discovery.discover(BLOG, get=slow, clock=clock, total_s=10000)["page_index"]
+        self.assertEqual(len([u for u in slow.calls if u in POSTS]), 1)
+        self.assertEqual(len(offer["articles"]), 1)
+
+    def test_a_page_with_a_malformed_link_still_gets_its_offer(self):
+        page = (b'<html><head><title>Notes</title></head><body><a href="//[::1">x</a><a href="https://[abc/blog/q">y</a>'
+                b'<a href="/blog/latency-per-decision">Latency per decision</a></body></html>')
+        get = blog_site(**{BLOG: page})
+        result = discovery.discover(BLOG, get=get)
+        self.assertTrue(result["page_index"]["offered"])
+        self.assertEqual(result["page_index"]["links"], ["https://ledgerlight.example/blog/latency-per-decision"])
+
+    def test_links_are_read_against_the_page_that_answered_not_the_pasted_address(self):
+        page = b'<html><head><title>Notes</title></head><body><a href="latency-per-decision">Latency</a></body></html>'
+        get = blog_site(**{BLOG: (200, page, BLOG + "/")})  # /blog answered from /blog/
+        offer = discovery.discover(BLOG, get=get)["page_index"]
+        self.assertTrue(offer["offered"], offer)
+        self.assertEqual(offer["links"], ["https://ledgerlight.example/blog/latency-per-decision"])
+
+    def test_a_page_answered_from_another_port_gets_no_offer(self):
+        get = blog_site(**{BLOG: (200, fixture("blog-nofeed-index.html"), "https://ledgerlight.example:8443/blog")})
+        offer = discovery.discover(BLOG, get=get)["page_index"]
+        self.assertFalse(offer["offered"])
+        self.assertIn("another site", offer["reason"])
 
     def test_no_offer_when_a_feed_was_found_and_no_article_is_fetched(self):
         feed = fixture("feed-rss.xml")
@@ -362,6 +447,15 @@ class RegisterTests(unittest.TestCase):
             self.add({"kind": "html-index", "url": BLOG + "/"}, label="ledgerlight NOTES")
         self.assertIn("already exists", str(cm.exception))
         self.assertEqual(len(self.saved()), 1)
+
+    def test_hidden_and_direction_characters_are_removed_from_the_name_and_the_note(self):
+        self.add({"kind": "html-index", "url": BLOG}, label="Ledger\u202elight\u200b notes",
+                 pasted=BLOG + "?q=a\u202eb")
+        [entry] = self.saved()
+        self.assertEqual(entry["label"], "Ledgerlight notes")
+        for ch in ("\u202e", "\u200b"):
+            self.assertNotIn(ch, entry["note"])
+            self.assertNotIn(ch, entry["label"])
 
     def test_a_feed_candidate_is_still_an_rss_or_atom_source(self):
         service = sources_registry.SourceService(

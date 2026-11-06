@@ -26,8 +26,8 @@ addresses under `/blog/` and nothing else on the site), that it follows at most 
 first 5 articles for a brief, and the titles of the first articles, read just now through the same reader a brief uses.
 Tap it, give it a name and **Add to my sources**, as with a feed. You get no such offer for the front page of a site
 (its links are not a list of articles; paste the address of the page that lists them), for a pasted `http://` address,
-for an address with a `user:password@` part or an odd path (dots, an encoded slash), or for a page that leads to
-another site. Only links on the same port as the page are followed. The check makes up to 10 more requests and takes up to 30 more seconds for the
+for an address with a `user:password@` part or an odd path (dots, a `;`, an encoded slash), or for a page that leads
+to another site. Only links on the same port as the page are followed. The check makes up to 10 more requests and takes up to 30 more seconds for the
 preview, only when no feed was found.
 
 The check uses the same guarded fetch as a brief (below): https only (a pasted `http://` address is tried as

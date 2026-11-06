@@ -18,7 +18,8 @@ address, with the others listed beside it.
 
 Safety: every request is the guarded fetch in composer.fetch (https only, public addresses only, checked again on
 the address actually connected to and after every redirect, no proxies, at most 2 MB a request). The whole check
-shares one time limit (TOTAL_S) and makes at most MAX_REQUESTS requests. A plain http:// address is tried as
+shares one time limit (TOTAL_S) and makes at most MAX_REQUESTS requests (the page-links preview below has its own,
+INDEX_PREVIEW_S and INDEX_PREVIEW_REQUESTS, on top of those). A plain http:// address is tried as
 https://; when no https feed answers, the check is refused with PLAIN_HTTP, a sentence the page shows, because a
 feed read without encryption can be altered on the way and the claim check would then vouch for the altered text.
 
@@ -65,11 +66,13 @@ PAGE_SCAN_CHARS = 512 * 1024  # the part of a page searched for feed links
 # The html-index offer: how much it may read, and how long the preview of it may take (on top of the feed check).
 INDEX_MAX_CANDIDATES = 10  # links on the page that may be followed
 INDEX_MAX_ITEMS = 5  # articles one brief reads
-INDEX_PREVIEW_S = 30
+INDEX_PREVIEW_S = 30  # the preview's own time and request limits: they come on top of TOTAL_S and MAX_REQUESTS
+INDEX_PREVIEW_REQUESTS = INDEX_MAX_CANDIDATES
+_PAGE_FILE = re.compile(r"\.(?:html?|php\d?|aspx?|jsp)$", re.I)  # a last part with one of these is a file, not a folder
 INDEX_NO_ROOT = ("This is the front page of the site, so its links are not a list of articles. Paste the address "
                  "of the page that lists them, such as https://example.com/blog.")
-_SEGMENT = re.compile(r"[A-Za-z0-9._~!$&'()*+,;=:@%-]+")
-_ENCODED_DOT_OR_SLASH = re.compile(r"%(2e|2f|5c|00)", re.I)
+_SEGMENT = re.compile(r"[A-Za-z0-9._~!$&'()*+,=:@%-]+")  # no ";" (a path parameter some servers read as a dot segment)
+_ENCODED_DOT_OR_SLASH = re.compile(r"%(2e|2f|5c|00|25|u)", re.I)
 
 
 class DiscoveryError(ValueError):
@@ -263,7 +266,7 @@ def index_entry(address: object) -> dict:
         parts.port
     except ValueError:
         raise DiscoveryError("that address has a port number that is not valid") from None
-    host = (parts.hostname or "").lower()
+    host = (parts.hostname or "").lower().rstrip(".")
     segments = parts.path.split("/")[1:] if parts.path.startswith("/") else []
     ends_in_slash = bool(segments) and segments[-1] == ""
     if ends_in_slash:
@@ -273,14 +276,20 @@ def index_entry(address: object) -> dict:
                 or _ENCODED_DOT_OR_SLASH.search(segment)):
             raise DiscoveryError("the path of that address has a part Composer will not use as a folder to read "
                                  "(an empty part, dots, an encoded slash or an unusual character)")
-    if segments and not ends_in_slash and "." in segments[-1]:
-        segments.pop()  # the address of a file (index.html): its folder is the scope
+    if segments and not ends_in_slash and _PAGE_FILE.search(segments[-1]):
+        segments.pop()  # the address of a page file (index.html): its folder is the scope
     if not segments:
         raise DiscoveryError(INDEX_NO_ROOT)
     page = urllib.parse.urlunsplit((parts.scheme, parts.netloc, parts.path, parts.query, ""))
     return {"id": "candidate", "label": "candidate", "kind": "html-index", "url": page, "max_items": INDEX_MAX_ITEMS,
             "discovery": {"allowed_hosts": [host], "allowed_path_prefixes": ["/" + "/".join(segments) + "/"],
                           "max_candidates": INDEX_MAX_CANDIDATES}}
+
+
+def _origin(url: str) -> tuple[str, int]:
+    """(host, port) of an address, for telling whether two addresses are the same site."""
+    parts = urllib.parse.urlsplit(url)
+    return (parts.hostname or "").lower().rstrip("."), (443 if parts.port is None else parts.port)
 
 
 def _page_index_offer(url: str, page, get, clock) -> dict:
@@ -300,17 +309,24 @@ def _page_index_offer(url: str, page, get, clock) -> dict:
         return offer
     host, prefix = raw["discovery"]["allowed_hosts"][0], raw["discovery"]["allowed_path_prefixes"][0]
     offer.update(allowed_host=host, allowed_path_prefix=prefix)
-    landed = (urllib.parse.urlsplit(page.url or url).hostname or "").lower()
-    if landed != host:
-        offer["reason"] = f"this address leads to another site ({landed[:100]}); paste that address instead"
+    landed = page.url or url
+    try:
+        same_site = _origin(landed) == _origin(source.url)
+        markup = page.body.decode("utf-8", "replace")
+        found = html_index.links(markup, landed, source) if same_site else []
+        title = html_index.extract(markup)[0] if found else ""
+    except ValueError:
+        offer["reason"] = "this page has a link or address that could not be read, so its article links were not used"
         return offer
-    markup = page.body.decode("utf-8", "replace")
-    found = html_index.links(markup, url, source)
+    if not same_site:
+        offer["reason"] = (f"this address leads to another site ({(urllib.parse.urlsplit(landed).netloc or '')[:100]});"
+                           " paste that address instead")
+        return offer
     if not found:
         offer["reason"] = f"no links to articles were found on this page: no link to {host} under {prefix}"
         return offer
-    offer.update(offered=True, links=found, suggested_label=suggest_label("", html_index.extract(markup)[0], url))
-    preview = _Budget(get, INDEX_PREVIEW_S, INDEX_MAX_CANDIDATES, clock)
+    offer.update(offered=True, links=found, suggested_label=suggest_label("", title, url))
+    preview = _Budget(get, INDEX_PREVIEW_S, INDEX_PREVIEW_REQUESTS, clock)
     preview.seen[source.url] = page
     items, receipt = adapters.fetch(source, preview)
     if receipt.get("status") != "ok" or not items:
@@ -378,7 +394,7 @@ def discover(address: object, *, get=fetch.http_get, total_s: float = TOTAL_S,
         if not any(r["ok"] for r in rows):
             # no feed at all: offer the page's own article links (never when a feed answered, never for pasted http)
             result["page_index"] = _page_index_offer(url, page, get, clock)
-        if budget.spent and not any(r["ok"] for r in rows):
+        if budget.spent and not any(r["ok"] for r in rows) and not result["page_index"]["offered"]:
             result["page"]["refusal"] = result["page"]["refusal"] or "the check ran out of time or requests"
         return result
     finally:

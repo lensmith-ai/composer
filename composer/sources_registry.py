@@ -12,6 +12,7 @@ from pathlib import Path
 
 from . import adapters, discovery, fetch, registry
 from .home import make_dirs
+from .sanitize import clean_text
 
 
 # A probe of a full registry entry (and the re-read before it is saved): an html-index entry may list up to 40
@@ -359,11 +360,13 @@ class SourceService:
         label = body.get("label")
         if not isinstance(label, str) or not label.strip():
             raise SourceServiceError("a source needs a name; that is what you will see in the picker")
-        label = " ".join(label.split())
+        label = " ".join(clean_text(label).text.split())  # no hidden or direction-changing characters in a name
+        if not label:
+            raise SourceServiceError("a source needs a name; that is what you will see in the picker")
         if len(label) > 60:
             raise SourceServiceError("that name is longer than 60 characters")
         try:  # recorded in the entry's note only in the form a check would use (never with a user:password part)
-            pasted = discovery.normalise(body.get("pasted_url"))[0]
+            pasted = " ".join(clean_text(discovery.normalise(body.get("pasted_url"))[0]).text.split())
         except discovery.DiscoveryError:
             pasted = ""
         url = candidate["url"].strip()

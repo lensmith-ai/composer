@@ -121,8 +121,10 @@ The full app, on your computer or your own server. In plain words:
 - The release workflow pushes the container image only under a candidate tag and gives it the version tag only
   after the tests, the build, the claim-sealed release note and the image's own attestations have all passed.
 - An `html-index` source now follows a link only if it is on the same port as its index page (before, a
-  link to the same host on another port was followed) and its path has no dot segments, no encoded dot, slash or
-  backslash and no space or control character. The scope the app offers for a page with no feed is built on the
+  link to the same host on another port was followed) and its path has no dot segments (also `..;`), no `;`, no
+  encoded dot, slash, backslash or `%`, and no space or control character. An article that leads to another host,
+  port or folder than the one allowed is not read, and a link that cannot be read as an address is skipped instead
+  of stopping the page. The scope the app offers for a page with no feed is built on the
   server from the address alone (the page's own host and folder, fixed limits), never from what the browser sends.
 
 ## [0.1.0] - 2026-11-01

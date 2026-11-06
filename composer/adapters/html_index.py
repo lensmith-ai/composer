@@ -127,14 +127,20 @@ def _drop_blocks(markup: str) -> str:
     return "".join(out)
 
 
-_UNSAFE_PATH = re.compile(r"(?:^|/)\.{1,2}(?:/|$)|%(?:2e|2f|5c|00)|[\\\x00-\x20\x7f]", re.I)
+# Paths a server may read as a different folder than the one that was checked: dot segments (also "..;" and encoded
+# dots or slashes, one level of encoding or two, and %u escapes), a ";" path parameter, a backslash, a space or a
+# control character. Every alternative is a plain scan: no nested repeats.
+_UNSAFE_PATH = re.compile(r"(?:^|/)\.{1,2}(?:[/;]|$)|%(?:2e|2f|5c|00|25|u)|[;\\\x00-\x20\x7f]", re.I)
 
 
 def canonical(url: str) -> str | None:
     p = urlsplit(url)
     if p.scheme != "https" or not p.hostname or p.username or p.password:
         return None
-    return urlunsplit(("https", p.netloc.lower(), p.path, "", ""))
+    netloc = p.netloc.lower()
+    if netloc.endswith(":443"):
+        netloc = netloc[:-4]  # the same address with and without its default port is one link
+    return urlunsplit(("https", netloc, p.path, "", ""))
 
 
 def eligible(url: str, source) -> str | None:
@@ -144,11 +150,11 @@ def eligible(url: str, source) -> str | None:
         return None
     p = urlsplit(url)
     d = source.discovery
-    if p.hostname not in d["allowed_hosts"]:
+    if (p.hostname or "").rstrip(".") not in d["allowed_hosts"]:
         return None
     try:
-        port = p.port or 443
-        index_port = urlsplit(source.url).port or 443
+        port = 443 if p.port is None else p.port
+        index_port = 443 if urlsplit(source.url).port is None else urlsplit(source.url).port
     except ValueError:
         return None
     if port != index_port:
@@ -167,7 +173,10 @@ def links(markup: str, page_url: str, source) -> list[str]:
         href = attrs.get("href", "").strip()
         if not href:
             continue
-        url = eligible(urljoin(page_url, html.unescape(href)), source)
+        try:
+            url = eligible(urljoin(page_url, html.unescape(href)), source)
+        except ValueError:
+            continue  # a link that cannot be read as an address (such as an unclosed IPv6 bracket) is skipped
         if url and url not in found and url != canonical(page_url):
             found.append(url)
         if len(found) >= source.discovery["max_candidates"]:
@@ -216,7 +225,7 @@ def fetch(source, get):
         receipt["bytes"] += len(page.body)
         if page.status != 200:
             raise ValueError(f"index page answered HTTP {page.status}")
-        candidates = links(page.body.decode("utf-8", "replace"), source.url, source)
+        candidates = links(page.body.decode("utf-8", "replace"), getattr(page, "url", "") or source.url, source)
         receipt["candidates"] = len(candidates)
         errors = 0
         for url in candidates:
@@ -233,6 +242,10 @@ def fetch(source, get):
             receipt["bytes"] += len(resp.body)
             if resp.status != 200:
                 errors += 1
+                continue
+            final = getattr(resp, "url", "") or url
+            if final != url and not eligible(final, source):
+                errors += 1  # an article that leads to another host, port or folder is not read
                 continue
             title, desc, tier = extract_with_tier(resp.body.decode("utf-8", "replace"), source)
             if not title:
