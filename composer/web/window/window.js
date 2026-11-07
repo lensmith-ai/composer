@@ -92,8 +92,6 @@
         at += T.gap;
       });
     }
-    // Skip to the end: the sheet, its scrim, the touch ripples and the pressed states go, and the slot reads as it does
-    // after the replay has run (what step() leaves at T.close + 900). Nothing here can open again.
     function finish() {
       stopped = true;
       if (scrim) scrim.remove();
@@ -604,7 +602,7 @@
         driver.abort(fin);
       }
       settle();
-      if (driver && driver.finish && fin) driver.finish(fin);   // the ring and the status line a replay that ran out leaves
+      if (driver && driver.finish && fin) driver.finish(fin);
     }
   });
   function watch() {
