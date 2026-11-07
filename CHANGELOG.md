@@ -41,6 +41,14 @@ The full app, on your computer or your own server. In plain words:
   10 links followed and 5 articles in a brief, and the titles of the first articles, read just now. Nothing is saved
   until you name it and press add. The front page of a site, an `http://` address, an address with a
   `user:password@` part, and a page that leads to another site get no offer.
+- A feed entry with no real text (an empty description, "TBD", "coming soon", Lorem ipsum, or only the title again)
+  is no longer written up as news. A brief reads such an entry from its own page, on the same site as the feed only,
+  or leaves it out, and the brief's receipt says how many were filled in or left out and why (by position, never
+  the title). The writer is also told never to describe how an item was published or described.
+- In the app: "Add a source" now finds feeds from a site's front page that advertises none in its head: it follows
+  a link such as "RSS" to the site's own page of feeds (on the same site only; `http://` addresses there are read as
+  `https://`), checks each feed it lists, and shows them for you to pick, each with how it was found
+  (`found_via`). Usual feed addresses (including `/rss.cms`) are guessed only when the page gave no feed.
 - An optional article parser (trafilatura) for news pages that have no feed, installed from a hash-locked file.
 - Optional narration: a Listen button that reads the brief's own spoken script aloud with Kokoro, made on your
   computer after the text is final. A Kokoro you already have is reused, read-only, after a check. If anything

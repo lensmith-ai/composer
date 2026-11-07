@@ -21,10 +21,13 @@ ADAPTERS = {
 }
 
 
-def fetch(source, get):
-    """Run the adapter the source names."""
+def fetch(source, get, *, enrich=False):
+    """Run the adapter the source names. `enrich` (a brief asks for it) lets an rss-or-atom feed read an entry with
+    no real text from its own page, or drop it (composer.adapters.thin); other kinds ignore it."""
     try:
         adapter = ADAPTERS[source.kind]
     except KeyError:
         raise ValueError(f"no adapter for kind {source.kind!r}") from None
+    if source.kind == "rss-or-atom":
+        return adapter(source, get, enrich=enrich)
     return adapter(source, get)

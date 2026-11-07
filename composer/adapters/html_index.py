@@ -18,6 +18,7 @@ from urllib.parse import urljoin, urlsplit, urlunsplit
 
 from .. import fetch as _fetch
 from ..sanitize import clean_text, clean_url
+from . import thin
 from .common import DESC_CAP, TIMEOUT_S, TITLE_CAP, new_receipt, strip_html
 
 # Hostile pages are expected here. Nothing below is a backtracking regex: tags and their
@@ -282,10 +283,19 @@ def fetch(source, get):
             if final != url and not eligible(final, source):
                 errors += 1  # an article that leads to another host, port or folder is not read
                 continue
-            title, desc, tier = extract_with_tier(resp.body.decode("utf-8", "replace"), source)
+            markup = resp.body.decode("utf-8", "replace")
+            title, desc, tier = extract_with_tier(markup, source)
             if not title:
                 errors += 1
                 continue
+            if thin.classify(title, desc) == "filler":  # a meta description of "TBD" is not the article
+                from .. import html_extract
+                better = html_extract.article_text(markup, tier=source.extraction_tier)[1]
+                if thin.classify(title, better) not in ("ok", "short"):
+                    receipt["thin_dropped"] = receipt.get("thin_dropped", 0) + 1
+                    errors += 1
+                    continue
+                desc = better
             receipt["fetch_tiers"][tier] += 1
             t, dsc, link = clean_text(title), clean_text(desc), clean_url(url)
             receipt["cleaned"] += t.changes + dsc.changes + link.changes

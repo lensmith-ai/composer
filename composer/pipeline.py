@@ -1,6 +1,8 @@
 """One brief, start to finish: read, screen, write, check, seal.
 
-    1 read     each chosen source through its adapter (composer.adapters)
+    1 read     each chosen source through its adapter (composer.adapters); a feed entry with no real text (empty,
+               "TBD", "coming soon") is read from its own page, or left out and the receipt says why
+               (composer.adapters.thin), so filler text is never written up as news
     2 screen   every string cleaned (composer.sanitize); counts kept per source
     3 write    one model call under your lens (composer.prompt); one retry if the answer
                cannot be used; then the quote rule (composer.quotes): at most 25 words per quoted
@@ -49,9 +51,14 @@ def read_sources(sources: list, get=http_get, log=lambda *_: None) -> dict:
     out = {}
     for s in sources:
         log("source.started", f"reading {s.label}")
-        items, receipt = adapters.fetch(s, get)
+        items, receipt = adapters.fetch(s, get, enrich=True)
         out[s.id] = (items, receipt)
         state = f"{receipt['items']} items (ok)" if receipt["status"] == "ok" else f"failed: {receipt.get('error')}"
+        thin = receipt.get("thin") or {}
+        if thin.get("enriched"):
+            state += f" · {thin['enriched']} read from the item's own page (the feed had no real text)"
+        if thin.get("dropped_count"):
+            state += f" · {thin['dropped_count']} left out (no real text in the feed or on its page)"
         log("source.done", f"{s.label} · {state}")
     return out
 

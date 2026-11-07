@@ -6,8 +6,13 @@ module tries, in order:
   1. the address itself, read as a feed;
   2. every RSS or Atom feed the page advertises (<link rel="alternate" type="application/rss+xml" ...>),
      resolved against the page's address;
-  3. a few usual feed addresses under it (/feed/, /feed, /rss/, /rss.xml, /blog/feed/, /blog/rss.xml,
-     /feeds/stories, /feed.xml, /atom.xml), and /rss/<the same path> for sites that keep their feeds there.
+  3. links on the page that point at a feed or at the site's own RSS page (a footer link such as /rss.cms with the
+     text "RSS"): a link that answers as a feed is a candidate; one that answers as a web page is read once, on
+     the same site only, and the feeds it lists are tried (Times of India keeps all of its feeds on one such
+     page, and lists them with http:// addresses, which are read as https:// on the same site);
+  4. only when none of the above gave a feed: a few usual feed addresses under it (/feed/, /feed, /rss/, /rss,
+     /rss.xml, /rss.cms, /feeds, /blog/feed/, /blog/rss.xml, /feeds/stories, /feed.xml, /atom.xml, /index.xml),
+     and /rss/<the same path> for sites that keep their feeds there.
 
 Each try goes through the same reader a brief uses (composer.adapters, rss-or-atom), so what a person sees here is
 what a brief would get. The answer is an ordered list of candidates, each with the newest titles it returned. It
@@ -41,14 +46,19 @@ import urllib.parse
 import xml.etree.ElementTree as ET
 
 from . import adapters, fetch, registry
-from .adapters import html_index, rss_or_atom
+from .adapters import html_index, rss_or_atom, thin
 
 URL_MAX_CHARS = 2048
 TOTAL_S = 60  # the whole check, every request included
-MAX_REQUESTS = 14
+MAX_REQUESTS = 24
 MAX_CANDIDATES = 8
-SUFFIXES = ("/feed/", "/feed", "/rss/", "/rss.xml", "/blog/feed/", "/blog/rss.xml", "/feeds/stories", "/feed.xml",
-            "/atom.xml")
+SUFFIXES = ("/feed/", "/feed", "/rss/", "/rss", "/rss.xml", "/rss.cms", "/feeds", "/blog/feed/", "/blog/rss.xml",
+            "/feeds/stories", "/feed.xml", "/atom.xml", "/index.xml")
+PAGE_LINK_TRIES = 4  # links on the page that look like a feed or an RSS page, tried (the first ones in page order)
+RSS_PAGES_READ = 2  # of those, answers that were web pages and were read for the feeds they list
+RSS_PAGE_FEEDS = 6  # feeds tried from one such page
+FOUND_VIA = {"as-pasted": "you pasted it", "advertised": "the page advertises it",
+             "suffix": "we guessed this address"}
 PLAIN_HTTP = ("This address uses plain http, and Composer reads feeds only over https: a feed read without "
               "encryption can be changed on its way to you, and the claim check would then vouch for the changed "
               "text. No https feed was found at this address; ask the site for an https feed address.")
@@ -58,6 +68,12 @@ RULE = ("Addresses that returned the same items are shown once, on the row with 
 _LINK_TAG = re.compile(r"<link\b[^<>]*>", re.I)
 _ATTR = re.compile(r"""([a-zA-Z-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')""")
 _COMMENTS = re.compile(r"comment", re.I)
+# A link that looks like a feed or a feed list: "rss" in the path, a whole /feed or /feeds segment, atom as a segment
+# or an extension. (Not "feedback": the whole segment must be feed or feeds.)
+_FEEDISH_PATH = re.compile(r"rss|(?:^|/)feeds?(?:[/.]|$)|(?:^|[/._-])atom(?:[/.]|$)", re.I)
+_FEEDISH_TEXT = re.compile(r"^(?:subscribe(?: via| with| to)? )?(?:rss|atom|feeds?|rss feeds?|syndication)\b", re.I)
+_TAG_END = " \t\n\r\f/>"
+ANCHOR_TEXT_CHARS = 80
 _GENERIC_TITLES = {"", "feed", "rss", "rss feed", "atom", "atom feed", "main site feed", "site feed", "blog", "home",
                    "news", "articles", "posts", "all posts", "untitled"}
 _GENERIC_LEAD = re.compile(r"^(blog|home|news|feed|articles|posts)\s*[-–—|:·]\s+", re.I)
@@ -140,6 +156,65 @@ def advertised_feeds(page_url: str, body: str) -> list[tuple[str, str]]:
             continue
         out.append((urllib.parse.urljoin(page_url, href), html.unescape(attrs.get("title", "").strip())))
     return out
+
+
+def _anchors(markup: str):
+    """(href, text) for every <a href> in the markup, in order, read in one pass (each stretch looked at once). The
+    text is what follows the tag up to the next tag, cut short."""
+    lower = markup.lower()
+    at = lower.find("<a")
+    while at >= 0:
+        if lower[at + 2:at + 3] not in _TAG_END:
+            at = lower.find("<a", at + 2)
+            continue
+        next_lt = lower.find("<", at + 2)
+        limit = len(lower) if next_lt < 0 else next_lt
+        gt = lower.find(">", at + 2, limit)
+        if gt < 0:
+            at = lower.find("<a", limit)
+            continue
+        href = html_index._attrs(markup[at + 2:gt]).get("href", "").strip()
+        end = lower.find("<", gt + 1, gt + 1 + 400)
+        text = html.unescape(markup[gt + 1:gt + 1 + 400 if end < 0 else end])
+        if href:
+            yield html.unescape(href), " ".join(text.split())[:ANCHOR_TEXT_CHARS]
+        at = lower.find("<a", gt)
+
+
+def _same_site_https(href: str, page_url: str) -> str:
+    """The absolute https address of a link when it is on the same site as the page, else "". A plain http:// link
+    to the same host is read as https:// (Composer reads nothing over plain http); a link to another host, a
+    fragment-only link or one with a fragment, and anything that is not http or https are left out."""
+    try:
+        absolute = urllib.parse.urljoin(page_url, href)
+        parts = urllib.parse.urlsplit(absolute)
+        parts.port
+    except ValueError:
+        return ""
+    if parts.scheme == "http" and parts.port is None:
+        parts = parts._replace(scheme="https")
+    if parts.fragment or parts.scheme != "https" or parts.username or parts.password:
+        return ""
+    address = urllib.parse.urlunsplit(parts)
+    return address if thin.same_site(address, page_url) else ""
+
+
+def page_feed_links(page_url: str, markup: str, *, limit: int) -> list[tuple[str, str]]:
+    """[(address, link text)] for the links on a page that look like a feed or a list of feeds, on the same site,
+    in page order, the first `limit`. A link that is the page itself is left out; the first text a link had is kept
+    (the same address is often linked twice, the second time as an icon with no text)."""
+    found: dict[str, str] = {}
+    own = page_url.split("#", 1)[0]
+    for href, text in _anchors(markup):
+        address = _same_site_https(href, page_url)
+        if not address or address == own or len(address) > URL_MAX_CHARS:
+            continue
+        path = urllib.parse.urlsplit(address).path
+        if not (_FEEDISH_PATH.search(path) or _FEEDISH_TEXT.match(text)):
+            continue
+        if address not in found or (not found[address] and text):
+            found[address] = text
+    return list(found.items())[:limit]
 
 
 def feed_title(raw: bytes) -> str:
@@ -232,9 +307,17 @@ class _Budget:
         return self.left <= 0 or self.clock() >= self.deadline
 
 
-def _try_feed(url: str, origin: str, advertised: str, get: _Budget) -> dict:
-    row = {"url": url, "origin": origin, "advertised_title": advertised, "feed_title": "", "suggested_label": "",
-           "ok": False, "items": 0, "titles": [], "bytes": 0, "cleaned": 0, "refusal": "",
+def _stay_on(address: str):
+    """Redirect rule for a fetch of a link found on a page: each hop must stay on that link's own site."""
+    def rule(target: str) -> None:
+        if not thin.same_site(target, address):
+            raise fetch.FetchError("the link leads to another site; not followed")
+    return rule
+
+
+def _try_feed(url: str, origin: str, advertised: str, get: _Budget, via: str = "") -> dict:
+    row = {"url": url, "origin": origin, "found_via": via or FOUND_VIA[origin], "advertised_title": advertised,
+           "feed_title": "", "suggested_label": "", "ok": False, "items": 0, "titles": [], "bytes": 0, "cleaned": 0, "refusal": "",
            "looks_like_comments": bool(_COMMENTS.search(url) or _COMMENTS.search(advertised)), "same_as": []}
     try:
         entry = registry.parse_entry({"id": "candidate", "label": "candidate", "kind": "rss-or-atom", "url": url,
@@ -251,6 +334,11 @@ def _try_feed(url: str, origin: str, advertised: str, get: _Budget) -> dict:
     got = get.seen.get(url)
     row["feed_title"] = feed_title(got.body) if hasattr(got, "body") else ""
     row["suggested_label"] = suggest_label(row["feed_title"], advertised, url)
+    shown, own = clean_title(advertised).lower(), row["suggested_label"].lower()
+    if via and shown and own != shown and not own.startswith(shown + " "):
+        # one site's RSS page lists many feeds that share the site's name: the link's own words tell them apart
+        room = max(0, 60 - len(shown) - 3)  # the link's words always fit; the site's name gives way
+        row["suggested_label"] = f"{row['suggested_label'][:room].rstrip()} \u00b7 {clean_title(advertised)}"[:60]
     return row
 
 
@@ -361,11 +449,12 @@ def discover(address: object, *, get=fetch.http_get, total_s: float = TOTAL_S,
         first = _try_feed(url, "as-pasted", "", budget)
         if first["ok"]:
             rows.append(first)
-        body, page_url, page = "", url, None
+        body, markup, page_url, page = "", "", url, None
         try:
             page = budget(url, adapters.common.TIMEOUT_S)
             if page.status == 200:
-                body = page.body[:PAGE_SCAN_CHARS].decode("utf-8", "replace")
+                markup = page.body.decode("utf-8", "replace")  # links in a footer are far down a large page
+                body = markup[:PAGE_SCAN_CHARS]  # the head, where feeds are advertised
                 page_url = page.url or url
                 result["page"]["fetched"] = True
             else:
@@ -373,26 +462,57 @@ def discover(address: object, *, get=fetch.http_get, total_s: float = TOTAL_S,
         except Exception as exc:
             result["page"]["refusal"] = (f"the page could not be read ({str(exc)[:200]}); paste the feed address "
                                          "if you have it")
-        tries, seen = [], {url}
+        seen = {url}
+
+        def room() -> bool:
+            return len([r for r in rows if r["ok"]]) < MAX_CANDIDATES and not budget.spent
+
+        # 2. the feeds the page advertises
         for feed_url, title in advertised_feeds(page_url, body):
-            if feed_url not in seen:
-                seen.add(feed_url)
-                tries.append((feed_url, "advertised", title))
-        base = url.split("#", 1)[0].split("?", 1)[0].rstrip("/")
-        guesses = [base + suffix for suffix in SUFFIXES]
-        parts = urllib.parse.urlsplit(base)
-        if parts.path and parts.path != "/":
-            guesses.append(f"{parts.scheme}://{parts.netloc}/rss{parts.path}")
-        for guess in guesses:
-            if guess not in seen:
-                seen.add(guess)
-                tries.append((guess, "suffix", ""))
-        for feed_url, origin, title in tries:
-            if len([r for r in rows if r["ok"]]) >= MAX_CANDIDATES or budget.spent:
-                break
-            row = _try_feed(feed_url, origin, title, budget)
-            if row["ok"] or origin == "advertised":  # a failed guess is ours; a failed advertised feed is news
+            if feed_url in seen or not room():
+                continue
+            seen.add(feed_url)
+            rows.append(_try_feed(feed_url, "advertised", title, budget))  # a failed advertised feed is news
+        # 3. links on the page to a feed, or to the site's own page that lists its feeds
+        pages_read = 0
+        for link, text in page_feed_links(page_url, markup, limit=PAGE_LINK_TRIES) if markup else []:
+            if link in seen or not room():
+                continue
+            seen.add(link)
+            with fetch.redirect_rules(_stay_on(link)):
+                row = _try_feed(link, "advertised", text, budget, via="the site links to it from the page")
+            if row["ok"]:
                 rows.append(row)
+                continue
+            got = budget.seen.get(link)
+            if pages_read >= RSS_PAGES_READ or isinstance(got, BaseException) or getattr(got, "status", 0) != 200:
+                continue
+            pages_read += 1  # it answered, but not as a feed: it may be the site's page that lists its feeds
+            listed = page_feed_links(got.url or link, got.body.decode("utf-8", "replace"), limit=RSS_PAGE_FEEDS + 8)
+            where = urllib.parse.urlsplit(link).path or "/"
+            for feed_url, label in [x for x in listed if x[0] not in seen][:RSS_PAGE_FEEDS]:
+                if not room():
+                    break
+                seen.add(feed_url)
+                with fetch.redirect_rules(_stay_on(feed_url)):
+                    found = _try_feed(feed_url, "advertised", label, budget,
+                                      via=f"the site's own RSS page lists it ({where})")
+                if found["ok"]:
+                    rows.append(found)
+        # 4. usual feed addresses, only when the page itself gave no feed
+        if not any(r["ok"] for r in rows):
+            base = url.split("#", 1)[0].split("?", 1)[0].rstrip("/")
+            guesses = [base + suffix for suffix in SUFFIXES]
+            parts = urllib.parse.urlsplit(base)
+            if parts.path and parts.path != "/":
+                guesses.append(f"{parts.scheme}://{parts.netloc}/rss{parts.path}")
+            for guess in guesses:
+                if guess in seen or not room():
+                    continue
+                seen.add(guess)
+                row = _try_feed(guess, "suffix", "", budget)
+                if row["ok"]:  # a failed guess is ours, not news
+                    rows.append(row)
         rows.sort(key=lambda r: (r["looks_like_comments"], not r["ok"],
                                  {"as-pasted": 0, "advertised": 1, "suffix": 2}[r["origin"]]))
         result["candidates"] = collapse_duplicates(rows)

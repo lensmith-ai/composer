@@ -1,0 +1,9 @@
+<?xml version="1.0"?><rss version="2.0"><channel><title>Invented Lab blog</title><link>https://lab.example.org/</link>
+<item><title>Invented model Argon built for hard problems</title><link>https://lab.example.org/blog/argon</link><description>TBD</description></item>
+<item><title>Invented model Carbon is the next frontier model</title><link>https://lab.example.org/blog/carbon</link><description></description></item>
+<item><title>Invented model Neon launches</title><link>https://other.example.net/neon</link><description>Lorem ipsum dolor sit amet</description></item>
+<item><title>Invented model Helium ships in the autumn</title><link>https://lab.example.org/blog/helium</link><description>The lab says Helium ships in the autumn with a longer context window and lower prices for everyone.</description></item>
+<item><title>Invented short note about Krypton</title><link>https://lab.example.org/blog/krypton</link><description>Krypton is smaller than Argon, the lab said.</description></item>
+<item><title>Invented model Xenon is reported</title><link>https://lab.example.org/blog/xenon</link><description>The lab published a long explanation of Xenon today covering its training data, tests and limits in detail.</description></item>
+<item><title>Invented model Radon is reported</title><link>https://lab.example.org/blog/radon</link><description>The lab published a long explanation of Radon today covering its training data, tests and limits in detail.</description></item>
+</channel></rss>
