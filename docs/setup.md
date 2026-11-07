@@ -5,7 +5,8 @@
 ~/.lensmith-composer/bin/composer up
 ```
 
-Then open http://127.0.0.1:8765/ (setup offers the next free port if 8765 is taken). This page says what setup
+`composer up` prints `Open: http://127.0.0.1:8765/` on a line of its own: Cmd+click it in macOS Terminal (or paste it
+into a browser). Setup offers the next free port if 8765 is taken. This page says what setup
 asks, what it creates, what it never touches, and how to update, back up and remove it.
 
 ## What setup needs
@@ -13,7 +14,12 @@ asks, what it creates, what it never touches, and how to update, back up and rem
 - macOS or Linux (on Windows, use WSL2 or [the container](deploy-vps.md#try-it-on-your-own-computer-first)).
 - Python 3.10 or newer with `venv`. If you have none, setup can download a pinned uv (checked against its SHA-256)
   into the app folder, which installs its own Python there too. It asks first; for that it needs `curl` or `wget`
-  and CA certificates. It never uses sudo, apt, brew or `pip --user`.
+  and CA certificates. It never uses sudo, apt, brew or `pip --user`. Before it asks, it says why it wants to
+  download (for example, macOS ships python3 3.9.6, which is older than 3.10). Setup prints "Step N of 7" for each
+  stage and leaves the download's own progress and any error on screen. Network timeouts default to 300 seconds
+  (uv) and 120 seconds (pip), and the Python download is tried three times; set your own with
+  `UV_HTTP_TIMEOUT=600 sh setup.sh` on a slow connection. If the download still fails, install Python 3.10 or newer
+  from python.org and run `./setup.sh` again.
 - The internet, once: to install Composer's one dependency (claim-seal, pinned by commit and SHA-256) and, if you
   choose narration, its runtime and model.
 - About 300 MB of disk without narration; narration adds about 110 MB of runtime and 354 MB of model files.
@@ -196,7 +202,7 @@ set `"seals": {"daily": false}` in `config.json` to turn that off.
 ```sh
 composer backup                      # data/backups/composer-backup-<time>.tar.gz; not your key unless --include-secrets
 composer restore <file>              # checks the archive first; keeps what it replaces
-composer update --from-file <release> --sha256 <its SHA-256>
+composer update --from-file <release> --sha256 <its SHA-256>   # or leave out --sha256 with SHA256SUMS (or SHA256SUMS.txt) beside the file
 composer rollback
 ```
 

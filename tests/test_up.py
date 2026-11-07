@@ -74,7 +74,10 @@ class UpTests(unittest.TestCase):
                 self.assertIn("already running", second.stderr)
                 proc.terminate()  # SIGTERM, as `docker compose stop` sends: a clean stop, the lock released
                 self.assertEqual(proc.wait(10), 0)
-                self.assertIn("serving on", proc.stdout.read())
+                text = proc.stdout.read()
+                self.assertIn("serving on", text)
+                # the address on a line of its own, plain text (a pipe is not a terminal): Cmd+clickable on a Mac
+                self.assertIn(f"Open: http://127.0.0.1:{port}/", text.splitlines())
             finally:
                 if proc.poll() is None:
                     proc.kill()

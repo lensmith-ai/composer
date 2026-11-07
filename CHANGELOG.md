@@ -7,6 +7,20 @@ Each release note is written from this file and checked against it by claim-seal
 
 ## [Unreleased]
 
+### Changed
+
+- Setup shows where it is: "Step 3 of 7: downloading Python 3.12 (about 40 MB)", with the download's own progress on
+  screen. Before it asks to download a Python it says why ("Found python3 3.9.6 at /usr/bin/python3; Composer needs
+  3.10 or newer."). A failed download prints the real error and the two ways forward (rerun with a longer
+  `UV_HTTP_TIMEOUT`, or install Python 3.10 or newer from python.org) instead of hiding it. The network timeout now
+  defaults to 300 seconds (uv's own is 30) and a download is tried three times; a timeout you set yourself is kept.
+- `composer up` prints `Open: http://127.0.0.1:8765/` on a line of its own, so a macOS Terminal makes it Cmd+clickable
+  (terminals known to draw links get a link around the same text). A brief composed from the page, or by
+  `composer compose`, prints numbered progress lines on the terminal (reading sources, writing, checking claims, done)
+  and, if it fails, the reason.
+- `composer update --from-file` also finds the checksums in `SHA256SUMS.txt` next to the release file (a messaging app
+  or browser may add `.txt`), and says it did.
+
 ## [0.2.0] - not released yet
 
 The full app, on your computer or your own server. In plain words:

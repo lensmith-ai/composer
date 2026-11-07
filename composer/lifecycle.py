@@ -638,18 +638,27 @@ def _remove_version(home: Path, version: str, home_at: "H.Owned | None" = None, 
             home_at.close()
 
 
-def verify_file(path: Path, sha256: str | None) -> str:
+SUMS_NAMES = ("SHA256SUMS", "SHA256SUMS.txt")  # a messaging app, email or a browser may add .txt to a file with none
+
+
+def verify_file(path: Path, sha256: str | None, log=None) -> str:
     got = _sha(path)
     want = (sha256 or "").strip().lower()
     if not want:
-        sums = path.parent / "SHA256SUMS"
-        if sums.is_file():
+        # SHA256SUMS if it is there; SHA256SUMS.txt only when there is no SHA256SUMS (never both: a list that does
+        # not name the file is not a reason to look in another list)
+        sums = next((path.parent / n for n in SUMS_NAMES if (path.parent / n).is_file()), None)
+        if sums is not None:
             for line in sums.read_text(encoding="utf-8").splitlines():
                 bits = line.split()
                 if len(bits) == 2 and bits[1].lstrip("*") == path.name:
                     want = bits[0].lower()
+            if want and sums.name != SUMS_NAMES[0] and log is not None:
+                log(f"note: using {sums.name} (there is no SHA256SUMS next to the release file; "
+                    f"a messaging app or browser may have added .txt)")
     if not want:
-        raise LifecycleError("refused: give the release file's SHA-256 (--sha256) or put SHA256SUMS next to it")
+        raise LifecycleError("refused: give the release file's SHA-256 (--sha256) or put SHA256SUMS (or "
+                             "SHA256SUMS.txt) next to it")
     if got != want:
         raise LifecycleError("refused: the release file's SHA-256 does not match; nothing was installed")
     return got
@@ -714,7 +723,7 @@ def _update(home: Path, data: Path, release: Path, *, sha256, run, crash_after, 
     if old_version is None:
         raise LifecycleError("this is not a native install with app/current; in Docker, change the image tag "
                              "(docs/deploy-vps.md, updates)")
-    verify_file(release, sha256)
+    verify_file(release, sha256, log=log)
     new_version = release_version(release)
     if new_version == old_version:
         raise LifecycleError(f"refused: the release is version {new_version!r}, which is already installed")

@@ -83,8 +83,13 @@ The full app (the phone-width page, saved briefs, a daily brief, optional narrat
 
 ```sh
 ./setup.sh
-~/.lensmith-composer/bin/composer up        # then open http://127.0.0.1:8765/
+~/.lensmith-composer/bin/composer up        # prints "Open: http://127.0.0.1:8765/"; Cmd+click it in macOS Terminal
 ```
+
+Setup prints "Step N of 7" as it goes, with the download's own progress. If it has to download Python it first says
+why (for example, "Found python3 3.9.6 at /usr/bin/python3; Composer needs 3.10 or newer."). On a slow connection a
+download can take several minutes; if one fails, setup shows the real error and what to do next, and
+`UV_HTTP_TIMEOUT=600 sh setup.sh` gives it more time (the default is 300 seconds per request).
 
 `./setup.sh` checks everything first and writes nothing until every check passes. It uses your Python 3.10+ (or,
 only if you say yes, downloads a pinned, checksum-verified uv into that folder, which brings its own Python), makes
