@@ -2576,7 +2576,7 @@ if(IS_LIVE&&LIVE.feeds){
 }
 if(IS_LIVE){
   var FEED_LABEL={};
-  var VERDICT_SHORT={supported:"supported",partial:"partly supported",
+  var VERDICT_SHORT={supported:"supported",partial:"partly supported",partially_supported:"partly supported",
                      unsupported:"not supported",unresolved:"citation not found",
                      unchecked:"unchecked","cites-real":"real sources"};
   window.__VERDICT_SHORT=VERDICT_SHORT;
@@ -2614,11 +2614,21 @@ if(IS_LIVE){
       clearReceiptMarkers(ic);
       ic.setAttribute("aria-label",s.title+" — open the full claim and its sources");
       ic.addEventListener("click",function(){openSheet(s.id);});
-      ic.addEventListener("keydown",function(e){
-        if(e.key==="Enter"||e.key===" "){e.preventDefault();openSheet(s.id);}});
+      if(window.__claimSeal){
+        // the claims are underlined sentences you press (claimseal.js); the card itself is no longer one big
+        // button, so its open-the-sheet control is the info button, which a keyboard reaches
+        window.__claimSeal.card(ic,s);
+      }else{
+        ic.addEventListener("keydown",function(e){
+          if(e.key==="Enter"||e.key===" "){e.preventDefault();openSheet(s.id);}});
+      }
       wrap.appendChild(ic);
       insEl.appendChild(wrap);
     });
+    if(window.__claimSeal){
+      var csR=(typeof LIVE!=="undefined"&&LIVE&&LIVE.receipts&&LIVE.receipts.check)||null;
+      window.__claimSeal.legend($("cRailWrap")||insEl,DATA.sections,csR?{seal:csR.seal,verified:csR.seal_verified}:null);
+    }
     if(window.__cdeck&&window.__cdeck.rebuild)window.__cdeck.rebuild();
   }
 }
@@ -2804,10 +2814,11 @@ window.__buildLoom=buildLoom;
   var VERDICT_WORD={supported:"supported by its sources",
                     "cites-real":"every source it names is real — the joke is not fact-checked",
                     partial:"only partly supported by its sources",
+                    partially_supported:"only partly supported by its sources",
                     unsupported:"NOT supported by its sources",
                     unresolved:"its citations matched nothing we fetched",
                     unchecked:"not checked"};
-  var VERDICT_SHORT={supported:"supported",partial:"partly supported",
+  var VERDICT_SHORT={supported:"supported",partial:"partly supported",partially_supported:"partly supported",
                      unsupported:"not supported",unresolved:"citation not found",
                      unchecked:"unchecked"};
   function displayVerification(verification){
@@ -4179,7 +4190,7 @@ window.__buildLoom=buildLoom;
       if(scrimEl)scrimEl.classList.add("on");});
     var railWrap=document.createElement("div");railWrap.className="crail-scroll cmp-assembly-piece";var rail=document.createElement("div");rail.className="crail";rail.setAttribute("role","tablist");railWrap.appendChild(rail);
     var deck=document.createElement("div");deck.className="cdeck cmp-assembly-piece";deck.setAttribute("aria-label","Completed insight cards");
-    edition.sections.forEach(function(section,i){var chip=document.createElement("button");chip.type="button";chip.className="crchip";chip.setAttribute("role","tab");chip.setAttribute("aria-selected",i===0?"true":"false");chip.textContent="Insight "+(i+1); rail.appendChild(chip);var wrap=document.createElement("article");wrap.className="icw";wrap.setAttribute("data-card-id",section.id);wrap.setAttribute("data-settled-card",String(i));var card=document.createElement("div");card.className="icard";card.tabIndex=0;card.setAttribute("role","button"); var _vd=(section.verification&&section.verification.verdict)||"unchecked",_VS=window.__VERDICT_SHORT||{supported:"supported",partial:"partly supported",unsupported:"not supported",unresolved:"citation not found",unchecked:"unchecked","cites-real":"real sources"};var _chk=!!window.__cwDraftChecking; card.innerHTML="<div class=\"ik\"><span>Insight "+(i+1)+"</span><br><span class=\""+(_chk?"prooftag checking":"prooftag v-"+escT(_vd))+"\"></span></div><h4></h4><div class=\"gk keep\">what changed</div><div class=\"gv keep\"></div><span class=\"infodot\" aria-hidden=\"true\">i</span>"; card.querySelector(".prooftag").textContent=(_chk?"checking":(_VS[_vd]||"unchecked"))+" · "+section.sources.length+" source"+(section.sources.length===1?"":"s");card.querySelector("h4").textContent=section.title;card.querySelector(".gv").textContent=(section.kp||[])[1]||(section.kp||[])[0]||"";wrap.appendChild(card);deck.appendChild(wrap);chip.onclick=function(){deck.scrollTo({left:wrap.offsetLeft,behavior:instant?"auto":"smooth"});};});
+    edition.sections.forEach(function(section,i){var chip=document.createElement("button");chip.type="button";chip.className="crchip";chip.setAttribute("role","tab");chip.setAttribute("aria-selected",i===0?"true":"false");chip.textContent="Insight "+(i+1); rail.appendChild(chip);var wrap=document.createElement("article");wrap.className="icw";wrap.setAttribute("data-card-id",section.id);wrap.setAttribute("data-settled-card",String(i));var card=document.createElement("div");card.className="icard";card.tabIndex=0;card.setAttribute("role","button"); var _vd=(section.verification&&section.verification.verdict)||"unchecked";if(_vd==="partially_supported")_vd="partial";var _VS=window.__VERDICT_SHORT||{supported:"supported",partial:"partly supported",unsupported:"not supported",unresolved:"citation not found",unchecked:"unchecked","cites-real":"real sources"};var _chk=!!window.__cwDraftChecking; card.innerHTML="<div class=\"ik\"><span>Insight "+(i+1)+"</span><br><span class=\""+(_chk?"prooftag checking":"prooftag v-"+escT(_vd))+"\"></span></div><h4></h4><div class=\"gk keep\">what changed</div><div class=\"gv keep\"></div><span class=\"infodot\" aria-hidden=\"true\">i</span>"; card.querySelector(".prooftag").textContent=(_chk?"checking":(_VS[_vd]||"unchecked"))+" · "+section.sources.length+" source"+(section.sources.length===1?"":"s");card.querySelector("h4").textContent=section.title;card.querySelector(".gv").textContent=(section.kp||[])[1]||(section.kp||[])[0]||"";if(window.__claimSeal)window.__claimSeal.card(card,section);wrap.appendChild(card);deck.appendChild(wrap);chip.onclick=function(){deck.scrollTo({left:wrap.offsetLeft,behavior:instant?"auto":"smooth"});};});
     var sources=document.createElement("section");sources.className="ingr cmp-assembly-piece";
     sources.innerHTML='<div class="ingrlab">What went in</div><div class="ingrstrip"></div>';
     (function(){var strip=sources.querySelector(".ingrstrip"),seen={},hues={};
@@ -4203,7 +4214,8 @@ window.__buildLoom=buildLoom;
     var stageEl=document.getElementById('cmpStage');
     if(stageEl&&stageEl.parentNode&&mast.parentNode!==stageEl.parentNode)stageEl.parentNode.insertBefore(mast,stageEl);
     try{var rSub=document.getElementById("cwMastSub"),rSt=document.getElementById("cwMastStatus");if(rSub&&rSt&&document.getElementById("cwDaterowReserve")){var rWhen=doc&&(doc.composed_at_utc||doc.generated_at||doc.composed_at);var rDt=rWhen?new Date(rWhen):new Date();rSub.textContent=isNaN(rDt)?"":cwShortDate(rDt);var rClk=((document.getElementById("cmpClock")||{}).textContent||"").trim();if(/^\d:\d\d$/.test(rClk))rClk="0"+rClk;var rN=(doc&&doc.items||[]).length;rSt.textContent=(rClk||"--:--")+" \u00b7 "+cwPubWord()+" \u00b7 "+rN+"/"+rN;document.getElementById("cwDaterowReserve").removeAttribute("id");}else if(!document.getElementById("cwMastSub")){var mWhen=doc&&(doc.composed_at_utc||doc.generated_at||doc.composed_at);var mDt=mWhen?new Date(mWhen):new Date();var mDateTxt=isNaN(mDt)?"":cwShortDate(mDt);var mClk=((document.getElementById("cmpClock")||{}).textContent||"").trim();if(/^\d:\d\d$/.test(mClk))mClk="0"+mClk;var mN=(doc&&doc.items||[]).length;var mSub=document.createElement("div");mSub.className="sub cw-mast-sub cmp-assembly-piece";mSub.id="cwMastSub";mSub.textContent=mDateTxt;var mSt=document.createElement("div");mSt.className="status cw-mast-status cmp-assembly-piece";mSt.id="cwMastStatus";mSt.textContent=(mClk||"--:--")+" \u00b7 "+cwPubWord()+" \u00b7 "+mN+"/"+mN;var mRow=document.createElement("div");mRow.className="daterow cw-daterow";mRow.appendChild(mSub);mRow.appendChild(mSt);mast.parentNode.insertBefore(mRow,mast.nextSibling); }}catch(e){}
-    [readout,railWrap,deck,sources].forEach(function(piece){assembly.appendChild(piece);});slot.appendChild(assembly);var pieces=[mast,readout,railWrap,deck,sources],self=this;
+    var csLegend=null;if(window.__claimSeal){var csR2=(window.__receiptsDoc&&window.__receiptsDoc.job===this.job&&window.__receiptsDoc.doc&&window.__receiptsDoc.doc.check)||null;csLegend=window.__claimSeal.legendNode(edition.sections,csR2?{seal:csR2.seal,verified:csR2.seal_verified}:null);csLegend.classList.add("cmp-assembly-piece");}
+    [readout,csLegend,railWrap,deck,sources].filter(Boolean).forEach(function(piece){assembly.appendChild(piece);});slot.appendChild(assembly);var pieces=[mast,readout,csLegend,railWrap,deck,sources].filter(Boolean),self=this;
     (function watchAudio(){if(currentAudioState!=="generating")return;jget("/status/"+self.job).then(function(st){setAudioState.call(self,st.audio_state||"failed");if((st.audio_state||"failed")==="generating")setTimeout(watchAudio,1000);}).catch(function(){setTimeout(watchAudio,2000);});})();
     function reveal(i){if(i>=pieces.length){assembly.setAttribute("data-completion-assembly","settled");slot.setAttribute("data-completion-assembly","settled");window.dispatchEvent(new Event("composition:assembly-settled"));return Promise.resolve();}pieces[i].classList.add("is-in");if(i===0){["cwMastSub","cwMastStatus"].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.add("is-in");});}return instant?reveal(i+1):new Promise(function(resolve){setTimeout(function(){reveal(i+1).then(resolve);},420);});}
     return instant?reveal(0):new Promise(function(resolve){setTimeout(function(){reveal(0).then(resolve);},3400);});
@@ -4261,7 +4273,7 @@ window.__buildLoom=buildLoom;
       self.__refreshEd=function(d2){items=(d2&&d2.items)||items;try{cwEd=window.__toEdition(d2,self.receiptsDoc||null,self.job);}catch(e){}};
       if(!cwEd&&window.__toEdition&&self.job){try{jget(DATA_ROOT+"/live/"+self.job+"/receipts.json").then(function(r){self.receiptsDoc=r;try{cwEd=window.__toEdition(doc,r,self.job);}catch(e){}},function(){});}catch(e){}}
       function sheetFor(i){var it=items[i];if(!it)return;if(cwEd&&cwEd.sections&&cwEd.sections[i]&&window.__editionOpenSection){var sec=cwEd.sections[i];sec.composedAt=cwEd.generated_at||sec.composedAt;window.__editionOpenSection(sec,"published");return;}openSheetRaw(function(sh){var v=it.verification||{};var srcs=(it.sources||[]).map(function(sc){var lab=esc(sc.label||sc.id||"source"),ref=esc(sc.ref||"");var url=sc.url&&/^https?:/.test(sc.url)?esc(sc.url):null;return '<div class="srow">'+(url?'<a href="'+url+'" target="_blank" rel="noopener">'+lab+'</a>':lab)+(ref?' <span class="cws-ref">\u00b7 '+ref+'</span>':'')+'</div>';}).join("");var det=Array.isArray(it.detail)?it.detail:(it.detail?[it.detail]:[]);sh.innerHTML='<div class="handle"></div><button class="close" type="button" aria-label="Close">\u00d7</button><div class="rk">Insight '+(i+1)+' of '+items.length+'</div><div class="claim">'+esc(it.insight||it.title||"")+'</div>'+(it.why_it_matters?'<div class="rk">why it matters</div><div class="cws-why2">'+esc(it.why_it_matters)+'</div>':'')+(det.length?'<div class="rk">detail</div><ul class="pts">'+det.map(function(d){return '<li>'+esc(d)+'</li>';}).join("")+'</ul>':'')+(v.verdict?'<div class="rk">verification</div><div class="stamp">'+esc(v.verdict)+(v.why?' \u2014 '+esc(v.why):'')+'</div>':'')+(srcs?'<div class="rk">sources</div>'+srcs:'');var cl=sh.querySelector(".close");if(cl)cl.addEventListener("click",closeSheetRaw);});}
-      var cards=slot.querySelectorAll(".cdeck .icw");cards.forEach(function(card,i){card.style.cursor="pointer";card.setAttribute("role","button");card.setAttribute("tabindex","0");card.addEventListener("click",function(ev){if(ev.target.closest("a"))return;sheetFor(i);});});
+      var cards=slot.querySelectorAll(".cdeck .icw");cards.forEach(function(card,i){card.style.cursor="pointer";if(!window.__claimSeal){card.setAttribute("role","button");card.setAttribute("tabindex","0");}card.addEventListener("click",function(ev){if(ev.target.closest("a"))return;sheetFor(i);});});
       var sc0=document.getElementById("scrim");if(sc0&&!sc0.__cwBound){sc0.__cwBound=true;sc0.addEventListener("click",function(){try{closeSheetRaw();}catch(e){}});}
       (function(){try{var mastEl=document.querySelector(".cmp-composed-mast");if(!mastEl||document.getElementById("cwMastSub"))return;var when=doc&&(doc.composed_at_utc||doc.generated_at||doc.composed_at);var dt=when?new Date(when):new Date();var dateTxt=isNaN(dt)?"":dt.toLocaleString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit",timeZoneName:"short"});var clk=(document.getElementById("cmpClock")||{}).textContent||"";var mm=clk.trim();if(/^\d:\d\d$/.test(mm))mm="0"+mm;var n=(doc&&doc.items||[]).length;var sub=document.createElement("div");sub.className="sub cw-mast-sub";sub.id="cwMastSub";sub.textContent=dateTxt;var st=document.createElement("div");st.className="status cw-mast-status";st.id="cwMastStatus";st.textContent=(mm||"--:--")+" \u00b7 "+cwPubWord()+" \u00b7 "+n+"/"+n;mastEl.parentNode.insertBefore(sub,mastEl.nextSibling);sub.parentNode.insertBefore(st,sub.nextSibling);}catch(e){}})();
       var mbtns=document.querySelectorAll(".cmp-composed-mast .mbtn");if(mbtns[0]){mbtns[0].setAttribute("role","button");mbtns[0].setAttribute("aria-label","Open menu and history");mbtns[0].addEventListener("click",function(){var mb=document.getElementById("menuBtn");if(mb){mb.click();return;}try{openDrawer();}catch(e){}}); }if(mbtns[1]){mbtns[1].setAttribute("role","button");mbtns[1].setAttribute("aria-label","About this composition");mbtns[1].addEventListener("click",function(){ var ib=document.getElementById("infoBtn");if(ib){ib.click();return;}openSheetRaw(function(sh){sh.innerHTML='<div class="handle"></div><button class="close" type="button" aria-label="Close">\u00d7</button><div class="rk">this composition</div><div class="claim">'+esc((doc.lens||"")+" lens \u00b7 voice "+(doc.voice||""))+'</div><div class="rk">job</div><div class="rcp">'+esc(self.job)+'</div><div class="rk">composed</div><div class="rcp">'+esc(doc.composed_at_utc||"")+'</div>';var cl=sh.querySelector(".close");if(cl)cl.addEventListener("click",closeSheetRaw);});});}
@@ -4324,7 +4336,7 @@ window.__buildLoom=buildLoom;
     if(logHost)logHost.innerHTML="";
     var liveStage=prepareLiveStage(request.sources||[]);
     var entryTransition=window.__composerEntryTransition,entryEntry=null;
-    if(entryTransition&&entryTransition.mountRejoin&&state!=="failed"){entryEntry=entryTransition.begin({sources:request.sources||[]});entryTransition.mountRejoin(entryEntry);entryTransition.bind(entryEntry,job);if(liveStage.setDelivery)liveStage.setDelivery(function(d){entryTransition.accept(entryEntry,d);});(record&&record.progress||[]).forEach(function(line,i){entryTransition.accept(entryEntry,{type:null,raw:line,progressOrdinal:-100000+i});});}
+    if(entryTransition&&entryTransition.mountRejoin&&state!=="failed"){entryEntry=entryTransition.begin({sources:request.sources||[],skippable:true});entryTransition.mountRejoin(entryEntry);entryTransition.bind(entryEntry,job);if(liveStage.setDelivery)liveStage.setDelivery(function(d){entryTransition.accept(entryEntry,d);});(record&&record.progress||[]).forEach(function(line,i){entryTransition.accept(entryEntry,{type:null,raw:line,progressOrdinal:-100000+i});});}
     var started=Date.parse(record&&record.started_at||"")||Date.now();
     var timer=setInterval(function(){var s=Math.max(0,Math.floor((Date.now()-started)/1000));
       if(clock)clock.textContent=Math.floor(s/60)+":"+("0"+(s%60)).slice(-2);},500);
@@ -4350,7 +4362,7 @@ window.__buildLoom=buildLoom;
   function startCompose(){
     var c=cmpChosen();
     var entryTransition=window.__composerEntryTransition;
-    var entryEntry=entryTransition&&entryTransition.begin({sources:c.sources});
+    var entryEntry=entryTransition&&entryTransition.begin({sources:c.sources,skippable:true});
     var body={sources:c.sources,lens:c.lens,voice:c.voice,insights:c.insights,
       reading_level:c.reading_level};
     var step=document.getElementById("cmpStep"),

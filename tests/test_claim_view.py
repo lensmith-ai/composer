@@ -47,9 +47,6 @@ class ComposedViewTests(unittest.TestCase):
         first = self.view({"0.0": {"text": "words"}})["items"][0]["verification"]["citations"][0]
         self.assertNotIn("window_sha256", first)
 
-    def test_the_edition_itself_stays_free_of_passages(self):
-        self.assertNotIn("passage", json.dumps(EDITION))
-
 
 class ReadsPassagesFileTests(unittest.TestCase):
     class Store:

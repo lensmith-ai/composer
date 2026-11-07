@@ -140,16 +140,29 @@ class ComposeTests(unittest.TestCase):
         self.assertNotIn("street lights", blob)
         self.assertNotIn("updated hourly", blob)
 
-    def test_passages_are_the_located_words_cut_to_the_quote_cap_and_kept_out_of_the_edition(self):
+    def test_passages_are_the_located_words_cut_to_the_quote_cap_and_kept_out_of_every_shared_file(self):
+        import claim_seal.normalize as N
+        from composer import receipts
         run, *_ = self.run_compose([brief_for_fixtures()])
         rows = pipeline.passages([HARBOR, QUARRY], run["fetched"], run["result"])
         self.assertTrue(rows, "no located passage at all")
-        article = " ".join(it["description"] for items, _ in run["fetched"].values() for it in items)
+        sealed = pipeline.seal_sources([HARBOR, QUARRY], run["fetched"], "")
+        items = {it["id"]: it for entry in sealed.values() for it in entry["items"]}
+        spans = {f"{o['claim_ref']['item_index']}.{o['citation_index']}": o["evidence_spans"][0]
+                 for o in run["result"]["claim_evidence"]["outcomes"] if o.get("evidence_spans")}
         for key, row in rows.items():
             self.assertRegex(key, r"^\d+\.\d+$")
             self.assertLessEqual(row["words"], pipeline.PASSAGE_MAX_WORDS)
-            self.assertIn(row["text"].rstrip(" \u2026").split(" ")[0], article)
-        self.assertNotIn("\"passage\"", json.dumps(run["edition"]))
+            body = N.normalize(N.NORMALIZER_ID, items[row["item"]]["text"].encode("utf-8"))
+            located = " ".join(body[spans[key]["start"]:spans[key]["end"]].split())
+            self.assertEqual(row["text"], located, "the passage is not the located slice of the article")
+        # the sealed record and the receipt hold digests and positions, never the passage's words; the edition's
+        # citation rows carry no passage field (its own prose may share a phrase with an article, so it is not text-searched)
+        sealed_and_receipt = json.dumps(run["result"]["claim_evidence"]) \
+            + json.dumps(receipts.build_receipt(run, requested=["harbor", "quarry"]))
+        for row in rows.values():
+            self.assertNotIn(row["text"], sealed_and_receipt, "article words reached a shared file")
+        self.assertNotIn('"passage"', json.dumps(run["edition"]) + sealed_and_receipt)
         self.assertEqual(set(run["edition"]["cards"][0]["citations"][0]),
                          {"label", "title", "url", "resolution", "field", "start", "end", "relation", "window_sha256"})
 

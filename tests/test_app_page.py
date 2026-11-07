@@ -68,7 +68,7 @@ class AppFilesTests(unittest.TestCase):
                     self.assertNotRegex(ref, r"^[a-z][a-z0-9+.-]*:|^//", f"{tag} {key}={ref}")
                     self.assertIn(ref, app_static.FILES, f"{tag} {key}={ref} is not an app file")
         scripts = [a.get("src") for t, a in p.tags if t == "script" and a.get("src")]
-        self.assertEqual(scripts, ["boot.js", "boot-note.js", "app.js", "sand-engine.js", "composer-entry-transition.js"])
+        self.assertEqual(scripts, ["boot.js", "boot-note.js", "claimseal.js", "app.js", "sand-engine.js", "composer-entry-transition.js"])
 
     def test_no_inline_script_style_or_handlers(self):
         p = parsed()
@@ -81,7 +81,7 @@ class AppFilesTests(unittest.TestCase):
         self.assertFalse([t for t, a in p.tags if t == "style"])
 
     def test_scripts_inject_no_inline_style_and_no_handler_attributes(self):
-        for name in ("app.js", "boot.js", "boot-note.js"):
+        for name in ("app.js", "boot.js", "boot-note.js", "claimseal.js"):
             js = text(name)
             with self.subTest(name):
                 self.assertNotRegex(js, r'createElement\(\s*["\']style["\']\s*\)')
@@ -135,7 +135,7 @@ class AppFilesTests(unittest.TestCase):
         self.assertEqual(js.count(r"""replace(/[&<>"']/g"""), 3)
 
     def test_private_and_test_only_material_is_gone(self):
-        blob = "\n".join(text(n) for n in ("index.html", "app.js", "app.css", "boot.js", "boot-note.js")).lower()
+        blob = "\n".join(text(n) for n in ("index.html", "app.js", "app.css", "boot.js", "boot-note.js", "claimseal.js")).lower()
         for word in ("?uat=", "/staging/", "sop-runs", "/runs?run=", "america/chicago", "actor:",
                      "satire.json", "claims.json", "lensmith", "test retrieval", "mock row", "stand-in"):
             self.assertNotIn(word, blob, word)

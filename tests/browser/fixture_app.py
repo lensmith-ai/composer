@@ -24,6 +24,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -84,6 +85,10 @@ for _letter in "cdefgh":
 
 class Site(BaseHTTPRequestHandler):
     def do_GET(self):  # noqa: N802
+        # FIXTURE_FEED_DELAY (seconds): every feed answers this late, like a slow connection (the intro-timing test)
+        delay = float(os.environ.get("FIXTURE_FEED_DELAY") or 0)
+        if delay and self.path.endswith("/feed.xml"):
+            time.sleep(delay)
         body, ctype = SITE.get(self.path) or SITE.get(self.path.rstrip("/")) or (b"not here", "text/plain")
         self.send_response(200 if body != b"not here" else 404)
         self.send_header("Content-Type", ctype)
@@ -141,10 +146,15 @@ class FixtureModel:
                           "detail": [row["description"][:150]],
                           "sources": [{"id": source_id, "ref": row["title"]}]})
             quote = row["description"][:40]
-            self.answers[insight] = {"verdict": "supported", "why": "The feed says so.", "relation": "says",
+            # the judge marks one sentence of the brief's own words (it must occur once, in one field): the
+            # why-it-matters line, so the app has an underlined sentence to open
+            marked = f"Single source: {row['description'][:30]}"
+            # the first insight is backed, the second only partly, the third not at all: the app draws each differently
+            verdict, relation = {2: ("partial", "implies"), 3: ("unsupported", "contradicts")}.get(n, ("supported", "says"))
+            self.answers[insight] = {"verdict": verdict, "why": "The feed says so.", "relation": relation,
                                      "strength": 80,
-                                     "citation_spans": [{"citation_index": 0, "span_quote": quote,
-                                                         "span_relation": "says"}],
+                                     "citation_spans": [{"citation_index": 0, "span_quote": marked,
+                                                         "span_relation": relation}],
                                      "evidence_spans": [{"citation_index": 0, "support_span": quote}]}
         connection = {"headline": "The sources each publish their own measurements in the open.",
                       "confidence": "plausible", "why": "Each feed describes data shared openly.",

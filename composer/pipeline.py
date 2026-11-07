@@ -20,6 +20,8 @@ edition and the receipt record the two separately.
 What is written to disk (composer.cli decides where): the edition (our words, the cited titles
 and links, the verdicts and the seal; never the articles' text) and the full claim-seal result.
 The feed text itself stays in memory unless you ask for it with --keep-sources.
+The one exception is the app's passages.json (see `passages`): the few words (at most 25) of located evidence
+behind each citation, written into that job's own folder for the claim popover, never into the edition.
 """
 from __future__ import annotations
 

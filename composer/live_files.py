@@ -1,7 +1,9 @@
 """The data files the app page reads for one brief, under /data/live/<job>/.
 
   job.json         the job record, with `audio_state` (off, generating, ready, failed) and `audio`
-  composed.json    the brief in the page's composed-brief/v1 shape, including `transcript`: the narration script
+  composed.json    the brief in the page's composed-brief/v1 shape, including `transcript`: the narration script, and each
+                   citation's marked sentence (`span`) and, from the job's private passages.json (not itself served),
+                   the few words of evidence the check located (`passage`, at most 25 words)
   transcript.txt   the same narration script, as plain text
   receipts.json    what was read and how, the model calls and the check summary (no source text; see receipts.py)
   composer-<voice>.mp3 (or .wav)   the narration, once it is ready

@@ -18,7 +18,7 @@ APP_DIR = Path(__file__).with_name("web") / "app"
 PREFIX = "/app/"
 TYPES = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8",
          ".css": "text/css; charset=utf-8"}
-FILES = ("index.html", "app.js", "app.css", "boot.js", "boot-note.js", "sand-engine.js",
+FILES = ("index.html", "app.js", "app.css", "boot.js", "boot-note.js", "claimseal.js", "sand-engine.js",
          "composer-entry-transition.js", "entry-transition.css")
 CSP = ("default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self'; "
        "connect-src 'self'; font-src 'self'; frame-src 'self'; frame-ancestors 'self'; form-action 'none'; "
