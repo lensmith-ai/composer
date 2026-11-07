@@ -4640,7 +4640,7 @@ window.__buildLoom=buildLoom;
           if(!rw||rw.kind!=="item"||typeof rw.item_index!=="number")return;
           var card=p2cards[rw.item_index];if(!card)return;
           var tag=card.querySelector(".prooftag");if(!tag)return;
-          var vd=rw.state==="ok"?(rw.verdict||"unchecked"):"unchecked";
+          var vd=rw.state==="ok"?(rw.verdict||"unchecked"):"unchecked";if(vd==="partially_supported")vd="partial";
           if(tag.dataset.p2===vd)return;
           tag.dataset.p2=vd;
           tag.className="prooftag v-"+vd;
@@ -4676,7 +4676,7 @@ window.__buildLoom=buildLoom;
       var i=Number(m[1])-1,n=(tag.textContent.match(/(\d+) source/)||[])[1];if(!n)return;
       if(checking){if(tag.dataset.p2)return; tag.className="prooftag checking";tag.textContent="checking \u00b7 "+(n||"?")+" source"+(n==="1"?"":"s");return;}
       if(!items||!items[i])return;
-      var vd=(items[i].verification&&items[i].verification.verdict)||"unchecked";
+      var vd=(items[i].verification&&items[i].verification.verdict)||"unchecked";if(vd==="partially_supported")vd="partial";
       tag.className="prooftag v-"+vd;tag.textContent=(VS[vd]||vd)+" \u00b7 "+(n||(items[i].sources||[]).length)+" source"+((n||String((items[i].sources||[]).length))==="1"?"":"s");
     });
     if(!checking){["status","cwMastStatus"].forEach(function(id){var el=document.getElementById(id);if(el&&/\u00b7 draft \u00b7/.test(el.textContent))el.textContent=el.textContent.replace("\u00b7 draft \u00b7","\u00b7 published \u00b7");});}
