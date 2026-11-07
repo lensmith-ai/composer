@@ -184,6 +184,18 @@ class ComposeTests(unittest.TestCase):
         self.assertNotIn("<p>", good["0.0"]["text"])
         self.assertEqual(pipeline.passages([HARBOR], fetched, result("0" * 64)), {})
 
+    def test_a_span_of_text_with_no_spaces_is_cut_to_the_character_cap(self):
+        import hashlib
+        item = {"title": "T", "description": "<p>" + "\u65e5\u672c\u8a9e" * 700 + "</p>", "url": "https://example.org/t"}
+        fetched = {"harbor": ([item], {"status": "ok", "items": 1})}
+        text = pipeline.seal_sources([HARBOR], fetched, "")["harbor"]["items"][0]["text"]
+        result = {"claim_evidence": {"outcomes": [{"claim_ref": {"kind": "item", "item_index": 0}, "citation_index": 0,
+                  "response_id": "harbor-1", "source": "harbor",
+                  "evidence_spans": [{"start": 0, "end": len(text), "sha256": hashlib.sha256(text.encode()).hexdigest()}]}]}}
+        row = pipeline.passages([HARBOR], fetched, result)["0.0"]
+        self.assertTrue(row["cut"])
+        self.assertLessEqual(len(row["text"]), pipeline.PASSAGE_MAX_CHARS + 2)
+
     def test_unusable_answer_is_retried_once(self):
         run, counted, model, lines = self.run_compose(["not json", brief_for_fixtures()])
         self.assertEqual(run["edition"]["model"]["write_attempts"], 2)

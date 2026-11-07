@@ -334,7 +334,7 @@ fetch_uv() {  # one try at the uv download, with a progress bar when this is a t
     curl --fail --location --proto '=https' --tlsv1.2 $prog --show-error --connect-timeout 30 \
       --speed-limit 1000 --speed-time "$UV_HTTP_TIMEOUT" -o "$H/bootstrap/uv.tar.gz" "$url"
   else
-    wget --https-only --timeout="$UV_HTTP_TIMEOUT" -O "$H/bootstrap/uv.tar.gz" "$url"
+    wget --https-only --tries=1 --timeout="$UV_HTTP_TIMEOUT" -O "$H/bootstrap/uv.tar.gz" "$url"
   fi
 }
 

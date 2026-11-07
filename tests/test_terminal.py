@@ -108,6 +108,13 @@ class ProgressSafetyTests(unittest.TestCase):
             self.assertNotRegex(line, r"[\x00-\x1f\x7f-\x9f]")
         self.assertLess(len(got[1]), 400)
 
+    def test_text_direction_overrides_in_a_name_cannot_reorder_a_progress_line(self):
+        got = []
+        progress = terminal.ComposeProgress(1, write=got.append)
+        progress("source.done", "Blog \u202etxet\u202c and \u2066x\u2069")
+        for line in got:
+            self.assertNotRegex(line, "[\u202a-\u202e\u2066-\u2069]")
+
     def test_a_broken_output_never_changes_the_result_or_the_error(self):
         def broken(_text):
             raise BrokenPipeError("stdout closed")

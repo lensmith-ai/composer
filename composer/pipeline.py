@@ -215,6 +215,7 @@ def _card(item: dict, index: int, labels: dict, digests: dict) -> dict:
     return card
 
 
+PASSAGE_MAX_CHARS = 300  # and never more than this many characters: Chinese, Japanese and Thai have no spaces to count
 PASSAGE_MAX_WORDS = 25  # the quote rule's own cap (composer.quotes.MAX_QUOTE_WORDS): a shown passage never goes past it
 _TAGS = re.compile(r"<[^<>]*>")
 
@@ -252,8 +253,9 @@ def passages(sources: list, fetched: dict, result: dict, *, retrieved_at: str = 
         parts = " ".join(html.unescape(_TAGS.sub(" ", piece)).split()).split(" ")
         if not parts or not parts[0]:
             continue
-        cut = len(parts) > PASSAGE_MAX_WORDS
-        out[key] = {"text": " ".join(parts[:PASSAGE_MAX_WORDS]) + (" \u2026" if cut else ""),
+        shown = " ".join(parts[:PASSAGE_MAX_WORDS])
+        cut = len(parts) > PASSAGE_MAX_WORDS or len(shown) > PASSAGE_MAX_CHARS  # text with no spaces is one "word"
+        out[key] = {"text": shown[:PASSAGE_MAX_CHARS].rstrip() + (" \u2026" if cut else ""),
                     "words": min(len(parts), PASSAGE_MAX_WORDS), "cut": cut,
                     "source": row.get("source"), "item": item["id"]}
     return out

@@ -278,5 +278,13 @@ class SetupShMessageTests(unittest.TestCase):
             self.assertFalse((home / "app").exists())  # what it had made was removed again
 
 
+    def test_the_wget_fallback_tries_once_because_the_retry_loop_is_the_scripts_own(self):
+        text = (ROOT / "setup.sh").read_text(encoding="utf-8")
+        calls = [line for line in text.splitlines() if line.strip().startswith("wget ")]
+        self.assertTrue(calls)
+        for line in calls:
+            self.assertIn("--tries=1", line)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -11,7 +11,7 @@ import threading
 import time
 
 _LOCK = threading.Lock()  # one for the whole process: two briefs composing at once must not mix their lines
-_CONTROL = re.compile(r"[\x00-\x1f\x7f-\x9f]")  # escape sequences in a source's name or an error text never reach a terminal
+_CONTROL = re.compile(r"[\x00-\x1f\x7f-\x9f\u202a-\u202e\u2066-\u2069]")  # escape sequences in a source's name or an error text never reach a terminal
 OSC8_TERMINALS = {"iTerm.app", "WezTerm", "vscode", "ghostty", "Hyper", "rio"}
 
 
