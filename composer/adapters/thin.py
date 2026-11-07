@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import re
 import time
+import unicodedata
 import urllib.parse
 
 from .. import fetch as _fetch
@@ -42,7 +43,6 @@ DROPPED_LISTED = 20  # dropped items named in a receipt
 
 _CJK = re.compile(r"[぀-ヿ㐀-䶿一-鿿가-힯]")
 _UNSPACED = re.compile("[\u0e00-\u0eff\u1000-\u109f\u1780-\u17ff]")  # Thai, Lao, Myanmar, Khmer: no spaces
-_EDGE = re.compile(r"^\W+|\W+$")
 _NOT_ALNUM = re.compile(r"[^\w]+")
 _LOREM = re.compile(r"\blorem ipsum\b|\bdolor sit amet\b", re.I)
 # A feed generator's tail on an excerpt ("The post X appeared first on Y", "[...]", "Read more »"). The "read more"
@@ -66,12 +66,28 @@ _FILLER = re.compile(
 _SPELLED_OUT = {"tbd", "tba", "tbc", "tbs", "na"}
 
 
+def _wordlike(ch: str) -> bool:
+    """A letter, a digit, or a combining mark (a vowel sign belongs to its word)."""
+    return ch.isalnum() or unicodedata.category(ch).startswith("M")
+
+
+def _trim(token: str) -> str:
+    """The token without the punctuation at either end, by two scans (a regex for this is quadratic on a token with
+    punctuation inside it)."""
+    start, end = 0, len(token)
+    while start < end and not _wordlike(token[start]):
+        start += 1
+    while end > start and not _wordlike(token[end - 1]):
+        end -= 1
+    return token[start:end]
+
+
 def _tokens(text: str) -> list[str]:
     """Words as written: split on spaces, punctuation trimmed off the ends, tokens with no letter or digit left out.
-    (Not split inside a word, so a Hindi word keeps its vowel signs; one-letter words such as Russian "\u043a" stay.)"""
+    Not split inside a word, so a Hindi word keeps its vowel signs and Russian one-letter words stay."""
     out = []
     for raw in (text or "").split():
-        token = _EDGE.sub("", raw)
+        token = _trim(raw)
         if any(ch.isalnum() for ch in token):
             out.append(token)
     return out
@@ -87,8 +103,8 @@ def word_count(text: str) -> int:
             count += max(1, len(token) // 2)
         elif _UNSPACED.search(token):
             count += max(1, len(token) // 4)
-        else:
-            count += 1
+        elif len(token) >= 2 or token.isdigit() or ord(token) > 127:
+            count += 1  # a lone ASCII letter ("a", "x") is not a word here; a lone Cyrillic or Greek one is
     return count
 
 
@@ -128,7 +144,8 @@ def same_site(a: str, b: str) -> bool:
     except ValueError:
         return False
     return (pa.scheme == "https" and pb.scheme == "https" and bool(host_a) and host_a == host_b
-            and port_a == port_b and not pa.username and not pb.username)
+            and port_a == port_b and pa.username is None and pb.username is None
+            and pa.password is None and pb.password is None)
 
 
 def page_address(link: str, feed_url: str) -> tuple[str, str]:
