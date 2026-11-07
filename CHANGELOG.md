@@ -58,7 +58,8 @@ The full app, on your computer or your own server. In plain words:
   words, kept in that brief's own `passages.json` on your computer, never in the shared edition, the receipts or
   `check.json`). Esc, the Close button or pressing elsewhere closes it.
 - The compose animation forms its first words within 3 seconds of pressing Compose, no longer waiting for the first
-  feed to answer. Tap, click or Esc skips it; with reduced motion nothing is drawn.
+  feed to answer. Tap, click or Esc skips it, at any moment, and the screen then ends exactly as it does when the
+  animation plays out (the loom keeps showing the run until the brief is ready); with reduced motion nothing is drawn.
 - Setup shows where it is: "Step 3 of 7: downloading Python 3.12 (about 40 MB)", with the download's own progress on
   screen. Before it asks to download a Python it says why ("Found python3 3.9.6 at /usr/bin/python3; Composer needs
   3.10 or newer."). A failed download prints the real error and the two ways forward (rerun with a longer
