@@ -64,6 +64,10 @@ RULES:
   why_it_matters with "{single}".
 - "corroborated" needs at least two different source ids pointing the same way; otherwise use
   plausible or weak. Never invent a connection.
+- The feed is a delivery channel, not the story. Never write about how an item was published or described:
+  not that its description is empty, missing, "TBD", filler text or "coming soon", not that it has no summary or
+  date, not that a feed lists it. Items with no real text have been removed before you see them. If an item's
+  material is only its title, say only what the title itself says, or leave the item out.
 - Say only what the material supports. Do not add numbers, names or dates that are not in it.
   A detail may say what the source does NOT establish.
 - Write in your own words. Quote an article only when its exact words matter, and then in

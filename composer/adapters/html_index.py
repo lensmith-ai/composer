@@ -18,6 +18,7 @@ from urllib.parse import urljoin, urlsplit, urlunsplit
 
 from .. import fetch as _fetch
 from ..sanitize import clean_text, clean_url
+from . import thin
 from .common import DESC_CAP, TIMEOUT_S, TITLE_CAP, new_receipt, strip_html
 
 # Hostile pages are expected here. Nothing below is a backtracking regex: tags and their
@@ -25,6 +26,14 @@ from .common import DESC_CAP, TIMEOUT_S, TITLE_CAP, new_receipt, strip_html
 # page size and no arrangement of tags or attributes can make it quadratic (see the tests).
 ATTR_CAP = 2000  # the longest attribute value kept (an address or a description)
 _SPACE = " \t\n\r\f"
+_ASCII_LOWER = {c: c + 32 for c in range(ord("A"), ord("Z") + 1)}
+
+
+def ascii_lower(text: str) -> str:
+    """Lower-case A-Z only, so the result is exactly as long as the text. (str.lower() makes some characters longer,
+    such as a dotted capital I, which would move every position found in the lower-cased copy off the original.)"""
+    return text.translate(_ASCII_LOWER)
+
 
 
 def _attrs(tag: str) -> dict[str, str]:
@@ -105,7 +114,7 @@ def _between(markup: str, lower: str, tag: str) -> str | None:
 
 def _drop_blocks(markup: str) -> str:
     """The markup without <script>, <style> and <noscript> blocks; an unclosed one runs to the end."""
-    lower = markup.lower()
+    lower = ascii_lower(markup)
     out: list[str] = []
     at = 0
     nxt = {t: lower.find("<" + t) for t in _DROPPED}  # each tag's next opening; -1 once there is none
@@ -202,7 +211,7 @@ def _article_redirects(source):
 def links(markup: str, page_url: str, source) -> list[str]:
     found: list[str] = []
     markup = markup[:MARKUP_CAP * 4]
-    for attrs in _tags(markup, markup.lower(), "a"):
+    for attrs in _tags(markup, ascii_lower(markup), "a"):
         href = attrs.get("href", "").strip()
         if not href:
             continue
@@ -219,7 +228,7 @@ def links(markup: str, page_url: str, source) -> list[str]:
 
 def extract(markup: str) -> tuple[str, str]:
     markup = markup[:MARKUP_CAP]
-    lower = markup.lower()
+    lower = ascii_lower(markup)
     raw_title = _between(markup, lower, "title")
     if not (raw_title or "").strip():
         raw_title = _between(markup, lower, "h1")
@@ -282,10 +291,19 @@ def fetch(source, get):
             if final != url and not eligible(final, source):
                 errors += 1  # an article that leads to another host, port or folder is not read
                 continue
-            title, desc, tier = extract_with_tier(resp.body.decode("utf-8", "replace"), source)
+            markup = resp.body.decode("utf-8", "replace")
+            title, desc, tier = extract_with_tier(markup, source)
             if not title:
                 errors += 1
                 continue
+            if thin.classify(title, desc) == "filler":  # a meta description of "TBD" is not the article
+                from .. import html_extract
+                better = html_extract.article_text(markup, tier=source.extraction_tier)[1]
+                if thin.classify(title, better) not in ("ok", "short"):
+                    receipt["thin_dropped"] = receipt.get("thin_dropped", 0) + 1
+                    errors += 1
+                    continue
+                desc = better
             receipt["fetch_tiers"][tier] += 1
             t, dsc, link = clean_text(title), clean_text(desc), clean_url(url)
             receipt["cleaned"] += t.changes + dsc.changes + link.changes

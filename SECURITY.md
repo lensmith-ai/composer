@@ -132,6 +132,11 @@ What Composer does to stay safe, and where its limits are:
   from the address alone (that one host, the page's own folder as the only prefix, 10 links and 5
   articles at most, never the front page), shows the links and article titles it read, and saves
   nothing until you confirm; the browser's copy of the offer is not used for the scope.
+  A feed entry whose description is empty or filler ("TBD", "coming soon") is read from its own page for a brief:
+  https only, the same host and port as the feed ("www." ignored), every redirect hop held to that site and counted,
+  at most 10 requests and 45 seconds for one source, the first timeout stops asking that site, and a page that
+  cannot be read means the entry is left out with the reason in the receipt. Feed discovery follows links on the
+  pasted page only to the same site, reads at most two of them as web pages, and tries at most six feeds from each.
 - **Output.** The brief file and the page keep the brief's own words, the cited titles and links,
   the verdicts and SHA-256 digests. They do not store the articles' text (a sentence may quote a
   few words, as any summary does). `check.json` also holds the judge's one-line reasons, which

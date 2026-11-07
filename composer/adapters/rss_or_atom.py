@@ -12,6 +12,7 @@ import xml.etree.ElementTree as ET
 from xml.parsers import expat
 
 from ..sanitize import clean_text, clean_url
+from . import thin
 from .common import DESC_CAP, PUB_CAP, TIMEOUT_S, TITLE_CAP, new_receipt, strip_html
 
 ITEM_TAGS = ("item", "entry")
@@ -101,21 +102,28 @@ def parse(raw: bytes, max_items: int) -> tuple[list[dict], int]:
     return items, cleaned
 
 
-def fetch(source, get):
+def fetch(source, get, *, enrich=False):
+    """One GET of the feed. With `enrich` (a brief does; a probe or discovery does not) an entry whose text is
+    empty or filler text is read from its own page or dropped, with the reason in receipt["thin"]
+    (composer.adapters.thin); a few entries past max_items are read to replace the dropped ones."""
     receipt = new_receipt(source)
     try:
         resp = get(source.url, TIMEOUT_S)
         receipt["bytes"] = len(resp.body)
         if resp.status != 200:
             raise ValueError(f"feed answered HTTP {resp.status}")
-        items, cleaned = parse(resp.body, source.max_items)
+        items, cleaned = parse(resp.body, source.max_items + (thin.EXTRA_ENTRIES if enrich else 0))
     except Exception as exc:  # a bad feed is reported, never raised
         receipt["error"] = f"{type(exc).__name__}: {exc}"[:300]
         return [], receipt
     receipt["cleaned"] = cleaned
+    if enrich:
+        items = thin.refine(items, source, get, receipt, max_items=source.max_items)
     receipt["items"] = len(items)
     if items:
         receipt["status"] = "ok"
+    elif enrich and receipt.get("thin", {}).get("dropped_count"):
+        receipt["error"] = "every item in the feed had no real text (empty or filler), and its page gave none"
     else:
         receipt["error"] = "the feed had no items with a title"
     return items, receipt

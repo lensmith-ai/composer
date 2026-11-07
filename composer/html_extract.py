@@ -62,3 +62,66 @@ def extract(markup: str, *, tier: str = "native") -> tuple[str, str]:
     title, fallback = html_index.extract(markup)
     text = " ".join(text.split())[:html_index.DESC_CAP]
     return title, text or fallback
+
+
+_PARA_MIN_WORDS = 6  # a paragraph shorter than this is a caption, a button or a notice, not article text
+
+
+_TAG_END = (">", " ", "\t", "\n", "\r", "/")
+
+
+def _next_p(lower: str, start: int) -> int:
+    """Where the next <p> tag opens at or after `start` (not <pre>, <param>), or -1."""
+    at = lower.find("<p", start)
+    while at >= 0 and lower[at + 2:at + 3] not in _TAG_END:
+        at = lower.find("<p", at + 2)
+    return at
+
+
+def _paragraphs(markup: str) -> list[str]:
+    """The text of every <p>...</p> in the markup, in order, read in one pass: a paragraph ends at its </p>, or where
+    the next <p> opens, or at the end, and each stretch of the page is looked at once."""
+    lower = html_index.ascii_lower(markup)
+    out: list[str] = []
+    at = _next_p(lower, 0)
+    while at >= 0:
+        open_end = lower.find(">", at)
+        if open_end < 0:
+            break
+        following = _next_p(lower, open_end)
+        limit = len(lower) if following < 0 else following
+        close = lower.find("</p", open_end, limit)
+        out.append(html_index.strip_html(markup[open_end + 1:limit if close < 0 else close]))
+        at = following
+    return out
+
+
+def article_text(markup: str, *, tier: str = "native") -> tuple[str, str]:
+    """(title, the article's own text) from a page that a feed entry links to, for the entry's description.
+
+    Unlike `extract` (a page's meta description, else all its text), this looks for the article body: with the
+    optional parser installed and asked for, that parser; otherwise the paragraphs of the page's <article> (or
+    <main>, or the whole page), those long enough to be sentences, joined. When the page has no such paragraphs, its
+    meta description is used. The text is cut at the description limit; it may be empty."""
+    markup = markup[:html_index.MARKUP_CAP]
+    if tier == "trafilatura" and trafilatura_installed():
+        title, text = extract(markup, tier=tier)
+        return title, text
+    lower = html_index.ascii_lower(markup)
+    title = html_index.extract(markup)[0]
+    cleaned = html_index._drop_blocks(markup)
+    low = html_index.ascii_lower(cleaned)
+    text = ""
+    for scope in (html_index._between(cleaned, low, "article"), html_index._between(cleaned, low, "main"), cleaned):
+        if scope is None:
+            continue
+        kept = [p for p in _paragraphs(scope) if len(p.split()) >= _PARA_MIN_WORDS]
+        text = " ".join(kept)
+        if text:
+            break
+    if not text:
+        meta = next((a.get("content", "") for a in html_index._tags(markup, lower, "meta")
+                     if a.get("name", "").strip().lower() in ("description", "twitter:description")
+                     or a.get("property", "").strip().lower() == "og:description"), "")
+        text = html_index.strip_html(meta)
+    return title, text[:html_index.DESC_CAP]

@@ -6,7 +6,9 @@
                   `model_calls` holds the writer's), the check summary and, when a
                   lens from the registry or the lens store was used, that lens's revision and the prompt's digest;
                   and the quote rule's note (`quotes`): quoted runs and passages found, and whether the brief was
-                  repaired or parts were dropped for copying too much of an article (counts only, no text)
+                  repaired or parts were dropped for copying too much of an article (counts only, no text). A source's entry
+                  also has `thin` when feed entries with no real text were read from their pages or left out
+                  (counts, and a reason for each entry left out, by position, never its title)
   transcript.txt  the narration script the model wrote with the brief, the same words the page's transcript
                   sheet shows and narration reads; a brief without one gets no transcript file
 
@@ -31,6 +33,16 @@ def build_receipt(run: dict, *, requested: list | None = None) -> dict:
     for source_id, (_items, receipt) in (run.get("fetched") or {}).items():
         sources[source_id] = {"label": receipt.get("label", ""), "status": receipt.get("status", "failed"),
                               "items": receipt.get("items", 0), "fetch_tier": receipt.get("fetch_tier", "native")}
+        thin = receipt.get("thin")
+        if isinstance(thin, dict):  # entries with no real text: counts, and why each left one out (never its title)
+            sources[source_id]["thin"] = {
+                "seen": thin.get("thin", 0), "page_requests": thin.get("page_requests", 0),
+                "filled_from_page": thin.get("enriched", 0), "kept_short": thin.get("kept_short", 0),
+                "dropped": thin.get("dropped_count", 0),
+                "dropped_why": [{"position": d.get("position"), "reason": d.get("reason", "")}
+                                for d in (thin.get("dropped") or []) if isinstance(d, dict)]}
+        if receipt.get("thin_dropped"):  # an article page whose description was filler and whose text gave none
+            sources[source_id]["thin_dropped"] = receipt["thin_dropped"]
     edition = run.get("edition") or {}
     output = {"schema": SCHEMA, "requested_sources": list(requested if requested is not None else sources),
               "sources": sources, "model_calls": dict(run.get("receipt") or {}),
