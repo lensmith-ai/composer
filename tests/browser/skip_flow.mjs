@@ -183,13 +183,21 @@ async function landed(page, since, why) {
 
 async function natural(browser, server, width, opts) {
   const { ctx, page } = await openApp(browser, server, width, opts);
+  // when the Skip button goes by itself (the animation ends before the brief shows): presses after that have nothing to press
+  await page.evaluate(() => {
+    document.getElementById('cmpGo').addEventListener('click', () => {
+      const t0 = performance.now();
+      const iv = setInterval(() => { if (!document.getElementById('cwEntrySkip')) { window.__buttonGone = performance.now() - t0; clearInterval(iv); } }, 20);
+    }, { once: true, capture: true });
+  });
   const since = Date.now();
   await page.click('#cmpGo');
   const took = await landed(page, since, 'a run left alone');
   await page.waitForTimeout(SETTLE_MS);
   const snap = await page.evaluate(snapshot);
+  const buttonGone = await page.evaluate(() => window.__buttonGone || 0);
   await ctx.close();
-  return { took, snap };
+  return { took, snap, buttonGone };
 }
 
 const HOWS = ['button', 'esc', 'click'];
@@ -265,9 +273,9 @@ async function sweep(browser, engine, width, feedDelay, stride, log) {
       || !first.snap.canvases.includes('cmp-entry-sand-rest') || first.snap.panels.length) {
       throw new Error(`a run left alone does not end the way this test expects: ${JSON.stringify(first.snap)}`);
     }
-    base = { snap: first.snap, took: Math.min(first.took, second.took) };
+    base = { snap: first.snap, took: Math.min(first.took, second.took), buttonGone: Math.min(first.buttonGone, second.buttonGone) };
   } finally { await stop(probe); }
-  const last = Math.max(stride, base.took - 200);
+  const last = Math.max(stride, (base.buttonGone || base.took) - 300);
   const jobs = [];
   let landedPresses = 0;
   let i = 0;
@@ -296,7 +304,7 @@ async function sweep(browser, engine, width, feedDelay, stride, log) {
     const first = stuck[0] || failures[0];
     throw new Error(`${failures.length} of ${jobs.length} presses failed (${stuck.length} left the page stuck, ${failures.length - stuck.length} ended in a different state), first: ${first}`);
   }
-  log.push(`${feedDelay ? 'slow' : 'fast'} feeds: ${landedPresses} presses of ${jobs.length} to ${last} ms (natural end ${base.took} ms)`);
+  log.push(`${feedDelay ? 'slow' : 'fast'} feeds: ${landedPresses} presses of ${jobs.length} to ${last} ms (the Skip button is there for ${Math.round(base.buttonGone)} ms, the brief shows at ${base.took} ms)`);
 }
 
 async function failureAfterSkip(browser, engine, log) {
