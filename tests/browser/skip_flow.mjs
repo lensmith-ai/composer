@@ -332,7 +332,7 @@ async function failureAfterSkip(browser, engine, log) {
 
 // reload onto a run that is still going (the app joins it: "rejoin"), then press Skip: the page must still land on the brief
 async function rejoinSkip(browser, engine, log) {
-  const server = await startServer({ FIXTURE_FEED_DELAY: '1.5' });
+  const server = await startServer({ FIXTURE_FEED_DELAY: '3' });   // a run of about 20 s: still going when the page has reloaded onto it, even on a slow machine
   try {
     for (const at of [300, 1500, 4000]) {
       const { ctx, page, errors } = await openApp(browser, server, 1280);
