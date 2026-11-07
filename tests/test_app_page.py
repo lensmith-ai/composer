@@ -129,6 +129,16 @@ class AppFilesTests(unittest.TestCase):
         self.assertNotIn("href", offer)  # addresses are shown as text, never made links
         self.assertIn("Nothing is saved until you add it.", offer)
 
+    def test_a_picked_feed_row_shows_how_the_feed_was_found_as_text(self):
+        js = text("app.js")
+        start = js.index('check.onclick=function(){var target=url.value.trim();')
+        end = js.index("add.onclick=function()", start)
+        rows = js[start:end]
+        self.assertIn("c.found_via", rows)
+        self.assertIn("sub.textContent=", rows)  # found_via comes from a third-party page's own link text: text, never markup
+        self.assertEqual(rows.count("innerHTML"), rows.count('innerHTML=""'))  # the only use is clearing the list
+        self.assertIn("slice(0,160)", rows)
+
     def test_escape_helpers_cover_quotes(self):
         js = text("app.js")
         self.assertIn('.replace(/"/g,"&quot;").replace(/\'/g,"&#39;")', js)
