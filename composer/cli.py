@@ -76,8 +76,8 @@ def cmd_compose(args) -> int:
         checker.ready()
     out = _fresh_dir(args.out)
 
-    def log(_kind, text):
-        print(f"  {text}", flush=True)
+    from . import terminal
+    log = terminal.ComposeProgress(len(sources))  # numbered steps on the terminal while it works
 
     try:
         lens = lenses.LensRegistry.builtin().get(args.lens.strip())  # a public lens by id
@@ -167,8 +167,9 @@ def cmd_serve(args) -> int:
     except ProviderError as exc:
         print(f"note: {exc}. The page will show the recorded brief; Compose will fail until a key is set.", flush=True)
     source_path = registry.local_path(args.sources_file) or Path(args.sources_file or registry.LOCAL_DEFAULT)
+    from . import terminal
     app = server.App(reg, lambda: from_env(args.provider, args.model), make_checker=lambda: checker_from_env(),
-                     out_dir=out, data_root=data_root, passphrase=passphrase,
+                     compose=terminal.with_progress(pipeline.compose), out_dir=out, data_root=data_root, passphrase=passphrase,
                      source_service=sources_registry.SourceService(
                          source_path, packages=sources_registry.PackageService(
                              source_path.parent / "composer-packages.json")),
@@ -232,7 +233,7 @@ def build_scheduler(data: Path, cfg: dict, env: dict, *, provider=None, model=No
 
 def cmd_up(args) -> int:
     import os
-    from . import home as H, lifecycle, narration, server, settings as S
+    from . import home as H, lifecycle, narration, server, settings as S, terminal
     from .providers import use_key_file
     from .scheduler import chain
     home, data = _where(args)
@@ -240,6 +241,7 @@ def cmd_up(args) -> int:
     if not (data / "current").exists() and not container:
         print(f"composer: no Composer data at {data}; run setup.sh (or `composer setup`) first", file=sys.stderr)
         return 2
+    print(f"Starting Composer {__version__}: checking your data folder and settings...", flush=True)
     native = home if (home / "app").is_dir() else None
     lifecycle.admit(native, data)  # read-only trust admission, before the lock, recovery or any write
     H.make_dirs(data)
@@ -257,6 +259,7 @@ def cmd_up(args) -> int:
     narrator = narration.Narrator(cfg["narration"], base)
     sched = build_scheduler(data, cfg, env, provider=args.provider, model=args.model)
     app = server.App(reg, lambda: from_env(args.provider, args.model, env=env), data_root=data, settings=cfg,
+                     compose=terminal.with_progress(pipeline.compose),  # a brief started from the page shows progress here
                      make_checker=None if cfg["checker"]["same"] else (lambda: checker_from_env(env=env)),
                      source_service=sources_registry.SourceService(
                          sf, packages=sources_registry.PackageService(sf.parent / "packages.json")),
@@ -457,7 +460,7 @@ def parser() -> argparse.ArgumentParser:
 
     up = where(sub.add_parser("update", help="install a release file as a checked, undoable update"))
     up.add_argument("--from-file", required=True, metavar="RELEASE")
-    up.add_argument("--sha256", help="the release file's SHA-256 (or put SHA256SUMS next to it)")
+    up.add_argument("--sha256", help="the release file's SHA-256 (or put SHA256SUMS, or SHA256SUMS.txt, next to it)")
     up.set_defaults(func=cmd_update)
 
     rb = where(sub.add_parser("rollback", help="go back to the version and data before the last update"))

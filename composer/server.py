@@ -706,6 +706,7 @@ def check_bind(host: str, passphrase: str, trusted=None) -> None:
 
 
 def serve(app: App, host: str, port: int, *, trusted=None, public_origin: str = "", on_ready=None) -> None:
+    from . import terminal
     check_bind(host, app.passphrase, trusted)
     httpd = ThreadingHTTPServer((host, port), handler_for(app, local_only=host in LOOPBACK, trusted=trusted,
                                                           public_origin=public_origin))
@@ -713,7 +714,10 @@ def serve(app: App, host: str, port: int, *, trusted=None, public_origin: str = 
         on_ready(httpd)
     _stop_on_sigterm()
     shown = "127.0.0.1" if host == "localhost" else (f"[{host}]" if ":" in host else host)
-    print(f"composer serving on http://{shown}:{port}/  (Ctrl+C to stop)", flush=True)
+    print(f"composer serving on {shown}:{port}  (Ctrl+C to stop)", flush=True)
+    url = terminal.app_url(host, port, public_origin=public_origin)
+    if url:  # on a line of its own, with nothing after it, so a terminal makes it Cmd+clickable
+        print(terminal.open_line(url), flush=True)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

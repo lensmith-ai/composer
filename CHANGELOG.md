@@ -7,18 +7,6 @@ Each release note is written from this file and checked against it by claim-seal
 
 ## [Unreleased]
 
-### Changed
-
-- The app page uses the width of your screen. The phone keeps its single column; from 768 px the loom stands beside
-  the reading column, and from 960 px the insight cards sit in two columns (the text is held to a readable line
-  length). The compose screen is centred and larger on a laptop.
-- In a brief, every checked claim is an underlined sentence: solid is supported, dashed is partly supported, wavy is
-  not supported. Pressing one (click, tap, Enter or Space) opens the verdict in plain words, the cited article with
-  its link and the passage the check located (at most 25 words, kept in that brief's own `passages.json`, never in
-  the shared edition). Esc, or pressing elsewhere, closes it.
-- The compose animation forms its first words within 3 seconds of pressing Compose, no longer waiting for the first
-  feed to answer. Tap, click or Esc skips it; with reduced motion nothing is drawn.
-
 ## [0.2.0] - not released yet
 
 The full app, on your computer or your own server. In plain words:
@@ -61,6 +49,26 @@ The full app, on your computer or your own server. In plain words:
   a link such as "RSS" to the site's own page of feeds (on the same site only; `http://` addresses there are read as
   `https://`), checks each feed it lists, and shows them for you to pick, each with how it was found
   (`found_via`). Usual feed addresses (including `/rss.cms`) are guessed only when the page gave no feed.
+- The app page uses the width of your screen. The phone keeps its single column; from 768 px the loom stands beside
+  the reading column, and from 960 px the insight cards sit in two columns (the text is held to a readable line
+  length). The compose screen is centred and larger on a laptop.
+- In a brief, every checked claim is an underlined sentence: solid is supported, dashed is partly supported, wavy is
+  not supported. Pressing one (click, tap, Enter or Space) opens the verdict in plain words, the cited article with
+  its link and the passage the check located (at most 25 words, kept in that brief's own `passages.json`, never in
+  the shared edition). Esc, or pressing elsewhere, closes it.
+- The compose animation forms its first words within 3 seconds of pressing Compose, no longer waiting for the first
+  feed to answer. Tap, click or Esc skips it; with reduced motion nothing is drawn.
+- Setup shows where it is: "Step 3 of 7: downloading Python 3.12 (about 40 MB)", with the download's own progress on
+  screen. Before it asks to download a Python it says why ("Found python3 3.9.6 at /usr/bin/python3; Composer needs
+  3.10 or newer."). A failed download prints the real error and the two ways forward (rerun with a longer
+  `UV_HTTP_TIMEOUT`, or install Python 3.10 or newer from python.org) instead of hiding it. The network timeout now
+  defaults to 300 seconds (uv's own is 30) and a download is tried three times; a timeout you set yourself is kept.
+- `composer up` prints `Open: http://127.0.0.1:8765/` on a line of its own, so a macOS Terminal makes it Cmd+clickable
+  (terminals known to draw links get a link around the same text). A brief composed from the page, or by
+  `composer compose`, prints numbered progress lines on the terminal (reading sources, writing, checking claims, done)
+  and, if it fails, the reason.
+- `composer update --from-file` also finds the checksums in `SHA256SUMS.txt` next to the release file (a messaging app
+  or browser may add `.txt`), and says it did.
 - An optional article parser (trafilatura) for news pages that have no feed, installed from a hash-locked file.
 - Optional narration: a Listen button that reads the brief's own spoken script aloud with Kokoro, made on your
   computer after the text is final. A Kokoro you already have is reused, read-only, after a check. If anything

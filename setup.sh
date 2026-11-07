@@ -27,6 +27,21 @@ PY_VERSION=3.12.9
 NEED_KB=307200
 
 say() { printf '%s\n' "$*"; }
+# Numbered, visible steps: a person watching a slow connection can see where setup is and how many are left.
+STEPS=7
+step() { printf '\nStep %s of %s: %s\n' "$1" "$STEPS" "$2"; }
+# try3 WHAT COMMAND...: runs the command up to 3 times. Its own output (download progress, and the real error when
+# it fails) is never hidden or captured. Returns 1 after the third failure.
+try3() {
+  t3_what=$1; shift; t3_n=1
+  while :; do
+    if "$@"; then return 0; fi
+    [ "$t3_n" -lt 3 ] || return 1
+    say "  $t3_what did not work (attempt $t3_n of 3); trying again in ${COMPOSER_SETUP_RETRY_WAIT:-5} seconds"
+    sleep "${COMPOSER_SETUP_RETRY_WAIT:-5}"
+    t3_n=$((t3_n + 1))
+  done
+}
 die() { printf 'setup.sh: %s\n' "$*" >&2; exit 2; }
 has_tty() { (: < /dev/tty) 2>/dev/null; }
 # The folders setup and Composer make in the app folder must be real folders: a symbolic link planted there could
@@ -151,6 +166,8 @@ VERSION=$(sed -n 's/^version = "\([0-9][0-9A-Za-z.+_-]*\)"$/\1/p' "$SRC/pyprojec
 [ -n "$VERSION" ] || die "cannot read the version from pyproject.toml"
 
 # ---------------------------------------------------------------------------------------- checks (read only)
+say "Lensmith Composer $VERSION setup"
+step 1 "checking this computer and the app folder (nothing is written yet)"
 case "$H" in /*) ;; *) die "the app folder must be an absolute path, not $H" ;; esac
 while [ "${H%/}" != "$H" ] && [ "$H" != "/" ]; do H=${H%/}; done
 case "$H" in */../*|*/..|*/./*|*/.) die "give the app folder without . or .. parts: $H" ;; esac
@@ -196,17 +213,33 @@ fi
 [ "$YES" = 1 ] && PYDL=1
 
 PY=""
+PYVER=""
+WHYNOT=""
 for cand in python3 python3.14 python3.13 python3.12 python3.11 python3.10; do
   p=$(command -v "$cand" 2>/dev/null || true)
   [ -n "$p" ] || continue
+  v=$("$p" -c 'import sys; print("%d.%d.%d" % sys.version_info[:3])' 2>/dev/null || true)
   if "$p" -c 'import sys, venv, ensurepip; sys.exit(0 if sys.version_info >= (3, 10) else 1)' >/dev/null 2>&1; then
-    PY=$p; break
+    PY=$p; PYVER=$v; break
   fi
+  # say why this one cannot be used (only the first two, so a long PATH stays readable)
+  if [ -z "$v" ]; then
+    reason="Found $cand at $p, but it does not run."
+  elif "$p" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)' >/dev/null 2>&1; then
+    reason="Found $cand $v at $p, but it has no venv module (on Debian or Ubuntu: apt install python3-venv)."
+  else
+    reason="Found $cand $v at $p; Composer needs 3.10 or newer."
+  fi
+  [ "$(printf '%s' "$WHYNOT" | grep -c .)" -ge 2 ] || WHYNOT="${WHYNOT:+$WHYNOT
+}$reason"
 done
+step 2 "looking for Python 3.10 or newer"
+[ -z "$PY" ] || say "  found Python $PYVER at $PY"
 
 FETCH=""
 if [ -z "$PY" ]; then
-  say "No Python 3.10 or newer (with venv) was found on this computer."
+  if [ -n "$WHYNOT" ]; then say "$WHYNOT"; else say "No python3 was found on this computer."; fi
+  say "So there is no usable Python 3.10 or newer here, and Composer needs one."
   case "$(uname -s)-$(uname -m)" in
     Linux-x86_64) UV_ASSET=uv-x86_64-unknown-linux-gnu; UV_SHA=46d3fcf04d64be42bded914d648657cd62d968172604e3aaf8386142c09d2317 ;;
     Linux-aarch64|Linux-arm64) UV_ASSET=uv-aarch64-unknown-linux-gnu; UV_SHA=d1f716e8362d7da654a154b8331054a987c1fc16562bd719190a42458e945785 ;;
@@ -273,6 +306,10 @@ cleanup() {
 }
 MADE_VERSION=0
 trap cleanup EXIT
+# Ctrl+C (or a closed window) during a long download must clean up too: some shells skip the EXIT trap on a signal
+trap 'exit 130' INT
+trap 'exit 143' TERM
+trap 'exit 129' HUP
 
 umask 077
 check_trust
@@ -286,50 +323,71 @@ export TMPDIR="$H/tmp" PIP_CACHE_DIR="$H/cache/pip" UV_CACHE_DIR="$H/cache/uv" U
   HF_HOME="$H/cache/hf" PYTHONPYCACHEPREFIX="$H/cache/pycache" PIP_REQUIRE_VIRTUALENV=1 PIP_CONFIG_FILE=/dev/null \
   PYTHONNOUSERSITE=1 PIP_DISABLE_PIP_VERSION_CHECK=1 UV_NO_CONFIG=1 UV_PYTHON_PREFERENCE=only-managed \
   COMPOSER_HOME="$H"
+# A slow connection (the Python download alone is about 40 MB) must not fail on uv's 30 second default or pip's 15:
+# generous timeouts unless you set your own (UV_HTTP_TIMEOUT=600 sh setup.sh).
+: "${UV_HTTP_TIMEOUT:=300}" "${PIP_DEFAULT_TIMEOUT:=120}" "${PIP_RETRIES:=5}"
+export UV_HTTP_TIMEOUT PIP_DEFAULT_TIMEOUT PIP_RETRIES
+
+fetch_uv() {  # one try at the uv download, with a progress bar when this is a terminal
+  if [ "$FETCH" = curl ]; then
+    if [ -t 2 ]; then prog=--progress-bar; else prog=--silent; fi
+    curl --fail --location --proto '=https' --tlsv1.2 $prog --show-error --connect-timeout 30 \
+      --speed-limit 1000 --speed-time "$UV_HTTP_TIMEOUT" -o "$H/bootstrap/uv.tar.gz" "$url"
+  else
+    wget --https-only --timeout="$UV_HTTP_TIMEOUT" -O "$H/bootstrap/uv.tar.gz" "$url"
+  fi
+}
 
 if [ -z "$PY" ]; then
+  step 3 "downloading Python ${PY_VERSION%.*} (about 40 MB)"
+  say "  uv $UV_VERSION first (about 16 MB), the small tool that installs Python; then Python $PY_VERSION itself (the 40 MB)."
+  say "  The download timeout is $UV_HTTP_TIMEOUT seconds (set UV_HTTP_TIMEOUT to change it). A slow connection can take several minutes."
   check_owned
   mkdir -p -- "$H/bootstrap"
   url="https://github.com/astral-sh/uv/releases/download/$UV_VERSION/$UV_ASSET.tar.gz"
-  say "downloading uv $UV_VERSION"
-  if [ "$FETCH" = curl ]; then
-    curl --fail --location --proto '=https' --tlsv1.2 --silent --show-error -o "$H/bootstrap/uv.tar.gz" "$url"
-  else
-    wget --quiet --https-only -O "$H/bootstrap/uv.tar.gz" "$url"
-  fi
+  say "  downloading uv $UV_VERSION"
+  try3 "the uv download" fetch_uv || die "could not download uv from $url (see the error above). Slow or unreliable connection? Run setup again, or install Python 3.10 or newer from python.org and run ./setup.sh"
   got=$($SHACMD "$H/bootstrap/uv.tar.gz" | awk '{print $1}')
   [ "$got" = "$UV_SHA" ] || die "the uv download did not match its pinned SHA-256; nothing was run"
   tar -xzf "$H/bootstrap/uv.tar.gz" -C "$H/bootstrap" --strip-components=1
-  say "installing Python $PY_VERSION into $H/python"
-  "$H/bootstrap/uv" python install --quiet "$PY_VERSION"
+  say "  downloading and installing Python $PY_VERSION into $H/python (uv shows its progress)"
+  try3 "the Python download" "$H/bootstrap/uv" python install "$PY_VERSION" || \
+    die "could not download Python $PY_VERSION (uv's error is above). On a slow connection, rerun the same command with a longer timeout, for example UV_HTTP_TIMEOUT=600 sh setup.sh (add the options you used), or install Python 3.10 or newer from python.org and run ./setup.sh again"
   PY=$("$H/bootstrap/uv" python find "$PY_VERSION")
+  PYVER=$("$PY" -c 'import sys; print("%d.%d.%d" % sys.version_info[:3])' 2>/dev/null || echo "$PY_VERSION")
+else
+  step 3 "using Python $PYVER (nothing to download)"
 fi
 
 VENV="$H/app/$VERSION/venv"
 if [ -x "$VENV/bin/composer" ] && "$VENV/bin/composer" --version >/dev/null 2>&1; then
-  say "Composer $VERSION is already installed in $H/app/$VERSION"
+  step 4 "Composer $VERSION is already installed in $H/app/$VERSION"
+  step 5 "nothing to install"
 else
-  say "making a private environment with $("$PY" -c 'import sys; print("Python %d.%d.%d" % sys.version_info[:3])')"
+  step 4 "making a private environment with Python $PYVER"
   check_owned
   MADE_VERSION=1
   "$PY" -m venv "$VENV"
-  say "installing Composer $VERSION into it (and its one dependency, claim-seal, checked by SHA-256)"
+  step 5 "installing Composer $VERSION and its one dependency, claim-seal (checked by SHA-256); pip's progress follows"
   # pip builds in the folder it installs from, so it gets a copy inside $H/tmp: your checkout stays as it is.
   check_owned
   rm -rf -- "$H/tmp/source"
   mkdir -p -- "$H/tmp/source"
   cp -R -- "$SRC/pyproject.toml" "$SRC/README.md" "$SRC/LICENSE" "$SRC/composer" "$H/tmp/source/"
   find "$H/tmp/source" -name __pycache__ -prune -exec rm -rf -- {} +
-  "$VENV/bin/python" -m pip install --quiet "$H/tmp/source"
+  "$VENV/bin/python" -m pip install "$H/tmp/source" || \
+    die "the install of Composer failed (pip's error is above). If it was the network, rerun the same command with PIP_DEFAULT_TIMEOUT=300 in front, for example PIP_DEFAULT_TIMEOUT=300 sh setup.sh"
   rm -rf -- "$H/tmp/source"
   "$VENV/bin/composer" --version >/dev/null
 fi
+step 6 "checking the install and making it the current version"
 check_owned
 "$VENV/bin/python" -c 'import os, sys
 link = os.path.join(sys.argv[1], "current"); tmp = link + ".tmp"
 if os.path.lexists(tmp): os.unlink(tmp)
 os.symlink(sys.argv[2], tmp); os.replace(tmp, link)' "$H/app" "$VERSION"
 
+step 7 "Composer's own setup: the questions, and then your first start"
 set -- setup --home "$H"
 [ -n "$ANSWERS" ] && set -- "$@" --answers "$ANSWERS"
 [ "$YES" = 1 ] && set -- "$@" --yes
