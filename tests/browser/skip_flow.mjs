@@ -304,7 +304,7 @@ async function sweep(browser, engine, width, feedDelay, stride, log) {
     const first = stuck[0] || failures[0];
     throw new Error(`${failures.length} of ${jobs.length} presses failed (${stuck.length} left the page stuck, ${failures.length - stuck.length} ended in a different state), first: ${first}`);
   }
-  log.push(`${feedDelay ? 'slow' : 'fast'} feeds: ${landedPresses} presses of ${jobs.length} to ${last} ms (the Skip button is there for ${Math.round(base.buttonGone)} ms, the brief shows at ${base.took} ms)`);
+  log.push(`${feedDelay ? 'slow' : 'fast'} feeds: ${landedPresses} presses of ${jobs.length} to ${Math.round(last)} ms (the Skip button is there for ${Math.round(base.buttonGone)} ms, the brief shows at ${base.took} ms)`);
 }
 
 async function failureAfterSkip(browser, engine, log) {
@@ -420,7 +420,13 @@ async function replayAt(browser, base, width, at) {
     await page.evaluate(() => document.getElementById('cw').contentWindow.postMessage({ lensmithHost: 'still' }, location.origin));
     await page.clock.runFor(2500);   // a little more replay time: nothing may come back in it
   }
-  await page.waitForTimeout(900);    // CSS transitions run on the real clock
+  // CSS transitions run on the real clock, not the controlled one: wait until every finite one has ended (a busy machine is slow)
+  for (let i = 0; i < 80; i += 1) {
+    await page.waitForTimeout(50);
+    const running = await frame().evaluate(() => document.getAnimations()
+      .filter((a) => a.playState === 'running' && a.effect && a.effect.getComputedTiming().endTime !== Infinity).length);
+    if (!running && i >= 6) break;
+  }
   const snap = { ...(await frame().evaluate(snapshot)), ...(await frame().evaluate(replayExtras)) };
   delete snap.entryParts;   // a replay that ran to its end leaves its entry elements in the page, hidden; what is on the screen is compared
   delete snap.sandText;
