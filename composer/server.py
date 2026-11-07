@@ -239,8 +239,19 @@ class App:
             self.jobs.write_artifact(job["job"], "check.json", {"claim_evidence": evidence})
         self.jobs.write_artifact(job["job"], "receipts.json",
                                  receipts.build_receipt(run, requested=request["sources"]))
+        self._keep_passages(job["job"], sources, run)
         return {"status": "ok", "claim_evidence": {"job": job["job"],
                                                         "draft_sha256": job["draft_sha256"]}}
+
+    def _keep_passages(self, job_id: str, sources: list, run: dict) -> None:
+        """The few words of article each claim popover shows, in the job's own passages.json (see pipeline.passages).
+        Best effort: a brief without them still opens its popovers, saying no passage was kept."""
+        try:
+            rows = pipeline.passages(sources, run.get("fetched") or {}, run.get("result") or {})
+        except Exception:  # noqa: BLE001 - the brief is already written and checked; this is only the extra
+            return
+        if rows:
+            self.jobs.write_artifact(job_id, "passages.json", {"schema": "composer-passages/v1", "rows": rows})
 
     @staticmethod
     def _json_body(body: bytes) -> dict:

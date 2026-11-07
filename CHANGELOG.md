@@ -7,6 +7,18 @@ Each release note is written from this file and checked against it by claim-seal
 
 ## [Unreleased]
 
+### Changed
+
+- The app page uses the width of your screen. The phone keeps its single column; from 768 px the loom stands beside
+  the reading column, and from 960 px the insight cards sit in two columns (the text is held to a readable line
+  length). The compose screen is centred and larger on a laptop.
+- In a brief, every checked claim is an underlined sentence: solid is supported, dashed is partly supported, wavy is
+  not supported. Pressing one (click, tap, Enter or Space) opens the verdict in plain words, the cited article with
+  its link and the passage the check located (at most 25 words, kept in that brief's own `passages.json`, never in
+  the shared edition). Esc, or pressing elsewhere, closes it.
+- The compose animation forms its first words within 3 seconds of pressing Compose, no longer waiting for the first
+  feed to answer. Tap, click or Esc skips it; with reduced motion nothing is drawn.
+
 ## [0.2.0] - not released yet
 
 The full app, on your computer or your own server. In plain words:

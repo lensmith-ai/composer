@@ -140,6 +140,50 @@ class ComposeTests(unittest.TestCase):
         self.assertNotIn("street lights", blob)
         self.assertNotIn("updated hourly", blob)
 
+    def test_passages_are_the_located_words_cut_to_the_quote_cap_and_kept_out_of_every_shared_file(self):
+        import claim_seal.normalize as N
+        from composer import receipts
+        run, *_ = self.run_compose([brief_for_fixtures()])
+        rows = pipeline.passages([HARBOR, QUARRY], run["fetched"], run["result"])
+        self.assertTrue(rows, "no located passage at all")
+        sealed = pipeline.seal_sources([HARBOR, QUARRY], run["fetched"], "")
+        items = {it["id"]: it for entry in sealed.values() for it in entry["items"]}
+        spans = {f"{o['claim_ref']['item_index']}.{o['citation_index']}": o["evidence_spans"][0]
+                 for o in run["result"]["claim_evidence"]["outcomes"] if o.get("evidence_spans")}
+        for key, row in rows.items():
+            self.assertRegex(key, r"^\d+\.\d+$")
+            self.assertLessEqual(row["words"], pipeline.PASSAGE_MAX_WORDS)
+            body = N.normalize(N.NORMALIZER_ID, items[row["item"]]["text"].encode("utf-8"))
+            located = " ".join(body[spans[key]["start"]:spans[key]["end"]].split())
+            self.assertEqual(row["text"], located, "the passage is not the located slice of the article")
+        # the sealed record and the receipt hold digests and positions, never the passage's words; the edition's
+        # citation rows carry no passage field (its own prose may share a phrase with an article, so it is not text-searched)
+        sealed_and_receipt = json.dumps(run["result"]["claim_evidence"]) \
+            + json.dumps(receipts.build_receipt(run, requested=["harbor", "quarry"]))
+        for row in rows.values():
+            self.assertNotIn(row["text"], sealed_and_receipt, "article words reached a shared file")
+        self.assertNotIn('"passage"', json.dumps(run["edition"]) + sealed_and_receipt)
+        self.assertEqual(set(run["edition"]["cards"][0]["citations"][0]),
+                         {"label", "title", "url", "resolution", "field", "start", "end", "relation", "window_sha256"})
+
+    def test_a_long_located_span_is_cut_and_a_digest_mismatch_shows_nothing(self):
+        import hashlib
+        words = " ".join(f"w{n}" for n in range(60))
+        item = {"title": "T", "description": f"<p>{words}</p>", "url": "https://example.org/t"}
+        fetched = {"harbor": ([item], {"status": "ok", "items": 1})}
+        sealed = pipeline.seal_sources([HARBOR], fetched, "")
+        text = sealed["harbor"]["items"][0]["text"]
+        def result(sha):
+            return {"claim_evidence": {"outcomes": [{"claim_ref": {"kind": "item", "item_index": 0}, "citation_index": 0,
+                    "response_id": "harbor-1", "source": "harbor",
+                    "evidence_spans": [{"start": 0, "end": len(text), "sha256": sha}]}]}}
+        good = pipeline.passages([HARBOR], fetched, result(hashlib.sha256(text.encode()).hexdigest()))
+        self.assertTrue(good["0.0"]["cut"])
+        self.assertEqual(good["0.0"]["words"], pipeline.PASSAGE_MAX_WORDS)
+        self.assertTrue(good["0.0"]["text"].startswith("w0 w1 w2") and good["0.0"]["text"].endswith("\u2026"))
+        self.assertNotIn("<p>", good["0.0"]["text"])
+        self.assertEqual(pipeline.passages([HARBOR], fetched, result("0" * 64)), {})
+
     def test_unusable_answer_is_retried_once(self):
         run, counted, model, lines = self.run_compose(["not json", brief_for_fixtures()])
         self.assertEqual(run["edition"]["model"]["write_attempts"], 2)
