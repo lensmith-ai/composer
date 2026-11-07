@@ -1112,18 +1112,12 @@ html.cw-text-only .aplay,html.cw-text-only .speedrow,html.cw-text-only .apstand,
 .cws-why2{font:15px/1.6 Georgia,serif;color:var(--ink2,#c9c3b6)}
 .cws-rejoin{color:var(--amber,#f2b30a);text-decoration:none}
 
-/* ===== claim-seal: the checked claims, drawn as underlined sentences (claimseal.js) =====
-   The underline's STYLE carries the verdict as well as its colour: solid = supported, dashed = partly supported,
-   wavy = not supported, dotted = not checked. */
-.cs-claim{cursor:pointer;text-decoration-line:underline;text-decoration-thickness:2px;text-underline-offset:.22em;
-  text-decoration-skip-ink:none;border-radius:3px;-webkit-tap-highlight-color:transparent}
-.cs-claim.cs-supported{text-decoration-style:solid;text-decoration-color:var(--good)}
-.cs-claim.cs-partial{text-decoration-style:dashed;text-decoration-color:var(--warn)}
-.cs-claim.cs-unsupported{text-decoration-style:wavy;text-decoration-color:#ff6b6b}
-.cs-claim.cs-unchecked{text-decoration-style:dotted;text-decoration-color:var(--ink2)}
-.cs-claim:hover{background:rgba(255,255,255,.07)}
-.cs-claim[aria-expanded="true"]{background:rgba(255,176,32,.14)}
-.cs-claim:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+/* ===== claim-seal: the checked claims (claimseal.js) =====
+   One mark for every checked claim: the published Composer window's own claim mark (composer/web/window/window.css,
+   `.lw .sheet .cmark`), word for word. The verdict is said in plain words inside the sheet that opens, never by the mark. */
+.cmark{padding:0 1px;margin:0 -1px;border-radius:2px;background:transparent;color:inherit;border-bottom:1px solid rgba(255,176,32,.6)}
+.icard .cmark{cursor:pointer}
+.icard .cmark:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 .icard.cs-card{cursor:default}
 .icard.cs-card .infodot{pointer-events:auto;cursor:pointer;z-index:2}
 .icard.cs-card .infodot:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
@@ -1132,42 +1126,7 @@ html.cw-text-only .aplay,html.cw-text-only .speedrow,html.cw-text-only .apstand,
 .cs-lk{font:9px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--amber)}
 .cs-lt{font:600 13.5px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink)}
 .cs-ld{font-size:13px;line-height:1.6;color:var(--ink2);margin-top:4px;max-width:66ch}
-.cs-key{display:inline-flex;gap:10px;flex-wrap:wrap;margin:0 2px}
-.cs-k{font:10px var(--mono);color:var(--ink);text-decoration-line:underline;text-decoration-thickness:2px;text-underline-offset:.22em}
-.cs-k.cs-supported{text-decoration-style:solid;text-decoration-color:var(--good)}
-.cs-k.cs-partial{text-decoration-style:dashed;text-decoration-color:var(--warn)}
-.cs-k.cs-unsupported{text-decoration-style:wavy;text-decoration-color:#ff6b6b}
-.cs-pop{position:fixed;z-index:120;box-sizing:border-box;overflow-y:auto;background:#10141b;color:var(--ink);
-  border:1px solid rgba(255,176,32,.4);border-radius:14px;padding:14px 16px 14px;
-  box-shadow:0 14px 40px rgba(0,0,0,.55);font-size:14px;line-height:1.55;overscroll-behavior:contain}
-.cs-pop[hidden]{display:none}
-.cs-pop:focus{outline:none}
-.cs-pop.cs-sheet{left:0;right:0;bottom:0;top:auto;width:auto;max-height:70dvh;border-radius:20px 20px 0 0;border-bottom:none;
-  padding-bottom:calc(20px + env(safe-area-inset-bottom))}
-.cs-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.cs-chip{font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:4px 10px;
-  border:1px solid var(--line);color:var(--ink2)}
-.cs-chip.cs-supported{color:var(--good);border-color:rgba(72,209,160,.5);background:rgba(72,209,160,.08)}
-.cs-chip.cs-partial{color:var(--warn);border-color:rgba(255,184,74,.5);background:rgba(255,184,74,.08)}
-.cs-chip.cs-unsupported{color:#ff8b8b;border-color:rgba(255,107,107,.5);background:rgba(255,107,107,.08)}
-.cs-x{font:11px var(--mono);color:var(--ink2);border:1px solid var(--line);border-radius:999px;padding:6px 12px;min-height:32px}
-.cs-x:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
-.cs-text{font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.5;margin:10px 0 4px;
-  border-left:2px solid var(--amber);padding-left:11px;overflow-wrap:anywhere}
-.cs-plain,.cs-rel{color:var(--ink2);font-size:13.5px;margin:4px 0 0}
-.cs-src{border-top:1px solid var(--line);margin-top:11px;padding-top:9px;overflow-wrap:anywhere}
-.cs-lab{font:9.5px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
-.cs-link{display:inline-block;margin-top:3px;color:var(--amber);font-weight:600;text-decoration:underline;
-  text-underline-offset:.2em;min-height:24px}
-.cs-link:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
-.cs-host{font:10px var(--mono);color:var(--ink3);margin-top:1px}
-.cs-title{font-weight:600;margin-top:3px}
-.cs-pass{margin:8px 0 0;padding:9px 12px;border-left:2px solid rgba(255,255,255,.28);background:rgba(255,255,255,.04);
-  border-radius:0 8px 8px 0}
-.cs-pass p{font-family:Georgia,'Times New Roman',serif;font-size:15px;line-height:1.55;color:var(--ink)}
-.cs-pass footer{font:9.5px var(--mono);color:var(--ink3);margin-top:5px;letter-spacing:.04em}
-.cs-none{color:var(--ink2);font-size:13px;margin-top:6px}
-.cs-foot{font:9.5px/1.6 var(--mono);color:var(--ink3);margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
+.span-sheet .cmsrc .cmq{font-size:15px;margin-top:8px}
 
 /* ===== wide screens: the app uses the width it has (design language: mobile-first at 390 px, nothing below 768 px changes) =====
    Same tokens as the phone (near-black ground, one amber accent). Breakpoints follow the project library's
@@ -1218,8 +1177,6 @@ html.cw-text-only .aplay,html.cw-text-only .speedrow,html.cw-text-only .apstand,
   /* the finished screen right after a compose: the loom keeps a phone-sized card, the brief below uses the column */
   #cmp[data-state="settled"] .cmprun .cmpstage{max-width:480px;margin-left:auto;margin-right:auto}
   #cmp[data-state="settled"] .cmprun{max-width:760px}
-  .cs-pop{max-width:420px}
-  .cs-key{display:flex;margin:6px 0}
 }
 @media (min-width:960px){
   .col{max-width:1180px;padding-left:40px;padding-right:40px;grid-template-columns:minmax(0,7fr) minmax(0,5fr);
@@ -1234,7 +1191,6 @@ html.cw-text-only .aplay,html.cw-text-only .speedrow,html.cw-text-only .apstand,
 @media (min-width:1440px){
   .col{max-width:1280px;column-gap:56px}
 }
-@media (prefers-reduced-motion:reduce){.cs-pop{transition:none}}
 
 /* the entry animation can be skipped (tap, click or Esc; composer-entry-transition.js): a visible control for it */
 #cwEntrySkip{position:fixed;z-index:210;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);

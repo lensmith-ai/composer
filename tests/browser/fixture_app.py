@@ -147,7 +147,7 @@ class FixtureModel:
                           "sources": [{"id": source_id, "ref": row["title"]}]})
             quote = row["description"][:40]
             # the judge marks one sentence of the brief's own words (it must occur once, in one field): the
-            # why-it-matters line, so the app has an underlined sentence to open
+            # why-it-matters line, so the app has a marked sentence to open
             marked = f"Single source: {row['description'][:30]}"
             # the first insight is backed, the second only partly, the third not at all: the app draws each differently
             verdict, relation = {2: ("partial", "implies"), 3: ("unsupported", "contradicts")}.get(n, ("supported", "says"))

@@ -110,13 +110,37 @@ class ClassifyTests(unittest.TestCase):
         self.assertEqual(thin._tokens("\u0939\u0948, \u0915\u093f\u092f\u093e."),
                          ["\u0939\u0948", "\u0915\u093f\u092f\u093e"])
 
-    def test_same_site_refuses_any_userinfo_even_a_password_alone(self):
+    def test_same_site_refuses_any_userinfo_even_a_password_alone_or_an_empty_one(self):
         for link in ("https://user:pw@lab.example.org/x", "https://:pw@lab.example.org/x",
-                     "https://user@lab.example.org/x"):
+                     "https://user@lab.example.org/x", "https://user:@lab.example.org/x", "https://@lab.example.org/x",
+                     "https://:@lab.example.org/x"):
             with self.subTest(link=link):
                 self.assertFalse(thin.same_site(link, "https://lab.example.org/"))
                 self.assertFalse(thin.same_site("https://lab.example.org/", link))
+                self.assertEqual(thin.page_address(link, "https://lab.example.org/feed.xml")[0], "")
         self.assertTrue(thin.same_site("https://WWW.Lab.Example.org./x", "https://lab.example.org:443/y"))
+
+    def test_only_a_and_I_are_one_letter_words_and_a_hindi_sentence_keeps_every_vowel_sign(self):
+        self.assertEqual(thin.word_count("a I i x y z b"), 3)
+        self.assertEqual(thin.word_count("I saw a lab"), 4)
+        hindi = "\u092d\u093e\u0930\u0924 \u0915\u0940 \u0905\u0930\u094d\u0925\u0935\u094d\u092f\u0935\u0938\u094d\u0925\u093e \u092e\u0947\u0902 \u0924\u0947\u091c\u0940 \u0906\u0908"
+        self.assertEqual(thin.word_count(hindi), 6)
+        self.assertEqual(thin._tokens(hindi)[2], "\u0905\u0930\u094d\u0925\u0935\u094d\u092f\u0935\u0938\u094d\u0925\u093e")  # no sign cut off
+        self.assertEqual(thin._tokens("(\u0915\u093f\u092f\u093e!)"), ["\u0915\u093f\u092f\u093e"])  # punctuation goes, the sign stays
+
+    def test_the_text_read_is_capped_so_a_huge_description_costs_a_bounded_amount(self):
+        started = time.monotonic()
+        words = thin.word_count("ab " * 1000000)
+        self.assertLessEqual(words, thin._TEXT_CAP // 3 + 1)
+        self.assertEqual(thin.classify("t", "!" * 3000000 + " real words appear only after the cap"), "empty")
+        self.assertLess(time.monotonic() - started, 2)
+
+    def test_the_edge_trim_is_linear_on_a_token_with_punctuation_inside(self):
+        started = time.monotonic()
+        for token in ("a" + "!" * 200000 + "a", "!" * 200000 + "a" + "!" * 200000, "a" + "!?" * 100000 + "a"):
+            self.assertEqual(thin._trim(token)[:1], token.strip("!?")[:1])
+        self.assertEqual(thin._trim("(\u201cword\u201d.)"), "word")
+        self.assertLess(time.monotonic() - started, 3)
 
     def test_hostile_text_is_scanned_in_linear_time(self):
         started = time.monotonic()

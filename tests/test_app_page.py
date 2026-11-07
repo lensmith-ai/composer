@@ -139,6 +139,25 @@ class AppFilesTests(unittest.TestCase):
         self.assertEqual(rows.count("innerHTML"), rows.count('innerHTML=""'))  # the only use is clearing the list
         self.assertIn("slice(0,160)", rows)
 
+    def test_the_claim_mark_is_the_published_windows_mark_and_says_no_verdict(self):
+        window_rule = re.search(r"\.lw \.sheet (\.cmark\{[^}]*\})", (WINDOW / "window.css").read_text(encoding="utf-8")).group(1)
+        css = text("app.css")
+        self.assertEqual(css.count(window_rule), 1, "app.css must carry the window's .cmark rule word for word, once")
+        js = text("claimseal.js")
+        self.assertIn("span.className = 'cmark';", js)  # one class for every checked claim
+        self.assertNotRegex(js, r"className = '(?:cs-claim|cmark)[^']*'\s*\+")  # never a class built from the verdict
+        for gone in ("cs-claim", "cs-pop", "cs-supported", "cs-partial", "cs-unsupported", "wavy"):
+            self.assertNotIn(gone, js + css)
+        self.assertNotIn("text-decoration", css[css.index("claim-seal: the checked claims"):css.index("wide screens")])
+        # the verdict is said in the sheet only; the strip above the cards names no verdict
+        legend = js[js.index("function legendNode"):js.index("function legend(hostEl")]
+        for word in ("supported", "partly", "unsupported", "tally"):
+            self.assertNotIn(word, legend.lower())
+        # the sheet is filled with textContent only (a source passage comes from a third-party page)
+        sheet = js[js.index("function sheetFill"):js.index("function open(")]
+        self.assertNotIn("innerHTML", sheet)
+        self.assertNotIn("insertAdjacentHTML", sheet)
+
     def test_escape_helpers_cover_quotes(self):
         js = text("app.js")
         self.assertIn('.replace(/"/g,"&quot;").replace(/\'/g,"&#39;")', js)

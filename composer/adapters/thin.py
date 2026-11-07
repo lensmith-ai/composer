@@ -66,6 +66,10 @@ _FILLER = re.compile(
 _SPELLED_OUT = {"tbd", "tba", "tbc", "tbs", "na"}
 
 
+_TEXT_CAP = 20000  # characters read when counting or classifying; adapters hand over at most DESC_CAP (800) today
+_ONE_LETTER_WORDS = {"a", "i"}  # the only lone Latin letters that are words
+
+
 def _wordlike(ch: str) -> bool:
     """A letter, a digit, or a combining mark (a vowel sign belongs to its word)."""
     return ch.isalnum() or unicodedata.category(ch).startswith("M")
@@ -86,7 +90,7 @@ def _tokens(text: str) -> list[str]:
     """Words as written: split on spaces, punctuation trimmed off the ends, tokens with no letter or digit left out.
     Not split inside a word, so a Hindi word keeps its vowel signs and Russian one-letter words stay."""
     out = []
-    for raw in (text or "").split():
+    for raw in (text or "")[:_TEXT_CAP].split():
         token = _trim(raw)
         if any(ch.isalnum() for ch in token):
             out.append(token)
@@ -96,15 +100,15 @@ def _tokens(text: str) -> list[str]:
 def word_count(text: str) -> int:
     """Meaningful words. A run of Chinese, Japanese or Korean characters counts one word for every two characters,
     and Thai, Lao, Myanmar or Khmer text one for every four, since those are not written with spaces; any other
-    token is one word. A lone letter counts, so "T.B.D." is one token, not three."""
+    token is one word. "T.B.D." is one token, not three; a lone Latin letter counts only as "a" or "I"."""
     count = 0
     for token in _tokens(text):
         if _CJK.search(token):
             count += max(1, len(token) // 2)
         elif _UNSPACED.search(token):
             count += max(1, len(token) // 4)
-        elif len(token) >= 2 or token.isdigit() or ord(token) > 127:
-            count += 1  # a lone ASCII letter ("a", "x") is not a word here; a lone Cyrillic or Greek one is
+        elif len(token) >= 2 or token.isdigit() or ord(token) > 127 or token.lower() in _ONE_LETTER_WORDS:
+            count += 1  # a lone ASCII letter is a word only as "a" or "I"; a lone Cyrillic or Greek one is
     return count
 
 
@@ -114,7 +118,7 @@ def _normal(text: str) -> str:
 
 def classify(title: str, description: str) -> str:
     """ok, short, fragment, title-only, filler or empty (see the module's note)."""
-    text = _BOILERPLATE.sub(" ", description or "")
+    text = _BOILERPLATE.sub(" ", (description or "")[:_TEXT_CAP])
     if not _tokens(text):
         return "empty"
     flat = _normal(text)
