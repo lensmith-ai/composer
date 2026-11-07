@@ -18,7 +18,7 @@ from .home import make_dirs
 
 DATA_SCHEMA = "1"  # the data schema this code reads and writes; a newer generation is refused at start
 AUDIO_STATES = ("off", "generating", "ready", "failed")
-ARTIFACTS = ("check.json", "receipts.json")
+ARTIFACTS = ("check.json", "receipts.json", "passages.json")
 
 
 class StoreError(RuntimeError):

@@ -24,6 +24,8 @@ The feed text itself stays in memory unless you ask for it with --keep-sources.
 from __future__ import annotations
 
 import hashlib
+import html
+import re
 import time
 from datetime import datetime, timezone
 
@@ -202,6 +204,50 @@ def _card(item: dict, index: int, labels: dict, digests: dict) -> dict:
             row["window_sha256"] = digests[(index, n)]
         card["citations"].append(row)
     return card
+
+
+PASSAGE_MAX_WORDS = 25  # the quote rule's own cap (composer.quotes.MAX_QUOTE_WORDS): a shown passage never goes past it
+_TAGS = re.compile(r"<[^<>]*>")
+
+
+def passages(sources: list, fetched: dict, result: dict, *, retrieved_at: str = "") -> dict:
+    """The words of the located evidence behind each citation, for the app's claim popover only.
+
+    {"<item index>.<citation index>": {"text", "words", "cut", "source", "item"}}, one per citation whose evidence
+    was located (the first located span, as `_window_digests` reads it). The text is sliced from the cited
+    article's own text by the span's offsets, kept only when its SHA-256 equals the digest claim-seal sealed for it
+    (a passage that does not match is not shown), cut to PASSAGE_MAX_WORDS words, and tags and extra spaces are
+    removed. It is the one place article words are kept beside a brief, in the job's own `passages.json`; the
+    edition, receipts.json and check.json never carry it. A citation with no located span has no row."""
+    import claim_seal.normalize as N
+    by_id = {item["id"]: item for entry in seal_sources(sources, fetched, retrieved_at).values()
+             for item in entry["items"]}
+    out: dict = {}
+    for row in (result.get("claim_evidence") or {}).get("outcomes") or []:
+        ref = row.get("claim_ref") or {}
+        spans = row.get("evidence_spans") or []
+        key = f"{ref.get('item_index')}.{row.get('citation_index')}"
+        if ref.get("kind") != "item" or not spans or not isinstance(spans[0], dict) or key in out:
+            continue
+        item = by_id.get(row.get("response_id"))
+        start, end = spans[0].get("start"), spans[0].get("end")
+        if item is None or not isinstance(start, int) or not isinstance(end, int) or not 0 <= start < end:
+            continue
+        try:
+            body = N.normalize(N.NORMALIZER_ID, str(item["text"]).encode("utf-8"))
+        except (UnicodeDecodeError, KeyError):
+            continue
+        piece = body[start:end]
+        if hashlib.sha256(piece.encode("utf-8")).hexdigest() != spans[0].get("sha256"):
+            continue
+        parts = " ".join(html.unescape(_TAGS.sub(" ", piece)).split()).split(" ")
+        if not parts or not parts[0]:
+            continue
+        cut = len(parts) > PASSAGE_MAX_WORDS
+        out[key] = {"text": " ".join(parts[:PASSAGE_MAX_WORDS]) + (" \u2026" if cut else ""),
+                    "words": min(len(parts), PASSAGE_MAX_WORDS), "cut": cut,
+                    "source": row.get("source"), "item": item["id"]}
+    return out
 
 
 def edition(*, lens: str, sources: list, fetched: dict, result: dict, model: Counted, seconds: int,

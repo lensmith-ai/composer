@@ -140,6 +140,37 @@ class ComposeTests(unittest.TestCase):
         self.assertNotIn("street lights", blob)
         self.assertNotIn("updated hourly", blob)
 
+    def test_passages_are_the_located_words_cut_to_the_quote_cap_and_kept_out_of_the_edition(self):
+        run, *_ = self.run_compose([brief_for_fixtures()])
+        rows = pipeline.passages([HARBOR, QUARRY], run["fetched"], run["result"])
+        self.assertTrue(rows, "no located passage at all")
+        article = " ".join(it["description"] for items, _ in run["fetched"].values() for it in items)
+        for key, row in rows.items():
+            self.assertRegex(key, r"^\d+\.\d+$")
+            self.assertLessEqual(row["words"], pipeline.PASSAGE_MAX_WORDS)
+            self.assertIn(row["text"].rstrip(" \u2026").split(" ")[0], article)
+        self.assertNotIn("\"passage\"", json.dumps(run["edition"]))
+        self.assertEqual(set(run["edition"]["cards"][0]["citations"][0]),
+                         {"label", "title", "url", "resolution", "field", "start", "end", "relation", "window_sha256"})
+
+    def test_a_long_located_span_is_cut_and_a_digest_mismatch_shows_nothing(self):
+        import hashlib
+        words = " ".join(f"w{n}" for n in range(60))
+        item = {"title": "T", "description": f"<p>{words}</p>", "url": "https://example.org/t"}
+        fetched = {"harbor": ([item], {"status": "ok", "items": 1})}
+        sealed = pipeline.seal_sources([HARBOR], fetched, "")
+        text = sealed["harbor"]["items"][0]["text"]
+        def result(sha):
+            return {"claim_evidence": {"outcomes": [{"claim_ref": {"kind": "item", "item_index": 0}, "citation_index": 0,
+                    "response_id": "harbor-1", "source": "harbor",
+                    "evidence_spans": [{"start": 0, "end": len(text), "sha256": sha}]}]}}
+        good = pipeline.passages([HARBOR], fetched, result(hashlib.sha256(text.encode()).hexdigest()))
+        self.assertTrue(good["0.0"]["cut"])
+        self.assertEqual(good["0.0"]["words"], pipeline.PASSAGE_MAX_WORDS)
+        self.assertTrue(good["0.0"]["text"].startswith("w0 w1 w2") and good["0.0"]["text"].endswith("\u2026"))
+        self.assertNotIn("<p>", good["0.0"]["text"])
+        self.assertEqual(pipeline.passages([HARBOR], fetched, result("0" * 64)), {})
+
     def test_unusable_answer_is_retried_once(self):
         run, counted, model, lines = self.run_compose(["not json", brief_for_fixtures()])
         self.assertEqual(run["edition"]["model"]["write_attempts"], 2)
