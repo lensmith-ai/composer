@@ -26,6 +26,14 @@ from .common import DESC_CAP, TIMEOUT_S, TITLE_CAP, new_receipt, strip_html
 # page size and no arrangement of tags or attributes can make it quadratic (see the tests).
 ATTR_CAP = 2000  # the longest attribute value kept (an address or a description)
 _SPACE = " \t\n\r\f"
+_ASCII_LOWER = {c: c + 32 for c in range(ord("A"), ord("Z") + 1)}
+
+
+def ascii_lower(text: str) -> str:
+    """Lower-case A-Z only, so the result is exactly as long as the text. (str.lower() makes some characters longer,
+    such as a dotted capital I, which would move every position found in the lower-cased copy off the original.)"""
+    return text.translate(_ASCII_LOWER)
+
 
 
 def _attrs(tag: str) -> dict[str, str]:
@@ -106,7 +114,7 @@ def _between(markup: str, lower: str, tag: str) -> str | None:
 
 def _drop_blocks(markup: str) -> str:
     """The markup without <script>, <style> and <noscript> blocks; an unclosed one runs to the end."""
-    lower = markup.lower()
+    lower = ascii_lower(markup)
     out: list[str] = []
     at = 0
     nxt = {t: lower.find("<" + t) for t in _DROPPED}  # each tag's next opening; -1 once there is none
@@ -203,7 +211,7 @@ def _article_redirects(source):
 def links(markup: str, page_url: str, source) -> list[str]:
     found: list[str] = []
     markup = markup[:MARKUP_CAP * 4]
-    for attrs in _tags(markup, markup.lower(), "a"):
+    for attrs in _tags(markup, ascii_lower(markup), "a"):
         href = attrs.get("href", "").strip()
         if not href:
             continue
@@ -220,7 +228,7 @@ def links(markup: str, page_url: str, source) -> list[str]:
 
 def extract(markup: str) -> tuple[str, str]:
     markup = markup[:MARKUP_CAP]
-    lower = markup.lower()
+    lower = ascii_lower(markup)
     raw_title = _between(markup, lower, "title")
     if not (raw_title or "").strip():
         raw_title = _between(markup, lower, "h1")

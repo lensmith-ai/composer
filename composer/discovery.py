@@ -70,8 +70,9 @@ _ATTR = re.compile(r"""([a-zA-Z-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')""")
 _COMMENTS = re.compile(r"comment", re.I)
 # A link that looks like a feed or a feed list: "rss" in the path, a whole /feed or /feeds segment, atom as a segment
 # or an extension. (Not "feedback": the whole segment must be feed or feeds.)
-_FEEDISH_PATH = re.compile(r"rss|(?:^|/)feeds?(?:[/.]|$)|(?:^|[/._-])atom(?:[/.]|$)", re.I)
-_FEEDISH_TEXT = re.compile(r"^(?:subscribe(?: via| with| to)? )?(?:rss|atom|feeds?|rss feeds?|syndication)\b", re.I)
+_FEEDISH_PATH = re.compile(r"(?:^|[/._-])rss|(?:^|/)feeds?(?:[/.]|$)|(?:^|[/._-])atom(?:[/.]|$)", re.I)
+_FEEDISH_TEXT = re.compile(r"(?:subscribe(?: via| with| to)? )?(?:the )?(?:rss|atom|feeds?|rss feeds?|syndication)"
+                           r"(?: feeds?| links?)?\W*", re.I)
 _TAG_END = " \t\n\r\f/>"
 ANCHOR_TEXT_CHARS = 80
 _GENERIC_TITLES = {"", "feed", "rss", "rss feed", "atom", "atom feed", "main site feed", "site feed", "blog", "home",
@@ -161,7 +162,7 @@ def advertised_feeds(page_url: str, body: str) -> list[tuple[str, str]]:
 def _anchors(markup: str):
     """(href, text) for every <a href> in the markup, in order, read in one pass (each stretch looked at once). The
     text is what follows the tag up to the next tag, cut short."""
-    lower = markup.lower()
+    lower = html_index.ascii_lower(markup)
     at = lower.find("<a")
     while at >= 0:
         if lower[at + 2:at + 3] not in _TAG_END:
@@ -210,11 +211,13 @@ def page_feed_links(page_url: str, markup: str, *, limit: int) -> list[tuple[str
         if not address or address == own or len(address) > URL_MAX_CHARS:
             continue
         path = urllib.parse.urlsplit(address).path
-        if not (_FEEDISH_PATH.search(path) or _FEEDISH_TEXT.match(text)):
+        by_path = bool(_FEEDISH_PATH.search(path))
+        if not (by_path or _FEEDISH_TEXT.fullmatch(text)):
             continue
-        if address not in found or (not found[address] and text):
-            found[address] = text
-    return list(found.items())[:limit]
+        if address not in found or (not found[address][1] and text):
+            found[address] = (0 if by_path else 1, text)
+    ranked = sorted(found.items(), key=lambda kv: kv[1][0])  # a feed-like address first, then a link only worded so
+    return [(address, text) for address, (_rank, text) in ranked][:limit]
 
 
 def feed_title(raw: bytes) -> str:

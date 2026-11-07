@@ -40,14 +40,18 @@ MAX_REQUESTS = 10  # page requests (redirect hops included) for one source
 TOTAL_S = 45  # one source's page reads, in all
 DROPPED_LISTED = 20  # dropped items named in a receipt
 
-_WORD = re.compile(r"[^\W_]+")
 _CJK = re.compile(r"[぀-ヿ㐀-䶿一-鿿가-힯]")
+_UNSPACED = re.compile("[\u0e00-\u0eff\u1000-\u109f\u1780-\u17ff]")  # Thai, Lao, Myanmar, Khmer: no spaces
+_EDGE = re.compile(r"^\W+|\W+$")
 _NOT_ALNUM = re.compile(r"[^\w]+")
 _LOREM = re.compile(r"\blorem ipsum\b|\bdolor sit amet\b", re.I)
-# Text a feed generator adds after (or instead of) an excerpt. Bounded repeats, so none of these can backtrack badly.
+# A feed generator's tail on an excerpt ("The post X appeared first on Y", "[...]", "Read more »"). The "read more"
+# kinds are removed only as the last words of a sentence or of the whole text, never from the middle of prose
+# ("people who read more books live longer" is left alone).
 _BOILERPLATE = re.compile(
-    r"the post .{0,300}? appeared first on .{0,120}|\[(?:…|\.{2,3}|&#8230;)\]|"
-    r"(?:read|continue reading|learn) more\b[^.]{0,40}|\bcontinue reading\b[^.]{0,40}|\bclick here\b[^.]{0,40}",
+    r"the post .{0,300}? appeared first on .{0,120}|\[(?:\u2026|\.{2,3}|&#8230;)\]|"
+    r"(?:^|(?<=[.!?\u2026\]\u00bb)]))\s*(?:(?:read|continue reading|learn) more|continue reading|click here)"
+    r"\b[^.]{0,40}$",
     re.I | re.S)
 _FILLER = re.compile(
     r"(?:tbd|tba|tbc|tbs|n a|na|none|null|nil|undefined|nan|empty|blank|test|testing|todo|to do|xxx+|x|"
@@ -63,17 +67,27 @@ _SPELLED_OUT = {"tbd", "tba", "tbc", "tbs", "na"}
 
 
 def _tokens(text: str) -> list[str]:
-    return _WORD.findall(text or "")
+    """Words as written: split on spaces, punctuation trimmed off the ends, tokens with no letter or digit left out.
+    (Not split inside a word, so a Hindi word keeps its vowel signs; one-letter words such as Russian "\u043a" stay.)"""
+    out = []
+    for raw in (text or "").split():
+        token = _EDGE.sub("", raw)
+        if any(ch.isalnum() for ch in token):
+            out.append(token)
+    return out
 
 
 def word_count(text: str) -> int:
-    """Meaningful words: runs of letters or digits of two or more (or a lone digit). A run of Chinese, Japanese or
-    Korean characters, which are not written with spaces, counts one word for every two characters."""
+    """Meaningful words. A run of Chinese, Japanese or Korean characters counts one word for every two characters,
+    and Thai, Lao, Myanmar or Khmer text one for every four, since those are not written with spaces; any other
+    token is one word. A lone letter counts, so "T.B.D." is one token, not three."""
     count = 0
     for token in _tokens(text):
         if _CJK.search(token):
             count += max(1, len(token) // 2)
-        elif len(token) >= 2 or token.isdigit():
+        elif _UNSPACED.search(token):
+            count += max(1, len(token) // 4)
+        else:
             count += 1
     return count
 
@@ -91,7 +105,7 @@ def classify(title: str, description: str) -> str:
     if _LOREM.search(text) or _FILLER.fullmatch(flat) or flat.replace(" ", "") in _SPELLED_OUT:
         return "filler"  # "T.B.D." reads as "t b d"
     seen = {t.lower() for t in _tokens(title)}
-    if not [t for t in _tokens(text) if t.lower() not in seen and len(t) >= 2]:
+    if not [t for t in _tokens(text) if t.lower() not in seen]:
         return "title-only"
     words = word_count(text)
     if words < FLOOR_WORDS:
@@ -114,7 +128,7 @@ def same_site(a: str, b: str) -> bool:
     except ValueError:
         return False
     return (pa.scheme == "https" and pb.scheme == "https" and bool(host_a) and host_a == host_b
-            and port_a == port_b)
+            and port_a == port_b and not pa.username and not pb.username)
 
 
 def page_address(link: str, feed_url: str) -> tuple[str, str]:
@@ -178,7 +192,7 @@ def page_text(address: str, title: str, source, pages: _Pages) -> tuple[str, str
     try:
         resp = pages.read(address)
     except _fetch.FetchError as exc:
-        return "", f"its page could not be read ({str(exc)[:120]})", 0
+        return "", f"its page could not be read ({clean_text(str(exc)[:120]).text})", 0
     except Exception as exc:  # a failing page is a reason, never an exception
         return "", f"its page could not be read ({type(exc).__name__})", 0
     body = getattr(resp, "body", b"") or b""

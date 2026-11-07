@@ -81,7 +81,7 @@ def _next_p(lower: str, start: int) -> int:
 def _paragraphs(markup: str) -> list[str]:
     """The text of every <p>...</p> in the markup, in order, read in one pass: a paragraph ends at its </p>, or where
     the next <p> opens, or at the end, and each stretch of the page is looked at once."""
-    lower = markup.lower()
+    lower = html_index.ascii_lower(markup)
     out: list[str] = []
     at = _next_p(lower, 0)
     while at >= 0:
@@ -107,10 +107,10 @@ def article_text(markup: str, *, tier: str = "native") -> tuple[str, str]:
     if tier == "trafilatura" and trafilatura_installed():
         title, text = extract(markup, tier=tier)
         return title, text
-    lower = markup.lower()
+    lower = html_index.ascii_lower(markup)
     title = html_index.extract(markup)[0]
     cleaned = html_index._drop_blocks(markup)
-    low = cleaned.lower()
+    low = html_index.ascii_lower(cleaned)
     text = ""
     for scope in (html_index._between(cleaned, low, "article"), html_index._between(cleaned, low, "main"), cleaned):
         if scope is None:

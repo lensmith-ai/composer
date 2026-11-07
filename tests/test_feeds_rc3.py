@@ -72,6 +72,31 @@ class ClassifyTests(unittest.TestCase):
         self.assertEqual(thin.classify(title, "Tests show a model that is faster, cheaper and smaller than the "
                                               "last one by a wide margin."), "ok")
 
+    def test_prose_that_contains_read_more_or_learn_more_is_not_cut(self):
+        title = "Lab news"
+        for text in ("Researchers say people who read more books tend to live longer, a study of 3,500 adults finds.",
+                     "The lab will continue reading scripts from new directors through the end of the autumn season.",
+                     "Learn more about cats and dogs in this long and detailed guide for owners and their families."):
+            with self.subTest(text=text):
+                self.assertEqual(thin.classify(title, text), "ok")
+        self.assertEqual(thin.classify(title, "The lab said Argon ships in the autumn with a longer context window "
+                                              "and lower prices for everyone. Read more \u00bb"), "ok")
+        self.assertEqual(thin.classify(title, "Read more about this story at Some Site"), "empty")
+
+    def test_words_are_counted_in_scripts_that_split_inside_a_word_or_have_one_letter_words(self):
+        title = "title"
+        hindi = ("\u0905\u0928\u0941\u0938\u0902\u0927\u093e\u0928 \u0938\u0902\u0938\u094d\u0925\u093e \u0928\u0947 "
+                 "\u092e\u0902\u0917\u0932\u0935\u093e\u0930 \u0915\u094b \u090f\u0915 \u0928\u092f\u093e "
+                 "\u092e\u0949\u0921\u0932 \u092a\u0947\u0936 \u0915\u093f\u092f\u093e \u091c\u094b "
+                 "\u0915\u0920\u093f\u0928 \u0938\u0935\u093e\u0932\u094b\u0902 \u0915\u0947 "
+                 "\u0932\u093f\u090f \u092c\u0928\u093e \u0939\u0948")
+        self.assertEqual(thin.word_count(hindi), len(hindi.split()))
+        self.assertEqual(thin.classify(title, hindi), "ok")
+        self.assertEqual(thin.word_count("\u0420\u0443\u0431\u043b\u044c \u0443\u043a\u0440\u0435\u043f\u0438\u043b\u0441\u044f "
+                                         "\u043a \u0434\u043e\u043b\u043b\u0430\u0440\u0443."), 4)
+        thai = "\u0e2b\u0e49\u0e2d\u0e07\u0e41\u0e25\u0e1a\u0e40\u0e1b\u0e34\u0e14\u0e15\u0e31\u0e27\u0e42\u0e21\u0e40\u0e14\u0e25\u0e43\u0e2b\u0e21\u0e48\u0e2a\u0e33\u0e2b\u0e23\u0e31\u0e1a\u0e1b\u0e31\u0e0d\u0e2b\u0e32\u0e22\u0e32\u0e01\u0e43\u0e19\u0e27\u0e31\u0e19\u0e2d\u0e31\u0e07\u0e04\u0e32\u0e23"
+        self.assertGreaterEqual(thin.word_count(thai), thin.FLOOR_WORDS)
+
     def test_unspaced_scripts_are_counted_by_character_pairs(self):
         self.assertEqual(thin.classify("新モデル", "研究所は火曜日に新しい"
                                        "モデルを発表しました。この"
@@ -102,6 +127,13 @@ class ArticleTextTests(unittest.TestCase):
             '<title>t</title><meta name="description" content="A real summary of the page in a sentence.">'
             "<div>no paragraphs here</div>")
         self.assertEqual(text, "A real summary of the page in a sentence.")
+
+    def test_a_character_that_grows_when_lower_cased_does_not_move_what_is_read(self):
+        page = "<p>\u0130stanbul \u0130stanbul</p><article><p>The lab said Argon is built for hard problems in code.</p></article>"
+        self.assertEqual(html_extract.article_text(page)[1], "The lab said Argon is built for hard problems in code.")
+        links = discovery.page_feed_links("https://site.example.org/",
+                                          '<p>\u0130stanbul \u0130stanbul</p><nav><a href="/rss.cms">RSS</a></nav>', limit=4)
+        self.assertEqual(links, [("https://site.example.org/rss.cms", "RSS")])
 
     def test_unclosed_paragraphs_are_read_and_hostile_pages_stay_linear(self):
         _, text = html_extract.article_text("<p>first paragraph with enough words in it here <p>second paragraph "
@@ -229,6 +261,19 @@ class ThinItemTests(unittest.TestCase):
             items, receipt = adapters.fetch(feed_source(max_items=20), Table({FEED: feed}), enrich=True)
         self.assertEqual(receipt["thin"]["page_requests"], thin.MAX_REQUESTS)
         self.assertEqual(items, [])
+        self.assertTrue(any("limit on page requests" in d["reason"] for d in receipt["thin"]["dropped"]))
+
+    def test_redirect_hops_count_against_the_sources_page_requests(self):
+        many = "".join(f"<item><title>Thin number {n} of many</title><link>https://lab.example.org/p/{n}</link>"
+                       "<description>TBD</description></item>" for n in range(10))
+        feed = f'<rss version="2.0"><channel><title>t</title>{many}</channel></rss>'.encode()
+        hops = {f"https://lab.example.org/p/{n}": ["https://lab.example.org/m1", "https://lab.example.org/m2"]
+                for n in range(10)}
+        get = Table({FEED: feed}, hops=hops)
+        items, receipt = adapters.fetch(feed_source(max_items=10), get, enrich=True)
+        self.assertLessEqual(receipt["thin"]["page_requests"], thin.MAX_REQUESTS)
+        pages = [c for c in get.calls if c != FEED]
+        self.assertLessEqual(len(pages), thin.MAX_REQUESTS)  # hops are requests of their own: 3 per item, so 3 items
         self.assertTrue(any("limit on page requests" in d["reason"] for d in receipt["thin"]["dropped"]))
 
     def test_the_first_timeout_stops_asking_the_site(self):
@@ -442,6 +487,30 @@ class FrontPageDiscoveryTests(unittest.TestCase):
         self.assertLessEqual(len(get.calls), discovery.MAX_REQUESTS)
         self.assertLessEqual(len([c for c in get.calls if "/rssfeeds/" in c]), discovery.RSS_PAGE_FEEDS)
         self.assertEqual([r for r in result["candidates"] if r["ok"]], [])
+        # and the cap itself binds: with room for only four requests the check stops at four
+        small = Table({"https://site.example.org/": b'<a href="/rss.cms">RSS</a>',
+                       "https://site.example.org/rss.cms": f"<table>{feeds}</table>".encode()})
+        discovery.discover("https://site.example.org/", get=small, max_requests=4)
+        self.assertEqual(len(small.calls), 4)
+
+    def test_redirect_hops_are_counted_against_the_checks_request_cap(self):
+        hopping = Table({"https://site.example.org/": b'<a href="/rss.cms">RSS</a>'},
+                        hops={"https://site.example.org/rss.cms": ["https://site.example.org/a",
+                                                                  "https://site.example.org/b",
+                                                                  "https://site.example.org/c"]})
+        seen = []
+        real = hopping.__call__
+
+        def get(url, timeout, **kw):
+            try:
+                return real(url, timeout, **kw)
+            except FetchError as exc:
+                seen.append(str(exc))
+                raise
+        discovery.discover("https://site.example.org/", get=get, max_requests=4)
+        # page 1 + rss.cms 1 + two hops = 4: the third hop is past the cap and is refused
+        self.assertEqual(hopping.calls[:2], ["https://site.example.org/", "https://site.example.org/rss.cms"])
+        self.assertTrue(any("as many requests" in m for m in seen), seen)
 
     def test_hostile_pages_are_scanned_in_linear_time(self):
         started = time.monotonic()
@@ -460,7 +529,15 @@ class PageFeedLinkTests(unittest.TestCase):
         got = [url.removeprefix("https://site.example.org") for url, _ in
                discovery.page_feed_links("https://site.example.org/", page, limit=20)]
         self.assertEqual(got, ["/rss.cms", "/feed", "/feeds/all.xml", "/news/atom.xml", "/blog/index.atom",
-                               "/subscribe", "/podcast.rss"])
+                               "/podcast.rss", "/subscribe"])
+
+    def test_article_links_that_only_contain_rss_inside_a_name_do_not_crowd_out_the_real_link(self):
+        page = ('<a href="/sport/larsson-scores">Larsson scores twice</a><a href="/news/persson-wins">Persson wins</a>'
+                '<a href="/farm/feed-prices-rise">Feed prices rise again this week</a>'
+                '<a href="/farm/feeding-time">Feeds the cattle</a><a href="/about">About</a>'
+                '<footer><a href="/rss.xml">RSS</a></footer>')
+        got = discovery.page_feed_links("https://site.example.org/", page, limit=4)
+        self.assertEqual(got, [("https://site.example.org/rss.xml", "RSS")])
 
     def test_the_first_text_a_link_had_is_kept_when_the_same_address_is_linked_again_as_an_icon(self):
         page = '<a href="/rssa.cms"></a><a href="/rssa.cms">Top Stories</a><a href="/rssa.cms">Later</a>'

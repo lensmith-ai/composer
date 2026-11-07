@@ -41,6 +41,8 @@ def build_receipt(run: dict, *, requested: list | None = None) -> dict:
                 "dropped": thin.get("dropped_count", 0),
                 "dropped_why": [{"position": d.get("position"), "reason": d.get("reason", "")}
                                 for d in (thin.get("dropped") or []) if isinstance(d, dict)]}
+        if receipt.get("thin_dropped"):  # an article page whose description was filler and whose text gave none
+            sources[source_id]["thin_dropped"] = receipt["thin_dropped"]
     edition = run.get("edition") or {}
     output = {"schema": SCHEMA, "requested_sources": list(requested if requested is not None else sources),
               "sources": sources, "model_calls": dict(run.get("receipt") or {}),
