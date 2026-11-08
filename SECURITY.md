@@ -10,11 +10,11 @@ this repository, not in a public issue.
   Docker Compose with Caddy) and the steps that show the problem.
 - **When you will hear back:** an acknowledgement within 3 days, and a fix or a plan with a date within 14 days.
   We credit reporters in the advisory and the changelog unless you ask us not to.
-- **Supported versions:** the latest release gets security fixes. Before 1.0, that is the latest 0.y release only.
+- **Supported versions:** the newest release gets security fixes. Before 1.0, that is the newest 0.y release.
 
   | version | security fixes |
   |---|---|
-  | latest 0.y release | yes |
+  | 0.2.x (newest) | yes |
   | anything older | no; please update |
 
 - **In scope:** the `composer` package and command, its web page and server, the container image, `compose.yaml`

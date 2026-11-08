@@ -13,9 +13,7 @@ prints a line like this. Cmd+click it, or paste it into your browser:
 Open: http://127.0.0.1:8765/
 ```
 
-(The script lives in the Composer repository on GitHub, on its public `main` branch; `lensmith.ai` will serve a
-copy later. Until the repository is public, you were sent the script and its files in a folder. [Testing the installer](#testing-the-installer-on-your-own-computer) shows the
-one paste for that.)
+(The script lives in the Composer repository on GitHub, on its `main` branch. Every release also carries it, with its SHA-256, on the release page. `lensmith.ai` will serve a copy later.)
 
 ## What you will see
 
@@ -139,9 +137,9 @@ none it uses certifi's, which is installed with it. Checking is never switched o
 
 ## Testing the installer on your own computer
 
-Until the script is hosted, you get a folder (`composer-install-test`) with `install.sh` and Composer's release
-files. Unzip it into Downloads and paste this one block. It installs three times into three folders: once the normal
-way, once with `github.com` skipped (what happened to you), once with GitHub's whole download side skipped. It prints
+To try the installer against slow or blocked downloads, or with no network at all, put `install.sh` and the release's other files (everything on the
+release page) in one folder, `composer-install-test` in your Downloads. Then paste this one block. It installs three times into three folders: once the normal
+way, once with `github.com` skipped, once with GitHub's whole download side skipped. It prints
 how long each took, then starts the normal one and opens your browser.
 
 ```sh

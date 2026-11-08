@@ -146,5 +146,5 @@ read, `composer compose --keep-sources` saves it next to the brief; keep that fi
 
 Respect each site's terms. Some sites block automated readers; `composer sources check` will
 show the error if so. Before you share briefs made from a source, read
-[Sources and your responsibility](../README.md#sources-and-your-responsibility): check its terms and `robots.txt`,
+[Sources and your responsibility](sources-and-your-responsibility.md): check its terms and `robots.txt`,
 never add a source behind a paywall or a log-in, keep quotes short, and keep the AI note on what you publish.

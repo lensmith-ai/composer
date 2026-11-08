@@ -67,10 +67,14 @@ class SetupClosingNoteTests(unittest.TestCase):
 class ReadmeTests(unittest.TestCase):
     def test_the_readme_names_the_same_three_ways(self):
         text = (ROOT / "README.md").read_text(encoding="utf-8")
-        section = text[text.index("## To get this every day"):]
+        section = text[text.index("## Run it every day"):]
         section = section[:section.index("\n## ", 3)]
-        for words in ("only while", "awake", "docs/deploy-vps.md", "Always on", "lensmith.ai"):
+        for words in ("awake", "docs/deploy-vps.md", "Always on", "lensmith.ai"):
             self.assertIn(words, section)
+        long_text = (ROOT / "docs" / "ways-to-run.md").read_text(encoding="utf-8")  # the long version
+        long_section = long_text[long_text.index("## To get this every day"):]
+        for words in ("only while", "awake", "docs/deploy-vps.md", "Always on", "lensmith.ai"):
+            self.assertIn(words, long_section)
 
 
 if __name__ == "__main__":

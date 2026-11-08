@@ -7,10 +7,14 @@ Each release note is written from this file and checked against it by claim-seal
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-08
+
+The full app, on your computer or your own server. In plain words:
+
 ### Added
 
-- One command for a stranger on macOS and Linux: `curl -fsSL <address of install.sh> | sh`. It finds Python 3.10 or
-  newer or gets a private one, installs Composer and its three dependencies into `~/.lensmith-composer`, asks only for
+- One command for a stranger on macOS and Linux: `curl -fsSL https://raw.githubusercontent.com/lensmith-ai/composer/main/install.sh | sh`. It finds Python 3.10 or
+  newer or gets a private one, installs Composer and its two dependencies into `~/.lensmith-composer`, asks only for
   your Anthropic key (hidden; Enter skips it for the recorded demo), starts the app, prints `Open: http://127.0.0.1:8765/`
   and opens your browser. See `docs/install.md`.
 - Every file the installer fetches has a list of places to come from, tried in order with a one-line note when it
@@ -21,20 +25,6 @@ Each release note is written from this file and checked against it by claim-seal
 - `composer up --open` opens the address in your browser.
 - Composer uses certifi's list of trusted certificate authorities when the Python it runs on has none (python.org's
   macOS Python before its "Install Certificates" step), so feeds and the model API verify HTTPS on any Python.
-
-### Fixed
-
-- setup.sh refused its own environment when python.org's Python made group-writable template files in it, and a
-  rerun then died on the half-made version folder. It now takes the group-write bit off right away and removes a
-  half-made folder it marked itself.
-- A failed setup ends with what failed, the one next step and a log file, not a raw error.
-
-## [0.2.0] - not released yet
-
-The full app, on your computer or your own server. In plain words:
-
-### Added
-
 - One command installs the whole app: `./setup.sh`. It puts everything in one folder (`~/.lensmith-composer`), asks a
   few questions one at a time (or reads an answers file), checks everything before it writes anything, and keeps
   your key in a file only you can read. It does not touch your shell profile, PATH, sudo or system Python.
@@ -119,6 +109,13 @@ The full app, on your computer or your own server. In plain words:
 - Tests on Linux, macOS and Windows with Python 3.10 and 3.13, a secret scan, a workflow lint, and a nightly check
   of the server setup and the pages in two browsers.
 
+### Fixed
+
+- setup.sh refused its own environment when python.org's Python made group-writable template files in it, and a
+  rerun then died on the half-made version folder. It now takes the group-write bit off right away and removes a
+  half-made folder it marked itself.
+- A failed setup ends with what failed, the one next step and a log file, not a raw error.
+
 ### Changed
 
 - Six default sources instead of two: the Google AI blog, the Google DeepMind blog, the Hugging Face blog, the
@@ -196,5 +193,5 @@ The full app, on your computer or your own server. In plain words:
 - Fixes from an adversarial security review and a second opinion before publication; see SECURITY.md.
 
 [Unreleased]: https://github.com/lensmith-ai/composer/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/lensmith-ai/composer/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/lensmith-ai/composer/releases/tag/v0.1.0
+[0.2.0]: https://github.com/lensmith-ai/composer/releases/tag/v0.2.0
+[0.1.0]: https://github.com/lensmith-ai/composer/commit/4c2ba010aa280df12180dda8fa105e1b80d5deb6
