@@ -44,6 +44,8 @@ import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
 
+from . import tls
+
 DEFAULT_PROVIDER = "anthropic"
 DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-5-5"
 ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
@@ -87,7 +89,7 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
         raise ProviderError(f"the endpoint answered with a redirect ({code}); set the final URL directly")
 
 
-_OPENER = urllib.request.build_opener(_NoRedirect())
+_OPENER = urllib.request.build_opener(_NoRedirect(), tls.HTTPSHandler())
 
 
 def urllib_transport(url: str, headers: dict, body: bytes, timeout: float) -> tuple[int, bytes]:

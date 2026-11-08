@@ -9,7 +9,7 @@
   composer serve [--host 127.0.0.1] [--port 8765] [--out DIR]        (0.1: the classic page and form)
 
   composer setup [--answers FILE | --yes] [--reconfigure PART] [--home DIR] [--data-only]
-  composer up [--host 127.0.0.1] [--port N]       the app, its engine, narration and daily brief
+  composer up [--host 127.0.0.1] [--port N] [--open]  the app, its engine, narration and daily brief
   composer doctor [--online] [--parity] [--seals]
   composer backup [--include-secrets] [--out DIR]    composer restore FILE [--include-secrets]
   composer update --from-file RELEASE [--sha256 HEX]    composer rollback [--data-only]
@@ -280,7 +280,8 @@ def cmd_up(args) -> int:
         print(f"note: {exc} Until then the page shows the recorded brief.", flush=True)
     print(f"narration: {'on (' + cfg['narration']['engine'] + ')' if narrator.enabled else 'off (text-only)'}; "
           f"daily brief: {'at ' + cfg['schedule']['time'] if cfg['schedule']['enabled'] else 'off'}", flush=True)
-    server.serve(app, args.host, args.port or cfg["server"]["port"], trusted=trusted, public_origin=origin)
+    server.serve(app, args.host, args.port or cfg["server"]["port"], trusted=trusted, public_origin=origin,
+                 open_browser=args.open)
     return 0
 
 
@@ -356,7 +357,8 @@ def cmd_uninstall(args) -> int:
         print(f"left untouched (reused read-only): {path}")
     for name in result["not_ours_left_alone"]:
         print(f"left alone (not created by Composer): {home / name}")
-    print("If you added the alias line to your shell profile, remove it yourself.")
+    print("If you added an alias line to your shell profile yourself, remove it yourself "
+          "(`lensmith composer uninstall` takes away the shortcut the installer added).")
     return 0
 
 
@@ -437,6 +439,7 @@ def parser() -> argparse.ArgumentParser:
     u = where(sub.add_parser("up", help="run the app (page, engine, narration, daily brief)"))
     u.add_argument("--host", default="127.0.0.1")
     u.add_argument("--port", type=int, help="default: the port chosen at setup (8765)")
+    u.add_argument("--open", action="store_true", help="also open the address in your browser (this computer only)")
     u.add_argument("--provider", choices=["anthropic", "openai"], help=argparse.SUPPRESS)
     u.add_argument("--model", help=argparse.SUPPRESS)
     u.set_defaults(func=cmd_up)

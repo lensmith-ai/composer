@@ -532,9 +532,11 @@ class SupplyChainTests(unittest.TestCase):
         text = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
         self.assertRegex(text, r'requires = \["setuptools==\d+\.\d+\.\d+"\]')
         deps = re.search(r"dependencies = \[(.*?)\]", text, re.S).group(1)
-        lines = [x.strip().strip(",").strip('"') for x in deps.strip().splitlines() if x.strip()]
-        self.assertEqual(len(lines), 1)
-        self.assertRegex(lines[0], r"^claim-seal @ https://github\.com/lensmith-ai/claim-seal/archive/[0-9a-f]{40}\.tar\.gz"
+        lines = [x.strip().strip(",").strip('"') for x in deps.strip().splitlines()
+                 if x.strip() and not x.strip().startswith("#")]
+        self.assertEqual(len(lines), 2)
+        self.assertRegex(lines[0], r"^certifi==\d{4}\.\d{1,2}\.\d{1,2}$")  # one exact version: the installer hash-pins it
+        self.assertRegex(lines[1], r"^claim-seal @ https://github\.com/lensmith-ai/claim-seal/archive/[0-9a-f]{40}\.tar\.gz"
                                    r"#sha256=[0-9a-f]{64}$")
         self.assertNotIn("git+", text)
 
