@@ -125,14 +125,14 @@ The rest, including what the six bundled feeds are and the `html-index` caveat: 
 
 ## Releases you can check
 
-Each release lists SHA256SUMS, a CycloneDX SBOM, and GitHub artifact attestations for every file and the container image. See [docs/verify-a-release.md](docs/verify-a-release.md) and [docs/releasing.md](docs/releasing.md).
+Each release lists SHA256SUMS, a CycloneDX SBOM, and GitHub build-provenance attestations for every file the release workflow built (plus an SBOM attestation for the wheel and sdist) and for the container image. See [docs/verify-a-release.md](docs/verify-a-release.md) and [docs/releasing.md](docs/releasing.md).
 
 ## How it was built
 
 Claude wrote the code and the tests, and drafted this page. I decide what Composer does, and I read the briefs the private version writes.
 
 I don't review the code line by line, so here is what backs it instead:
-- 809 offline tests ran on Python 3.10 and 3.13 in clean containers: 0 failed, 13 skipped (they need root, another account or a tool the image lacks). The commands in this README were run there.
+- 810 offline tests ran on Python 3.10 and 3.13 in clean containers: 0 failed, 13 skipped (they need root, another account or a tool the image lacks). The commands in this README were run there.
 - The installer was run 64 times across 27 scenarios (a download source down or slow, a file that fails its checksum, no Python, a folder it must refuse), and every run ended as it should. It was also installed from supplied files with the network switched off.
 - A secret scanner (gitleaks) found nothing in any commit except one made-up marker string in a test, which its config allows. One test fails if private names, server paths or key shapes appear in the files or the history.
 - A security review on 2026-11-01 attacked it as a hostile feed, a hostile web page and a hostile network would. What it found is fixed, and a second reviewer attacked the fixes ([SECURITY.md](SECURITY.md)). Both reviewers were AI models; no human has audited the code.

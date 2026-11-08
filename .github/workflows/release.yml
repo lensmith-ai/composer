@@ -16,7 +16,8 @@
 #                 image digest. A candidate tag is a staging image, not a release: nothing names it as one.
 #   promote       the release's own image tag (<version>) is put on the candidate's digest only here, after test,
 #                 build, release-note and image (with its attestations) are all green
-#   publish       GitHub artifact attestations (build provenance + SBOM) for every file, then the GitHub Release
+#   publish       GitHub artifact attestations (build provenance for every file built here, SBOM for the wheel and sdist),
+#                 then the GitHub Release
 #                 (made as a draft, published only when every file is attached)
 #   installer-to-main   after the release: commits install.sh to main, where the one-line install is served from
 # Nothing is published unless every job before it is green. Write permissions exist only in the jobs that need them.
@@ -447,7 +448,7 @@ jobs:
     # by hand (docs/releasing.md).
     needs: [verify-tag, publish]
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     permissions:
       contents: write
     env:
@@ -478,7 +479,7 @@ jobs:
           [ -n "$current" ] && args+=(-f "sha=$current")
           gh api "repos/$GITHUB_REPOSITORY/contents/install.sh" "${args[@]}" --jq .commit.sha
           # The address people paste must now serve this file (the raw host can lag a few minutes).
-          for _ in $(seq 1 30); do
+          for _ in $(seq 1 54); do
             if curl -fsSL "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/install.sh" | cmp -s - install.sh; then
               echo "install.sh is served from main"; exit 0
             fi

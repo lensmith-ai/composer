@@ -47,7 +47,7 @@ def check_listed_sums(dist: Path, names) -> None:
     """The build job's own SHA256SUMS must agree with the files as they arrived (a corrupted transfer stops here)."""
     sums = dist / "SHA256SUMS"
     if not sums.is_file():
-        return
+        raise InstallerError("make_installer: dist has no SHA256SUMS")
     listed = {}
     for line in sums.read_text(encoding="utf-8").splitlines():
         parts = line.split()

@@ -126,6 +126,18 @@ class ReleaseNoteTests(unittest.TestCase):
             self.assertEqual(code, 2)
 
 
+class TestResultsCommitTests(unittest.TestCase):
+    def test_the_checked_out_commit_wins_over_github_sha(self):
+        # on a manual workflow run GITHUB_SHA is main's head, not the commit being released
+        import os
+        from unittest import mock
+        tr = load("test_results")
+        with mock.patch.dict(os.environ, {"GITHUB_SHA": "f" * 40}):
+            got = tr.commit()
+        self.assertNotEqual(got, "f" * 40)
+        self.assertRegex(got or "", r"^[0-9a-f]{40}$")
+
+
 class BuildScriptTests(unittest.TestCase):
     def test_tag_must_match_pyproject_version(self):
         build = load("build")

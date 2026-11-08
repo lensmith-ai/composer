@@ -1,7 +1,7 @@
 # Releases you can check
 
 Each release lists SHA256SUMS for its files, a CycloneDX SBOM of what the package installs (optional narration
-parts listed with their licences), and GitHub artifact attestations for every file and the container image, so
+parts listed with their licences), and GitHub build-provenance attestations for every file the release workflow built (plus an SBOM attestation for the wheel and sdist) and for the container image, so
 `gh attestation verify` can show which workflow and commit built it. The release is built from a tag signed with the
 maintainer's key; the workflow refuses a tag that is not signed, not on `main` or not the one named in
 `pyproject.toml`. The release note's factual lines are checked by claim-seal against CHANGELOG.md and the recorded

@@ -12,7 +12,7 @@ The short version is in the [README](../README.md#how-it-was-built).
 
 | Check | Result |
 |---|---|
-| Offline tests | 809 ran on Python 3.10 and 3.13 in clean containers: 0 failed, 13 skipped (they need root, another account or a tool the image lacks). The tests use invented fixture feeds and scripted model replies; no network, no key. The same suite is set to run on Linux, macOS and Windows in GitHub Actions |
+| Offline tests | 810 ran on Python 3.10 and 3.13 in clean containers: 0 failed, 13 skipped (they need root, another account or a tool the image lacks). The tests use invented fixture feeds and scripted model replies; no network, no key. The same suite is set to run on Linux, macOS and Windows in GitHub Actions |
 | The one-command installer | 64 runs across 27 scenarios (a download source down or slow, a file that fails its checksum, no Python, a folder it must refuse), all ended as they should; installed from supplied files with the network switched off |
 | Browser flows | the app page's flows run in Chromium and the WebKit engine at four screen widths (phone to desktop) |
 | The commands in the README | run in those containers (the `compose` command, which needs a key, on 3.13 only) |

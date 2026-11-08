@@ -21,13 +21,12 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def commit() -> str | None:
-    if os.environ.get("GITHUB_SHA"):
-        return os.environ["GITHUB_SHA"]
+    # The checked-out commit first: on a manual workflow run GITHUB_SHA is main's head, not the released commit.
     try:
         return subprocess.run(["git", "-C", str(ROOT), "rev-parse", "HEAD"], capture_output=True, text=True,
                               check=True).stdout.strip()
     except (OSError, subprocess.CalledProcessError):
-        return None
+        return os.environ.get("GITHUB_SHA") or None
 
 
 def version() -> str:

@@ -103,7 +103,7 @@ The full app, on your computer or your own server. In plain words:
   with a domain (always on, read anywhere), or the emailed brief on lensmith.ai (no setup). The README says the same.
 - The README has a new section, "Sources and your responsibility": check a source's terms, no paywalls, short
   quotes, no logos, keep the AI note, fix and remove fast.
-- Releases you can check: SHA256SUMS, a CycloneDX SBOM, GitHub attestations for every file and the container
+- Releases you can check: SHA256SUMS, a CycloneDX SBOM, GitHub build-provenance attestations for every file the workflow built (plus an SBOM attestation for the wheel and sdist) and for the container
   image, and a release note checked by claim-seal against this file. `scripts/release/rc.py` builds release
   candidates the same way, from chosen commits, for testing before a release.
 - Tests on Linux, macOS and Windows with Python 3.10 and 3.13, a secret scan, a workflow lint, and a nightly check
