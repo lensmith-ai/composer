@@ -551,7 +551,7 @@ case "${1:-}" in
       done
       for f in "${ZDOTDIR:-$HOME}/.zshrc" "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.bash_profile" "$HOME/.profile"; do
         [ -f "$f" ] && [ ! -L "$f" ] || continue
-        tmp=$(umask 077; mktemp "$f.lensmith.XXXXXX" 2>/dev/null) || continue
+        tmp=$(umask 077; mktemp "$f.lensmith.XXXXXX" 2>/dev/null) || continue  # vnf-allow: XXXXXX is mktemp's own template syntax, not a placeholder
         if LC_A=__ALIAS__ LC_B=__BEGIN__ LC_E=__END__ awk '{ l[NR] = $0 }
           END { i = 1; while (i <= NR) { if (l[i] == ENVIRON["LC_B"] && l[i+1] == ENVIRON["LC_A"] && l[i+2] == ENVIRON["LC_E"]) { i += 3; gone = 1 } else { print l[i]; i++ } } exit gone ? 0 : 3 }' "$f" > "$tmp"; then
           if cat "$tmp" > "$f" && cmp -s "$tmp" "$f"; then echo "removed the 3 lensmith lines from $f"; rm -f -- "$tmp"

@@ -70,7 +70,7 @@ class RootsTests(unittest.TestCase):
     def _fake_certifi(self):
         fake = mock.Mock()
         fake.where.return_value = str(self.cert)
-        return fake
+        return fake  # vnf-allow: a mock.Mock test double named fake, not stubbed output
 
     def test_no_system_roots_and_no_certifi_fails_verification(self):
         with mock.patch.object(tls, "_system_has_roots", return_value=False), \

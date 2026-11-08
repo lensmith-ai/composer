@@ -151,7 +151,7 @@ class LensmithCommandTests(unittest.TestCase):
         self.assertTrue((local / "lensmith").is_symlink())
         self.assertIn("alias lensmith", rc.read_text())
 
-    def test_a_home_with_the_placeholder_text_or_shell_characters_is_one_quoted_word(self):
+    def test_a_home_with_the_placeholder_text_or_shell_characters_is_one_quoted_word(self):  # vnf-allow: "placeholder" names the __HOME__ template token this test attacks
         evil = self.tmp / "x__HOME__;touch PWNED;x $(touch PWNED2) `touch PWNED3`"
         (evil / "bin").mkdir(parents=True)
         script = evil / "bin" / "lensmith"
