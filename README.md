@@ -13,7 +13,7 @@
 </tr>
 </table>
 
-<sub>Screenshots of the demo in <code>docs/demo</code>, which replays a brief recorded on 2026-11-02. Every word in them is from that brief.</sub>
+<sub>Screenshots of the demo in <code>docs/demo</code>, which replays a brief recorded on 2026-11-02. Every word in them is from that brief. (The page's own label says "the live edition"; this one is a replay.)</sub>
 
 **This is Lensmith Composer. It reads a few feeds, writes a short brief through a lens you choose, and checks every claim against the article it cites before you read it.**
 
@@ -42,7 +42,7 @@ lensmith composer
 
 Every file the installer downloads is checked against a SHA-256 written into the script, and you can download the
 script and read it first. No sudo. The steps, what it changes on your computer, what to do if something fails, and how
-to remove it: [docs/install.md](docs/install.md). On Windows, use the command line below.
+to remove it: [docs/install.md](docs/install.md). On Windows, use WSL2 or the container ([docs/setup.md](docs/setup.md)).
 
 ## Try it without installing
 
@@ -70,7 +70,7 @@ Composing prints each step, then the brief, and writes three files to the `--out
 
 ## Install the app from a download
 
-The full app has the phone-width page, saved briefs, a daily brief and optional narration. The one command above installs it. If you have this repo's folder instead, run the same install from it. It goes into one folder, `~/.lensmith-composer`, and touches nothing else: no sudo, no global Python, no PATH change.
+The full app has the phone-width page, saved briefs, a daily brief and optional narration. The one command above installs it. If you have this repo's folder instead, run the install from it. `./setup.sh` goes into one folder, `~/.lensmith-composer`, and touches nothing else: no sudo, no global Python, no PATH change. (The one command also makes a `lensmith` shortcut at the end; see [docs/install.md](docs/install.md).)
 
 ```sh
 ./setup.sh
@@ -132,9 +132,9 @@ Each release lists SHA256SUMS, a CycloneDX SBOM, and GitHub artifact attestation
 Claude wrote the code and the tests, and drafted this page. I decide what Composer does, and I read the briefs the private version writes.
 
 I don't review the code line by line, so here is what backs it instead:
-- 794 offline tests ran on Python 3.10 and 3.13 in clean containers, with 0 failures, and the commands in this README were run there.
+- 809 offline tests ran on Python 3.10 and 3.13 in clean containers: 0 failed, 13 skipped (they need root, another account or a tool the image lacks). The commands in this README were run there.
 - The installer was run 64 times across 27 scenarios (a download source down or slow, a file that fails its checksum, no Python, a folder it must refuse), and every run ended as it should. It was also installed from supplied files with the network switched off.
-- A secret scanner (gitleaks) found nothing in any commit, and one test fails if private names, server paths or key shapes appear in the files or the history.
+- A secret scanner (gitleaks) found nothing in any commit except one made-up marker string in a test, which its config allows. One test fails if private names, server paths or key shapes appear in the files or the history.
 - A security review on 2026-11-01 attacked it as a hostile feed, a hostile web page and a hostile network would. What it found is fixed, and a second reviewer attacked the fixes ([SECURITY.md](SECURITY.md)). Both reviewers were AI models; no human has audited the code.
 - One live brief, from a fresh install in a clean Python 3.13 container with a real Anthropic key and the default model: 7 calls, 29 seconds, about 8 cents. Every insight got a claim-seal verdict and the seal verified.
 

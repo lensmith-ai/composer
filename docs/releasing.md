@@ -44,11 +44,15 @@ The workflow then:
 | installer | `install.sh` for this release with every file it fetches pinned by SHA-256, and the dependency files it may fetch from the release (certifi's and setuptools' wheels, claim-seal's pinned archive and the wheel built from it), each checked against a hash written in the repository first | a hash that does not match; a file missing |
 | release-note | `scripts/release/release_note.py`: every line of the draft checked by claim-seal against this version's changelog section and `test-results.json`; the seal verified | any line partly supported, unsupported, unchecked or citing an unknown title; a missing draft |
 | image | after test, build and release-note: the default image (no narration) for linux/amd64 and linux/arm64 to ghcr.io under a candidate tag only (`candidate-<commit>`, a staging image, never named as a release); its SBOM (syft, CycloneDX); provenance and SBOM attested to the image digest | a failed build, push or attestation |
-| promote | after every job above: the version tag (`<version>`) put on the attested candidate's digest, with no rebuild. This is the only step that gives an image a release's tag | no digest from the image job |
+| promote | after every job above: the signed tag is checked once more, then the version tag (`<version>`) is put on the attested candidate's digest, with no rebuild. This is the only step that gives an image a release's tag | the tag no longer pointing at the checked commit; no digest from the image job |
 | publish | SHA256SUMS over every file; build provenance for every file; an SBOM attestation for the wheel and sdist; the GitHub Release, made as a draft and published only when every file is attached, with the note as its text | the tag no longer pointing at the checked commit; a file missing |
 | installer-to-main | after the release: the release's own `install.sh` (checked against the release's SHA256SUMS) committed to `main`, where the one-line install is served from | (the release is already complete) if `main` refuses the commit, commit that file by hand |
 
-The attestations name the workflow as it stood on `main` when it ran; the job log shows the tag and commit it built.
+The attestations name the workflow as it stood on `main` when it ran; the job log shows the tag and commit it built. Provenance
+covers the files the workflow built or made (not certifi's and setuptools' wheels or claim-seal's source archive, which are
+checked copies of upstream files). Two things to know when a run fails: if `publish` fails after `promote`, the `<version>`
+image tag already exists, and a re-run replaces it with the rebuilt image; and `verify-tag` cannot see a leftover draft
+release, so delete a failed draft by hand before re-running.
 
 ## The one-command installer
 

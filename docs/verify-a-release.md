@@ -20,7 +20,9 @@ gh attestation verify oci://ghcr.io/lensmith-ai/composer:0.2.0 --repo lensmith-a
 ```
 
 A checksum only shows the download is complete and matches the list next to it. The attestation shows which workflow,
-commit and tag built the file.
+commit and tag built the file. Three files on the release carry no attestation because this workflow did not build them:
+certifi's wheel, setuptools' wheel and claim-seal's source archive are copies of upstream files, checked against hashes
+written in this repository before they are attached (they are there so the installer has a second place to get them).
 
 ## Check the tag
 
