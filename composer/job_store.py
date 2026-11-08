@@ -337,7 +337,8 @@ class JobStore:
                 job["phase"] = "verified" if status == "ok" else "verification_failed"
                 job["state"] = "done"; job["finished_at"] = self._now()
                 job["progress"].append({"at": self._now(), "phase": job["phase"]})
-                job.setdefault("lines", []).append("done \u2713")
+                if status == "ok":  # a check that did not pass must not read as a clean finish in the page's trace
+                    job.setdefault("lines", []).append("done \u2713")
                 job["verification"] = {"status": status, "wall_s": round(time.monotonic() - started, 3)}
                 job["receipts"]["verification"] = job["verification"]
                 self._write_job(job)

@@ -69,7 +69,7 @@ async function stages(browser, engine, log) {
       const t0 = Date.now();
       while (Date.now() - t0 < 120000) {
         const s = await page.evaluate(() => {
-          const text = document.body.innerText + ' ' + document.body.textContent;  // all the text a person could read
+          const text = document.body.innerText + ' ' + document.documentElement.outerHTML;  // the text a person reads and every attribute
           const el = document.getElementById('cwWordRaster') || document.getElementById('cwReducedWords');
           return { word: el ? el.textContent.trim().toUpperCase() : '', bad: text.includes('[object Object]'),
                    done: /[?&]job=/.test(location.search) && !!document.querySelector('.cmark') && !document.getElementById('cmpEntryTransition') };
@@ -84,7 +84,7 @@ async function stages(browser, engine, log) {
       if (order.join() !== STAGES.join()) throw new Error(`stages shown: ${seen.join(' > ') || 'none'}; wanted ${STAGES.join(' > ')}`);
       if (seen.join() !== order.join()) throw new Error(`stages out of order: ${seen.join(' > ')}`);
       if (errors.length) throw new Error(`page error: ${errors[0]}`);
-      const final = await page.evaluate(() => (document.body.innerText + ' ' + document.body.textContent).includes('[object Object]'));
+      const final = await page.evaluate(() => (document.body.innerText + ' ' + document.documentElement.outerHTML).includes('[object Object]'));
       if (final) throw new Error('"[object Object]" is on the finished page');
       await ctx.close();
     });

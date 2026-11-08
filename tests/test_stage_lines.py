@@ -98,6 +98,73 @@ class LineMakerTests(unittest.TestCase):
         self.assertIsNone(make("quote.dropped", ""))
 
 
+class LabelTests(unittest.TestCase):
+    """Source labels are what the pipeline's events carry; the page wants ids."""
+
+    def make(self, *pairs):
+        return stage_lines.make_line_maker([Source(i, label) for i, label in pairs])
+
+    def test_a_label_that_starts_another_label_does_not_take_its_lines_in_either_order(self):
+        for pairs in ((("a", "OpenAI"), ("b", "OpenAI \u00b7 Research")), (("b", "OpenAI \u00b7 Research"), ("a", "OpenAI"))):
+            make = self.make(*pairs)
+            self.assertEqual("fetching b\u2026", make("source.started", "reading OpenAI \u00b7 Research"))
+            self.assertEqual("scanning b \u2014 4 items (ok)", make("source.done", "OpenAI \u00b7 Research \u00b7 4 items (ok)"))
+            self.assertEqual("fetching a\u2026", make("source.started", "reading OpenAI"))
+            self.assertEqual("scanning a \u2014 2 items (ok)", make("source.done", "OpenAI \u00b7 2 items (ok)"))
+
+    def test_a_failure_keeps_its_own_words_even_when_the_label_has_a_dot(self):
+        make = self.make(("b", "OpenAI \u00b7 Research"))
+        make("source.started", "reading OpenAI \u00b7 Research")
+        self.assertEqual("b could not be read \u2014 failed: timeout",
+                         make("source.done", "OpenAI \u00b7 Research \u00b7 failed: timeout"))
+
+    def test_two_sources_with_one_label_each_get_their_own_lines_in_order(self):
+        make = self.make(("a", "Same"), ("b", "Same"))
+        self.assertEqual("fetching a\u2026", make("source.started", "reading Same"))
+        self.assertEqual("scanning a \u2014 1 items (ok)", make("source.done", "Same \u00b7 1 item (ok)"))
+        self.assertEqual("fetching b\u2026", make("source.started", "reading Same"))
+        self.assertEqual("scanning b \u2014 3 items (ok)", make("source.done", "Same \u00b7 3 items (ok)"))
+
+
+class PageReaderTests(unittest.TestCase):
+    """The lines must satisfy the page's own readers: the regular expressions are read out of app.js and the entry
+    animation's script, not copied here."""
+
+    JS_DIR = Path(__file__).resolve().parents[1] / "composer" / "web" / "app"
+
+    def literals(self, name, start, end):
+        text = (self.JS_DIR / name).read_text(encoding="utf-8")
+        body = text[text.index(start):text.index(end, text.index(start))]
+        found = re.findall(r"/(\^[^/\n]*?)/(?=[.)]|\s)", body)
+        self.assertTrue(found, f"no regular expressions found in {name}")
+        return [re.compile(x, re.I) for x in found]
+
+    def test_the_loom_reader_takes_the_lines_it_draws_from(self):
+        regexes = self.literals("app.js", "function canonicalEventsFromProgress", "function prepareLiveStage")
+        make = stage_lines.make_line_maker(SOURCES, "System improvements")
+        lines = []
+        pipeline_events(lambda kind, text: lines.append(make(kind, text)))
+        for line in (lines[0], lines[1], lines[2], lines[6], lines[7], lines[8], lines[9]):
+            lower = line.lower()
+            self.assertTrue(any(r.search(lower) for r in regexes), f"the loom's reader does not take: {line}")
+        scanned = [r for r in regexes if r.search(lines[2].lower())]
+        self.assertTrue(any(r.match(lines[2].lower()) and r.pattern.count("(") >= 3 for r in scanned),
+                        "the scan line must give the loom its source id and item count")
+
+    def test_the_entry_animation_reaches_every_stage_from_the_lines(self):
+        regexes = self.literals("composer-entry-transition.js", "function rawStage", "function phaseMark")
+        self.assertGreaterEqual(len(regexes), 6)
+        make = stage_lines.make_line_maker(SOURCES, "System improvements")
+        lines = []
+        pipeline_events(lambda kind, text: lines.append(make(kind, text)))
+        reached = set()
+        for line in lines:
+            for i, r in enumerate(regexes):
+                if r.search(line.lower()):
+                    reached.add(i)
+        self.assertEqual(set(range(len(regexes))), reached)
+
+
 class JobLinesTests(unittest.TestCase):
     """A real server and job store: the job's `lines` carry the run's stages, and its phase records stay objects."""
 
@@ -159,6 +226,22 @@ class JobLinesTests(unittest.TestCase):
         # the lines name the sources by id, which is what the page draws its loom from
         self.assertIn("fetching google-ai…", lines)
         self.assertIn("fetching deepmind…", lines)
+
+    def test_a_check_that_did_not_pass_does_not_end_on_done(self):
+        def worker(job, draft_ready):
+            self.app.jobs.note(job["job"], "compose started \u00b7 1 source \u00b7 lens: x")
+            draft_ready({"schema": "composer-edition/v1", "job": job["job"], "cards": []})
+            return {"status": "unsupported", "claim_evidence": {"job": job["job"], "draft_sha256": job["draft_sha256"]}}
+
+        self.app.jobs.worker = worker
+        _, payload = self.request("POST", "/compose", json.dumps({"sources": ["google-ai"], "lens": "x"}))
+        for _ in range(200):
+            _, job = self.request("GET", "/status/" + payload["job"])
+            if job["phase"] in {"verified", "verification_failed", "compose_failed"}:
+                break
+            time.sleep(0.02)
+        self.assertEqual("verification_failed", job["phase"])
+        self.assertNotIn("done \u2713", job["lines"])
 
     def test_a_finished_job_takes_no_more_lines(self):
         status, payload = self.request("POST", "/compose", json.dumps({"sources": ["google-ai"], "lens": "x"}))

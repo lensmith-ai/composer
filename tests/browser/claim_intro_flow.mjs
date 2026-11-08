@@ -10,7 +10,10 @@
 //            loom beside the reading column, two columns of insight cards from 960 px).
 //   CLAIMS   the sentence the checker marked in an insight card's text carries the published window's one claim mark
 //            (`.cmark`: a thin amber underline, identical for every claim; the check compares its computed style); the
-//            card's headline never does, and pressing the headline or any other part of the card opens the insight sheet. Pressing
+//            card's headline never does, and pressing the headline or any other part of the card opens the insight sheet. Inside
+//            the card a mark is a pointer shortcut (no role, no tab stop: the card is the one button); the keyboard reaches the
+//            same claims through the card's sheet, whose marked sentences are controls, on the saved page and on the screen a
+//            compose ends on. Pressing
 //            one (click, or Enter from the keyboard) opens the app's sheet (#spanSheet) with the verdict in words, the cited
 //            article's link and the source passage; Esc, a press elsewhere or Close shuts it and focus goes back to the claim.
 //   INTRO    with the feeds answering 8 s late (a slow connection), the sand has formed the first words within 3 s of
@@ -109,12 +112,13 @@ async function layoutAndClaims(browser, engine, server, width, log) {
   });
   if (shots) await page.screenshot({ path: `${shots}/${engine}-brief-${width}.png` });
 
-  await step('every claim carries the published window\u2019s one mark, and a keyboard reaches it', log, async () => {
+  await step('every checked sentence on a card carries the published window\u2019s one mark, which is a pointer shortcut inside the card button', log, async () => {
     const claims = page.locator('#cDeck .cmark');
     if ((await claims.count()) < 5) throw new Error(`only ${await claims.count()} marked claims`);
     if (await page.locator('#cDeck h4 .cmark').count()) throw new Error('an insight headline is a claim mark: pressing it would not open the insight');
     const first = claims.first();
-    if ((await first.getAttribute('role')) !== 'button' || (await first.getAttribute('tabindex')) !== '0') throw new Error('a claim is not a keyboard control');
+    // the card is one button; a button inside it would be a nested control, so a card's mark has no role and no tab stop
+    if ((await first.getAttribute('role')) !== null || (await first.getAttribute('tabindex')) !== null) throw new Error('a mark inside the card is a second control');
     // the mark is window.css's `.cmark`: padding 0 1px, margin 0 -1px, radius 2px, 1px solid rgba(255,176,32,.6), no text-decoration
     const looks = await claims.evaluateAll((ns) => ns.map((n) => {
       const c = getComputedStyle(n);
@@ -137,7 +141,6 @@ async function layoutAndClaims(browser, engine, server, width, log) {
     await first.click();
     await page.waitForFunction(() => document.getElementById('spanSheet').classList.contains('on'), null, { timeout: 5000 });
     if ((await sheet.getAttribute('role')) !== 'dialog') throw new Error('the sheet is not a dialog');
-    if ((await first.getAttribute('aria-expanded')) !== 'true') throw new Error('the claim does not say it is open');
     const said = (await sheet.locator('.cmb').textContent()).trim();
     if (!said.startsWith('Supported. The cited article backs this up.')) throw new Error(`verdict in words: "${said}"`);
     const passage = (await sheet.locator('.cmsrc .cmq').first().innerText()).trim();
@@ -151,7 +154,7 @@ async function layoutAndClaims(browser, engine, server, width, log) {
     await page.keyboard.press('Escape');
     await page.waitForFunction(() => !document.getElementById('spanSheet').classList.contains('on'), null, { timeout: 5000 });
     const back = await page.evaluate(() => document.activeElement && document.activeElement.className);
-    if (!/cmark/.test(back || '')) throw new Error(`focus went to ${back}, not back to the claim`);
+    if (!/icard/.test(back || '')) throw new Error(`focus went to ${back}, not back to the card that holds the claim`);
   });
 
   await step('a partly supported and a not supported claim look the same and are worded differently', log, async () => {
@@ -185,21 +188,28 @@ async function layoutAndClaims(browser, engine, server, width, log) {
     await page.evaluate(() => window.scrollTo(0, 0));
   });
 
-  await step('the keyboard opens and closes a claim; a press elsewhere closes it', log, async () => {
+  await step('the keyboard reaches a claim through the card; a press elsewhere closes the claim sheet', log, async () => {
     const isOn = () => page.evaluate(() => document.getElementById('spanSheet').classList.contains('on'));
-    const second = page.locator('#cDeck .cmark').nth(1);
-    await second.focus();
+    // Enter on the card opens the insight sheet, whose marked sentences are controls a keyboard reaches
+    const card = page.locator('#cDeck .icw').nth(1).locator('.icard');
+    await card.focus();
+    await page.keyboard.press('Enter');
+    await page.locator('#sheet.on').waitFor({ timeout: 5000 });
+    const inSheet = page.locator('#sheet #shPoints .cmark').first();
+    if ((await inSheet.getAttribute('role')) !== 'button' || (await inSheet.getAttribute('tabindex')) !== '0') throw new Error('a claim in the insight sheet is not a keyboard control');
+    await inSheet.focus();
     await page.keyboard.press('Enter');
     await page.waitForFunction(() => document.getElementById('spanSheet').classList.contains('on'), null, { timeout: 5000 });
-    const focusInside = await page.evaluate(() => document.getElementById('spanSheet').contains(document.activeElement));
-    if (!focusInside) throw new Error('focus did not move into the sheet');
     await page.keyboard.press('Escape');
     await page.waitForFunction(() => !document.getElementById('spanSheet').classList.contains('on'), null, { timeout: 5000 });
+    await page.keyboard.press('Escape');
+    await page.waitForFunction(() => !document.getElementById('sheet').classList.contains('on'), null, { timeout: 5000 });
+    // a pointer press on a mark, then a press elsewhere, then the Close button
+    const second = page.locator('#cDeck .cmark').nth(1);
     await second.click();
     await page.waitForFunction(() => document.getElementById('spanSheet').classList.contains('on'), null, { timeout: 5000 });
     await page.mouse.click(5, 5);
     await page.waitForFunction(() => !document.getElementById('spanSheet').classList.contains('on'), null, { timeout: 5000 });
-    // the Close button shuts it too
     await second.click();
     await page.waitForFunction(() => document.getElementById('spanSheet').classList.contains('on'), null, { timeout: 5000 });
     await sheet.locator('.close').click();
@@ -223,10 +233,12 @@ async function layoutAndClaims(browser, engine, server, width, log) {
       if (await page.locator('#spanSheet.on').count()) throw new Error(`pressing the ${name} opened the claim sheet`);
       await closeSheet();
     }
-    await card.focus();
-    await page.keyboard.press('Enter');
-    await page.locator('#sheet.on').waitFor({ timeout: 5000 });
-    await closeSheet();
+    for (const key of ['Enter', ' ']) {
+      await card.focus();
+      await page.keyboard.press(key);
+      await page.locator('#sheet.on').waitFor({ timeout: 5000 });
+      await closeSheet();
+    }
   });
   if (errors.length) throw new Error(`page error: ${errors[0]}`);
   await ctx.close();
@@ -315,6 +327,26 @@ async function intro(browser, engine, log) {
       const said = (await page.locator('#spanSheet .cmb').textContent()).trim();
       if (!said.startsWith('Supported.')) throw new Error(`the first claim reads "${said}"`);
       if ((await page.locator('#spanSheet .cmsrc .cmq').first().innerText()).trim().length < 10) throw new Error('no source passage on the finished screen');
+      await page.keyboard.press('Escape');
+      await page.waitForFunction(() => !document.getElementById('spanSheet').classList.contains('on'), null, { timeout: 5000 });
+      // the card on this screen is its own build: the same presses open the insight sheet, never the claim sheet
+      // the cards take presses once the pieces have all faded in (the screen says so on its slot)
+      await page.waitForSelector('#cmpSettledContent[data-completion-assembly="settled"]', { timeout: 30000 });
+      await page.waitForTimeout(300);
+      const screenCard = page.locator('.cmp-completion-assembly .cdeck .icw').first().locator('.icard');
+      if ((await screenCard.getAttribute('role')) !== 'button') throw new Error('the card on the finished screen is not a button');
+      if (await page.locator('.cmp-completion-assembly h4 .cmark').count()) throw new Error('a headline is a claim mark on the finished screen');
+      const insightOpen = () => page.evaluate(() => [...document.querySelectorAll('.sheet.on')].map((n) => n.id));
+      for (const how of ['headline', 'corner', 'Enter', 'Space']) {
+        await screenCard.scrollIntoViewIfNeeded();
+        if (how === 'headline') await screenCard.locator('h4').click();
+        else if (how === 'corner') await screenCard.click({ position: { x: 10, y: 10 } });
+        else { await screenCard.focus(); await page.keyboard.press(how === 'Enter' ? 'Enter' : ' '); }
+        await page.waitForTimeout(700);
+        const open = await insightOpen();
+        if (open.includes('spanSheet') || !open.length) throw new Error(`${how} on the finished screen's card opened ${JSON.stringify(open)}, not the insight sheet`);
+        await page.evaluate(() => { document.querySelectorAll('.sheet.on').forEach((n) => n.classList.remove('on')); const sc = document.getElementById('scrim'); if (sc) sc.classList.remove('on'); });
+      }
       const tag = (await page.locator('.cmp-completion-assembly .cdeck .icw').nth(1).locator('.prooftag').textContent()).trim();
       if (!/^partly supported/.test(tag)) throw new Error(`a partly supported card is tagged "${tag}"`);
       await ctx.close();
