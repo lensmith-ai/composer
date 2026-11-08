@@ -17,7 +17,7 @@ so we could not run it for you). Lines that start with `#` are notes, not comman
 | `composer up` (the command the image runs), your key in the data volume, the daily brief, `composer backup` / `composer restore` | works (steps 7 to 9) |
 | Copying your whole data volume out and restoring it | works (step 9) |
 | Optional narration, as a separate image | works (see [Narration](#narration-optional-not-in-the-default-image)) |
-| A published image to pull, and its attestation | **pending the first release** (phase P5); until then you build the image on the server |
+| A published image to pull, and its attestation | works from 0.2.0 (you can also build the image on the server) |
 
 ## What you get
 
@@ -137,12 +137,11 @@ Until the first release is published, build the image on the server from the fil
 docker compose build composer
 ```
 
-**Pending the first release (P5):** set `COMPOSER_VERSION=0.2.0` in `.env` and pull the published image instead,
+**Or use the published image:** set `COMPOSER_VERSION=0.2.0` in `.env` and pull the published image instead,
 with `docker compose pull`. You can check where it came from before you run it, with the
 [GitHub CLI](https://cli.github.com/):
 
 ```sh
-# pending the first release
 gh attestation verify oci://ghcr.io/lensmith-ai/composer:0.2.0 --repo lensmith-ai/composer \
   --signer-workflow lensmith-ai/composer/.github/workflows/release.yml
 ```

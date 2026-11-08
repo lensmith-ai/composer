@@ -158,9 +158,10 @@ What Composer does to stay safe, and where its limits are:
   unprivileged user on a read-only filesystem with no extra privileges. Your model key is never a container
   environment variable. One login for one person: sharing it shares your API credit. Caddy does not slow down
   repeated wrong passwords, so use a long random one. Exposing the app without Caddy and the login is not supported.
-- **Release integrity.** From the first release on, every file attached to a GitHub Release and the container image
-  carry GitHub artifact attestations (build provenance and SBOM) made by this repository's release workflow, and
-  SHA256SUMS lists every file. `gh attestation verify` checks where a file came from; a checksum alone only shows the
+- **Release integrity.** From the first release on, every file the release workflow built, and the container image,
+  carry GitHub build-provenance attestations made by this repository's release workflow (the Composer wheel and sdist
+  and the image also carry an SBOM attestation). Certifi's wheel, setuptools' wheel and claim-seal's source archive on
+  the release are checked copies of upstream files and carry none. SHA256SUMS lists every file. `gh attestation verify` checks where a file came from; a checksum alone only shows the
   download is complete.
 - **The seal is not a signature.** It is an unkeyed SHA-256 chain. It shows a later edit only
   when compared with a copy you kept. See claim-seal's README.

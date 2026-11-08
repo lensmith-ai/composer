@@ -129,7 +129,7 @@ def render(version: str, draft: dict, result: dict, judge_name: str, replay: boo
               "", "## Check the files yourself", "",
               "```sh",
               "sha256sum -c SHA256SUMS",
-              f"gh attestation verify <file> --repo {REPO} \\",
+              f"gh attestation verify lensmith_composer-{version}-py3-none-any.whl --repo {REPO} \\",
               f"  --signer-workflow {REPO}/.github/workflows/release.yml",
               "```", "",
               "Composer sends no telemetry: no analytics, no crash reports, no update checks.", ""]
