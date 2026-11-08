@@ -1112,12 +1112,10 @@ html.cw-text-only .aplay,html.cw-text-only .speedrow,html.cw-text-only .apstand,
 .cws-why2{font:15px/1.6 Georgia,serif;color:var(--ink2,#c9c3b6)}
 .cws-rejoin{color:var(--amber,#f2b30a);text-decoration:none}
 
-/* ===== claim-seal: the checked claims (claimseal.js) =====
-   One mark for every checked claim: the published Composer window's own claim mark (composer/web/window/window.css,
-   `.lw .sheet .cmark`), word for word. The verdict is said in plain words inside the sheet that opens, never by the mark. */
+/* ===== claim-seal: the checked claims =====
+   The base claim mark is the published Composer window's own (composer/web/window/window.css, `.lw .sheet .cmark`), word for
+   word. Insight cards carry none; the marks inside the opened insight sheet are drawn from it (see `.sheet #shPoints .cmark`). */
 .cmark{padding:0 1px;margin:0 -1px;border-radius:2px;background:transparent;color:inherit;border-bottom:1px solid rgba(255,176,32,.6)}
-.icard .cmark{cursor:pointer}
-.icard .cmark:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 .cs-legend{border:1px solid var(--line);border-radius:var(--r);background:var(--glass);padding:11px 15px 12px;margin:2px 0 4px}
 .cs-lh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .cs-lk{font:9px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--amber)}

@@ -91,9 +91,6 @@ class ClaimSealScriptTests(unittest.TestCase):
     def test_nothing_from_a_brief_or_a_feed_goes_in_as_html(self):
         self.assertNotRegex(self.js, r"innerHTML|insertAdjacentHTML|outerHTML|document\.write")
 
-    def test_links_are_http_or_https_only(self):
-        self.assertIn("/^https?:\\/\\//i", self.js)
-
 
 if __name__ == "__main__":
     unittest.main()

@@ -15,6 +15,8 @@
 //            out alike: same header, same date row, the loom in the same place and the same width, the same reading column and
 //            insight cards. At 1440 px the reading column is on the left and the loom on the right in both, and the loom
 //            stays where it is from the moment the run ends (no jump from the narrow centred layout to the wide one).
+//   CARDS    no insight card carries a claim mark or any underline, on the screen a compose ends on and on the saved page (owner
+//            decision, as in the published app); opening a card shows its claims, marked, in the insight sheet.
 // Prints one PASS / FAIL line per engine and part; exits 1 if any failed.
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
@@ -72,7 +74,7 @@ async function stages(browser, engine, log) {
           const text = document.body.innerText + ' ' + document.documentElement.outerHTML;  // the text a person reads and every attribute
           const el = document.getElementById('cwWordRaster') || document.getElementById('cwReducedWords');
           return { word: el ? el.textContent.trim().toUpperCase() : '', bad: text.includes('[object Object]'),
-                   done: /[?&]job=/.test(location.search) && !!document.querySelector('.cmark') && !document.getElementById('cmpEntryTransition') };
+                   done: /[?&]job=/.test(location.search) && !!document.querySelector('.icard') && !document.getElementById('cmpEntryTransition') };
         }).catch(() => ({ word: '', bad: false, done: false }));
         if (s.bad && bad === null) bad = Math.round((Date.now() - t0) / 100) / 10;
         if (STAGES.includes(s.word) && seen[seen.length - 1] !== s.word) seen.push(s.word);
@@ -130,6 +132,24 @@ async function boxes(page, which) {
   }, [PARTS, which]);
 }
 
+// no claim mark and no underline anywhere in a card's headline or text; `where` is the card's container
+async function noCardMarks(page, where, what) {
+  const r = await page.evaluate((w) => {
+    const cards = [...document.querySelectorAll(w + ' .icard')];
+    const marks = document.querySelectorAll(w + ' .cmark, ' + w + ' .icard mark, ' + w + ' .icard u').length;
+    const lines = [];
+    for (const c of cards) for (const n of c.querySelectorAll('h4, h4 *, .gv, .gv *')) {
+      const st = getComputedStyle(n);
+      if (parseFloat(st.borderBottomWidth) > 0 && st.borderBottomStyle !== 'none') lines.push('border-bottom on ' + n.tagName);
+      if (/underline/.test(st.textDecorationLine)) lines.push('text-decoration on ' + n.tagName);
+    }
+    return { cards: cards.length, marks, lines };
+  }, where);
+  if (r.cards < 4) throw new Error(`${what}: only ${r.cards} insight cards`);
+  if (r.marks) throw new Error(`${what}: ${r.marks} claim marks on the insight cards`);
+  if (r.lines.length) throw new Error(`${what}: underlines on the cards: ${r.lines.slice(0, 3).join(', ')}`);
+}
+
 async function layout(browser, engine, width, log) {
   const server = await startServer();
   try {
@@ -152,7 +172,7 @@ async function layout(browser, engine, width, log) {
           return { shown: true, x: Math.round(b.x), y: Math.round(b.y + scrollY), w: Math.round(b.width), h: Math.round(b.height) };
         });
         if (r.shown && !shownAt) shownAt = r;
-        const over = await page.evaluate(() => /[?&]job=/.test(location.search) && !!document.querySelector('#cmpSettledContent .cmark')
+        const over = await page.evaluate(() => /[?&]job=/.test(location.search) && !!document.querySelector('#cmpSettledContent .icard')
           && !document.getElementById('cmpEntryTransition'));
         if (over) break;
         if (Date.now() - t0 > 120000) throw new Error('the run did not end');
@@ -176,11 +196,18 @@ async function layout(browser, engine, width, log) {
           throw new Error(`the loom jumped: ${JSON.stringify(shownAt)} when it first showed, ${JSON.stringify(here)} at the end`);
         }
       }
+      await noCardMarks(page, '#cmpSettledContent', 'the screen a compose ends on');
       if (shots) await page.screenshot({ path: `${shots}/${engine}-fresh-${width}.png` });
       await page.goto(new URL(`/app/?job=${job}`, server.app).href, { waitUntil: 'load' });
-      await page.locator('#cDeck .cmark').first().waitFor({ state: 'visible', timeout: 30000 });
+      await page.locator('#cDeck .icard').first().waitFor({ state: 'visible', timeout: 30000 });
       await page.waitForTimeout(2500);
       const saved = await boxes(page, 0);
+      await noCardMarks(page, '#cDeck', 'the saved page');
+      await page.locator('#cDeck .icw').first().locator('.icard').click();
+      await page.locator('#sheet.on').waitFor({ timeout: 5000 });
+      if (!(await page.locator('#sheet #shPoints .cmark').count())) throw new Error('the opened insight sheet shows no claims');
+      await page.keyboard.press('Escape');
+      await page.waitForFunction(() => !document.getElementById('sheet').classList.contains('on'), null, { timeout: 5000 });
       if (shots) await page.screenshot({ path: `${shots}/${engine}-saved-${width}.png` });
       const problems = [];
       for (const k of Object.keys(PARTS)) {

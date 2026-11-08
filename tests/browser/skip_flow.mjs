@@ -170,7 +170,7 @@ async function openApp(browser, server, width, opts = {}) {
 // the brief is on the screen: the claim marks show. Returns how long after `since` (ms on Node's clock).
 async function landed(page, since, why) {
   try {
-    await page.locator('.cmark').first().waitFor({ state: 'visible', timeout: LAND_MS });
+    await page.locator('.icard').first().waitFor({ state: 'visible', timeout: LAND_MS });
   } catch (e) {
     const where = await page.evaluate(() => {
       const c = window.__compositionController;
@@ -218,7 +218,7 @@ async function pressAt(browser, server, width, at, how) {
       withheld: !!document.getElementById('cmpStage') && document.getElementById('cmpStage').classList.contains('entry-loom-withheld'),
       focusOk: !document.activeElement || document.activeElement === document.body
         || (document.body.contains(document.activeElement) && document.activeElement.id !== 'cwEntrySkip'),
-      brief: !!document.querySelector('.cmark'),
+      brief: !!document.querySelector('.icard'),
     }), ENTRY_PARTS);
   }
   let took;
@@ -364,7 +364,7 @@ async function reduced(browser, engine, width, log) {
     const { ctx, page, errors } = await openApp(browser, server, width, opts);
     const since = Date.now();
     await page.click('#cmpGo');
-    for (let i = 0; i < 12 && !(await page.locator('.cmark').count()); i += 1) {
+    for (let i = 0; i < 12 && !(await page.locator('.icard').count()); i += 1) {
       await page.keyboard.press('Escape');
       await page.waitForTimeout(250);
       const drawn = await page.evaluate(() => ['canvas.cmp-entry-sand', 'canvas.sand-word-canvas', '#cwEntrySkip'].filter((s) => document.querySelector(s)));

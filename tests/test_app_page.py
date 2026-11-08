@@ -144,19 +144,25 @@ class AppFilesTests(unittest.TestCase):
         css = text("app.css")
         self.assertEqual(css.count(window_rule), 1, "app.css must carry the window's .cmark rule word for word, once")
         js = text("claimseal.js")
-        self.assertIn("span.className = 'cmark';", js)  # one class for every checked claim
-        self.assertNotRegex(js, r"className = '(?:cs-claim|cmark)[^']*'\s*\+")  # never a class built from the verdict
         for gone in ("cs-claim", "cs-pop", "cs-supported", "cs-partial", "cs-unsupported", "wavy"):
             self.assertNotIn(gone, js + css)
         self.assertNotIn("text-decoration", css[css.index("claim-seal: the checked claims"):css.index("wide screens")])
-        # the verdict is said in the sheet only; the strip above the cards names no verdict
+        # the strip above the cards names no verdict
         legend = js[js.index("function legendNode"):js.index("function legend(hostEl")]
         for word in ("supported", "partly", "unsupported", "tally"):
             self.assertNotIn(word, legend.lower())
-        # the sheet is filled with textContent only (a source passage comes from a third-party page)
-        sheet = js[js.index("function sheetFill"):js.index("function open(")]
-        self.assertNotIn("innerHTML", sheet)
-        self.assertNotIn("insertAdjacentHTML", sheet)
+
+    def test_insight_cards_carry_no_claim_marks(self):
+        # as in the published app: no underlines on the cards; the claims are marked in the opened insight sheet
+        js = text("claimseal.js")
+        for gone in ("cmark", "function card", "function mark", "kp[kpIndex]"):
+            self.assertNotIn(gone, js)
+        self.assertNotIn(".icard .cmark", text("app.css"))
+        app = text("app.js")
+        self.assertNotIn("__claimSeal.card", app)
+        self.assertNotIn("__claimSeal.mark", app)
+        # the sheet's own marks are still there
+        self.assertIn('phrase.className="cmark cmark-"+state;', app)
 
     def test_escape_helpers_cover_quotes(self):
         js = text("app.js")
