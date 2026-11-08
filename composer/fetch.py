@@ -36,6 +36,8 @@ import urllib.request
 import zlib
 from dataclasses import dataclass
 
+from . import tls as _tls
+
 USER_AGENT = "lensmith-composer/0.1 (+https://github.com/lensmith-ai/composer)"
 BYTE_CEILING = 2 * 1024 * 1024  # 2 MB; a feed or page above this is refused, never truncated
 TOTAL_S = 60  # one request, from connect to the last byte; the per-read timeout is separate
@@ -231,7 +233,7 @@ class _GuardedHTTPSConnection(http.client.HTTPSConnection):
 
 class _GuardedHTTPSHandler(urllib.request.HTTPSHandler):
     def https_open(self, req):
-        return self.do_open(_GuardedHTTPSConnection, req, context=self._context)
+        return self.do_open(_GuardedHTTPSConnection, req, context=_tls.ssl_context())
 
 
 @contextlib.contextmanager

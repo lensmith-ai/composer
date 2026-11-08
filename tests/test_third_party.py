@@ -87,7 +87,7 @@ class ThirdPartyListTests(unittest.TestCase):
 
     def test_every_pyproject_pin_has_a_row(self):
         pins = pyproject_pins((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
-        self.assertEqual({n for n, _ in pins}, {"setuptools", "claim-seal"})
+        self.assertEqual({n for n, _ in pins}, {"setuptools", "claim-seal", "certifi"})
         self.assertEqual(missing(self.doc, PACKAGE_SECTION, pins), [])
 
     def test_the_check_fails_when_a_package_is_left_out(self):

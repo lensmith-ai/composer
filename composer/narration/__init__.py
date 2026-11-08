@@ -38,6 +38,7 @@ import urllib.request
 from pathlib import Path
 from urllib.parse import urlsplit
 
+from .. import tls
 from ..home import (CONFINED, HomeError, atomic_write, check_handed, no_group_write, open_owned, owned_dir,
                     private_env)
 
@@ -225,7 +226,7 @@ def download(home: Path, *, log=print, opener=None) -> tuple[Path, Path]:
     target = _owned(home, "models", "kokoro")
     if CONFINED:
         return _download_at(home, target, log=log, opener=opener)
-    open_url = opener or urllib.request.urlopen
+    open_url = opener or tls.urlopen
     for name, (want_sha, want_size) in PINNED.items():
         final = target / name
         if final.is_file() and final.stat().st_size == want_size and sha256_file(final) == want_sha:
@@ -261,7 +262,7 @@ def download(home: Path, *, log=print, opener=None) -> tuple[Path, Path]:
 
 def _download_at(home: Path, target: Path, *, log, opener) -> tuple[Path, Path]:
     """download(), writing only inside the models/kokoro folder as opened (never by path)."""
-    open_url = opener or urllib.request.urlopen
+    open_url = opener or tls.urlopen
     try:
         at = open_owned(home, "models", "kokoro")
     except HomeError as exc:
@@ -413,7 +414,7 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
         raise NarrationError("the server answered with a redirect; refused")
 
 
-_OPENER = urllib.request.build_opener(_NoRedirect())
+_OPENER = urllib.request.build_opener(_NoRedirect(), tls.HTTPSHandler())
 
 
 def server_voices(url: str, *, timeout: float = 5.0, opener=None) -> list[str]:

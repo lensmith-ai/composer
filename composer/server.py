@@ -712,7 +712,8 @@ def check_bind(host: str, passphrase: str, trusted=None) -> None:
                          "(anyone who can compose spends your API credit)")
 
 
-def serve(app: App, host: str, port: int, *, trusted=None, public_origin: str = "", on_ready=None) -> None:
+def serve(app: App, host: str, port: int, *, trusted=None, public_origin: str = "", on_ready=None,
+          open_browser: bool = False) -> None:
     from . import terminal
     check_bind(host, app.passphrase, trusted)
     httpd = ThreadingHTTPServer((host, port), handler_for(app, local_only=host in LOOPBACK, trusted=trusted,
@@ -725,12 +726,24 @@ def serve(app: App, host: str, port: int, *, trusted=None, public_origin: str = 
     url = terminal.app_url(host, port, public_origin=public_origin)
     if url:  # on a line of its own, with nothing after it, so a terminal makes it Cmd+clickable
         print(terminal.open_line(url), flush=True)
+        if open_browser and host in LOOPBACK:
+            _open_browser(url)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
         pass
     finally:
         httpd.server_close()
+
+
+def _open_browser(url: str) -> None:
+    """Ask the computer's browser to open `url`. A computer with no browser (a server, a container) is not an error."""
+    import webbrowser
+    try:
+        if not webbrowser.open(url):
+            print("(no browser could be opened here; open the address above yourself)", flush=True)
+    except Exception:  # noqa: BLE001  any failure to open a browser is only a missing convenience
+        print("(no browser could be opened here; open the address above yourself)", flush=True)
 
 
 def _stop_on_sigterm() -> None:

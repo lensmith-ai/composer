@@ -36,6 +36,22 @@ The workflow then:
 | promote | after test, build, release-note and image: the version tag (`<version>`) put on the attested candidate's digest, with no rebuild. This is the only step that gives an image a release's tag | no digest from the image job |
 | publish | SHA256SUMS over every file; build provenance for every file; an SBOM attestation for the wheel and sdist; the GitHub Release with the note as its text | |
 
+## The one-command installer
+
+`scripts/install/build_install.py` makes `install.sh` for a release: the template with this release's SHA-256 pins and the
+fetch library copied from `setup.sh`. Put these files in one folder first, by their usual names: the sdist and wheel from the
+build job, certifi's wheel and setuptools' wheel (the versions `pyproject.toml` pins), claim-seal's wheel (built from the commit
+`pyproject.toml` pins) and that commit's archive. `tests/install_faults/make_release.py` shows how. Then:
+
+```sh
+python scripts/install/build_install.py --release DIR --out OUT      # writes install.sh, install.sh.sha256, install-pins.json
+```
+
+Attach the sdist, wheel, the three dependency files and `install.sh.sha256` to the GitHub Release, commit `install.sh` at the
+repository root on `main` (its address is `https://raw.githubusercontent.com/lensmith-ai/composer/main/install.sh`, a build option
+`--install-url`), and publish the same files at the mirror address when there is one. Before a release, run the fault-injection
+benchmark (`tests/install_faults/run_faults.py --help`); every scenario must pass 3 of 3.
+
 ## Release candidates, for a test before a release
 
 `scripts/release/rc.py` builds candidates from chosen commits the way the workflow builds a release, so a test on

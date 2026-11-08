@@ -78,8 +78,11 @@ composer compose --help
 
 ## Install the app (setup.sh)
 
+The shortest way is one command; see [docs/install.md](docs/install.md). What follows is the same install, run from a folder.
+
 The full app (the phone-width page, saved briefs, a daily brief, optional narration) installs into ONE folder,
-`~/.lensmith-composer`, and touches nothing else: no shell profile, no PATH, no sudo, no global Python.
+`~/.lensmith-composer`, and touches nothing else: no sudo, no global Python, no PATH change. (The one-command installer also makes a
+`lensmith` shortcut at the end: a link in `~/.local/bin`, or, if you say yes, 3 lines in your shell profile; see docs/install.md.)
 
 ```sh
 ./setup.sh

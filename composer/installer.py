@@ -510,6 +510,75 @@ echo "  Install Python 3.10+, or remove $APP yourself; your data is in its own f
 exit 127"""
 
 
+# `lensmith`: the umbrella command for Lensmith's products (today one: composer). It is written next to the composer
+# launcher, so the old full path keeps working. It never installs a bare `composer` anywhere (PHP's Composer is a
+# different program that many developers have). The three marker lines are how the installer's shell shortcut is found
+# again and removed by `lensmith composer uninstall`.
+SHORTCUT_BEGIN = "# >>> lensmith (added by the Composer installer; delete these 3 lines to undo)"
+SHORTCUT_END = "# <<< lensmith"
+LENSMITH_SH = r"""#!/bin/sh
+# lensmith: one command for Lensmith's products. Made by `composer setup`; it changes nothing outside its folder.
+COMPOSER=__COMPOSER__
+HERE=__HOME__
+case "${1:-}" in
+  ""|help|-h|--help)
+    echo "lensmith: one command for Lensmith's products."
+    echo "  lensmith composer          start Composer and open it in your browser"
+    echo "  lensmith composer doctor | update | rollback | uninstall | --version   (all of them: lensmith composer --help)"
+    exit 0 ;;
+  --version|-V|version)
+    echo "lensmith (composer $("$COMPOSER" --version 2>/dev/null | awk '{print $2}'))"
+    exit 0 ;;
+  composer) shift ;;
+  *) echo "lensmith: there is no product called '$1'. Try: lensmith composer" >&2; exit 2 ;;
+esac
+case "${1:-}" in
+  ""|up|--no-open|--port|--host)
+    [ "${1:-}" != up ] || shift
+    open=--open; n=$#
+    while [ "$n" -gt 0 ]; do a=$1; shift; n=$((n - 1)); if [ "$a" = --no-open ]; then open=""; else set -- "$@" "$a"; fi; done
+    exec "$COMPOSER" up $open "$@" ;;
+  uninstall)
+    "$COMPOSER" "$@"; rc=$?
+    # only when this install is really gone (composer uninstall --help or --home OTHER also exit 0)
+    if [ "$rc" -eq 0 ] && [ ! -e "$HERE/bin/composer" ]; then
+      # take away what the installer added outside the app folder: the shortcut link, and its 3 profile lines (the
+      # exact three lines, nothing near them; a block for another install, or one you edited, is left alone)
+      for d in "$HOME/.local/bin" "$HOME/bin"; do
+        if [ -L "$d/lensmith" ] && [ "$(readlink "$d/lensmith")" = "$HERE/bin/lensmith" ]; then
+          rm -f -- "$d/lensmith" && echo "removed the shortcut $d/lensmith"
+        fi
+      done
+      for f in "${ZDOTDIR:-$HOME}/.zshrc" "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.bash_profile" "$HOME/.profile"; do
+        [ -f "$f" ] && [ ! -L "$f" ] || continue
+        tmp=$(umask 077; mktemp "$f.lensmith.XXXXXX" 2>/dev/null) || continue
+        if LC_A=__ALIAS__ LC_B=__BEGIN__ LC_E=__END__ awk '{ l[NR] = $0 }
+          END { i = 1; while (i <= NR) { if (l[i] == ENVIRON["LC_B"] && l[i+1] == ENVIRON["LC_A"] && l[i+2] == ENVIRON["LC_E"]) { i += 3; gone = 1 } else { print l[i]; i++ } } exit gone ? 0 : 3 }' "$f" > "$tmp"; then
+          if cat "$tmp" > "$f" && cmp -s "$tmp" "$f"; then echo "removed the 3 lensmith lines from $f"; rm -f -- "$tmp"
+          else echo "could not rewrite $f (a copy of the cleaned text is in $tmp; check $f before you close this window)" >&2; fi
+        else rm -f -- "$tmp"; fi
+      done
+    fi
+    exit "$rc" ;;
+  *) exec "$COMPOSER" "$@" ;;
+esac
+"""
+
+
+def alias_line(home: Path) -> str:
+    """The profile line for the lensmith alias (the same text install.sh writes): the path quoted twice, because a shell
+    reads an alias's text again as commands when the alias is used."""
+    q, b = "'", "\\"
+    return "alias lensmith=" + q + q + b + q + q + str(home / "bin" / "lensmith") + q + b + q + q + q
+
+
+def lensmith_text(home: Path) -> str:
+    import re
+    values = {"ALIAS": shlex.quote(alias_line(home)), "COMPOSER": shlex.quote(str(home / "bin" / "composer")), "HOME": shlex.quote(str(home)),
+              "BEGIN": shlex.quote(SHORTCUT_BEGIN), "END": shlex.quote(SHORTCUT_END)}
+    return re.sub(r"__(ALIAS|COMPOSER|HOME|BEGIN|END)__", lambda m: values[m.group(1)], LENSMITH_SH)  # one pass: a value is never re-read
+
+
 def write_launcher(home: Path) -> Path:
     """bin/composer: runs app/current when setup.sh made the private environment, else this Python."""
     in_app = Path(sys.prefix).parent.parent == home / "app"
@@ -518,8 +587,10 @@ def write_launcher(home: Path) -> Path:
     if not H.CONFINED:  # no folder descriptors on this system (Windows): checked by path, as before
         path = H.owned_dir(home, "bin") / "composer"
         H.atomic_write(path, _launcher_text(home, command), mode=0o700)
+        H.atomic_write(path.parent / "lensmith", lensmith_text(home), mode=0o700)
         return path
     with H.open_owned(home, "bin") as bin_dir:  # written inside the bin folder that was opened, never by path
+        bin_dir.write("lensmith", lensmith_text(home), mode=0o700)
         return bin_dir.write("composer", _launcher_text(home, command), mode=0o700)
 
 
@@ -757,12 +828,15 @@ def _run(*, home: Path, data: Path | None, answers_file: str | None, assume_yes:
     if not data_only:
         out(f"  port       {cfg['server']['port']}")
         out("")
-        out(f"Start it:   {home}/bin/composer up")
-        out("When it starts it prints this address on a line of its own; Cmd+click it in macOS Terminal:")
-        out(f"Open: http://127.0.0.1:{cfg['server']['port']}/")
+        if not os.environ.get("COMPOSER_INSTALLER"):  # install.sh starts the app itself and prints the address then
+            out(f"Start it:   {home}/bin/composer up")
+            out("When it starts it prints this address on a line of its own; Cmd+click it in macOS Terminal:")
+            out(f"Open: http://127.0.0.1:{cfg['server']['port']}/")
+            out(f"Or:         {home}/bin/lensmith composer   (starts it and opens your browser)")
         out(f"Check it:   {home}/bin/composer doctor")
-        out("To run `composer` from anywhere, add this line to your shell profile yourself (setup does not):")
-        out(f"  alias composer={shlex.quote(str(home / 'bin' / 'composer'))}")
+        if not os.environ.get("COMPOSER_INSTALLER"):  # install.sh offers its own shortcut and says what it changed
+            out("To type `lensmith composer` from anywhere, add this line to your shell profile yourself (setup does not):")
+            out(f"  {alias_line(home)}")
         out("")
         for line in every_day_lines(home, cfg["schedule"]):
             out(line)

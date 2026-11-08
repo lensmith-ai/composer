@@ -7,6 +7,28 @@ Each release note is written from this file and checked against it by claim-seal
 
 ## [Unreleased]
 
+### Added
+
+- One command for a stranger on macOS and Linux: `curl -fsSL <address of install.sh> | sh`. It finds Python 3.10 or
+  newer or gets a private one, installs Composer and its three dependencies into `~/.lensmith-composer`, asks only for
+  your Anthropic key (hidden; Enter skips it for the recorded demo), starts the app, prints `Open: http://127.0.0.1:8765/`
+  and opens your browser. See `docs/install.md`.
+- Every file the installer fetches has a list of places to come from, tried in order with a one-line note when it
+  switches (uv: GitHub release, GitHub download API, PyPI's wheel, our mirror; Python: GitHub, the download API,
+  npmmirror, our mirror, and on a Mac python.org's signed installer; Composer's wheels: PyPI, the release, our mirror),
+  and every file is checked against a SHA-256 pinned in the script. `COMPOSER_FILES_DIR` and per-file variables take
+  files you already have; `COMPOSER_SKIP_SOURCES` skips a source that hangs.
+- `composer up --open` opens the address in your browser.
+- Composer uses certifi's list of trusted certificate authorities when the Python it runs on has none (python.org's
+  macOS Python before its "Install Certificates" step), so feeds and the model API verify HTTPS on any Python.
+
+### Fixed
+
+- setup.sh refused its own environment when python.org's Python made group-writable template files in it, and a
+  rerun then died on the half-made version folder. It now takes the group-write bit off right away and removes a
+  half-made folder it marked itself.
+- A failed setup ends with what failed, the one next step and a log file, not a raw error.
+
 ## [0.2.0] - not released yet
 
 The full app, on your computer or your own server. In plain words:

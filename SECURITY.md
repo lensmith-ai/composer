@@ -209,3 +209,27 @@ Content-Length or a cut-off gzip stream was accepted (now refused); a key echoed
 200-character cut of an error message could leave a prefix (it is now removed before the cut);
 and the server's Host check accepted text after an IPv6 address in brackets, and duplicate
 headers (it now accepts exactly one local authority and one of each header).
+
+## The one-command installer (`install.sh`)
+
+`curl -fsSL <address> | sh` trusts exactly one thing you cannot check from inside: the HTTPS fetch of the script
+itself. Everything after that is pinned inside the script: the SHA-256 of the installer kit, of uv, of Python, of the
+macOS Python installer, and of the wheels of Composer, certifi and claim-seal (and of setuptools, used only to build
+claim-seal from its source if no wheel is available). Each file is checked before it is run or extracted, from whichever
+source it came; a file that does not match is thrown away and the next source is tried. pip installs the wheels with
+`--require-hashes --no-index`. A file you hand it (`COMPOSER_FILES_DIR`, `COMPOSER_KIT` and the others) is copied
+into the installer's own folder and the copy is the one that is checked and used. If you would rather read it first,
+download it, compare its SHA-256 with the one printed on the download page, then run it; `sh install.sh --show-pins`
+prints every pin. When uv has to download Python itself (every other source failed), uv checks that file against the same
+SHA-256 (tested: a changed file is refused). Python is started with `-I` (one exception: the preflight runs Composer's own code from the kit folder, and honours your
+`PYTHONPATH`), so a file named `venv.py` or `pip` in the folder you run the command from is never imported.
+
+It uses no `sudo`, except on macOS when you add `--install-python-pkg` and no other Python can be had: it then
+downloads python.org's installer, checks its SHA-256 and its signature, and runs it with `sudo` (that installer may edit
+your shell profile itself). Outside the app folder it writes only a log file and a temporary folder in
+`TMPDIR` (the folder is removed, the log stays; it holds no key) and, at the end, the `lensmith` shortcut: one link in
+`~/.local/bin` or `~/bin` when that is yours and on your PATH, or, only if you say yes (or pass `--path`), three marked alias
+lines in your shell profile. It never makes a command called `composer` and never replaces another program named `lensmith`;
+`lensmith composer uninstall` removes exactly the link and the three lines it added. Your Anthropic key is typed hidden on the terminal, kept in
+one shell variable, handed to setup only through its environment (never an argument), and stored mode 0600.
+Reviewed independently on 2026-11-08 (an outside reviewer's blocker and should-fix findings were fixed with tests).

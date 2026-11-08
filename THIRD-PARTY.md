@@ -39,6 +39,7 @@ package itself. This is guidance, not legal advice.
 | name | version | licence | required or optional | how it is used |
 |---|---|---|---|---|
 | [claim-seal](https://github.com/lensmith-ai/claim-seal) | 0.2.0, commit `b0fdf6126196509984d3480867bd4cf861a19f98` | MIT | required | The checking and sealing step. Installed by `pip install .` from GitHub's archive of that exact commit, whose SHA-256 pip checks; not copied into this repository. It has no dependencies of its own. |
+| [certifi](https://github.com/certifi/python-certifi) | 2026.10.23 (pinned in `pyproject.toml`) | MPL-2.0 | required | Mozilla's list of trusted certificate authorities. Used only when the Python you run Composer with has none of its own (python.org's macOS Python before its "Install Certificates" step, or a private Python on a computer without the ca-certificates package); otherwise your system's list is used. See `composer/tls.py`. |
 | [setuptools](https://github.com/pypa/setuptools) | 84.2.1 (pinned in `pyproject.toml`) | MIT | required to build | Builds the package when you run `pip install .`. Not used at run time. |
 | [pip](https://github.com/pypa/pip) | the version your Python's `venv` brings (26.2.2 in the default image) | MIT | required | Installs Composer into its private environment, and the optional parts from their lock files. |
 
@@ -199,5 +200,5 @@ scripts or styles from other sites.
 ## Audit note
 
 No dependency-audit tool (such as pip-audit) was run, because one was not available offline
-where this repository was prepared. The core install is two packages (claim-seal and setuptools), both pinned to
+where this repository was prepared. The core install is three packages (certifi, claim-seal and setuptools), both pinned to
 exact versions; every optional package is pinned and hash-checked by its lock file, listed above.

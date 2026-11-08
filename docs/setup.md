@@ -1,5 +1,8 @@
 # Install Composer on your computer
 
+Want the shortest way? One command, no download first: [install.md](install.md). This page is for running
+`./setup.sh` from a release folder or a checkout, and for what each question means.
+
 ```sh
 ./setup.sh
 ~/.lensmith-composer/bin/composer up
@@ -162,7 +165,7 @@ could change (SECURITY.md, "the trust contract"), and says what to do. The commo
   mounted 0777): `chmod` has no effect there. Use a POSIX filesystem (ext4, btrfs, xfs, APFS), or mount the disk with
   `uid=$(id -u),dmask=077,fmask=177`. Every program it starts gets a private environment that points
 `TMPDIR`, pip's and uv's caches, the XDG folders and Python's bytecode cache inside the app folder and ignores your
-pip settings. It never edits your shell profile, PATH, login items or Homebrew: to run `composer` from anywhere it
+pip settings. It never edits your shell profile, PATH, login items or Homebrew: to type `lensmith composer` from anywhere it
 prints the alias line for you to add yourself.
 
 ## A Kokoro you already have
