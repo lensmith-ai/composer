@@ -1,0 +1,12 @@
+# gitleaks reads this file from the repository root (ci.yml runs it over every commit and over the tree).
+# It keeps the default rules and allows exactly one thing, with its reason.
+title = "Lensmith Composer gitleaks configuration"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "A fake marker string in one test: it stands in for a secret so the test can check that no secret is written into the shelf index. It is not a credential and matches no provider's key format."
+condition = "AND"
+paths = ['''tests/test_shelf_index\.py''']
+regexes = ['''PRIVATE-MARKER-7f3a''']
