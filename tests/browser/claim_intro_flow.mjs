@@ -1,4 +1,4 @@
-// claim_intro_flow.mjs: the wide layout, the claim marks and the entry animation, on the real app page.
+// claim_intro_flow.mjs: the wide layout, the claims in the insight sheet and the entry animation, on the real app page.
 //
 //   node tests/browser/claim_intro_flow.mjs [python]      (python: an interpreter with Composer installed; default python3)
 //   PLAYWRIGHT_MODULE=<path to playwright's index.mjs> picks a Playwright install that is not in node_modules.

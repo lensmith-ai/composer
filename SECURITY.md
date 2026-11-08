@@ -141,7 +141,7 @@ What Composer does to stay safe, and where its limits are:
   the verdicts and SHA-256 digests. They do not store the articles' text (a sentence may quote a
   few words, as any summary does). For a brief composed from the app page, the few words (at most 25, and at most
   300 characters) of each located passage are kept in `passages.json` in that brief's own folder, owner-readable only,
-  for the claim popover; the brief file, the receipts and `check.json` never carry them. `check.json` also holds the judge's one-line reasons, which
+  for a later claim view (this version's app page does not show them yet); the brief file, the receipts and `check.json` never carry them. `check.json` also holds the judge's one-line reasons, which
   often quote the source. The page makes no outside request; its Content-Security-Policy allows
   only its own inline script and style. Every feed string is set as text, never as markup, and
   only an `http(s)` address becomes a link.

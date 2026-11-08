@@ -74,11 +74,11 @@ The full app, on your computer or your own server. In plain words:
 - The app page uses the width of your screen. The phone keeps its single column; from 768 px the loom stands beside
   the reading column, and from 960 px the insight cards sit in two columns (the text is held to a readable line
   length). The compose screen is centred and larger on a laptop.
-- In a brief, every checked claim is marked with the same thin amber underline the published Composer window uses.
-  Pressing one (click, tap, Enter or Space) opens a sheet with the claim, the verdict in plain words (supported,
-  partly supported or not supported), the cited article with its link and the passage the check located (at most 25
-  words, kept in that brief's own `passages.json` on your computer, never in the shared edition, the receipts or
-  `check.json`). Esc, the Close button or pressing elsewhere closes it.
+- The insight cards carry no claim marks and no underlines, as in the published app. The whole card opens its insight
+  sheet (click, tap, Enter or Space), and the checked claims are marked in that sheet; pressing one shows the sources it
+  rests on. A strip above the cards says so. For a brief composed from the app page, the few words (at most 25) of each
+  located passage are written to that brief's own `passages.json` on your computer, never to the shared edition, the
+  receipts or `check.json`; this version's app page does not show them yet.
 - The compose animation forms its first words within 3 seconds of pressing Compose, no longer waiting for the first
   feed to answer. Tap, click or Esc skips it, at any moment, and the screen then ends exactly as it does when the
   animation plays out (the loom keeps showing the run until the brief is ready); with reduced motion nothing is drawn.

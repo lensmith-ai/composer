@@ -19,7 +19,7 @@
 //                 withheld, and the focus is on the page, not on a button that was taken away;
 //               - nothing the animation drew comes back afterwards (a watcher records every such element added after the
 //                 press);
-//               - the brief lands (the claim marks show) in time, and the snapshot then equals the natural one.
+//               - the brief lands (the insight cards show) in time, and the snapshot then equals the natural one.
 //   FAILURE   a press while the engine is about to refuse the compose leaves the compose screen back with nothing of
 //             the animation on it.
 //   REDUCED   with reduced motion there is no Skip button and nothing is drawn; pressing Esc all through the run changes
@@ -167,7 +167,7 @@ async function openApp(browser, server, width, opts = {}) {
   return { ctx, page, errors };
 }
 
-// the brief is on the screen: the claim marks show. Returns how long after `since` (ms on Node's clock).
+// the brief is on the screen: the insight cards show. Returns how long after `since` (ms on Node's clock).
 async function landed(page, since, why) {
   try {
     await page.locator('.icard').first().waitFor({ state: 'visible', timeout: LAND_MS });

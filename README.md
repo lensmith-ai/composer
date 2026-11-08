@@ -236,7 +236,7 @@ composer sources list
   quote the source, so read `check.json` before you share it.
 - The feed text is held in memory for the one brief. `--keep-sources` saves it, for debugging.
 - The one exception: for a brief composed from the app page, the few words (at most 25) of each located passage are
-  written to `passages.json` in that brief's own folder on your computer, so a claim can show what it rests on. They are
+  written to `passages.json` in that brief's own folder on your computer, for a later claim view (this version's app page does not show them yet). They are
   never in the edition, `receipts.json` or `check.json`.
 - The recorded demo brief (`composer/data/recorded-run.json`) follows the same rule.
 
