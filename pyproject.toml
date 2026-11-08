@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lensmith-composer"
-version = "0.2.0"
+version = "0.2.0rc4"
 description = "Read a few feeds, write a short brief through a lens you choose, and check every claim against the article it cites."
 readme = "README.md"
 license = "MIT"
