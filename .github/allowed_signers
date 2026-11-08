@@ -1,0 +1,4 @@
+# The maintainer's SSH signing public key: the key GitHub lists under the maintainer's account as a signing key.
+# release.yml checks release tags against this file as it stands on main. The principal is a wildcard
+# because the key, not the tagger e-mail, is what is trusted.
+* namespaces="git" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPhCsorVXAzcf+2ROyGW8tCPpslnINQUamPSGGkMVnBO

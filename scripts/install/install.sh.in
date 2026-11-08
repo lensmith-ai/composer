@@ -19,7 +19,7 @@
 #   -h, --help              this text
 #
 # What it does: gets a small kit (the release's source, checked by SHA-256), then runs the kit's own setup.sh,
-# which finds Python 3.10 or newer or gets a private one, installs Composer and its three dependencies into ONE
+# which finds Python 3.10 or newer or gets a private one, installs Composer and its two dependencies into ONE
 # folder, asks for your Anthropic key (hidden; Enter skips it), starts the app and prints the address. Every
 # download comes from a list of sources tried in order and is checked against the SHA-256 pinned below before it
 # is used; a source that is down is skipped with a one-line note. It never uses sudo (except the macOS Python

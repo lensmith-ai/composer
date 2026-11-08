@@ -1,55 +1,70 @@
 # Releasing Composer
 
-A release is made by pushing a tag. The workflow `.github/workflows/release.yml` does the rest, and publishes
-nothing unless every step before publishing is green.
+A release is made from a signed tag. The maintainer signs and pushes the tag; the workflow
+`.github/workflows/release.yml` checks it and does the rest, and publishes nothing unless every step before publishing
+is green.
 
 ## Once, before the first release
 
-These are repository settings, not files, so no commit can switch them on.
+These are repository settings and one key file, not code, so no commit can switch them on.
 
-1. **A `release` environment** (Settings, Environments) with one secret, `ANTHROPIC_API_KEY`: the key the release
+1. **The signing key.** `.github/allowed_signers` holds the maintainer's SSH signing public key (the one GitHub lists on
+   the maintainer's account, at `https://api.github.com/users/<user>/ssh_signing_keys`). The workflow checks a release tag's signature against that
+   file as it stands on `main`, never against a file the tag itself carries.
+2. **A `release` environment** (Settings, Environments) with one secret, `ANTHROPIC_API_KEY`: the key the release
    note's claim-seal judge uses. Only the release-note job reads it. Add a required reviewer if you want a person to
    approve each release before it runs.
-2. **Private vulnerability reporting** on (Settings, Security), because SECURITY.md sends reporters there.
-3. **Packages:** the first image push creates `ghcr.io/lensmith-ai/composer`; make that package public when the
+3. **Private vulnerability reporting** on (Settings, Security), because SECURITY.md sends reporters there. Secret
+   scanning and push protection on.
+4. **Packages:** the first image push creates `ghcr.io/lensmith-ai/composer`; make that package public when the
    repository is.
 
 ## Each release
 
 1. Move the `[Unreleased]` entries in CHANGELOG.md under a new `## [x.y.z] - date` heading, and set the same
-   version in `pyproject.toml`. Pre-releases use Python's spelling, such as `0.2.0rc1`, and are marked as
-   pre-releases on GitHub.
+   version in `pyproject.toml` and `composer/__init__.py`. Pre-releases use Python's spelling, such as `0.2.0rc1`, and
+   are marked as pre-releases on GitHub.
 2. Write the release note draft, `release-notes/x.y.z.json`: a short brief in claim-seal's shape whose every line
    cites `{"id": "changelog", "ref": "Changelog x.y.z"}` or `{"id": "tests", "ref": "Test results x.y.z"}`.
-   `tests/fixtures/release-note/draft.json` is a small example.
-3. Merge to main with CI green, then tag that commit and push the tag. This runs on the maintainer's machine, with
-   their signing key: `git tag -s vx.y.z`, then `git push origin vx.y.z`.
+   `tests/fixtures/release-note/draft.json` is a small example. The workflow reads the draft from `main`, not from the
+   tag, so a line that fails the check can be fixed on `main` and the run repeated without moving the tag. It still
+   checks every line against the tag's own changelog and test results.
+3. Merge to main with CI green, then sign a tag on that commit and push it. This runs on the maintainer's machine,
+   with their signing key: `git tag -s vx.y.z -m "Lensmith Composer x.y.z"`, then `git push origin vx.y.z`. The push
+   starts the workflow. For a tag that is already pushed, run it by hand: Actions, release, Run workflow, branch `main`,
+   tag `vx.y.z`. Never move or re-create a signed tag to trigger it.
 
 The workflow then:
 
 | job | what it does | what stops the release |
 |---|---|---|
+| verify-tag | the tag is annotated, names itself, points at the checked-out commit, is on `main`, has a good signature from the key in `.github/allowed_signers` (as on `main`), matches `pyproject.toml`, and has no release yet | any of those failing; a manual run not started from `main` |
 | test | the offline suite, recorded as `test-results.json` | any failure or error |
 | build | sdist and wheel with hash-locked tools; the wheel installed into an empty venv and run; a CycloneDX SBOM of that venv; SHA256SUMS | the tag not matching `pyproject.toml`; any step failing |
+| installer | `install.sh` for this release with every file it fetches pinned by SHA-256, and the dependency files it may fetch from the release (certifi's and setuptools' wheels, claim-seal's pinned archive and the wheel built from it), each checked against a hash written in the repository first | a hash that does not match; a file missing |
 | release-note | `scripts/release/release_note.py`: every line of the draft checked by claim-seal against this version's changelog section and `test-results.json`; the seal verified | any line partly supported, unsupported, unchecked or citing an unknown title; a missing draft |
 | image | after test, build and release-note: the default image (no narration) for linux/amd64 and linux/arm64 to ghcr.io under a candidate tag only (`candidate-<commit>`, a staging image, never named as a release); its SBOM (syft, CycloneDX); provenance and SBOM attested to the image digest | a failed build, push or attestation |
-| promote | after test, build, release-note and image: the version tag (`<version>`) put on the attested candidate's digest, with no rebuild. This is the only step that gives an image a release's tag | no digest from the image job |
-| publish | SHA256SUMS over every file; build provenance for every file; an SBOM attestation for the wheel and sdist; the GitHub Release with the note as its text | |
+| promote | after every job above: the version tag (`<version>`) put on the attested candidate's digest, with no rebuild. This is the only step that gives an image a release's tag | no digest from the image job |
+| publish | SHA256SUMS over every file; build provenance for every file; an SBOM attestation for the wheel and sdist; the GitHub Release, made as a draft and published only when every file is attached, with the note as its text | the tag no longer pointing at the checked commit; a file missing |
+| installer-to-main | after the release: the release's own `install.sh` (checked against the release's SHA256SUMS) committed to `main`, where the one-line install is served from | (the release is already complete) if `main` refuses the commit, commit that file by hand |
+
+The attestations name the workflow as it stood on `main` when it ran; the job log shows the tag and commit it built.
 
 ## The one-command installer
 
 `scripts/install/build_install.py` makes `install.sh` for a release: the template with this release's SHA-256 pins and the
-fetch library copied from `setup.sh`. Put these files in one folder first, by their usual names: the sdist and wheel from the
-build job, certifi's wheel and setuptools' wheel (the versions `pyproject.toml` pins), claim-seal's wheel (built from the commit
-`pyproject.toml` pins) and that commit's archive. `tests/install_faults/make_release.py` shows how. Then:
+fetch library copied from `setup.sh`. The release workflow's `installer` job runs `scripts/release/make_installer.py`, which
+gathers the files by their usual names (the sdist and wheel from the build job; certifi's wheel and setuptools' wheel, hashes in
+`scripts/install/pinned-extras.json`; claim-seal's archive at the commit `pyproject.toml` pins, hash from `pyproject.toml`; and
+claim-seal's wheel built from that archive) and calls it. To do the same by hand, put those files in one folder, then:
 
 ```sh
 python scripts/install/build_install.py --release DIR --out OUT      # writes install.sh, install.sh.sha256, install-pins.json
 ```
 
-Attach the sdist, wheel, the three dependency files and `install.sh.sha256` to the GitHub Release, commit `install.sh` at the
-repository root on `main` (its address is `https://raw.githubusercontent.com/lensmith-ai/composer/main/install.sh`, a build option
-`--install-url`), and publish the same files at the mirror address when there is one. Before a release, run the fault-injection
+The release carries `install.sh`, `install.sh.sha256` and the dependency files, and the workflow commits `install.sh` to the
+root of `main` (its address is `https://raw.githubusercontent.com/lensmith-ai/composer/main/install.sh`, a build option
+`--install-url`). Publish the same files at the mirror address when there is one. Before a release, run the fault-injection
 benchmark (`tests/install_faults/run_faults.py --help`); every scenario must pass 3 of 3.
 
 ## Release candidates, for a test before a release
@@ -105,7 +120,6 @@ cd dist && sha256sum -c SHA256SUMS
 After a release is published, anyone can check a downloaded file (with the [GitHub CLI](https://cli.github.com/)):
 
 ```sh
-# after the first release
 sha256sum -c SHA256SUMS
 gh attestation verify lensmith_composer-0.2.0-py3-none-any.whl --repo lensmith-ai/composer \
   --signer-workflow lensmith-ai/composer/.github/workflows/release.yml

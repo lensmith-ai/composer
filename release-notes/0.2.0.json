@@ -1,0 +1,21 @@
+{
+ "about": "The release note draft for 0.2.0: every line is checked by claim-seal against this version's changelog section or the recorded test results before the release is published (scripts/release/release_note.py).",
+ "version": "0.2.0",
+ "lede": "Composer 0.2.0 is the full app, on your computer or your own server.",
+ "items": [
+  {"insight": "One command installs the app on macOS and Linux: it finds Python 3.10 or newer or gets a private one, and installs Composer into one folder, ~/.lensmith-composer.",
+   "sources": [{"id": "changelog", "ref": "Changelog 0.2.0"}]},
+  {"insight": "Every file the installer fetches is checked against a SHA-256 pinned in the script.",
+   "sources": [{"id": "changelog", "ref": "Changelog 0.2.0"}]},
+  {"insight": "The app runs at http://127.0.0.1:8765/ with a phone-width page, your saved briefs, an optional daily brief and a weekly backup.",
+   "sources": [{"id": "changelog", "ref": "Changelog 0.2.0"}]},
+  {"insight": "Optional narration reads the brief's own spoken script aloud with Kokoro, made on your computer after the text is final.",
+   "sources": [{"id": "changelog", "ref": "Changelog 0.2.0"}]},
+  {"insight": "Composer can run on your own server, with a container image, a Compose file with Caddy in front for HTTPS and one login, and a step-by-step guide.",
+   "sources": [{"id": "changelog", "ref": "Changelog 0.2.0"}]},
+  {"insight": "The insight cards carry no claim marks; the checked claims are marked in the opened insight sheet.",
+   "sources": [{"id": "changelog", "ref": "Changelog 0.2.0"}]},
+  {"insight": "The offline test suite ran on Linux with no failures and no errors.",
+   "sources": [{"id": "tests", "ref": "Test results 0.2.0"}]}
+ ]
+}

@@ -66,7 +66,7 @@ class ReleaseGateTests(unittest.TestCase):
         self.assertEqual(len(tags), 1)
         self.assertIn("steps.name.outputs.candidate", tags[0])
         self.assertNotIn("outputs.version }}", tags[0])
-        self.assertIn('candidate=candidate-${GITHUB_SHA}', image)
+        self.assertIn('candidate=candidate-${COMMIT}', image)  # the tag's commit, not the run's (a manual run is on main)
 
     def test_only_the_promote_job_tags_the_version_and_it_needs_the_attested_image(self):
         tagging = [n for n, b in self.jobs.items() if "imagetools create" in b]
@@ -80,7 +80,47 @@ class ReleaseGateTests(unittest.TestCase):
         self.assertIn("attest-sbom", image)
 
     def test_the_release_itself_is_last(self):
-        self.assertLessEqual(GATES | {"promote"}, closure(self.graph, "publish"))
+        self.assertLessEqual(GATES | {"promote", "installer"}, closure(self.graph, "publish"))
+
+    def test_every_job_waits_for_the_signed_tag_check(self):
+        for name in self.jobs:
+            if name == "verify-tag":
+                continue
+            with self.subTest(job=name):
+                self.assertIn("verify-tag", closure(self.graph, name) | self.graph[name])
+
+    def test_the_tag_check_verifies_the_signature_against_the_key_on_main(self):
+        block = self.jobs["verify-tag"]
+        self.assertIn('git cat-file -t "refs/tags/$TAG"', block)
+        self.assertIn("git show refs/remotes/origin/main:.github/allowed_signers", block)
+        self.assertIn('tag -v "$TAG"', block)
+        self.assertIn("is not on main", block)
+        self.assertIn("github.ref == 'refs/heads/main'", block)  # a manual run starts from main
+
+    def test_every_job_builds_from_the_tag_not_from_the_run_ref(self):
+        text = WORKFLOW.read_text(encoding="utf-8")
+        for name, block in self.jobs.items():
+            if "actions/checkout@" in block:
+                with self.subTest(job=name):
+                    self.assertIn("ref: refs/tags/${{ ", block)
+        # outside verify-tag, the run's own ref name is never read (a manual run's ref is main)
+        for name, block in self.jobs.items():
+            if name != "verify-tag":
+                with self.subTest(job=name, what="ref name"):
+                    self.assertNotIn("GITHUB_REF_NAME", block)
+                    self.assertNotIn("github.ref_name", block)
+        self.assertIn("workflow_dispatch", text)
+
+    def test_the_installer_is_on_main_only_after_the_release_is_public(self):
+        self.assertIn("publish", self.graph["installer-to-main"])
+        self.assertNotIn("installer-to-main", closure(self.graph, "publish"))
+        self.assertIn('--draft=false', self.jobs["publish"])  # a draft first, public when every file is attached
+
+    def test_the_signers_file_is_one_ssh_key_for_git(self):
+        lines = [l for l in (ROOT / ".github" / "allowed_signers").read_text(encoding="utf-8").splitlines()
+                 if l.strip() and not l.startswith("#")]
+        self.assertEqual(len(lines), 1)
+        self.assertRegex(lines[0], r'^\* namespaces="git" ssh-ed25519 AAAA[0-9A-Za-z+/]{40,}$')
 
 
 if __name__ == "__main__":

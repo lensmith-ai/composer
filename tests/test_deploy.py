@@ -155,9 +155,11 @@ class WorkflowTests(unittest.TestCase):
             self.assertRegex(top, r"(?m)^permissions:( \{\}|\n  contents: read)$", name)
 
     def test_write_permissions_only_in_the_release_workflow(self):
+        # The one other write: CodeQL uploads its results (security-events), and nothing else.
         for name, text in workflows().items():
             if name != "release.yml":
-                self.assertNotRegex(text, r":\s*write\b", name)
+                allowed = {"security-events"} if name == "codeql.yml" else set()
+                self.assertLessEqual(set(re.findall(r"([\w-]+):\s*write\b", text)), allowed, name)
 
     def test_ci_matrix_is_the_claimed_platforms_and_pythons(self):
         ci = workflows()["ci.yml"]

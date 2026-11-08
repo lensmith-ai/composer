@@ -1,0 +1,13 @@
+{
+  "about": "The dependency files install.sh may fetch from a release, each checked against these SHA-256 values before the release job uses it (scripts/release/make_installer.py). Hashes are the ones PyPI lists for the wheel at that version. claim-seal's source archive is pinned in pyproject.toml.",
+  "certifi": {
+    "version": "2026.10.23",
+    "file": "certifi-2026.10.23-py3-none-any.whl",
+    "sha256": "e9b54de76e530bb6cf0ccd036787103acb58fd42ba930ea8bf948ddbaa2f61d1"
+  },
+  "setuptools": {
+    "version": "84.2.1",
+    "file": "setuptools-84.2.1-py3-none-any.whl",
+    "sha256": "ca140b45d5325a9478f880e351484f62fef15f336462e449ca0c03c873d589c2"
+  }
+}
