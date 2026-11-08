@@ -23,7 +23,7 @@ What is written to disk (composer.cli decides where): the edition (our words, th
 and links, the verdicts and the seal; never the articles' text) and the full claim-seal result.
 The feed text itself stays in memory unless you ask for it with --keep-sources.
 The one exception is the app's passages.json (see `passages`): the few words (at most 25) of located evidence
-behind each citation, written into that job's own folder for the claim popover, never into the edition.
+behind each citation, written into that job's own folder for a later claim view, never into the edition.
 """
 from __future__ import annotations
 
@@ -221,7 +221,7 @@ _TAGS = re.compile(r"<[^<>]*>")
 
 
 def passages(sources: list, fetched: dict, result: dict, *, retrieved_at: str = "") -> dict:
-    """The words of the located evidence behind each citation, for the app's claim popover only.
+    """The words of the located evidence behind each citation, for a later claim view only (this version's app page does not show them yet).
 
     {"<item index>.<citation index>": {"text", "words", "cut", "source", "item"}}, one per citation whose evidence
     was located (the first located span, as `_window_digests` reads it). The text is sliced from the cited

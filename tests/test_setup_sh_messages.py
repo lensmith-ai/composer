@@ -150,7 +150,7 @@ class SetupShMessageTests(unittest.TestCase):
                   'if [ "$FAKE_CURL_MODE" = failonce ] && [ "$n" = 1 ]; then echo "curl: (28) fake timeout" >&2; exit 28; fi\n'
                   f'while [ $# -gt 0 ]; do [ "$1" = -o ] && out=$2; shift; done\ncp {tgz} "$out"\n')
         env = {"PATH": str(bin_dir), "FAKE_LOG": str(log), "FAKE_UV_MODE": uv_mode, "FAKE_PY312": str(py312),
-               "COMPOSER_SETUP_RETRY_WAIT": "0", "COMPOSER_NO_TEST_CALL": "1", "LANG": "C",
+               "COMPOSER_SETUP_RETRY_WAIT": "0", "COMPOSER_NO_TEST_CALL": "1", "COMPOSER_PYTHON_PATH_ONLY": "1", "LANG": "C",
                "FAKE_PIP_MODE": pip_mode, "FAKE_CURL_MODE": curl_mode, "FAKE_VENV_PYTHON": str(root / "venv-python"),
                "FAKE_VENV_COMPOSER": str(root / "venv-composer"), "FAKE_REAL_PYTHON": sys.executable, "FAKE_VENV_GW": "0"}
         return env, log

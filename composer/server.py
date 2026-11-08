@@ -251,8 +251,8 @@ class App:
                                                         "draft_sha256": job["draft_sha256"]}}
 
     def _keep_passages(self, job_id: str, sources: list, run: dict) -> None:
-        """The few words of article each claim popover shows, in the job's own passages.json (see pipeline.passages).
-        Best effort: a brief without them still opens its popovers, saying no passage was kept."""
+        """The few words of article a claim view can show (this version's app page does not yet), in the job's own passages.json (see pipeline.passages).
+        Best effort: a brief without them still loads."""
         try:
             rows = pipeline.passages(sources, run.get("fetched") or {}, run.get("result") or {})
         except Exception:  # noqa: BLE001 - the brief is already written and checked; this is only the extra

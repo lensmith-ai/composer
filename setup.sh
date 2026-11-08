@@ -415,7 +415,9 @@ find_python() {
   for cand in python3 python3.14 python3.13 python3.12 python3.11 python3.10; do
     consider "$cand" && return 0
   done
-  # where Homebrew and python.org put theirs, when they are not on PATH
+  # where Homebrew and python.org put theirs, when they are not on PATH (COMPOSER_PYTHON_PATH_ONLY=1 skips this, so the
+  # tests' fake PATH is the whole search even where a real Python lives in /usr/local/bin)
+  [ -z "${COMPOSER_PYTHON_PATH_ONLY:-}" ] || return 1
   for minor in 14 13 12 11 10; do
     for cand in "/""opt""/homebrew/bin/python3.$minor" /usr/local/bin/python3.$minor \
                 /Library/Frameworks/Python.framework/Versions/3.$minor/bin/python3; do
