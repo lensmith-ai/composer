@@ -97,19 +97,53 @@ class ReleaseGateTests(unittest.TestCase):
         self.assertIn("is not on main", block)
         self.assertIn("github.ref == 'refs/heads/main'", block)  # a manual run starts from main
 
-    def test_every_job_builds_from_the_tag_not_from_the_run_ref(self):
-        text = WORKFLOW.read_text(encoding="utf-8")
+    def test_every_checkout_outside_verify_tag_is_the_verified_commit(self):
+        # A step is a "- " item; its text runs to the next one. Comments are dropped first.
         for name, block in self.jobs.items():
-            if "actions/checkout@" in block:
+            code = "\n".join(l for l in block.splitlines() if not l.lstrip().startswith("#"))
+            for step in re.split(r"(?m)^      - ", code):
+                if "actions/checkout@" not in step:
+                    continue
                 with self.subTest(job=name):
-                    self.assertIn("ref: refs/tags/${{ ", block)
-        # outside verify-tag, the run's own ref name is never read (a manual run's ref is main)
+                    want = "refs/tags/${{ steps.tag.outputs.name }}" if name == "verify-tag" else "${{ needs.verify-tag.outputs.commit }}"
+                    self.assertRegex(step, r"(?m)^\s+ref: " + re.escape(want) + r"\s*$")
+
+    def test_a_manual_run_never_reads_its_own_ref_name_outside_the_tag_check(self):
         for name, block in self.jobs.items():
             if name != "verify-tag":
-                with self.subTest(job=name, what="ref name"):
+                with self.subTest(job=name):
                     self.assertNotIn("GITHUB_REF_NAME", block)
                     self.assertNotIn("github.ref_name", block)
-        self.assertIn("workflow_dispatch", text)
+        self.assertIn("workflow_dispatch", WORKFLOW.read_text(encoding="utf-8"))
+
+    def test_write_permissions_are_held_only_where_they_are_used(self):
+        allowed = {"contents": {"publish", "installer-to-main"}, "packages": {"image", "promote"},
+                   "id-token": {"image", "publish"}, "attestations": {"image", "publish"}}
+        for name, block in self.jobs.items():
+            for scope in re.findall(r"(?m)^      ([\w-]+): write\b", block):
+                with self.subTest(job=name, scope=scope):
+                    self.assertIn(name, allowed.get(scope, set()), f"{name} holds {scope}: write")
+
+    def test_attestations_name_the_files_they_belong_to(self):
+        publish = self.jobs["publish"]
+        sbom = re.search(r"attest-sbom@[^\n]*\n\s+with:\n\s+subject-path: \|\n((?:\s+release/[^\n]+\n)+)", publish)
+        self.assertTrue(sbom, "the SBOM attestation lists its subjects")
+        subjects = [s.strip() for s in sbom.group(1).splitlines()]
+        self.assertEqual(len(subjects), 2)
+        self.assertTrue(all("*" not in s for s in subjects), subjects)
+        self.assertTrue(any(s.endswith("-py3-none-any.whl") and "lensmith_composer" in s for s in subjects))
+        self.assertTrue(any(s.endswith(".tar.gz") and "lensmith_composer" in s for s in subjects))
+        prov = re.search(r"attest-build-provenance@[^\n]*\n\s+with:\n\s+subject-path: \|\n((?:\s+release/[^\n]+\n)+)", publish)
+        self.assertTrue(prov, "the provenance attestation lists its subjects")
+        text = prov.group(1)
+        for copied in ("certifi", "setuptools", "claim-seal-"):  # upstream copies, not built here
+            self.assertNotIn(copied, text)
+        self.assertNotIn("release/*\n", text)
+
+    def test_the_image_gets_its_release_tag_only_after_the_tag_is_rechecked(self):
+        promote = self.jobs["promote"]
+        self.assertIn("git/ref/tags/$TAG", promote)
+        self.assertLess(promote.index("git/ref/tags/$TAG"), promote.index("imagetools create"))
 
     def test_the_installer_is_on_main_only_after_the_release_is_public(self):
         self.assertIn("publish", self.graph["installer-to-main"])

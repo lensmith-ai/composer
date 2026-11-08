@@ -43,6 +43,21 @@ def need_sha(path: Path, expected: str, what: str) -> None:
         raise InstallerError(f"make_installer: {what} {path.name} has SHA-256 {got}, expected {expected}")
 
 
+def check_listed_sums(dist: Path, names) -> None:
+    """The build job's own SHA256SUMS must agree with the files as they arrived (a corrupted transfer stops here)."""
+    sums = dist / "SHA256SUMS"
+    if not sums.is_file():
+        return
+    listed = {}
+    for line in sums.read_text(encoding="utf-8").splitlines():
+        parts = line.split()
+        if len(parts) == 2:
+            listed[parts[1].lstrip("*")] = parts[0]
+    for name in names:
+        if listed.get(name) != bi.sha256(dist / name):
+            raise InstallerError(f"make_installer: {name} does not match the build job's SHA256SUMS")
+
+
 def pip_download(spec: str, dest: Path) -> None:
     subprocess.run([sys.executable, "-m", "pip", "download", "--disable-pip-version-check", "--no-deps",
                     "--only-binary=:all:", "--dest", str(dest), spec], check=True)
@@ -81,9 +96,11 @@ def main(argv=None) -> int:
     facts = bi.project_facts()
     pinned = json.loads(PINNED.read_text(encoding="utf-8"))
     version = facts["version"]
-    for name in (f"lensmith_composer-{version}.tar.gz", f"lensmith_composer-{version}-py3-none-any.whl"):
+    dist_names = (f"lensmith_composer-{version}.tar.gz", f"lensmith_composer-{version}-py3-none-any.whl")
+    for name in dist_names:
         if not (a.dist / name).is_file():
             raise InstallerError(f"make_installer: {a.dist / name} is missing")
+    check_listed_sums(a.dist, dist_names)
     certifi = pinned["certifi"]
     setuptools = pinned["setuptools"]
     if certifi["version"] != facts["certifi"] or setuptools["version"] != facts["setuptools"]:

@@ -58,8 +58,8 @@ jobs:
         id: tag
         run: |
           # bash matches the whole value, so a value with a newline in it cannot slip through.
-          if ! [[ "$REQUESTED_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "::error::tag must be exactly vMAJOR.MINOR.PATCH"; exit 1
+          if ! [[ "$REQUESTED_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+((a|b|rc)[0-9]+)?$ ]]; then
+            echo "::error::tag must be exactly vMAJOR.MINOR.PATCH, or with a pre-release ending such as rc1"; exit 1
           fi
           echo "name=$REQUESTED_TAG" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -121,7 +121,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: refs/tags/${{ needs.verify-tag.outputs.tag }}
+          ref: ${{ needs.verify-tag.outputs.commit }}
           persist-credentials: false
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
@@ -146,7 +146,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: refs/tags/${{ needs.verify-tag.outputs.tag }}
+          ref: ${{ needs.verify-tag.outputs.commit }}
           persist-credentials: false
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
@@ -173,7 +173,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: refs/tags/${{ needs.verify-tag.outputs.tag }}
+          ref: ${{ needs.verify-tag.outputs.commit }}
           persist-credentials: false
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
@@ -205,7 +205,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: refs/tags/${{ needs.verify-tag.outputs.tag }}
+          ref: ${{ needs.verify-tag.outputs.commit }}
           persist-credentials: false
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
@@ -253,7 +253,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: refs/tags/${{ needs.verify-tag.outputs.tag }}
+          ref: ${{ needs.verify-tag.outputs.commit }}
           persist-credentials: false
       - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
         with:
@@ -325,10 +325,22 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
+      contents: read
       packages: write
     env:
       TAG: ${{ needs.verify-tag.outputs.tag }}
+      COMMIT: ${{ needs.verify-tag.outputs.commit }}
     steps:
+      - name: The tag still points at the commit that was checked and built
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          [ "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG" --jq .object.type)" = "tag" ] \
+            || { echo "::error::$TAG is no longer an annotated tag"; exit 1; }
+          tag_object=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG" --jq .object.sha)
+          [ "$(gh api "repos/$GITHUB_REPOSITORY/git/tags/$tag_object" --jq .object.sha)" = "$COMMIT" ] \
+            || { echo "::error::$TAG no longer points at $COMMIT"; exit 1; }
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
       - uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
         with:
@@ -357,9 +369,20 @@ jobs:
     steps:
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          pattern: "{dist,installer,note,image}"
+          name: dist
           path: release
-          merge-multiple: true
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: installer
+          path: release
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: note
+          path: release
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: image
+          path: release
       - name: Version
         id: v
         run: echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
@@ -369,16 +392,30 @@ jobs:
           rm -f SHA256SUMS
           sha256sum -- * > SHA256SUMS
           cat SHA256SUMS
-      - name: Build provenance for every release file
+      - name: Build provenance for every file this workflow built or made
+        # Not certifi's and setuptools' wheels or claim-seal's source archive: those are copies of upstream files,
+        # checked against hashes written in this repository, and were not built here.
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
-          subject-path: release/*
-      - name: SBOM attestation for the wheel and the sdist
+          subject-path: |
+            release/lensmith_composer-${{ steps.v.outputs.version }}-py3-none-any.whl
+            release/lensmith_composer-${{ steps.v.outputs.version }}.tar.gz
+            release/lensmith_composer-${{ steps.v.outputs.version }}.cdx.json
+            release/claim_seal-*-py3-none-any.whl
+            release/install.sh
+            release/install.sh.sha256
+            release/install-pins.json
+            release/release-note.md
+            release/release-note-check.json
+            release/lensmith_composer-${{ steps.v.outputs.version }}-image.cdx.json
+            release/lensmith_composer-${{ steps.v.outputs.version }}-image-digest.txt
+            release/SHA256SUMS
+      - name: SBOM attestation for Composer's wheel and sdist
         uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4.1.0
         with:
           subject-path: |
-            release/*.whl
-            release/*.tar.gz
+            release/lensmith_composer-${{ steps.v.outputs.version }}-py3-none-any.whl
+            release/lensmith_composer-${{ steps.v.outputs.version }}.tar.gz
           sbom-path: release/lensmith_composer-${{ steps.v.outputs.version }}.cdx.json
       - name: GitHub Release
         env:
@@ -434,7 +471,17 @@ jobs:
           set -eu
           cd inst
           current=$(gh api "repos/$GITHUB_REPOSITORY/contents/install.sh?ref=main" --jq .sha 2>/dev/null || true)
+          # gh prints an error body on stdout when the file does not exist yet; only a real blob id counts.
+          [[ "$current" =~ ^[0-9a-f]{40}$ ]] || current=""
           args=(-X PUT -f "message=install.sh for ${TAG#v}, made by the release workflow" -f "branch=main"
                 -f "content=$(base64 -w0 install.sh)")
           [ -n "$current" ] && args+=(-f "sha=$current")
           gh api "repos/$GITHUB_REPOSITORY/contents/install.sh" "${args[@]}" --jq .commit.sha
+          # The address people paste must now serve this file (the raw host can lag a few minutes).
+          for _ in $(seq 1 30); do
+            if curl -fsSL "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/install.sh" | cmp -s - install.sh; then
+              echo "install.sh is served from main"; exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::raw.githubusercontent.com does not serve the new install.sh yet"; exit 1

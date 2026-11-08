@@ -45,6 +45,33 @@ class MakeInstallerTests(unittest.TestCase):
             self.assertIn("expected " + "0" * 64, str(cm.exception))
             self.mi.need_sha(f, self.mi.bi.sha256(f), "a test file")  # the right hash passes
 
+    def test_the_build_jobs_sums_must_agree_with_the_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            d = Path(tmp)
+            (d / "a.whl").write_bytes(b"wheel")
+            (d / "SHA256SUMS").write_text(f"{self.mi.bi.sha256(d / 'a.whl')}  a.whl\n")
+            self.mi.check_listed_sums(d, ("a.whl",))  # agrees
+            (d / "a.whl").write_bytes(b"changed in transit")
+            with self.assertRaises(SystemExit):
+                self.mi.check_listed_sums(d, ("a.whl",))
+
+    def test_the_names_it_makes_are_the_names_build_install_pins(self):
+        facts = self.mi.bi.project_facts()
+        v = facts["version"]
+        names = [f"lensmith_composer-{v}.tar.gz", f"lensmith_composer-{v}-py3-none-any.whl",
+                 self.pinned["certifi"]["file"], self.pinned["setuptools"]["file"],
+                 f"claim_seal-0.2.0-py3-none-any.whl", f"claim-seal-{facts['cs_commit']}.tar.gz"]
+        with tempfile.TemporaryDirectory() as tmp:
+            stage, out = Path(tmp) / "stage", Path(tmp) / "out"
+            stage.mkdir()
+            for n in names:
+                (stage / n).write_bytes(n.encode())
+            pins = self.mi.bi.build(stage, out, install_url="https://example.invalid/install.sh", mirror_url="https://example.invalid/m",
+                                    release_base="https://example.invalid/r", check_source=False)
+            self.assertEqual({pins["KIT"], pins["COMPOSER_WHEEL"], pins["CERTIFI_WHEEL"], pins["SETUPTOOLS_WHEEL"],
+                              pins["CLAIMSEAL_WHEEL"], pins["CLAIMSEAL_SRC"]}, set(names))
+            self.assertTrue((out / "install.sh").is_file())
+
     def test_an_existing_non_empty_out_folder_is_refused(self):
         with tempfile.TemporaryDirectory() as tmp:
             (Path(tmp) / "keep").write_text("x")
