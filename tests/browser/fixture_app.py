@@ -127,9 +127,16 @@ class FixtureModel:
         self.answers: dict = {}
 
     def __call__(self, prompt: str, timeout=None):
+        # FIXTURE_MODEL_DELAY (seconds): the writer answers this late and each claim check a quarter as late, like a real
+        # model, so the stages of a run (lens, weave, check) reach the page apart instead of all at once
+        delay = float(os.environ.get("FIXTURE_MODEL_DELAY") or 0)
         if not prompt.startswith("You write a short, sourced brief"):
             from claim_seal.adapters import ReplayJudge
+            if delay:
+                time.sleep(delay / 4)
             return ReplayJudge(self.answers)(prompt, timeout=timeout)
+        if delay:
+            time.sleep(delay)
         count = int(re.search(r"Write exactly (\d+) items", prompt).group(1))
         material = prompt.split("SOURCE MATERIAL FOLLOWS.", 1)[1]
         rows = []

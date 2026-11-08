@@ -8,8 +8,9 @@
 //   LAYOUT   at 390, 834, 1280 and 1440 px a composed brief opens with no sideways scroll; the phone keeps its single
 //            column (the page is no wider than the screen), a tablet and a laptop use the width (page wider than 430 px, the
 //            loom beside the reading column, two columns of insight cards from 960 px).
-//   CLAIMS   an insight's headline and the sentence the checker marked carry the published window's one claim mark
-//            (`.cmark`: a thin amber underline, identical for every claim; the check compares its computed style); pressing
+//   CLAIMS   the sentence the checker marked in an insight card's text carries the published window's one claim mark
+//            (`.cmark`: a thin amber underline, identical for every claim; the check compares its computed style); the
+//            card's headline never does, and pressing the headline or any other part of the card opens the insight sheet. Pressing
 //            one (click, or Enter from the keyboard) opens the app's sheet (#spanSheet) with the verdict in words, the cited
 //            article's link and the source passage; Esc, a press elsewhere or Close shuts it and focus goes back to the claim.
 //   INTRO    with the feeds answering 8 s late (a slow connection), the sand has formed the first words within 3 s of
@@ -111,6 +112,7 @@ async function layoutAndClaims(browser, engine, server, width, log) {
   await step('every claim carries the published window\u2019s one mark, and a keyboard reaches it', log, async () => {
     const claims = page.locator('#cDeck .cmark');
     if ((await claims.count()) < 5) throw new Error(`only ${await claims.count()} marked claims`);
+    if (await page.locator('#cDeck h4 .cmark').count()) throw new Error('an insight headline is a claim mark: pressing it would not open the insight');
     const first = claims.first();
     if ((await first.getAttribute('role')) !== 'button' || (await first.getAttribute('tabindex')) !== '0') throw new Error('a claim is not a keyboard control');
     // the mark is window.css's `.cmark`: padding 0 1px, margin 0 -1px, radius 2px, 1px solid rgba(255,176,32,.6), no text-decoration
@@ -206,9 +208,25 @@ async function layoutAndClaims(browser, engine, server, width, log) {
     if (await page.locator('#sheet.on').count()) throw new Error('pressing a claim opened the card sheet');
   });
 
-  await step('the info button still opens the card sheet', log, async () => {
-    await page.locator('#cDeck .infodot').first().click();
+  await step('the card opens its insight sheet from its headline, its text, its info dot and the keyboard', log, async () => {
+    const closeSheet = async () => {
+      await page.keyboard.press('Escape');
+      await page.waitForFunction(() => !document.getElementById('sheet').classList.contains('on'), null, { timeout: 5000 });
+    };
+    const card = page.locator('#cDeck .icw').first().locator('.icard');
+    if ((await card.getAttribute('role')) !== 'button' || (await card.getAttribute('tabindex')) !== '0') throw new Error('the card is not a keyboard control');
+    for (const [name, where] of [['headline', 'h4'], ['info dot', '.infodot'], ['the card\u2019s own corner', null]]) {
+      if (where) await card.locator(where).first().click(); else await card.click({ position: { x: 10, y: 10 } });
+      await page.locator('#sheet.on').waitFor({ timeout: 5000 });
+      const said = (await page.locator('#sheet').innerText()).trim();
+      if (!/Finding 1/.test(said)) throw new Error(`pressing the ${name} opened a sheet that does not hold the insight: "${said.slice(0, 80)}"`);
+      if (await page.locator('#spanSheet.on').count()) throw new Error(`pressing the ${name} opened the claim sheet`);
+      await closeSheet();
+    }
+    await card.focus();
+    await page.keyboard.press('Enter');
     await page.locator('#sheet.on').waitFor({ timeout: 5000 });
+    await closeSheet();
   });
   if (errors.length) throw new Error(`page error: ${errors[0]}`);
   await ctx.close();

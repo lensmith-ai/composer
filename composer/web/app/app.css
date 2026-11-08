@@ -1118,9 +1118,6 @@ html.cw-text-only .aplay,html.cw-text-only .speedrow,html.cw-text-only .apstand,
 .cmark{padding:0 1px;margin:0 -1px;border-radius:2px;background:transparent;color:inherit;border-bottom:1px solid rgba(255,176,32,.6)}
 .icard .cmark{cursor:pointer}
 .icard .cmark:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
-.icard.cs-card{cursor:default}
-.icard.cs-card .infodot{pointer-events:auto;cursor:pointer;z-index:2}
-.icard.cs-card .infodot:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 .cs-legend{border:1px solid var(--line);border-radius:var(--r);background:var(--glass);padding:11px 15px 12px;margin:2px 0 4px}
 .cs-lh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .cs-lk{font:9px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--amber)}
@@ -1205,3 +1202,59 @@ html.cw-text-only .aplay,html.cw-text-only .speedrow,html.cw-text-only .apstand,
   html #cwRetry{top:calc(43% + 150px)}
 }
 .prooftag.v-partially_supported{color:#ffb84a;border-color:rgba(255,184,74,.45)}
+
+/* ===== the compose screen takes the saved page's layout (rc4) =====
+   A brief you have just composed and the same brief reopened from the shelf are laid out alike: the same header bar, the
+   same date row, the loom in the same slot, the same column. From 768 px the reading column is on the left and the loom
+   (the entry animation, the weave, then the settled picture) is in the right-hand slot from the first moment, so nothing
+   moves when the run ends; on a phone the loom sits above the brief as before. These rules only restyle the compose
+   screen's own elements to the saved page's metrics (.col, .hdrow, .daterow, #stageCard); the grid is .col's. */
+#cmp[data-state="running"] .cmprun,#cmp[data-state="settled"] .cmprun{box-sizing:border-box;width:100%;max-width:430px;margin:0 auto;
+  padding-left:20px;padding-right:20px}
+#cmp[data-state="settled"] .cmprun{padding-top:0;padding-bottom:calc(40px + env(safe-area-inset-bottom))}
+#cmp[data-state="running"] .cmp-composed-mast.cw-reserved,#cmp[data-state="settled"] .cmp-composed-mast{
+  position:sticky;top:0;z-index:8;box-sizing:border-box;margin:54px -20px 0;max-width:none;gap:10px;align-items:flex-start;
+  padding:8px 20px!important;background:var(--bg);box-shadow:0 1px 0 var(--line)}
+#cmp .cmprun .daterow .sub{font-size:13px}
+#cmp[data-state="settled"] #cmpSettledContent{margin-top:14px}
+#cmp #cmpSettledContent .cmp-completion-assembly{margin-top:0}
+#cmp #cmpSettledContent .crail-scroll{margin:15px 0 2px}
+#cmp #cmpSettledContent .cdeck{margin-top:4px}
+#cmp #cmpSettledContent .cmp-completion-assembly>.audio.acard{margin-top:0}
+.cw-unsaved-warn .cw-save-note{margin-bottom:0}
+#cmp .cmprun>.ainote{font-size:11px;color:var(--ink2);margin-top:4px;letter-spacing:.01em}
+/* the stage keeps its place in the page for the whole run (the frame-only state used to sit 10 px low) */
+#cmp[data-state="running"] #cmpStage.entry-frame-only,#cmp[data-state="settled"] #cmpStage.entry-frame-only,
+#cmp[data-state="running"] #cmpStage.entry-loom-withheld{transform:none}
+#cmp[data-state="running"] #cmpStage,#cmp[data-state="settled"] #cmpStage{aspect-ratio:390/326}
+#cmp .cmp-composed-mast .mbtn{width:26px;height:26px;margin-top:4px;font:12px var(--mono);line-height:1}
+#cmp .cmp-composed-mast .mbtn:first-child{width:38px;height:38px;margin-top:0;font-size:17px}
+#cmp .cmp-composed-mast h2{font:650 20px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:-.015em;
+  margin:3px 0 0;min-height:0;display:block;overflow:visible}
+@media (min-width:768px){
+  #cmp[data-state="running"] .cmprun::before,#cmp[data-state="settled"] .cmprun::before{content:"";grid-column:1/-1;grid-row:1;height:46px}
+  #cmp[data-state="running"] .cmprun,#cmp[data-state="settled"] .cmprun{max-width:900px;padding:8px 32px calc(48px + env(safe-area-inset-bottom))!important;
+    display:grid;grid-template-columns:minmax(0,1fr) 340px;column-gap:32px;align-content:start;min-height:0;
+    grid-template-rows:auto var(--hdh,64px) auto auto auto auto auto 1fr}
+  #cmp[data-state="running"] .cmp-composed-mast.cw-reserved,#cmp[data-state="settled"] .cmp-composed-mast{margin:0 -32px;padding:8px 32px!important;
+    grid-column:1/-1;grid-row:2/9;align-self:start}
+  #cmp .cmp-composed-mast h2{font-size:26px}
+  #cmp[data-state="running"] .cmprun>.daterow,#cmp[data-state="settled"] .cmprun>.daterow{grid-column:1/-1;grid-row:3}
+  #cmp .cmprun .daterow .sub{font-size:14px}
+  #cmp .cmprun>.ainote{grid-column:1/-1;grid-row:4;font-size:12px}
+  #cmp[data-state="running"] #cmpEntryTransition,#cmp[data-state="settled"] #cmpEntryTransition{grid-column:1/-1;grid-row:4}
+  #cmp[data-state="running"] #cmpStage,#cmp[data-state="settled"] #cmpStage{grid-column:2;grid-row:5;width:100%;max-width:none;margin:8px 0 0;align-self:start}
+  #cmp[data-state="running"] #cwDraftBanner,#cmp[data-state="settled"] #cwDraftBanner{grid-column:2;grid-row:6;align-self:start}
+  #cmp[data-state="settled"] #cwUnsavedWarn{grid-column:2;grid-row:7;align-self:start}
+  #cmp[data-state="running"] #cmpSettledContent,#cmp[data-state="settled"] #cmpSettledContent{grid-column:1;grid-row:5/9;min-width:0;margin-top:8px}
+}
+@media (min-width:960px){
+  #cmp[data-state="running"] .cmprun,#cmp[data-state="settled"] .cmprun{max-width:1180px;padding-left:40px!important;padding-right:40px!important;
+    grid-template-columns:minmax(0,7fr) minmax(0,5fr);column-gap:40px}
+  #cmp[data-state="running"] .cmp-composed-mast.cw-reserved,#cmp[data-state="settled"] .cmp-composed-mast{margin-left:-40px;margin-right:-40px;
+    padding-left:40px!important;padding-right:40px!important}
+  #cmp .cmp-composed-mast h2{font-size:32px;letter-spacing:-.02em}
+}
+@media (min-width:1440px){
+  #cmp[data-state="running"] .cmprun,#cmp[data-state="settled"] .cmprun{max-width:1280px;column-gap:56px}
+}

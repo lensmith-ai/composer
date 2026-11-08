@@ -9,7 +9,7 @@
  * The mark itself never says the verdict: only the sheet does.
  *
  * API (window.__claimSeal):
- *   card(el, section)    rewrite the card's headline and first line of text into claim marks
+ *   card(el, section)    mark the checked sentence in the card's first line of text (never the headline)
  *   mark(el, text, claim) fill el with text, the located sentences as claim marks
  *   legend(host, sections, meta)  put the one-line "what the underline means" strip before host
  *   open(trigger, claim) / close()
@@ -87,13 +87,8 @@
 
   function card(ic, s) {
     if (!ic || !s) return;
-    var head = ic.querySelector('h4');
-    var title = s.title || '';
-    if (head && title) {
-      head.textContent = '';
-      var whole = trigger(el('span', '', title), claimFor(s, title), title);
-      head.appendChild(whole);
-    }
+    // The headline is never a claim mark: pressing it, like any other part of the card, opens the insight sheet. Only
+    // the located sentence in the card's text line is marked, and pressing that mark opens its own claim sheet.
     var body = ic.querySelector('.gv.keep');
     // the line the card shows: the one the checker marked a sentence in, else the first detail (as before)
     var firstMarked = (s.claimSpans || []).filter(function (x) { return s.kp && s.kp[x.kp] != null; })[0];
@@ -116,19 +111,6 @@
         return one;
       } }, groups);
     }
-    // the info dot is a real button: the card is no longer one big button, so its claims can be pressed
-    var dot = ic.querySelector('.infodot');
-    if (dot) {
-      var b = el('button', 'infodot', 'i');
-      b.type = 'button';
-      b.setAttribute('aria-haspopup', 'dialog');
-      b.setAttribute('aria-label', 'Open the full claim and its sources: ' + title);
-      dot.parentNode.replaceChild(b, dot);
-    }
-    ic.removeAttribute('role');
-    ic.removeAttribute('tabindex');
-    ic.removeAttribute('aria-haspopup');
-    ic.classList.add('cs-card');
   }
 
   function ensurePop() {
