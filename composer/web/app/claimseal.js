@@ -2,14 +2,14 @@
  *
  * Every insight is a claim the checker (claim-seal) traced to the article it cites. This file marks that on the
  * insight cards with the published window's own claim mark (the `cmark` class: one thin amber underline, the same for
- * every checked claim). Pressing a mark, by tap, click, Enter or Space, opens the app's existing sheet (#spanSheet,
+ * every checked claim). Pressing a mark, by tap or click (and, outside a card, Enter or Space), opens the app's existing sheet (#spanSheet,
  * the one the phrase marks in a brief open) with the claim, the verdict in plain words, the cited article and its
  * link, and the passage the check located (a few words, at most 25, kept in the job's own passages.json and never in
  * the shared edition). Esc, the Close button, the handle or a tap outside shuts it; focus goes back to the mark.
  * The mark itself never says the verdict: only the sheet does.
  *
  * API (window.__claimSeal):
- *   card(el, section)    rewrite the card's headline and first line of text into claim marks
+ *   card(el, section)    mark the checked sentence in the card's first line of text (never the headline)
  *   mark(el, text, claim) fill el with text, the located sentences as claim marks
  *   legend(host, sections, meta)  put the one-line "what the underline means" strip before host
  *   open(trigger, claim) / close()
@@ -60,25 +60,32 @@
     return STEP.replace('{v}', rel);
   }
 
-  function trigger(span, claim, label) {
+  // A mark is a pointer shortcut when it sits inside an insight card, which is itself one button (the whole card opens the
+  // insight sheet): a button inside a button is not valid, and the card's own label already stands for its text. So a
+  // card's mark has no role, no tab stop and no label of its own; the same claims are reachable from the keyboard
+  // through the card (Enter opens its sheet, whose marked sentences are controls). Anywhere else a mark is a button.
+  function trigger(span, claim, label, inCard) {
     span.className = 'cmark';
-    span.setAttribute('role', 'button');
-    span.setAttribute('tabindex', '0');
-    span.setAttribute('aria-haspopup', 'dialog');
-    span.setAttribute('aria-expanded', 'false');
-    span.setAttribute('aria-label', label + ' Checked claim. Press to see the verdict and the passage it rests on.');
+    if (!inCard) {
+      span.setAttribute('role', 'button');
+      span.setAttribute('tabindex', '0');
+      span.setAttribute('aria-haspopup', 'dialog');
+      span.setAttribute('aria-expanded', 'false');
+      span.setAttribute('aria-label', label + ' Checked claim. Press to see the verdict and the passage it rests on.');
+    }
     span.__claim = claim;
     return span;
   }
 
   // Wrap each located sentence (the checker's offsets into `text`) as a claim sentence; the rest stays plain.
   function mark(node, text, claim, spans) {
+    var inCard = !!(node.closest && node.closest('.icard'));
     node.textContent = '';
     var at = 0;
     (spans || []).forEach(function (sp) {
       if (!sp || sp.start < at || sp.end <= sp.start || sp.end > text.length) return;
       if (sp.start > at) node.appendChild(document.createTextNode(text.slice(at, sp.start)));
-      var s = trigger(el('span', '', text.slice(sp.start, sp.end)), claim.sentence ? claim.sentence(sp) : claim, text.slice(sp.start, sp.end));
+      var s = trigger(el('span', '', text.slice(sp.start, sp.end)), claim.sentence ? claim.sentence(sp) : claim, text.slice(sp.start, sp.end), inCard);
       node.appendChild(s);
       at = sp.end;
     });
@@ -87,13 +94,8 @@
 
   function card(ic, s) {
     if (!ic || !s) return;
-    var head = ic.querySelector('h4');
-    var title = s.title || '';
-    if (head && title) {
-      head.textContent = '';
-      var whole = trigger(el('span', '', title), claimFor(s, title), title);
-      head.appendChild(whole);
-    }
+    // The headline is never a claim mark: pressing it, like any other part of the card, opens the insight sheet. Only
+    // the located sentence in the card's text line is marked, and pressing that mark opens its own claim sheet.
     var body = ic.querySelector('.gv.keep');
     // the line the card shows: the one the checker marked a sentence in, else the first detail (as before)
     var firstMarked = (s.claimSpans || []).filter(function (x) { return s.kp && s.kp[x.kp] != null; })[0];
@@ -116,19 +118,6 @@
         return one;
       } }, groups);
     }
-    // the info dot is a real button: the card is no longer one big button, so its claims can be pressed
-    var dot = ic.querySelector('.infodot');
-    if (dot) {
-      var b = el('button', 'infodot', 'i');
-      b.type = 'button';
-      b.setAttribute('aria-haspopup', 'dialog');
-      b.setAttribute('aria-label', 'Open the full claim and its sources: ' + title);
-      dot.parentNode.replaceChild(b, dot);
-    }
-    ic.removeAttribute('role');
-    ic.removeAttribute('tabindex');
-    ic.removeAttribute('aria-haspopup');
-    ic.classList.add('cs-card');
   }
 
   function ensurePop() {
@@ -192,13 +181,13 @@
 
   function open(t, claim) {
     if (!ensurePop()) return;
-    if (current && current !== t) current.setAttribute('aria-expanded', 'false');
+    if (current && current !== t && current.hasAttribute('aria-expanded')) current.setAttribute('aria-expanded', 'false');
     current = t;
     sheetFill(claim);
     pop.classList.add('on');
     pop.setAttribute('aria-hidden', 'false');
     pop.setAttribute('tabindex', '-1');
-    t.setAttribute('aria-expanded', 'true');
+    if (t.hasAttribute('aria-expanded')) t.setAttribute('aria-expanded', 'true');
     pop.focus({ preventScroll: true });
     if (!listening) {
       listening = true;
@@ -212,7 +201,11 @@
     pop.setAttribute('aria-hidden', 'true');
     var t = current;
     current = null;
-    if (t) { t.setAttribute('aria-expanded', 'false'); if (refocus && document.contains(t)) t.focus({ preventScroll: true }); }
+    if (t) {
+      if (t.hasAttribute('aria-expanded')) t.setAttribute('aria-expanded', 'false');
+      var back = t.hasAttribute('tabindex') ? t : (t.closest ? t.closest('.icard') : null);
+      if (refocus && back && document.contains(back)) back.focus({ preventScroll: true });
+    }
     if (listening) {
       listening = false;
       document.removeEventListener('keydown', onKey, true);

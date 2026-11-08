@@ -102,7 +102,7 @@ class JobRouteTests(unittest.TestCase):
         self.assertEqual("done", verified["state"])
         self.assertEqual("verified", verified["phase"])
         self.assertEqual("verified", verified["progress"][-1]["phase"])
-        self.assertEqual({"schema", "job", "state", "phase", "progress", "result", "verification", "receipts", "request", "started_at", "finished_at", "error", "commit", "draft_sha256", "verification_started_at"}, set(verified))
+        self.assertEqual({"schema", "job", "state", "phase", "progress", "result", "verification", "receipts", "request", "started_at", "finished_at", "error", "commit", "draft_sha256", "verification_started_at", "lines"}, set(verified))
 
     def test_status_routes_expose_compose_and_verification_failures(self):
         def compose_failure(job, draft_ready):

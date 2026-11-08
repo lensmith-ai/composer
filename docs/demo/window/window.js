@@ -24,6 +24,7 @@
     var done = null;
     var rows = [];
     var plan = [];
+    var stopped = false;
     function once(name, fn) {
       if (fired[name]) return;
       fired[name] = true;
@@ -91,7 +92,21 @@
         at += T.gap;
       });
     }
+    function finish() {
+      stopped = true;
+      if (scrim) scrim.remove();
+      if (sheet) sheet.remove();
+      scrim = null;
+      sheet = null;
+      var ripples = document.querySelectorAll('.lw-touch');
+      for (var i = 0; i < ripples.length; i++) ripples[i].remove();
+      ctx.slot.textContent = ctx.chosen;
+      ctx.slot.setAttribute('aria-label', 'sources: ' + ctx.chosen);
+      ctx.slot.classList.remove('lw-tap');
+      ctx.go.classList.remove('lw-press');
+    }
     function step(t) {
+      if (stopped) return;
       if (t >= T.slot) once('slot', function () {
         touch(ctx.slot);
         ctx.slot.classList.add('lw-tap');
@@ -132,7 +147,7 @@
         r.tick.textContent = '';
       };
     }
-    return { step: step };
+    return { step: step, finish: finish };
   }
   window.__lwComposeStep = { LENGTH: LENGTH, create: create };
 }());
@@ -266,6 +281,7 @@
   }
   var REPLAY = window.location.hash === '#replay';
   function settle() {
+    if (picker) picker.finish();
     if (warp.k !== 1) speed(1);
     state('settled');
     root.classList.add('lw-settled');
@@ -575,12 +591,18 @@
       playing = false;
       if (raf) realCancelRaf(raf);
       raf = 0;
+      var fin = null;
       if (entry) {
         dropped = true;
         var sand = document.querySelectorAll('canvas');
         for (var c = 0; c < sand.length; c++) sand[c].parentNode.removeChild(sand[c]);
       }
+      if (driver && driver.abort) {
+        fin = entry || driver.begin({ sources: data.sources });
+        driver.abort(fin);
+      }
       settle();
+      if (driver && driver.finish && fin) driver.finish(fin);
     }
   });
   function watch() {

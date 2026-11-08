@@ -89,7 +89,7 @@ class JobStore:
                 raise RuntimeError("capacity full")
             job_id = "job-" + uuid.uuid4().hex[:16]
             job = {"schema": "composer-job/v1", "job": job_id, "state": "running", "phase": "queued",
-                   "progress": [{"at": self._now(), "phase": "queued"}], "result": None,
+                   "progress": [{"at": self._now(), "phase": "queued"}], "lines": [], "result": None,
                    "verification": {"status": "pending", "wall_s": None},
                    "receipts": {"verification": {"status": "pending", "wall_s": None}}, "request": request,
                    "started_at": self._now(), "finished_at": None, "error": None,
@@ -107,6 +107,18 @@ class JobStore:
     def status(self, job_id: str) -> dict:
         with self.lock:
             return self._read_job(job_id)
+
+    def note(self, job_id: str, line: str) -> None:
+        """Append one human-readable progress line (a string, in the grammar the app page reads: see stage_lines.py)
+        to the job's `lines`. A job that has already finished takes none."""
+        if not isinstance(line, str) or not line.strip():
+            return
+        with self.lock:
+            job = self._read_job(job_id)
+            if job_id not in self.active or job["phase"] in self.TERMINAL:
+                return
+            job.setdefault("lines", []).append(line.strip()[:300])
+            self._write_job(job)
 
     def wait(self, job_id: str, timeout: float) -> dict:
         deadline = time.monotonic() + timeout
@@ -325,6 +337,8 @@ class JobStore:
                 job["phase"] = "verified" if status == "ok" else "verification_failed"
                 job["state"] = "done"; job["finished_at"] = self._now()
                 job["progress"].append({"at": self._now(), "phase": job["phase"]})
+                if status == "ok":  # a check that did not pass must not read as a clean finish in the page's trace
+                    job.setdefault("lines", []).append("done \u2713")
                 job["verification"] = {"status": status, "wall_s": round(time.monotonic() - started, 3)}
                 job["receipts"]["verification"] = job["verification"]
                 self._write_job(job)

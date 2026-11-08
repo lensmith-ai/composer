@@ -30,7 +30,7 @@ from urllib.parse import urlsplit
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from . import app_static, demo, discovery, html_extract, lenses, live_files, page, pipeline, receipts, sources_registry
+from . import app_static, demo, discovery, html_extract, lenses, live_files, page, pipeline, receipts, sources_registry, stage_lines
 from .job_store import JobStore, StoreError
 from .narration import options_fragment
 from .prompt import DEFAULT_INSIGHTS, INSIGHT_RANGE
@@ -231,8 +231,15 @@ class App:
         lens = self._resolve_lens(request["lens"], request.get("reading_level"))
         model, checker = self._models()
         extra = {"checker": checker} if checker is not None else {}
+        line_for = stage_lines.make_line_maker(sources, getattr(lens, "name", "") or "")
+
+        def note(kind: str, text: str) -> None:  # each stage the pipeline reaches becomes one progress line of the job
+            try:
+                self.jobs.note(job["job"], line_for(kind, text))
+            except Exception:  # noqa: BLE001 - a progress line is only for the page's animation; it never stops a brief
+                pass
         run = self.compose(lens=lens.instruction, lens_definition=lens, sources=sources, model=model,
-                           count=request.get("insights", DEFAULT_INSIGHTS), **extra)
+                           count=request.get("insights", DEFAULT_INSIGHTS), log=note, **extra)
         draft_ready(run["edition"])
         evidence = (run.get("result") or {}).get("claim_evidence")
         if isinstance(evidence, dict):  # kept so `composer doctor --seals` can re-verify the seal later
