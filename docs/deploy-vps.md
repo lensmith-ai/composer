@@ -9,7 +9,7 @@ The same files run on your own computer first, with a local certificate authorit
 Compose v5, unless its block says **runs on your server** (it needs your server, your domain or your DNS provider,
 so we could not run it for you). Lines that start with `#` are notes, not commands.
 
-**What works today, and what is pending.** This guide is written for Composer 0.2, which is being built in phases.
+**What works.** This guide is written for Composer 0.2. Each part below is proved, and the one thing that depends on the release is the published image.
 
 | part | status |
 |---|---|
