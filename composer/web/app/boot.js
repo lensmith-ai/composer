@@ -27,6 +27,16 @@
     if (hint) hint.textContent = on ? 'Tap an amber word to change what goes in, the lens, or the voice.'
       : 'Tap an amber word to change what goes in or the lens.';
   };
+  // Inline style from a "name:value;..." string, set one property at a time. Giving an element its whole style as one
+  // string (the style object's text form, or the style attribute) is an inline style that the page's policy
+  // (style-src 'self') refuses in WebKit; setting a property through the style object is allowed in every engine.
+  window.cwSetStyle = function (el, text) {
+    String(text).split(';').forEach(function (d) {
+      var i = d.indexOf(':');
+      if (i > 0) el.style.setProperty(d.slice(0, i).trim(), d.slice(i + 1).trim());
+    });
+    return el;
+  };
   var sheets = {};
   window.cwInjectCss = function (id, css) {
     try {

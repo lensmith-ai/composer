@@ -200,7 +200,7 @@ remove_stage() {
   [ -n "$STAGE" ] || return 0
   case "$STAGE" in "${LOGDIR%/}"/lensmith-composer-install-stage.*) ;; *) return 0 ;; esac
   if [ -d "$STAGE" ] && [ ! -L "$STAGE" ] && [ -z "$(find "$STAGE" -maxdepth 0 ! -user "$(id -u)" -print 2>/dev/null)" ]; then
-    chmod -R u+w -- "$STAGE" 2>/dev/null || true
+    chmod_u_w "$STAGE" 2>/dev/null || true   # from the shared library above: no `--` after a mode (BSD chmod)
     rm -rf -- "$STAGE"
   fi
   STAGE=""

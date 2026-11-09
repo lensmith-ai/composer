@@ -149,6 +149,12 @@ fetch_pinned() {
   done
   return 1
 }
+# Permission changes over a whole folder, the same on GNU and on BSD/macOS. BSD chmod reads the mode first and takes a
+# `--` after it as a file name ("chmod: --: No such file or directory", seen on a Mac), so there is no `--` here: find
+# prints the folder's own path in front of every name (absolute, or ./ when it was relative), so a name never begins
+# with "-". Links are skipped: chmod would follow them, and a link has no mode of its own on Linux.
+chmod_go_w() { case "$1" in /*) ;; *) set -- "./$1" ;; esac; find "$1" ! -type l \( -perm -020 -o -perm -002 \) -exec chmod go-w {} +; }
+chmod_u_w() { case "$1" in /*) ;; *) set -- "./$1" ;; esac; find "$1" ! -type l ! -perm -200 -exec chmod u+w {} +; }
 # END fetchlib
 # Numbered, visible steps: a person watching a slow connection can see where setup is and how many are left.
 # Run by install.sh, the numbers continue after its step 1 and each line says how long the run has taken.
@@ -224,7 +230,8 @@ trust_one() {  # trust_one FOLDER: prints why not, returns 1
   case "$mode" in
     *[tT]) case "$mode" in ?????w*|????????w*) say "$1 is a folder shared by every account ($mode); put the app folder in a folder of your own instead: ./setup.sh --home DIR"; return 1 ;; esac ;;
     ?????w*|????????w*)
-      fs=$(stat -f -c %T -- "$1" 2>/dev/null || true)  # GNU stat; elsewhere this prints nothing
+      fs=""
+      if [ "$(uname -s)" = Linux ]; then fs=$(stat -f -c %T -- "$1" 2>/dev/null || true); fi  # GNU stat only: BSD's stat -f takes a format, not -c
       case "$fs" in
         msdos|vfat|fat|exfat|fuseblk|ntfs|ntfs3|cifs|smb2|smb3|*0x2011bab0*)
           say "$1 can be written by other accounts ($mode): it is on a $fs filesystem, which has no permission bits of its own, so chmod has no effect there; put the app folder on a POSIX filesystem (./setup.sh --home DIR), or mount that disk with uid=$(id -u),dmask=077,fmask=177"; return 1 ;;
@@ -306,7 +313,7 @@ PYPI_INDEX=${COMPOSER_PYPI_INDEX:-https://pypi.org/simple/}
 PINS=${COMPOSER_PINS:-}
 pin() {  # pin NAME: its value, or nothing
   [ -n "$PINS" ] && [ -f "$PINS" ] || return 0
-  sed -n "s/^$1=\([A-Za-z0-9._:\/+%@-]*\)\$/\1/p" "$PINS" | head -n 1
+  sed -n "s|^$1=\([A-Za-z0-9._:/+%@-]*\)\$|\1|p" "$PINS" | head -n 1
 }
 
 SRC=$(cd "$(dirname "$0")" && pwd)
@@ -357,7 +364,7 @@ if [ -e "$H" ]; then
           other=$(find "$left" ! -user "$(id -u)" -print 2>/dev/null | head -n 1)
           [ -z "$other" ] || die "refused: $other belongs to another account, so the half-made $left was not removed; fix: chown -R $(id -un) $left"
           say "  an earlier setup stopped in the middle of making $left; removing that half-made folder first"
-          chmod -R u+w -- "$left"
+          chmod_u_w "$left"
           rm -rf -- "$left"
         fi
         rm -f -- "$mk"
@@ -521,7 +528,7 @@ cleanup() {
          fi ;;
     esac
     # what this run made in the version folder may have come out group-writable (python.org's venv templates are)
-    if [ "$MADE_VERSION" = 1 ]; then chmod -R go-w -- "$H/app/$VERSION" 2>/dev/null || true; fi
+    if [ "$MADE_VERSION" = 1 ]; then chmod_go_w "$H/app/$VERSION" 2>/dev/null || true; fi
     if ! why=$(owned_ok); then
       say "setup.sh: stopped; nothing it made was removed, because $why" >&2
       return
@@ -566,7 +573,7 @@ export UV_HTTP_TIMEOUT PIP_DEFAULT_TIMEOUT PIP_RETRIES
 # address, GitHub download API (answers when the release address is down), PyPI's uv wheel (carries the same
 # program), our mirror. Each file is checked against the pinned SHA-256 before anything in it runs.
 uv_check() {  # the unpacked uv must run and be the pinned version
-  chmod -R go-w -- "$H/bootstrap"
+  chmod_go_w "$H/bootstrap"
   [ -x "$H/bootstrap/uv" ] && [ "$("$H/bootstrap/uv" --version 2>/dev/null | awk '{print $2}')" = "$UV_VERSION" ]
 }
 uv_unpack_tar() {
@@ -718,7 +725,7 @@ if [ -z "$PY" ]; then
       PY=$("$H/bootstrap/uv" python find "$PY_VERSION")
     fi
   fi
-  chmod -R go-w -- "$H/python" 2>/dev/null || true
+  chmod_go_w "$H/python" 2>/dev/null || true
   PYVER=$("$PY" -I -c 'import sys; print("%d.%d.%d" % sys.version_info[:3])' 2>/dev/null || echo "$PY_VERSION")
 else
   step 3 "using Python $PYVER (nothing to download)"
@@ -837,7 +844,7 @@ else
   "$PY" -I -m venv "$VENV" || fail "Python could not make its private environment (its error is above)" \
     "on Debian or Ubuntu run: sudo apt install python3-venv; then run the same command again"
   # python.org's Python copies group-writable template files into every venv; the trust contract refuses those
-  chmod -R go-w -- "$H/app/$VERSION"
+  chmod_go_w "$H/app/$VERSION"
   if [ "$KIT" = 1 ]; then
     step 5 "installing Composer $VERSION, certifi and claim-seal into it (each checked by SHA-256)"
     check_owned
@@ -854,7 +861,7 @@ else
       die "the install of Composer failed (pip's error is above). If it was the network, rerun the same command with PIP_DEFAULT_TIMEOUT=300 in front, for example PIP_DEFAULT_TIMEOUT=300 sh setup.sh"
     rm -rf -- "$H/tmp/source"
   fi
-  chmod -R go-w -- "$H/app/$VERSION"
+  chmod_go_w "$H/app/$VERSION"
   "$VENV/bin/composer" --version >/dev/null || fail "the installed Composer does not start" "run the same command again; if it stops here again, send the log"
 fi
 step 6 "checking the install and making it the current version"

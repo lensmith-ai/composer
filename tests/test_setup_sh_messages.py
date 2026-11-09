@@ -324,7 +324,7 @@ class SetupShMessageTests(unittest.TestCase):
             env, _ = self.sandbox(py312_works=True)
             copy = Path(tempfile.mkdtemp(prefix="composer-nofix-"))
             self.addCleanup(shutil.rmtree, copy, True)
-            text = (ROOT / "setup.sh").read_text(encoding="utf-8").replace('chmod -R go-w -- "$H/app/$VERSION"', "true")
+            text = (ROOT / "setup.sh").read_text(encoding="utf-8").replace('chmod_go_w "$H/app/$VERSION"\n', "true\n")
             (copy / "setup.sh").write_text(text, encoding="utf-8")
             for name in ("pyproject.toml", "composer", "README.md", "LICENSE"):
                 (copy / name).symlink_to(ROOT / name)

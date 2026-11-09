@@ -1,5 +1,6 @@
 # Every push to main and every pull request: the offline test suite on three systems and the two ends of the
-# Python range we claim, the banned-text test over the whole history, a secret scan, and a lint of these workflows.
+# Python range we claim, the real one-command install on macOS (BSD userland), the banned-text test over the whole
+# history, a secret scan, and a lint of these workflows.
 # Every action is pinned by full commit SHA (the tag is in the comment); every downloaded tool by version + SHA-256.
 name: ci
 
@@ -37,6 +38,71 @@ jobs:
         run: python -m pip install .
       - name: Offline tests
         run: python -m unittest discover -s tests -t tests -v
+
+  install-macos:
+    # The one-command install, run for real on a Mac (BSD userland: its chmod, sed, find, stat and tar are not GNU's, and
+    # every other test runs on Linux). Built the way the release builds it, then installed from those local files
+    # (COMPOSER_FILES_DIR, no download of Composer's own files): the command a person types, then a second run (the
+    # "already installed" path), then `lensmith composer --version` and `doctor`.
+    name: one-command install on macOS (${{ matrix.case }})
+    runs-on: macos-14
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - case: python.org Python, default folder
+            templates: as-shipped
+            home: default
+          - case: group-writable venv templates, own folder
+            templates: group-writable
+            home: own
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Release tools (hash-locked), then the release files and install.sh as the release makes them
+        run: |
+          python -m pip install --require-hashes -r scripts/release/release-tools.txt
+          python scripts/release/build.py --out "$RUNNER_TEMP/dist"
+          python scripts/release/make_installer.py --dist "$RUNNER_TEMP/dist" --out "$RUNNER_TEMP/installer"
+          mkdir "$RUNNER_TEMP/kit"
+          cp "$RUNNER_TEMP/dist"/lensmith_composer-* "$RUNNER_TEMP/installer"/* "$RUNNER_TEMP/kit/"
+          ls -l "$RUNNER_TEMP/kit"
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Which Python the installer will find (python.org's installer build when this runner has it)
+        run: |
+          fw=/Library/Frameworks/Python.framework/Versions/3.12/bin
+          if [ -x "$fw/python3" ]; then echo "$fw" >> "$GITHUB_PATH"; echo "python.org framework Python: $fw/python3"; else echo "no /Library framework Python on this runner; using setup-python's"; fi
+          python3 -c 'import sys, sysconfig; print(sys.executable, sys.version.split()[0], "framework=" + str(sysconfig.get_config_var("PYTHONFRAMEWORK")))'
+      - name: Make the venv templates group-writable, as python.org's installer leaves them
+        if: matrix.templates == 'group-writable'
+        run: |
+          d=$(python3 -c 'import os, venv; print(os.path.join(os.path.dirname(venv.__file__), "scripts"))')
+          sudo chmod -R g+w "$d"
+          ls -ld "$d" "$d"/common/* | head
+      - name: One-command install from local files
+        env:
+          WHICH_HOME: ${{ matrix.home }}
+        run: |
+          cd "$RUNNER_TEMP/kit"
+          if [ "$WHICH_HOME" = own ]; then H="$RUNNER_TEMP/composer-home"; else H="$HOME/.lensmith-composer"; fi
+          echo "H=$H" >> "$GITHUB_ENV"
+          COMPOSER_FILES_DIR="$PWD" sh install.sh --home "$H" --no-open --no-start --path
+      - name: The same command again (already installed)
+        run: |
+          cd "$RUNNER_TEMP/kit"
+          COMPOSER_FILES_DIR="$PWD" sh install.sh --home "$H" --no-open --no-start --path
+      - name: lensmith composer --version and doctor
+        run: |
+          "$H/bin/lensmith" composer --version
+          "$H/bin/lensmith" composer doctor
+          echo "MACOS-INSTALL-PROOF: ok | ${{ matrix.case }} | $("$H/bin/lensmith" composer --version) | $(uname -sm) macOS $(sw_vers -productVersion) | $(python3 -c 'import sys; print("Python " + sys.version.split()[0])')"
 
   banned-text:
     name: banned-text test (tree and full history)
