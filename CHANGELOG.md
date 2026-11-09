@@ -7,7 +7,7 @@ Each release note is written from this file and checked against it by claim-seal
 
 ## [Unreleased]
 
-## [0.2.0] - 2026-11-08
+## [0.2.0] - 2026-11-09
 
 The full app, on your computer or your own server. In plain words:
 

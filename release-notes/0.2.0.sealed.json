@@ -22,7 +22,7 @@
      ],
      "verification": {
       "verdict": "supported",
-      "why": "Source says it \"finds Python 3.10 or newer or gets a private one, installs Composer and its two dependencies into ~/.lensmith-composer\" on macOS and Linux.",
+      "why": "Source states one command for macOS and Linux, finds Python 3.10 or newer or gets a private one, installs into ~/.lensmith-composer.",
       "citations": [
        {
         "source": "changelog",
@@ -31,7 +31,7 @@
         "match_score": null,
         "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
         "matched_title": "Changelog 0.2.0, Added 1",
-        "bears": "The changelog describes a single curl-piped install command for macOS and Linux that finds or fetches Python and installs Composer plus dependencies into ~/.lensmith-composer, matching the claim.",
+        "bears": "The changelog entry describes a single curl-based install for macOS and Linux that locates or fetches Python and installs everything into one home-directory folder, matching the claim.",
         "span": {
          "field": "insight",
          "start": 49,
@@ -57,7 +57,7 @@
      ],
      "verification": {
       "verdict": "supported",
-      "why": "Source says \"every file is checked against a SHA-256 pinned in the script\", in a sentence about every file the installer fetches.",
+      "why": "Source states \"every file is checked against a SHA-256 pinned in the script\" for files the installer fetches.",
       "citations": [
        {
         "source": "changelog",
@@ -66,12 +66,12 @@
         "match_score": null,
         "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
         "matched_title": "Changelog 0.2.0, Added 2",
-        "bears": "The changelog says each file the installer fetches comes from an ordered list of sources and is verified against a SHA-256 pinned in the script, matching the claim.",
+        "bears": "The changelog says every file the installer fetches, whichever source it comes from, is verified against a SHA-256 hash pinned in the script, which matches the claim directly.",
         "span": {
          "field": "insight",
-         "start": 0,
-         "end": 83,
-         "quote": "Every file the installer fetches is checked against a SHA-256 pinned in the script.",
+         "start": 36,
+         "end": 82,
+         "quote": "checked against a SHA-256 pinned in the script",
          "coordinate_system": "unicode-code-point-v1",
          "producer": "model-exact-quote-v1",
          "sentence_relation": "says"
@@ -92,7 +92,7 @@
      ],
      "verification": {
       "verdict": "supported",
-      "why": "The source says composer up starts the app at that URL with the phone-width page, saved briefs, an optional daily brief and a weekly backup.",
+      "why": "Changelog says 'composer up starts the app at http://127.0.0.1:8765/' with the phone-width page, saved briefs, optional daily brief and weekly backup.",
       "citations": [
        {
         "source": "changelog",
@@ -101,7 +101,7 @@
         "match_score": null,
         "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
         "matched_title": "Changelog 0.2.0, Added 9",
-        "bears": "The changelog entry lists the same address and the same four components, with 'if you want one' matching 'optional', so it backs the claim directly.",
+        "bears": "The changelog entry lists the same address and the same four components, including that the daily brief is optional, so it matches the claim directly.",
         "span": {
          "field": "insight",
          "start": 0,
@@ -127,7 +127,7 @@
      ],
      "verification": {
       "verdict": "supported",
-      "why": "Source says narration \"reads the brief's own spoken script aloud with Kokoro, made on your computer after the text is final.\"",
+      "why": "Changelog says: \"a Listen button that reads the brief's own spoken script aloud with Kokoro, made on your computer after the text is final.\"",
       "citations": [
        {
         "source": "changelog",
@@ -136,12 +136,12 @@
         "match_score": null,
         "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
         "matched_title": "Changelog 0.2.0, Added 22",
-        "bears": "The changelog entry describes the same optional narration feature, matching the claim's wording on Kokoro, local generation and timing, and adds the Listen button.",
+        "bears": "The changelog entry describes optional narration that reads the brief's spoken script with Kokoro, generated locally once the text is final. This matches the claim almost exactly.",
         "span": {
          "field": "insight",
-         "start": 19,
-         "end": 119,
-         "quote": "reads the brief's own spoken script aloud with Kokoro, made on your computer after the text is final",
+         "start": 0,
+         "end": 120,
+         "quote": "Optional narration reads the brief's own spoken script aloud with Kokoro, made on your computer after the text is final.",
          "coordinate_system": "unicode-code-point-v1",
          "producer": "model-exact-quote-v1",
          "sentence_relation": "says"
@@ -162,7 +162,7 @@
      ],
      "verification": {
       "verdict": "supported",
-      "why": "Source lists 'a container image', 'a Compose file with Caddy in front for HTTPS and one login', and 'a step-by-step guide'.",
+      "why": "Source lists \"a container image\", \"a Compose file with Caddy in front for HTTPS and one login\", and \"a step-by-step guide\" under running on your own server.",
       "citations": [
        {
         "source": "changelog",
@@ -171,12 +171,12 @@
         "match_score": null,
         "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
         "matched_title": "Changelog 0.2.0, Added 24",
-        "bears": "The changelog entry announces self-hosting with the same three parts the claim lists: a container image, a Caddy-fronted Compose file, and a guide. It adds image details the claim leaves out.",
+        "bears": "The changelog entry names the same three deliverables: container image, Compose file with Caddy for HTTPS and one login, and a step-by-step guide, directly backing the claim.",
         "span": {
          "field": "insight",
-         "start": 42,
-         "end": 145,
-         "quote": "a container image, a Compose file with Caddy in front for HTTPS and one login, and a step-by-step guide",
+         "start": 0,
+         "end": 146,
+         "quote": "Composer can run on your own server, with a container image, a Compose file with Caddy in front for HTTPS and one login, and a step-by-step guide.",
          "coordinate_system": "unicode-code-point-v1",
          "producer": "model-exact-quote-v1",
          "sentence_relation": "says"
@@ -197,7 +197,7 @@
      ],
      "verification": {
       "verdict": "supported",
-      "why": "Source says cards carry no claim marks and \"the checked claims are marked in that sheet\".",
+      "why": "Source says the cards \"carry no claim marks\" and \"the checked claims are marked in that sheet\".",
       "citations": [
        {
         "source": "changelog",
@@ -206,12 +206,12 @@
         "match_score": null,
         "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
         "matched_title": "Changelog 0.2.0, Added 16",
-        "bears": "The changelog states that cards show no claim marks and that checked claims appear marked only inside the opened insight sheet, matching the claim directly.",
+        "bears": "The changelog states the cards show no marks and that the checked claims are marked in the insight sheet the card opens, matching the claim.",
         "span": {
          "field": "insight",
-         "start": 0,
-         "end": 38,
-         "quote": "The insight cards carry no claim marks",
+         "start": 40,
+         "end": 97,
+         "quote": "the checked claims are marked in the opened insight sheet",
          "coordinate_system": "unicode-code-point-v1",
          "producer": "model-exact-quote-v1",
          "sentence_relation": "says"
@@ -232,7 +232,7 @@
      ],
      "verification": {
       "verdict": "supported",
-      "why": "Source states the same sentence verbatim: install 'ends by naming the optional extras' and 'still asks one question'.",
+      "why": "Changelog 0.2.0 says the install \"ends by naming the optional extras\" and that \"it still asks one question\"; the claim only drops the \"(model)\" qualifier on provider and replaces the pipe separators w",
       "citations": [
        {
         "source": "changelog",
@@ -241,12 +241,12 @@
         "match_score": null,
         "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
         "matched_title": "Changelog 0.2.0, Fixed 1",
-        "bears": "The 0.2.0 changelog entry states this behaviour directly, listing the extras and the single remaining question, so it fully backs the claim.",
+        "bears": "The changelog entry states the same fix: the install finishes by listing the reconfigure options and still asks a single question, so it directly supports the claim.",
         "span": {
          "field": "insight",
-         "start": 0,
-         "end": 58,
-         "quote": "The one-command install ends by naming the optional extras",
+         "start": 155,
+         "end": 181,
+         "quote": "it still asks one question",
          "coordinate_system": "unicode-code-point-v1",
          "producer": "model-exact-quote-v1",
          "sentence_relation": "says"
@@ -267,7 +267,7 @@
      ],
      "verification": {
       "verdict": "supported",
-      "why": "Changelog states \"The installer no longer stops on a Mac with chmod: --: No such file or directory\", which is a chmod error.",
+      "why": "The changelog says \"The installer no longer stops on a Mac with chmod: --: No such file or directory\", which matches the claim.",
       "citations": [
        {
         "source": "changelog",
@@ -276,7 +276,7 @@
         "match_score": null,
         "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
         "matched_title": "Changelog 0.2.0, Fixed 2",
-        "bears": "The changelog reports the Mac installer stopping on a chmod 'No such file or directory' failure as fixed, and explains the cause, which directly backs the claim.",
+        "bears": "The changelog entry states that the Mac installer failure with a chmod 'No such file or directory' error is fixed, and explains the cause. This directly supports the claim.",
         "span": {
          "field": "insight",
          "start": 0,
@@ -303,7 +303,7 @@
    "status": "ok",
    "claims_checked": 8,
    "claims_total": 8,
-   "wall_s": 33.85,
+   "wall_s": 34.06,
    "attempts": 8,
    "sharding": {
     "pool_size": 2,
@@ -315,8 +315,8 @@
       "status": "ok",
       "reason": null,
       "attempts": 1,
-      "queue_wait_s": 0.003,
-      "wall_s": 8.66,
+      "queue_wait_s": 0.001,
+      "wall_s": 8.208,
       "model_executed": "claude-cli:sonnet",
       "prompt_sha256_8": "c698fd61",
       "error": null
@@ -326,8 +326,8 @@
       "status": "ok",
       "reason": null,
       "attempts": 1,
-      "queue_wait_s": 0.003,
-      "wall_s": 8.317,
+      "queue_wait_s": 0.002,
+      "wall_s": 8.751,
       "model_executed": "claude-cli:sonnet",
       "prompt_sha256_8": "75827535",
       "error": null
@@ -337,8 +337,8 @@
       "status": "ok",
       "reason": null,
       "attempts": 1,
-      "queue_wait_s": 8.321,
-      "wall_s": 10.253,
+      "queue_wait_s": 8.209,
+      "wall_s": 8.411,
       "model_executed": "claude-cli:sonnet",
       "prompt_sha256_8": "71b9c02c",
       "error": null
@@ -348,8 +348,8 @@
       "status": "ok",
       "reason": null,
       "attempts": 1,
-      "queue_wait_s": 8.663,
-      "wall_s": 9.178,
+      "queue_wait_s": 8.753,
+      "wall_s": 9.417,
       "model_executed": "claude-cli:sonnet",
       "prompt_sha256_8": "f2403446",
       "error": null
@@ -359,8 +359,8 @@
       "status": "ok",
       "reason": null,
       "attempts": 1,
-      "queue_wait_s": 17.841,
-      "wall_s": 8.914,
+      "queue_wait_s": 16.621,
+      "wall_s": 6.67,
       "model_executed": "claude-cli:sonnet",
       "prompt_sha256_8": "3128a47b",
       "error": null
@@ -370,8 +370,8 @@
       "status": "ok",
       "reason": null,
       "attempts": 1,
-      "queue_wait_s": 18.574,
-      "wall_s": 7.638,
+      "queue_wait_s": 18.17,
+      "wall_s": 8.119,
       "model_executed": "claude-cli:sonnet",
       "prompt_sha256_8": "37b3e000",
       "error": null
@@ -381,8 +381,8 @@
       "status": "ok",
       "reason": null,
       "attempts": 1,
-      "queue_wait_s": 26.212,
-      "wall_s": 6.898,
+      "queue_wait_s": 23.291,
+      "wall_s": 8.72,
       "model_executed": "claude-cli:sonnet",
       "prompt_sha256_8": "b73ef594",
       "error": null
@@ -392,8 +392,8 @@
       "status": "ok",
       "reason": null,
       "attempts": 1,
-      "queue_wait_s": 26.756,
-      "wall_s": 7.092,
+      "queue_wait_s": 26.289,
+      "wall_s": 7.77,
       "model_executed": "claude-cli:sonnet",
       "prompt_sha256_8": "9b07b990",
       "error": null
@@ -494,23 +494,15 @@
       {
        "normalizer": "norm/v1",
        "coordinate_system": "normalized-codepoint",
-       "start": 0,
-       "end": 66,
-       "sha256": "02c9a2bb444b910e0fe145ee077a5dfa05d5b430346ab17788ed13e4748e270b",
-       "response_sha256": "73487cf3de77bf3b891497e58b228dbc1ad6b762509fd080138eebad005c0547"
-      },
-      {
-       "normalizer": "norm/v1",
-       "coordinate_system": "normalized-codepoint",
-       "start": 341,
+       "start": 345,
        "end": 405,
-       "sha256": "a9739d8ed41dd6536c1e85e3dc4f2ceee53182d4caed19ce069da550d29dc32b",
+       "sha256": "f008297d831a06a1937c1b62c3ca7cfca88fc72d623f88a96e772b5fda34957e",
        "response_sha256": "73487cf3de77bf3b891497e58b228dbc1ad6b762509fd080138eebad005c0547"
       }
      ],
      "span_counts": {
-      "proposed": 2,
-      "located": 2
+      "proposed": 1,
+      "located": 1
      },
      "display_policy": {
       "text_retained": false,
@@ -543,14 +535,22 @@
        "normalizer": "norm/v1",
        "coordinate_system": "normalized-codepoint",
        "start": 0,
-       "end": 253,
-       "sha256": "90118ac0eaae2755a9d3d1a6cde9e0e8a4c08f4894de1fd44fc147edd591e394",
+       "end": 124,
+       "sha256": "bf1253cde04fee674d9067998676725c4fffa2b373b38d788f848f26c56e5a99",
+       "response_sha256": "37666a57885a90757452711fa2b95fc35515c713b1975585ee81ba7945467e75"
+      },
+      {
+       "normalizer": "norm/v1",
+       "coordinate_system": "normalized-codepoint",
+       "start": 233,
+       "end": 252,
+       "sha256": "8aa5429cc763e0b320fd8a6a08184600a1345e364ef5f62026de93c8a7fe4b23",
        "response_sha256": "37666a57885a90757452711fa2b95fc35515c713b1975585ee81ba7945467e75"
       }
      ],
      "span_counts": {
-      "proposed": 1,
-      "located": 1
+      "proposed": 2,
+      "located": 2
      },
      "display_policy": {
       "text_retained": false,
@@ -657,7 +657,7 @@
      "relation_is_judgement": true,
      "relation_source": "judge",
      "corroboration": 1,
-     "strength": 97,
+     "strength": 95,
      "evidence_spans": [
       {
        "normalizer": "norm/v1",
@@ -705,7 +705,7 @@
      "relation_is_judgement": true,
      "relation_source": "judge",
      "corroboration": 1,
-     "strength": 97,
+     "strength": 96,
      "evidence_spans": [
       {
        "normalizer": "norm/v1",
@@ -745,7 +745,7 @@
      "relation_is_judgement": true,
      "relation_source": "judge",
      "corroboration": 1,
-     "strength": 93,
+     "strength": 96,
      "evidence_spans": [
       {
        "normalizer": "norm/v1",
@@ -774,7 +774,7 @@
     "seal": {
      "algorithm": "sha256-digest-chain/v1",
      "key_id": null,
-     "value": "eeed1614e9c375d4044d7c12b1a28b3dac780fc4e80b9dd63ab22e038f54ca0e"
+     "value": "fc0a63918686ff1d9b99a92f0ded38b51d311892775bcd34dfcb580a7ec1f64b"
     }
    }
   },
