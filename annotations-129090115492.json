@@ -1,0 +1,14 @@
+[
+  {
+    "path": ".github",
+    "blob_href": "https://github.com/lensmith-ai/composer/blob/2c86bc178d53407524bd64c19d393055c44a0182/.github",
+    "start_line": 1,
+    "start_column": null,
+    "end_line": 1,
+    "end_column": null,
+    "annotation_level": "failure",
+    "title": "",
+    "message": "The configuration 'macos-14-arm64-us-default' is not supported",
+    "raw_details": ""
+  }
+]
