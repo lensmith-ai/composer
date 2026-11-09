@@ -837,3 +837,16 @@ def ensure_private_dirs(home: Path) -> None:
             open_owned(home, name).close()
         else:
             owned_dir(home, name)
+
+
+def drop_group_other_write(root: Path) -> None:
+    """Take group and other write off everything under root (links are skipped, never followed). A Python whose venv
+    templates are group- or other-writable (python.org's on a Mac, a CI runner's tool cache) copies those modes into every
+    environment it makes, and the trust contract refuses such files; setup.sh does the same right after it makes one."""
+    if os.name != "posix":
+        return
+    for dirpath, dirnames, filenames in os.walk(root):
+        for path in [dirpath] + [os.path.join(dirpath, n) for n in dirnames + filenames]:
+            mode = os.lstat(path).st_mode
+            if not stat.S_ISLNK(mode) and mode & 0o022:
+                os.chmod(path, stat.S_IMODE(mode) & ~0o022)

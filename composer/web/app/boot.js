@@ -30,10 +30,14 @@
   // Inline style from a "name:value;..." string, set one property at a time. Giving an element its whole style as one
   // string (the style object's text form, or the style attribute) is an inline style that the page's policy
   // (style-src 'self') refuses in WebKit; setting a property through the style object is allowed in every engine.
+  // Limits: it splits on ";", so a value holding one (a data: URL, a quoted string) is not for it.
   window.cwSetStyle = function (el, text) {
     String(text).split(';').forEach(function (d) {
       var i = d.indexOf(':');
-      if (i > 0) el.style.setProperty(d.slice(0, i).trim(), d.slice(i + 1).trim());
+      if (i <= 0) return;
+      var value = d.slice(i + 1).trim(), priority = '';
+      if (/!\s*important\s*$/i.test(value)) { value = value.replace(/!\s*important\s*$/i, '').trim(); priority = 'important'; }
+      el.style.setProperty(d.slice(0, i).trim(), value, priority);
     });
     return el;
   };

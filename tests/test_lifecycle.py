@@ -450,5 +450,32 @@ class UpdateRollbackTests(unittest.TestCase):
             self.assertEqual(JobStore(data, worker=None).current_generation(), "g1")
 
 
+class DropGroupOtherWriteTests(unittest.TestCase):
+    """A Python whose venv templates are group- or other-writable (python.org's on a Mac) leaves such files in the
+    environment `composer update` makes; the trust contract refuses them, so the update was undone. The mode bits come off."""
+
+    @unittest.skipUnless(os.name == "posix", "POSIX modes")
+    def test_group_and_other_write_come_off_files_and_folders_and_links_are_left_alone(self):
+        with fake_home() as home:
+            root = home / "version"
+            (root / "venv" / "bin").mkdir(parents=True)
+            template = root / "venv" / "bin" / "activate"
+            template.write_text("x")
+            template.chmod(0o777)
+            script = root / "venv" / "bin" / "tool"
+            script.write_text("x")
+            script.chmod(0o775)
+            (root / "venv" / "bin").chmod(0o777)
+            outside = home / "outside"
+            outside.write_text("y")
+            outside.chmod(0o666)
+            (root / "venv" / "link").symlink_to(outside)
+            H.drop_group_other_write(root)
+            self.assertEqual(template.stat().st_mode & 0o777, 0o755)
+            self.assertEqual(script.stat().st_mode & 0o777, 0o755)
+            self.assertEqual((root / "venv" / "bin").stat().st_mode & 0o777, 0o755)
+            self.assertEqual(outside.stat().st_mode & 0o777, 0o666)  # a link's target is never followed
+
+
 if __name__ == "__main__":
     unittest.main()

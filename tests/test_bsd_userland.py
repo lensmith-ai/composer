@@ -62,7 +62,7 @@ GNU_ISMS = [
     ("find -printf / -regextype", r"\bfind\b[^|;&]*\s(-printf|-regextype|-readable|-executable)\b"),
     ("a bash-ism under sh: [[ ]], <<<, $'..', ${x,,}, arrays, local, function, source, pipefail",
      r"(\[\[ |[^#]\s<<<\s|\$'|\$\{[A-Za-z_]+(,,|\^\^)|\blocal\s|^\s*function\s|^\s*source\s|pipefail)"),
-    ("mktemp without a template, or -t (differs between GNU and BSD)", r"\bmktemp\s+(-d\s+)?(-t\b|\"?\)|\$)"),
+    ("mktemp -t or an empty template (differs between GNU and BSD)", r"\bmktemp\s+(-d\s+)?(-t\b|\"?\)|\$)"),
     ("cp/rm/mv --force-style long options GNU only", r"\b(rm|mv|cp)\b[^|;&]*\s--(force|recursive|verbose|interactive)\b"),
     ("tar --wildcards / --transform / -z with --overwrite-dir (GNU tar only)", r"\btar\b[^|;&]*\s--(wildcards|transform|owner=|group=)\b"),
     ("ls --time-style / --color / -l --block-size", r"\bls\b[^|;&]*\s--(time-style|block-size|color|full-time)\b"),
@@ -86,6 +86,7 @@ class GnuIsmScanTests(unittest.TestCase):
     def test_no_shell_the_installer_runs_uses_a_gnu_only_form(self):
         found = []
         for name, text in shell_texts().items():
+            text = text.replace("\\\n", " ")  # a command continued on the next line is one command (line numbers then run short)
             for n, line in enumerate(text.splitlines(), 1):
                 body = line.strip()
                 if not body or body.startswith("#"):
@@ -109,12 +110,6 @@ class GnuIsmScanTests(unittest.TestCase):
             self.assertTrue(any(re.search(rx, line) for _, rx in GNU_ISMS), line)
         for line in ok:
             self.assertFalse([w for w, rx in GNU_ISMS if re.search(rx, line)], line)
-
-    def test_a_dash_dash_is_still_fine_after_rm_cp_mv_mkdir_ln_ls(self):
-        """BSD accepts `--` after the OPTIONS of these (there is no positional mode in front of it)."""
-        text = (ROOT / "setup.sh").read_text(encoding="utf-8")
-        for cmd in ("rm -rf --", "rm -f --", "mv -f --", "mkdir -p --", "cp --", "ls -ldn --"):
-            self.assertIn(cmd, text)
 
 
 @unittest.skipUnless(os.name == "posix" and shutil.which("sh"), "POSIX shell")
@@ -189,6 +184,82 @@ class BsdChmodRunTests(unittest.TestCase):
             self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
             self.assertIn("removing that half-made folder first", run.stdout)
             self.assertNotIn("No such file or directory", run.stdout + run.stderr)
+
+
+@unittest.skipUnless(os.name == "posix" and shutil.which("sh"), "POSIX shell")
+class ChmodHelperTests(unittest.TestCase):
+    """chmod_go_w and chmod_u_w taken out of setup.sh and run on their own, on a PATH whose chmod is BSD-like. They check
+    modes directly, so they hold when the tests run as root (where removing a read-only folder works with or without
+    them)."""
+
+    def setUp(self):
+        self.d = Path(tempfile.mkdtemp(prefix="composer-chmodhelp-"))
+        self.addCleanup(shutil.rmtree, self.d, True)
+        bin_dir = self.d / "bin"
+        bin_dir.mkdir()
+        shim = bin_dir / "chmod"
+        shim.write_text(BSD_CHMOD % shutil.which("chmod"), encoding="utf-8")
+        shim.chmod(0o755)
+        for tool in ("find", "sh"):
+            (bin_dir / tool).symlink_to(shutil.which(tool))
+        lines = [l for l in (ROOT / "setup.sh").read_text(encoding="utf-8").splitlines() if re.match(r"chmod_(go_w|u_w)\(\)", l)]
+        self.assertEqual(len(lines), 2)
+        (self.d / "helpers.sh").write_text("\n".join(lines) + "\n", encoding="utf-8")
+        self.env = {"PATH": str(bin_dir)}
+
+    def run_helper(self, name, arg, cwd=None):
+        return subprocess.run(["sh", "-c", f". {self.d / 'helpers.sh'}; {name} \"$1\"", "sh", arg], capture_output=True, text=True,
+                              env=self.env, cwd=cwd or self.d)
+
+    def mode(self, path):
+        return stat.S_IMODE(os.lstat(path).st_mode)
+
+    def test_go_w_takes_group_and_other_write_off_files_and_folders_but_not_through_links(self):
+        top = self.d / "a folder with spaces"
+        (top / "sub").mkdir(parents=True)
+        f = top / "sub" / "file one"
+        f.write_text("x")
+        f.chmod(0o777)
+        (top / "sub").chmod(0o775)
+        top.chmod(0o777)
+        outside = self.d / "outside"
+        outside.write_text("y")
+        outside.chmod(0o666)
+        (top / "link").symlink_to(outside)
+        r = self.run_helper("chmod_go_w", str(top))
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertEqual(self.mode(f), 0o755)
+        self.assertEqual(self.mode(top / "sub"), 0o755)
+        self.assertEqual(self.mode(top), 0o755)
+        self.assertEqual(self.mode(outside), 0o666)  # the link's target is not touched
+
+    def test_u_w_gives_the_owner_write_back_on_read_only_folders_and_files(self):
+        top = self.d / "half made"
+        (top / "lib").mkdir(parents=True)
+        f = top / "lib" / "x"
+        f.write_text("x")
+        f.chmod(0o444)
+        (top / "lib").chmod(0o555)
+        top.chmod(0o555)
+        r = self.run_helper("chmod_u_w", str(top))
+        self.assertEqual(r.returncode, 0, r.stderr)
+        for path in (f, top / "lib", top):
+            self.assertTrue(self.mode(path) & 0o200, f"{path} {oct(self.mode(path))}")
+
+    def test_a_folder_whose_name_starts_with_a_dash_and_a_relative_path_are_not_taken_for_options(self):
+        top = self.d / "-odd"
+        top.mkdir()
+        (top / "f").write_text("x")
+        (top / "f").chmod(0o666)
+        r = self.run_helper("chmod_go_w", "-odd", cwd=self.d)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertEqual(self.mode(top / "f"), 0o644)
+        r = self.run_helper("chmod_go_w", "-odd/f", cwd=self.d)
+        self.assertEqual(r.returncode, 0, r.stderr)
+
+    def test_a_missing_folder_is_an_error_not_a_silent_success(self):
+        r = self.run_helper("chmod_go_w", str(self.d / "nothing here"))
+        self.assertNotEqual(r.returncode, 0)
 
 
 if __name__ == "__main__":

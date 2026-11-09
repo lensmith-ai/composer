@@ -39,7 +39,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 from .. import tls
-from ..home import (CONFINED, HomeError, atomic_write, check_handed, no_group_write, open_owned, owned_dir,
+from ..home import (CONFINED, HomeError, atomic_write, check_handed, drop_group_other_write, no_group_write, open_owned, owned_dir,
                     private_env)
 
 VOICES = ("af_heart", "am_michael", "bf_emma")
@@ -345,9 +345,11 @@ def install_runtime(home: Path, *, log=print, base_python: str | None = None) ->
             if made:
                 log("  making a private environment for narration")
                 subprocess.run([base_python or sys.executable, "-m", "venv", str(venv)], check=True, env=env)
+                drop_group_other_write(venv)  # python.org's venv templates are group-writable, whatever the umask
             log(f"  installing the narration runtime (about {RUNTIME_MB} MB, hash-checked)")
             subprocess.run([str(python), "-m", "pip", "install", "--quiet", "--require-hashes", "--no-deps",
                             "--only-binary", ":all:", "-r", str(RUNTIME_LOCK)], check=True, env=env)
+            drop_group_other_write(venv)
             subprocess.run([str(python), "-I", "-c", "import kokoro_onnx, soundfile"], check=True, env=env,
                            capture_output=True)
             atomic_write(venv / ".runtime-ok", "installed from requirements.lock\n", mode=0o600)

@@ -40,23 +40,36 @@ jobs:
         run: python -m unittest discover -s tests -t tests -v
 
   install-macos:
-    # The one-command install, run for real on a Mac (BSD userland: its chmod, sed, find, stat and tar are not GNU's, and
-    # every other test runs on Linux). Built the way the release builds it, then installed from those local files
-    # (COMPOSER_FILES_DIR, no download of Composer's own files): the command a person types, then a second run (the
-    # "already installed" path), then `lensmith composer --version` and `doctor`.
+    # The one-command install, run for real on a Mac (BSD userland: its chmod, sed, find, stat, tar and awk are not GNU's,
+    # and every other test runs on Linux). Built the way the release builds it, then installed from those local files
+    # (COMPOSER_FILES_DIR): the command a person types; the same command again ("already installed"); an interrupted
+    # install (a half-made version folder with read-only folders and its marker) and the rerun that removes it; then
+    # `lensmith composer --version`, `doctor`, and `uninstall` with its shell-profile lines taken away again.
+    # Case 3 has no usable Python on PATH, so the installer fetches uv and a private Python (the download path).
     name: one-command install on macOS (${{ matrix.case }})
     runs-on: macos-14
-    timeout-minutes: 30
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
         include:
-          - case: python.org Python, default folder
+          - case: Python from setup-python, default folder
             templates: as-shipped
             home: default
+            path: inherit
           - case: group-writable venv templates, own folder
             templates: group-writable
             home: own
+            path: inherit
+          - case: no Python on PATH, private Python through uv
+            templates: as-shipped
+            home: own
+            path: bare
+    env:
+      CASE: ${{ matrix.case }}
+      TEMPLATES: ${{ matrix.templates }}
+      WHICH_HOME: ${{ matrix.home }}
+      WHICH_PATH: ${{ matrix.path }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -87,22 +100,49 @@ jobs:
           sudo chmod -R g+w "$d"
           find "$d" -maxdepth 2 -type f -exec ls -l {} +
       - name: One-command install from local files
-        env:
-          WHICH_HOME: ${{ matrix.home }}
         run: |
           cd "$RUNNER_TEMP/kit"
           if [ "$WHICH_HOME" = own ]; then H="$RUNNER_TEMP/composer-home"; else H="$HOME/.lensmith-composer"; fi
           echo "H=$H" >> "$GITHUB_ENV"
-          COMPOSER_FILES_DIR="$PWD" sh install.sh --home "$H" --no-open --no-start --path
+          if [ "$WHICH_PATH" = bare ]; then
+            # no Python 3.10+ anywhere the installer looks: it must fetch uv and a private Python, as on a fresh Mac
+            COMPOSER_PYTHON_PATH_ONLY=1 COMPOSER_FILES_DIR="$PWD" PATH=/usr/bin:/bin:/usr/sbin:/sbin sh install.sh --home "$H" --no-open --no-start --path
+          else
+            COMPOSER_FILES_DIR="$PWD" sh install.sh --home "$H" --no-open --no-start --path
+          fi
       - name: The same command again (already installed)
         run: |
           cd "$RUNNER_TEMP/kit"
-          COMPOSER_FILES_DIR="$PWD" sh install.sh --home "$H" --no-open --no-start --path
+          if [ "$WHICH_PATH" = bare ]; then export COMPOSER_PYTHON_PATH_ONLY=1 PATH=/usr/bin:/bin:/usr/sbin:/sbin; fi
+          COMPOSER_FILES_DIR="$PWD" sh install.sh --home "$H" --no-open --no-start --path 2>&1 | tee "$RUNNER_TEMP/rerun.txt"
+          grep -q "is already installed in" "$RUNNER_TEMP/rerun.txt"
+      - name: An interrupted install, then the rerun that removes what it left
+        run: |
+          cd "$RUNNER_TEMP/kit"
+          if [ "$WHICH_PATH" = bare ]; then export COMPOSER_PYTHON_PATH_ONLY=1 PATH=/usr/bin:/bin:/usr/sbin:/sbin; fi
+          v=$(sed -n 's/^version = "\([0-9][0-9A-Za-z.+_-]*\)"$/\1/p' "$GITHUB_WORKSPACE/pyproject.toml" | head -n 1)
+          mv "$H/app/current" "$RUNNER_TEMP/current.moved"
+          : > "$H/app/.making-$v"
+          find "$H/app/$v" -type d -exec chmod 555 {} +
+          COMPOSER_FILES_DIR="$PWD" sh install.sh --home "$H" --no-open --no-start --path 2>&1 | tee "$RUNNER_TEMP/rerun2.txt"
+          grep -q "an earlier setup stopped in the middle of making" "$RUNNER_TEMP/rerun2.txt"
+          test -L "$H/app/current"
       - name: lensmith composer --version and doctor
         run: |
-          "$H/bin/lensmith" composer --version
-          "$H/bin/lensmith" composer doctor
-          echo "MACOS-INSTALL-PROOF: ok | ${{ matrix.case }} | $("$H/bin/lensmith" composer --version) | $(uname -sm) macOS $(sw_vers -productVersion) | $(python3 -c 'import sys; print("Python " + sys.version.split()[0])')"
+          v=$(sed -n 's/^version = "\([0-9][0-9A-Za-z.+_-]*\)"$/\1/p' pyproject.toml | head -n 1)
+          said=$("$H/bin/lensmith" composer --version)
+          echo "$said"
+          test "$said" = "composer $v"
+          "$H/bin/lensmith" composer doctor | tee "$RUNNER_TEMP/doctor.txt"
+          grep -q ", 0 failed" "$RUNNER_TEMP/doctor.txt"
+          echo "MACOS-INSTALL-PROOF: ok | $CASE | $said | $(grep 'passed, 0 failed' "$RUNNER_TEMP/doctor.txt") | $(uname -sm) macOS $(sw_vers -productVersion) | $("$H"/app/current/venv/bin/python -c 'import sys; print("Python " + sys.version.split()[0])')"
+      - name: lensmith composer uninstall takes its shell-profile lines away
+        run: |
+          # (cat, not grep on three names: grep exits 2 when one of the profiles does not exist)
+          cat "$HOME/.zshrc" "$HOME/.bash_profile" "$HOME/.profile" 2>/dev/null | grep -q "added by the Composer installer"
+          "$H/bin/lensmith" composer uninstall
+          if cat "$HOME/.zshrc" "$HOME/.bash_profile" "$HOME/.profile" 2>/dev/null | grep -q "added by the Composer installer"; then echo "the lensmith lines are still in a profile"; exit 1; fi
+          test ! -e "$H/bin/composer"
 
   banned-text:
     name: banned-text test (tree and full history)

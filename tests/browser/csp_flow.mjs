@@ -6,7 +6,9 @@
 //
 // Why: the sand canvas was given its position and stacking with `el.style.cssText = "..."`, an inline style that
 // WebKit's policy check refused on a page whose policy has no 'unsafe-inline' (the Hugging Face Space builder met it,
-// 2026-11-09). The fix sets each property through the style object. For each engine this checks, with a listener for
+// 2026-11-09, in its own page; Playwright's Linux WebKit does NOT refuse it, so this flow passes on the old code too:
+// it checks the outcome, it is not a detector of the old form; tests/test_csp_inline_style.py is the detector, and
+// a Mac with Safari is where the owner sees it). The fix sets each property through the style object. This checks, with a listener for
 // `securitypolicyviolation` and for console messages about the policy installed before the page's own scripts run:
 //   DEMO  docs/demo/window (the page's own meta policy): after Replay the sand canvas anchored to the loom exists, is
 //         position:absolute with z-index 3 (the values the old code set), and has ink; no violation at any moment.

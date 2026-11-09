@@ -758,10 +758,12 @@ def _update(home: Path, data: Path, release: Path, *, sha256, run, crash_after, 
         r = run([str(base), "-m", "venv", str(venv)], env=env, capture_output=True, text=True)
         if r.returncode != 0:
             raise LifecycleError(f"could not make the new environment: {(r.stderr or '').strip()[-300:]}")
+        H.drop_group_other_write(folder)
         r = run([str(_venv_python(venv)), "-m", "pip", "install", "--quiet", str(release)], env=env,
                 capture_output=True, text=True)
         if r.returncode != 0:
             raise LifecycleError(f"the release did not install: {(r.stderr or '').strip()[-300:]}")
+        H.drop_group_other_write(folder)
         got = _query(_venv_python(venv), home, "import composer; print(composer.__version__)", run)
         if got != new_version:
             raise LifecycleError(f"refused: the release says version {new_version} but its code says {got[:70]!r}")
