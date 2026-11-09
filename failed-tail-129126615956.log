@@ -1,0 +1,250 @@
+2026-11-09T11:17:39.1384680Z test_doctor_online_sends_nothing_when_the_trust_check_fails (test_trust_doctor_online.SameAccountTests) ... ok
+2026-11-09T11:17:39.1546060Z test_doctor_reads_no_settings_and_no_key_file_after_the_refusal (test_trust_doctor_online.SameAccountTests) ... ok
+2026-11-09T11:17:39.1578620Z test_make_dirs_sets_the_mode_even_when_mkdir_gives_more (test_trust_explicit_modes.ExplicitModeTests) ... ok
+2026-11-09T11:17:39.1601400Z test_nothing_composer_makes_is_open_to_others_under_a_default_acl (test_trust_explicit_modes.ExplicitModeTests) ... skipped 'libacl is not installed here'
+2026-11-09T11:17:39.2126320Z test_nothing_composer_makes_is_open_to_others_under_an_open_umask (test_trust_explicit_modes.ExplicitModeTests) ... ok
+2026-11-09T11:17:39.2128260Z test_a_disk_without_permission_bits_gets_advice_that_can_work (test_trust_messages.AdviceRuleTests) ... ok
+2026-11-09T11:17:39.2130170Z test_a_posix_disk_keeps_the_chmod_advice_and_names_the_folder (test_trust_messages.AdviceRuleTests) ... ok
+2026-11-09T11:17:39.2131880Z test_the_mount_table_names_the_filesystem_of_the_longest_mount_point (test_trust_messages.AdviceRuleTests) ... ok
+2026-11-09T11:17:39.2263930Z test_a_data_folder_refusal_says_data_folder_and_keeps_the_umask_fix (test_trust_messages.FolderNameTests) ... ok
+2026-11-09T11:17:39.4052270Z test_default_setup_and_setup_sh_name_the_option_to_use (test_trust_messages.LinkedHomeTests) ... ok
+2026-11-09T11:17:39.4097020Z test_the_refusal_says_how_to_pass_the_real_path (test_trust_messages.LinkedHomeTests) ... ok
+2026-11-09T11:17:39.4099480Z test_a_data_folder_on_a_fat_disk_is_refused_with_advice_that_can_work (test_trust_messages.RealFatDiskTests) ... skipped 'a real FAT disk needs root, mkfs.vfat and unshare (a private mount namespace)'
+2026-11-09T11:17:39.4276660Z test_backup_out_in_a_shared_folder_names_out (test_trust_out_messages.OutMessageTests) ... ok
+2026-11-09T11:17:39.4471090Z test_backup_out_swapped_for_a_link_after_its_check_names_out (test_trust_out_messages.OutMessageTests) ... ok
+2026-11-09T11:17:39.4516590Z test_serve_out_in_a_shared_folder_names_out (test_trust_out_messages.OutMessageTests) ... ok
+2026-11-09T11:17:39.4558370Z test_serve_out_through_a_link_names_out_and_the_real_path (test_trust_out_messages.OutMessageTests) ... ok
+2026-11-09T11:17:39.4559680Z test_a_planted_link_beside_the_hop_target_gets_no_write (test_trust_serve_out_path.AnotherAccountTests) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 501'
+2026-11-09T11:17:39.4609220Z note: Composer needs a model key to write a brief. Run ./setup.sh --reconfigure provider.. The page will show the recorded brief; Compose will fail until a key is set.
+2026-11-09T11:17:39.4681800Z test_a_relative_out_is_made_absolute_once (test_trust_serve_out_path.SameAccountTests) ... ok
+2026-11-09T11:17:39.4736700Z note: Composer needs a model key to write a brief. Run ./setup.sh --reconfigure provider.. The page will show the recorded brief; Compose will fail until a key is set.
+2026-11-09T11:17:39.4806140Z test_serve_writes_where_it_checked_not_through_a_link_and_dot_dot (test_trust_serve_out_path.SameAccountTests) ... ok
+2026-11-09T11:17:39.4807840Z test_another_account_cannot_choose_where_setup_writes_its_data (test_trust_setup_data.AnotherAccountTests) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 501'
+2026-11-09T11:17:39.4809160Z test_another_account_cannot_plant_inside_a_data_folder_setup_admitted (test_trust_setup_data.AnotherAccountTests) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 501'
+2026-11-09T11:17:39.4856910Z test_setup_takes_data_as_written_and_never_resolves_it (test_trust_setup_data.GivenPathTests) ... ok
+2026-11-09T11:17:39.4872360Z test_a_data_folder_under_a_folder_others_can_write_is_refused_before_any_write (test_trust_setup_data.SetupDataTests) ... ok
+2026-11-09T11:17:39.4888530Z test_a_folder_shared_by_every_account_is_refused (test_trust_setup_data.SetupDataTests) ... ok
+2026-11-09T11:17:39.5044930Z test_a_good_data_folder_outside_still_works_and_is_private (test_trust_setup_data.SetupDataTests) ... ok
+2026-11-09T11:17:39.5068460Z test_a_link_on_the_way_to_the_data_folder_is_refused_and_its_target_is_untouched (test_trust_setup_data.SetupDataTests) ... ok
+2026-11-09T11:17:39.5247670Z test_an_existing_data_folder_with_something_open_to_others_is_refused (test_trust_setup_data.SetupDataTests) ... ok
+2026-11-09T11:17:39.5269040Z test_the_data_folder_mode_is_never_set_through_a_link (test_trust_setup_data.SetupDataTests) ... ok
+2026-11-09T11:17:39.5271920Z test_another_account_cannot_redirect_the_launcher_through_a_hidden_hop (test_trust_symlink_hops.AnotherAccountTests) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 501'
+2026-11-09T11:17:39.5302620Z test_a_link_on_the_way_is_refused_and_the_real_path_is_named (test_trust_symlink_hops.SymlinkHopTests) ... ok
+2026-11-09T11:17:39.5340280Z test_a_safe_link_is_refused_too_and_a_real_path_passes (test_trust_symlink_hops.SymlinkHopTests) ... ok
+2026-11-09T11:17:39.5654130Z test_setup_sh_refuses_a_link_on_the_way_before_any_write (test_trust_symlink_hops.SymlinkHopTests) ... ok
+2026-11-09T11:17:39.5670670Z test_writable_folders_on_the_real_path_are_still_refused (test_trust_symlink_hops.SymlinkHopTests) ... ok
+2026-11-09T11:17:39.5672630Z test_a_replaced_install_cannot_make_backup_write_elsewhere (test_trust_uninstall_backup.AnotherAccountTests) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 501'
+2026-11-09T11:17:39.5675040Z test_a_replaced_install_cannot_make_uninstall_create_a_file_elsewhere (test_trust_uninstall_backup.AnotherAccountTests) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 501'
+2026-11-09T11:17:39.5677030Z test_a_swap_after_the_manifest_check_cannot_make_uninstall_remove_elsewhere (test_trust_uninstall_backup.AnotherAccountTests) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 501'
+2026-11-09T11:17:39.5855190Z test_backup_never_writes_through_a_linked_backups_folder (test_trust_uninstall_backup.SameAccountTests) ... ok
+2026-11-09T11:17:39.6094130Z test_backup_out_must_be_a_folder_no_other_account_can_change (test_trust_uninstall_backup.SameAccountTests) ... ok
+2026-11-09T11:17:39.6280270Z test_doctor_reports_the_trust_check_and_then_writes_and_starts_nothing (test_trust_uninstall_backup.SameAccountTests) ... ok
+2026-11-09T11:17:39.6344700Z test_serve_admits_its_data_folder_before_the_store_writes (test_trust_uninstall_backup.SameAccountTests) ... composer: refused: /Users/runner/.composer-tests/composer-home-7c2jn90b/home/shared can be written by other accounts (mode 0777). Fix: chmod go-w /Users/runner/.composer-tests/composer-home-7c2jn90b/home/shared, or put the brief folder somewhere else: --out <a folder of your own>. The brief folder and every folder above it must belong to you or root and be writable only by you or root, so no other account can change what Composer runs or keeps there
+2026-11-09T11:17:39.6355550Z ok
+2026-11-09T11:17:39.6512850Z test_the_run_lock_is_never_opened_through_a_link (test_trust_uninstall_backup.SameAccountTests) ... ok
+2026-11-09T11:17:39.6715040Z test_uninstall_and_backup_are_admitted_before_the_lock_or_any_write (test_trust_uninstall_backup.SameAccountTests) ... ok
+2026-11-09T11:17:39.6908520Z test_uninstall_removes_inside_the_app_folder_it_opened (test_trust_uninstall_backup.SameAccountTests) ... ok
+2026-11-09T11:17:39.7348910Z test_every_launcher_takes_the_write_bits_away_before_it_starts_anything (test_umask_launch.LauncherUmaskTests) ... ok
+2026-11-09T11:17:40.2946730Z test_python_started_by_the_launcher_under_umask_002_leaves_the_folder_acceptable (test_umask_launch.LauncherUmaskTests) ... ok
+2026-11-09T11:17:40.8433850Z test_setup_sh_runs_nothing_under_a_group_writable_umask (test_umask_launch.SetupShUmaskTests) ... ok
+2026-11-09T11:17:40.8487080Z test_bind_and_origin_rules (test_up.ProxyModeTests) ... ok
+2026-11-09T11:17:40.8530020Z test_change_requests_need_the_public_origin (test_up.ProxyModeTests) ... ok
+2026-11-09T11:17:40.8581720Z test_only_the_proxy_network_and_the_public_host (test_up.ProxyModeTests) ... ok
+2026-11-09T11:18:01.5831310Z test_up_serves_the_app_and_health_and_runs_once (test_up.UpTests) ... FAIL
+2026-11-09T11:18:01.5876410Z /Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/subprocess.py:1072: ResourceWarning: subprocess 17776 is still running
+2026-11-09T11:18:01.5878710Z   _warn("subprocess %s is still running" % self.pid,
+2026-11-09T11:18:01.5880300Z ResourceWarning: Enable tracemalloc to get the object allocation traceback
+2026-11-09T11:18:01.5892370Z /Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/unittest/case.py:613: ResourceWarning: unclosed file <_io.TextIOWrapper name=6 encoding='UTF-8'>
+2026-11-09T11:18:01.5893220Z   outcome.errors.clear()
+2026-11-09T11:18:01.5893660Z ResourceWarning: Enable tracemalloc to get the object allocation traceback
+2026-11-09T11:18:01.7174140Z test_up_without_setup_says_what_to_do (test_up.UpTests) ... ok
+2026-11-09T11:18:56.8409090Z test_a_failed_update_leaves_the_old_version_current_and_working (test_update_native.NativeUpdateTests) ... ok
+2026-11-09T11:19:09.6657140Z test_an_interrupted_update_on_a_broken_environment_still_rolls_back_and_uninstalls (test_update_native.NativeUpdateTests) ... ok
+2026-11-09T11:20:48.0926820Z test_install_update_rollback_update_uninstall_setup_again_delete_data (test_update_native.NativeUpdateTests) ... ok
+2026-11-09T11:21:37.6437170Z test_uninstall_and_delete_data_work_when_no_environment_starts (test_update_native.NativeUpdateTests) ... ok
+2026-11-09T11:21:37.6511020Z test_a_source_missing_from_the_sheet_is_refused (test_window.WindowTests) ... ok
+2026-11-09T11:21:37.6515930Z test_an_undetermined_relation_reads_cites (test_window.WindowTests) ... ok
+2026-11-09T11:21:37.6521050Z test_cited_phrases_are_our_words_with_links_and_fingerprints (test_window.WindowTests) ... ok
+2026-11-09T11:21:37.6688290Z test_committed_site_matches_a_fresh_build (test_window.WindowTests) ... ok
+2026-11-09T11:21:37.6739220Z test_pages_load_only_their_own_files (test_window.WindowTests) ... ok
+2026-11-09T11:21:37.6827010Z test_scripts_and_styles_make_no_request_and_carry_no_comments (test_window.WindowTests) ... ok
+2026-11-09T11:21:37.6836510Z test_six_spools_keep_their_names_apart (test_window.WindowTests) ... ok
+2026-11-09T11:21:37.6849140Z test_text_is_escaped (test_window.WindowTests) ... ok
+2026-11-09T11:21:37.6852250Z test_the_landing_page_says_what_the_recording_is (test_window.WindowTests) ... ok
+2026-11-09T11:21:37.6857800Z test_window_tells_the_recorded_run (test_window.WindowTests) ... ok
+2026-11-09T11:21:37.6923120Z test_a_hard_linked_mp3_is_replaced_not_written_through (test_worker_fresh_audio.FreshAudioTests) ... ok
+2026-11-09T11:21:37.6968850Z test_a_hard_linked_wav_is_replaced_not_written_through (test_worker_fresh_audio.FreshAudioTests) ... ok
+2026-11-09T11:21:37.7012120Z test_a_planted_temporary_name_is_never_reused (test_worker_fresh_audio.FreshAudioTests) ... ok
+2026-11-09T11:21:37.7013390Z 
+2026-11-09T11:21:37.7014310Z ======================================================================
+2026-11-09T11:21:37.7015110Z ERROR: test_no_system_roots_uses_certifi_and_succeeds (test_tls.RootsTests)
+2026-11-09T11:21:37.7016620Z ----------------------------------------------------------------------
+2026-11-09T11:21:37.7017780Z Traceback (most recent call last):
+2026-11-09T11:21:37.7085670Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/urllib/request.py", line 1348, in do_open
+2026-11-09T11:21:37.7088320Z     h.request(req.get_method(), req.selector, req.data, headers,
+2026-11-09T11:21:37.7089200Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/http/client.py", line 1283, in request
+2026-11-09T11:21:37.7090280Z     self._send_request(method, url, body, headers, encode_chunked)
+2026-11-09T11:21:37.7091270Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/http/client.py", line 1329, in _send_request
+2026-11-09T11:21:37.7092150Z     self.endheaders(body, encode_chunked=encode_chunked)
+2026-11-09T11:21:37.7093220Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/http/client.py", line 1278, in endheaders
+2026-11-09T11:21:37.7093920Z     self._send_output(message_body, encode_chunked=encode_chunked)
+2026-11-09T11:21:37.7095040Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/http/client.py", line 1038, in _send_output
+2026-11-09T11:21:37.7095730Z     self.send(msg)
+2026-11-09T11:21:37.7096250Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/http/client.py", line 976, in send
+2026-11-09T11:21:37.7103010Z     self.connect()
+2026-11-09T11:21:37.7104130Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/http/client.py", line 1455, in connect
+2026-11-09T11:21:37.7104910Z     self.sock = self._context.wrap_socket(self.sock,
+2026-11-09T11:21:37.7105740Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/ssl.py", line 513, in wrap_socket
+2026-11-09T11:21:37.7106300Z     return self.sslsocket_class._create(
+2026-11-09T11:21:37.7107650Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/ssl.py", line 1071, in _create
+2026-11-09T11:21:37.7108240Z     self.do_handshake()
+2026-11-09T11:21:37.7110590Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/ssl.py", line 1342, in do_handshake
+2026-11-09T11:21:37.7111270Z     self._sslobj.do_handshake()
+2026-11-09T11:21:37.7111960Z ssl.SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1007)
+2026-11-09T11:21:37.7112490Z 
+2026-11-09T11:21:37.7112760Z During handling of the above exception, another exception occurred:
+2026-11-09T11:21:37.7113010Z 
+2026-11-09T11:21:37.7113180Z Traceback (most recent call last):
+2026-11-09T11:21:37.7113990Z   File "/Users/runner/work/composer/composer/tests/test_tls.py", line 85, in test_no_system_roots_uses_certifi_and_succeeds
+2026-11-09T11:21:37.7114630Z     with tls.urlopen(self.url, timeout=10) as resp:
+2026-11-09T11:21:37.7115250Z   File "/Users/runner/work/composer/composer/composer/tls.py", line 71, in urlopen
+2026-11-09T11:21:37.7116880Z     return urllib.request.urlopen(url, timeout=timeout, context=ssl_context())
+2026-11-09T11:21:37.7117680Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/urllib/request.py", line 216, in urlopen
+2026-11-09T11:21:37.7118660Z     return opener.open(url, data, timeout)
+2026-11-09T11:21:37.7120780Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/urllib/request.py", line 519, in open
+2026-11-09T11:21:37.7121860Z     response = self._open(req, data)
+2026-11-09T11:21:37.7122530Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/urllib/request.py", line 536, in _open
+2026-11-09T11:21:37.7123430Z     result = self._call_chain(self.handle_open, protocol, protocol +
+2026-11-09T11:21:37.7124670Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/urllib/request.py", line 496, in _call_chain
+2026-11-09T11:21:37.7125600Z     result = func(*args)
+2026-11-09T11:21:37.7126270Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/urllib/request.py", line 1391, in https_open
+2026-11-09T11:21:37.7127160Z     return self.do_open(http.client.HTTPSConnection, req,
+2026-11-09T11:21:37.7129140Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/urllib/request.py", line 1351, in do_open
+2026-11-09T11:21:37.7130160Z     raise URLError(err)
+2026-11-09T11:21:37.7131200Z urllib.error.URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1007)>
+2026-11-09T11:21:37.7133780Z 
+2026-11-09T11:21:37.7133960Z ======================================================================
+2026-11-09T11:21:37.7135270Z ERROR: test_ssl_cert_file_is_the_persons_choice_and_certifi_is_not_added (test_tls.RootsTests)
+2026-11-09T11:21:37.7138190Z ----------------------------------------------------------------------
+2026-11-09T11:21:37.7138930Z Traceback (most recent call last):
+2026-11-09T11:21:37.7140250Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/urllib/request.py", line 1348, in do_open
+2026-11-09T11:21:37.7141790Z     h.request(req.get_method(), req.selector, req.data, headers,
+2026-11-09T11:21:37.7143150Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/http/client.py", line 1283, in request
+2026-11-09T11:21:37.7143840Z     self._send_request(method, url, body, headers, encode_chunked)
+2026-11-09T11:21:37.7146540Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/http/client.py", line 1329, in _send_request
+2026-11-09T11:21:37.7150070Z     self.endheaders(body, encode_chunked=encode_chunked)
+2026-11-09T11:21:37.7153600Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/http/client.py", line 1278, in endheaders
+2026-11-09T11:21:37.7154920Z     self._send_output(message_body, encode_chunked=encode_chunked)
+2026-11-09T11:21:37.7155840Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/http/client.py", line 1038, in _send_output
+2026-11-09T11:21:37.7156580Z     self.send(msg)
+2026-11-09T11:21:37.7158570Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/http/client.py", line 976, in send
+2026-11-09T11:21:37.7159090Z     self.connect()
+2026-11-09T11:21:37.7161180Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/http/client.py", line 1455, in connect
+2026-11-09T11:21:37.7269550Z     self.sock = self._context.wrap_socket(self.sock,
+2026-11-09T11:21:37.7270560Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/ssl.py", line 513, in wrap_socket
+2026-11-09T11:21:37.7271090Z     return self.sslsocket_class._create(
+2026-11-09T11:21:37.7271760Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/ssl.py", line 1071, in _create
+2026-11-09T11:21:37.7272420Z     self.do_handshake()
+2026-11-09T11:21:37.7272890Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/ssl.py", line 1342, in do_handshake
+2026-11-09T11:21:37.7273990Z     self._sslobj.do_handshake()
+2026-11-09T11:21:37.7274540Z ssl.SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1007)
+2026-11-09T11:21:37.7275040Z 
+2026-11-09T11:21:37.7275280Z During handling of the above exception, another exception occurred:
+2026-11-09T11:21:37.7275550Z 
+2026-11-09T11:21:37.7275680Z Traceback (most recent call last):
+2026-11-09T11:21:37.7276300Z   File "/Users/runner/work/composer/composer/tests/test_tls.py", line 101, in test_ssl_cert_file_is_the_persons_choice_and_certifi_is_not_added
+2026-11-09T11:21:37.7276970Z     with tls.urlopen(self.url, timeout=10) as resp:
+2026-11-09T11:21:37.7281500Z   File "/Users/runner/work/composer/composer/composer/tls.py", line 71, in urlopen
+2026-11-09T11:21:37.7282160Z     return urllib.request.urlopen(url, timeout=timeout, context=ssl_context())
+2026-11-09T11:21:37.7282860Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/urllib/request.py", line 216, in urlopen
+2026-11-09T11:21:37.7283440Z     return opener.open(url, data, timeout)
+2026-11-09T11:21:37.7284050Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/urllib/request.py", line 519, in open
+2026-11-09T11:21:37.7284550Z     response = self._open(req, data)
+2026-11-09T11:21:37.7285150Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/urllib/request.py", line 536, in _open
+2026-11-09T11:21:37.7285710Z     result = self._call_chain(self.handle_open, protocol, protocol +
+2026-11-09T11:21:37.7286350Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/urllib/request.py", line 496, in _call_chain
+2026-11-09T11:21:37.7286880Z     result = func(*args)
+2026-11-09T11:21:37.7287360Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/urllib/request.py", line 1391, in https_open
+2026-11-09T11:21:37.7287990Z     return self.do_open(http.client.HTTPSConnection, req,
+2026-11-09T11:21:37.7288580Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/urllib/request.py", line 1351, in do_open
+2026-11-09T11:21:37.7289170Z     raise URLError(err)
+2026-11-09T11:21:37.7289780Z urllib.error.URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1007)>
+2026-11-09T11:21:37.7290220Z 
+2026-11-09T11:21:37.7290940Z ======================================================================
+2026-11-09T11:21:37.7291440Z ERROR: test_the_provider_and_feed_openers_use_the_same_rule (test_tls.RootsTests)
+2026-11-09T11:21:37.7291930Z ----------------------------------------------------------------------
+2026-11-09T11:21:37.7292330Z Traceback (most recent call last):
+2026-11-09T11:21:37.7292880Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/urllib/request.py", line 1348, in do_open
+2026-11-09T11:21:37.7293560Z     h.request(req.get_method(), req.selector, req.data, headers,
+2026-11-09T11:21:37.7294180Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/http/client.py", line 1283, in request
+2026-11-09T11:21:37.7294730Z     self._send_request(method, url, body, headers, encode_chunked)
+2026-11-09T11:21:37.7295350Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/http/client.py", line 1329, in _send_request
+2026-11-09T11:21:37.7295910Z     self.endheaders(body, encode_chunked=encode_chunked)
+2026-11-09T11:21:37.7296510Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/http/client.py", line 1278, in endheaders
+2026-11-09T11:21:37.7297100Z     self._send_output(message_body, encode_chunked=encode_chunked)
+2026-11-09T11:21:37.7297660Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/http/client.py", line 1038, in _send_output
+2026-11-09T11:21:37.7298270Z     self.send(msg)
+2026-11-09T11:21:37.7298760Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/http/client.py", line 976, in send
+2026-11-09T11:21:37.7299530Z     self.connect()
+2026-11-09T11:21:37.7300180Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/http/client.py", line 1455, in connect
+2026-11-09T11:21:37.7300680Z     self.sock = self._context.wrap_socket(self.sock,
+2026-11-09T11:21:37.7301260Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/ssl.py", line 513, in wrap_socket
+2026-11-09T11:21:37.7301750Z     return self.sslsocket_class._create(
+2026-11-09T11:21:37.7302340Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/ssl.py", line 1071, in _create
+2026-11-09T11:21:37.7302870Z     self.do_handshake()
+2026-11-09T11:21:37.7303330Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/ssl.py", line 1342, in do_handshake
+2026-11-09T11:21:37.7303860Z     self._sslobj.do_handshake()
+2026-11-09T11:21:37.7304410Z ssl.SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1007)
+2026-11-09T11:21:37.7304920Z 
+2026-11-09T11:21:37.7305120Z During handling of the above exception, another exception occurred:
+2026-11-09T11:21:37.7305390Z 
+2026-11-09T11:21:37.7305470Z Traceback (most recent call last):
+2026-11-09T11:21:37.7306670Z   File "/Users/runner/work/composer/composer/tests/test_tls.py", line 108, in test_the_provider_and_feed_openers_use_the_same_rule
+2026-11-09T11:21:37.7307500Z     with providers._OPENER.open(self.url, timeout=10) as resp:  # same opener the model calls use
+2026-11-09T11:21:37.7308240Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/urllib/request.py", line 519, in open
+2026-11-09T11:21:37.7308790Z     response = self._open(req, data)
+2026-11-09T11:21:37.7309460Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/urllib/request.py", line 536, in _open
+2026-11-09T11:21:37.7310090Z     result = self._call_chain(self.handle_open, protocol, protocol +
+2026-11-09T11:21:37.7310660Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/urllib/request.py", line 496, in _call_chain
+2026-11-09T11:21:37.7315490Z     result = func(*args)
+2026-11-09T11:21:37.7315990Z   File "/Users/runner/work/composer/composer/composer/tls.py", line 66, in https_open
+2026-11-09T11:21:37.7316500Z     return self.do_open(http.client.HTTPSConnection, req, context=ssl_context())
+2026-11-09T11:21:37.7317630Z   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/urllib/request.py", line 1351, in do_open
+2026-11-09T11:21:37.7318130Z     raise URLError(err)
+2026-11-09T11:21:37.7318840Z urllib.error.URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1007)>
+2026-11-09T11:21:37.7319370Z 
+2026-11-09T11:21:37.7319530Z ======================================================================
+2026-11-09T11:21:37.7319910Z FAIL: test_up_serves_the_app_and_health_and_runs_once (test_up.UpTests)
+2026-11-09T11:21:37.7320340Z ----------------------------------------------------------------------
+2026-11-09T11:21:37.7320670Z Traceback (most recent call last):
+2026-11-09T11:21:37.7321280Z   File "/Users/runner/work/composer/composer/tests/test_up.py", line 60, in test_up_serves_the_app_and_health_and_runs_once
+2026-11-09T11:21:37.7321840Z     proc = self.start(target, port, env)
+2026-11-09T11:21:37.7322290Z   File "/Users/runner/work/composer/composer/tests/test_up.py", line 51, in start
+2026-11-09T11:21:37.7322780Z     raise AssertionError(proc.stdout.read())
+2026-11-09T11:21:37.7323180Z AssertionError: Starting Composer 0.2.0: checking your data folder and settings...
+2026-11-09T11:21:37.7323970Z note: Composer needs a model key to write a brief. Run ./setup.sh --reconfigure provider. Until then the page shows the recorded brief.
+2026-11-09T11:21:37.7324590Z narration: off (text-only); daily brief: off
+2026-11-09T11:21:37.7324870Z 
+2026-11-09T11:21:37.7324870Z 
+2026-11-09T11:21:37.7325070Z ----------------------------------------------------------------------
+2026-11-09T11:21:37.7325780Z Ran 827 tests in 404.691s
+2026-11-09T11:21:37.7325980Z 
+2026-11-09T11:21:37.7326220Z FAILED (failures=1, errors=3, skipped=15)
+2026-11-09T11:21:37.7748520Z ##[error]Process completed with exit code 1.
+2026-11-09T11:21:37.8061650Z Post job cleanup.
+2026-11-09T11:21:38.2741580Z [command]/opt/homebrew/bin/git version
+2026-11-09T11:21:38.3366530Z git version 2.56.0
+2026-11-09T11:21:38.3392790Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/d446deaf-fed3-4882-8770-d07f9b368d32/.gitconfig'
+2026-11-09T11:21:38.3394130Z Temporarily overriding HOME='/Users/runner/work/_temp/d446deaf-fed3-4882-8770-d07f9b368d32' before making global git config changes
+2026-11-09T11:21:38.3394940Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-09T11:21:38.3398570Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/composer/composer
+2026-11-09T11:21:38.3521440Z Removing SSH command configuration
+2026-11-09T11:21:38.3527140Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-09T11:21:38.3600790Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-09T11:21:38.4774800Z Removing HTTP extra header
+2026-11-09T11:21:38.4778620Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-09T11:21:38.4851610Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-09T11:21:38.5768980Z Removing includeIf entries pointing to credentials config files
+2026-11-09T11:21:38.5774450Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-09T11:21:38.6054860Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-09T11:21:38.7514940Z Cleaning up orphan processes

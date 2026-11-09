@@ -1,0 +1,250 @@
+2026-11-09T11:20:30.3738960Z ----------------------------------------------------------------------
+2026-11-09T11:20:30.3739350Z Traceback (most recent call last):
+2026-11-09T11:20:30.3808210Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 1331, in do_open
+2026-11-09T11:20:30.3809700Z     h.request(req.get_method(), req.selector, req.data, headers,
+2026-11-09T11:20:30.3810250Z     ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3810700Z               encode_chunked=req.has_header('Transfer-encoding'))
+2026-11-09T11:20:30.3811240Z               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3812040Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1386, in request
+2026-11-09T11:20:30.3812820Z     self._send_request(method, url, body, headers, encode_chunked)
+2026-11-09T11:20:30.3813290Z     ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3813980Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1432, in _send_request
+2026-11-09T11:20:30.3814630Z     self.endheaders(body, encode_chunked=encode_chunked)
+2026-11-09T11:20:30.3815170Z     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3815750Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1381, in endheaders
+2026-11-09T11:20:30.3816410Z     self._send_output(message_body, encode_chunked=encode_chunked)
+2026-11-09T11:20:30.3816820Z     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3817570Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1141, in _send_output
+2026-11-09T11:20:30.3818140Z     self.send(msg)
+2026-11-09T11:20:30.3818380Z     ~~~~~~~~~^^^^^
+2026-11-09T11:20:30.3819020Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1085, in send
+2026-11-09T11:20:30.3819650Z     self.connect()
+2026-11-09T11:20:30.3819960Z     ~~~~~~~~~~~~^^
+2026-11-09T11:20:30.3820530Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1527, in connect
+2026-11-09T11:20:30.3821140Z     self.sock = self._context.wrap_socket(self.sock,
+2026-11-09T11:20:30.3821580Z                 ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+2026-11-09T11:20:30.3822020Z                                           server_hostname=server_hostname)
+2026-11-09T11:20:30.3822630Z                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3824710Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 469, in wrap_socket
+2026-11-09T11:20:30.3825500Z     return self.sslsocket_class._create(
+2026-11-09T11:20:30.3826570Z            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+2026-11-09T11:20:30.3827280Z         sock=sock,
+2026-11-09T11:20:30.3828350Z         ^^^^^^^^^^
+2026-11-09T11:20:30.3829570Z     ...<5 lines>...
+2026-11-09T11:20:30.3830260Z         session=session
+2026-11-09T11:20:30.3830480Z         ^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3833290Z     )
+2026-11-09T11:20:30.3834010Z     ^
+2026-11-09T11:20:30.3838090Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1087, in _create
+2026-11-09T11:20:30.3838760Z     self.do_handshake()
+2026-11-09T11:20:30.3840280Z     ~~~~~~~~~~~~~~~~~^^
+2026-11-09T11:20:30.3841520Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1383, in do_handshake
+2026-11-09T11:20:30.3843510Z     self._sslobj.do_handshake()
+2026-11-09T11:20:30.3845260Z     ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+2026-11-09T11:20:30.3847380Z ssl.SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unsuitable certificate purpose (_ssl.c:1032)
+2026-11-09T11:20:30.3848710Z 
+2026-11-09T11:20:30.3848920Z During handling of the above exception, another exception occurred:
+2026-11-09T11:20:30.3849550Z 
+2026-11-09T11:20:30.3849910Z Traceback (most recent call last):
+2026-11-09T11:20:30.3854200Z   File "/Users/runner/work/composer/composer/tests/test_tls.py", line 85, in test_no_system_roots_uses_certifi_and_succeeds
+2026-11-09T11:20:30.3858210Z     with tls.urlopen(self.url, timeout=10) as resp:
+2026-11-09T11:20:30.3861270Z          ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3864430Z   File "/Users/runner/work/composer/composer/composer/tls.py", line 71, in urlopen
+2026-11-09T11:20:30.3865890Z     return urllib.request.urlopen(url, timeout=timeout, context=ssl_context())
+2026-11-09T11:20:30.3867400Z            ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3869220Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 189, in urlopen
+2026-11-09T11:20:30.3870260Z     return opener.open(url, data, timeout)
+2026-11-09T11:20:30.3871680Z            ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3874500Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 489, in open
+2026-11-09T11:20:30.3875930Z     response = self._open(req, data)
+2026-11-09T11:20:30.3877420Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 506, in _open
+2026-11-09T11:20:30.3878560Z     result = self._call_chain(self.handle_open, protocol, protocol +
+2026-11-09T11:20:30.3879450Z                               '_open', req)
+2026-11-09T11:20:30.3880170Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 466, in _call_chain
+2026-11-09T11:20:30.3880780Z     result = func(*args)
+2026-11-09T11:20:30.3882150Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 1379, in https_open
+2026-11-09T11:20:30.3884240Z     return self.do_open(http.client.HTTPSConnection, req,
+2026-11-09T11:20:30.3884780Z            ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3886690Z                         context=self._context)
+2026-11-09T11:20:30.3887620Z                         ^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3889180Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 1334, in do_open
+2026-11-09T11:20:30.3890150Z     raise URLError(err)
+2026-11-09T11:20:30.3893020Z urllib.error.URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unsuitable certificate purpose (_ssl.c:1032)>
+2026-11-09T11:20:30.3893810Z 
+2026-11-09T11:20:30.3893960Z ======================================================================
+2026-11-09T11:20:30.3894920Z ERROR: test_ssl_cert_file_is_the_persons_choice_and_certifi_is_not_added (test_tls.RootsTests.test_ssl_cert_file_is_the_persons_choice_and_certifi_is_not_added)
+2026-11-09T11:20:30.3896490Z ----------------------------------------------------------------------
+2026-11-09T11:20:30.3898000Z Traceback (most recent call last):
+2026-11-09T11:20:30.3899800Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 1331, in do_open
+2026-11-09T11:20:30.3902500Z     h.request(req.get_method(), req.selector, req.data, headers,
+2026-11-09T11:20:30.3904790Z     ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3907100Z               encode_chunked=req.has_header('Transfer-encoding'))
+2026-11-09T11:20:30.3908190Z               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3911540Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1386, in request
+2026-11-09T11:20:30.3914370Z     self._send_request(method, url, body, headers, encode_chunked)
+2026-11-09T11:20:30.3916770Z     ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3917330Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1432, in _send_request
+2026-11-09T11:20:30.3917960Z     self.endheaders(body, encode_chunked=encode_chunked)
+2026-11-09T11:20:30.3918750Z     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3919330Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1381, in endheaders
+2026-11-09T11:20:30.3920200Z     self._send_output(message_body, encode_chunked=encode_chunked)
+2026-11-09T11:20:30.3921310Z     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3921980Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1141, in _send_output
+2026-11-09T11:20:30.3922510Z     self.send(msg)
+2026-11-09T11:20:30.3923810Z     ~~~~~~~~~^^^^^
+2026-11-09T11:20:30.3924490Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1085, in send
+2026-11-09T11:20:30.3925280Z     self.connect()
+2026-11-09T11:20:30.3926390Z     ~~~~~~~~~~~~^^
+2026-11-09T11:20:30.3927170Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1527, in connect
+2026-11-09T11:20:30.3927750Z     self.sock = self._context.wrap_socket(self.sock,
+2026-11-09T11:20:30.3929110Z                 ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+2026-11-09T11:20:30.3930250Z                                           server_hostname=server_hostname)
+2026-11-09T11:20:30.3930690Z                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3932280Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 469, in wrap_socket
+2026-11-09T11:20:30.3932800Z     return self.sslsocket_class._create(
+2026-11-09T11:20:30.3933100Z            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+2026-11-09T11:20:30.3933430Z         sock=sock,
+2026-11-09T11:20:30.3934760Z         ^^^^^^^^^^
+2026-11-09T11:20:30.3935340Z     ...<5 lines>...
+2026-11-09T11:20:30.3937030Z         session=session
+2026-11-09T11:20:30.3937280Z         ^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3937590Z     )
+2026-11-09T11:20:30.3938450Z     ^
+2026-11-09T11:20:30.3939080Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1087, in _create
+2026-11-09T11:20:30.3939510Z     self.do_handshake()
+2026-11-09T11:20:30.3940250Z     ~~~~~~~~~~~~~~~~~^^
+2026-11-09T11:20:30.3942740Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1383, in do_handshake
+2026-11-09T11:20:30.3944840Z     self._sslobj.do_handshake()
+2026-11-09T11:20:30.3945160Z     ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+2026-11-09T11:20:30.3946320Z ssl.SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unsuitable certificate purpose (_ssl.c:1032)
+2026-11-09T11:20:30.3946760Z 
+2026-11-09T11:20:30.3946960Z During handling of the above exception, another exception occurred:
+2026-11-09T11:20:30.3947220Z 
+2026-11-09T11:20:30.3947350Z Traceback (most recent call last):
+2026-11-09T11:20:30.3949380Z   File "/Users/runner/work/composer/composer/tests/test_tls.py", line 101, in test_ssl_cert_file_is_the_persons_choice_and_certifi_is_not_added
+2026-11-09T11:20:30.3950510Z     with tls.urlopen(self.url, timeout=10) as resp:
+2026-11-09T11:20:30.3950850Z          ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3952850Z   File "/Users/runner/work/composer/composer/composer/tls.py", line 71, in urlopen
+2026-11-09T11:20:30.3954520Z     return urllib.request.urlopen(url, timeout=timeout, context=ssl_context())
+2026-11-09T11:20:30.3955650Z            ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3957150Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 189, in urlopen
+2026-11-09T11:20:30.3958090Z     return opener.open(url, data, timeout)
+2026-11-09T11:20:30.3958650Z            ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3959240Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 489, in open
+2026-11-09T11:20:30.3959740Z     response = self._open(req, data)
+2026-11-09T11:20:30.3960340Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 506, in _open
+2026-11-09T11:20:30.3960870Z     result = self._call_chain(self.handle_open, protocol, protocol +
+2026-11-09T11:20:30.3961290Z                               '_open', req)
+2026-11-09T11:20:30.3961880Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 466, in _call_chain
+2026-11-09T11:20:30.3962430Z     result = func(*args)
+2026-11-09T11:20:30.3962940Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 1379, in https_open
+2026-11-09T11:20:30.3963530Z     return self.do_open(http.client.HTTPSConnection, req,
+2026-11-09T11:20:30.3963880Z            ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3964240Z                         context=self._context)
+2026-11-09T11:20:30.3964520Z                         ^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3965120Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 1334, in do_open
+2026-11-09T11:20:30.3965740Z     raise URLError(err)
+2026-11-09T11:20:30.3966330Z urllib.error.URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unsuitable certificate purpose (_ssl.c:1032)>
+2026-11-09T11:20:30.3966860Z 
+2026-11-09T11:20:30.3967040Z ======================================================================
+2026-11-09T11:20:30.3967660Z ERROR: test_the_provider_and_feed_openers_use_the_same_rule (test_tls.RootsTests.test_the_provider_and_feed_openers_use_the_same_rule)
+2026-11-09T11:20:30.3968230Z ----------------------------------------------------------------------
+2026-11-09T11:20:30.3968560Z Traceback (most recent call last):
+2026-11-09T11:20:30.3969110Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 1331, in do_open
+2026-11-09T11:20:30.3969680Z     h.request(req.get_method(), req.selector, req.data, headers,
+2026-11-09T11:20:30.3970040Z     ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3970430Z               encode_chunked=req.has_header('Transfer-encoding'))
+2026-11-09T11:20:30.3970770Z               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3971390Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1386, in request
+2026-11-09T11:20:30.3971860Z     self._send_request(method, url, body, headers, encode_chunked)
+2026-11-09T11:20:30.3972220Z     ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3972780Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1432, in _send_request
+2026-11-09T11:20:30.3973290Z     self.endheaders(body, encode_chunked=encode_chunked)
+2026-11-09T11:20:30.3973640Z     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3974090Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1381, in endheaders
+2026-11-09T11:20:30.3974880Z     self._send_output(message_body, encode_chunked=encode_chunked)
+2026-11-09T11:20:30.3975330Z     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3975870Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1141, in _send_output
+2026-11-09T11:20:30.3976390Z     self.send(msg)
+2026-11-09T11:20:30.3976670Z     ~~~~~~~~~^^^^^
+2026-11-09T11:20:30.3977220Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1085, in send
+2026-11-09T11:20:30.3977720Z     self.connect()
+2026-11-09T11:20:30.3978360Z     ~~~~~~~~~~~~^^
+2026-11-09T11:20:30.3978890Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1527, in connect
+2026-11-09T11:20:30.3979420Z     self.sock = self._context.wrap_socket(self.sock,
+2026-11-09T11:20:30.3979750Z                 ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+2026-11-09T11:20:30.3980130Z                                           server_hostname=server_hostname)
+2026-11-09T11:20:30.3980470Z                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3981030Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 469, in wrap_socket
+2026-11-09T11:20:30.3981480Z     return self.sslsocket_class._create(
+2026-11-09T11:20:30.3981740Z            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+2026-11-09T11:20:30.3982010Z         sock=sock,
+2026-11-09T11:20:30.3982300Z         ^^^^^^^^^^
+2026-11-09T11:20:30.3982500Z     ...<5 lines>...
+2026-11-09T11:20:30.3982750Z         session=session
+2026-11-09T11:20:30.3982960Z         ^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3983220Z     )
+2026-11-09T11:20:30.3983420Z     ^
+2026-11-09T11:20:30.3983980Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1087, in _create
+2026-11-09T11:20:30.3984470Z     self.do_handshake()
+2026-11-09T11:20:30.3984680Z     ~~~~~~~~~~~~~~~~~^^
+2026-11-09T11:20:30.3985330Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1383, in do_handshake
+2026-11-09T11:20:30.3985780Z     self._sslobj.do_handshake()
+2026-11-09T11:20:30.3986090Z     ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+2026-11-09T11:20:30.3986550Z ssl.SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unsuitable certificate purpose (_ssl.c:1032)
+2026-11-09T11:20:30.3987080Z 
+2026-11-09T11:20:30.3987300Z During handling of the above exception, another exception occurred:
+2026-11-09T11:20:30.3987570Z 
+2026-11-09T11:20:30.3987700Z Traceback (most recent call last):
+2026-11-09T11:20:30.3988220Z   File "/Users/runner/work/composer/composer/tests/test_tls.py", line 108, in test_the_provider_and_feed_openers_use_the_same_rule
+2026-11-09T11:20:30.3988990Z     with providers._OPENER.open(self.url, timeout=10) as resp:  # same opener the model calls use
+2026-11-09T11:20:30.3989420Z          ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3990020Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 489, in open
+2026-11-09T11:20:30.3990570Z     response = self._open(req, data)
+2026-11-09T11:20:30.3991060Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 506, in _open
+2026-11-09T11:20:30.3991590Z     result = self._call_chain(self.handle_open, protocol, protocol +
+2026-11-09T11:20:30.3991930Z                               '_open', req)
+2026-11-09T11:20:30.3992490Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 466, in _call_chain
+2026-11-09T11:20:30.3992900Z     result = func(*args)
+2026-11-09T11:20:30.3993290Z   File "/Users/runner/work/composer/composer/composer/tls.py", line 66, in https_open
+2026-11-09T11:20:30.3993860Z     return self.do_open(http.client.HTTPSConnection, req, context=ssl_context())
+2026-11-09T11:20:30.3994290Z            ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:20:30.3995280Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 1334, in do_open
+2026-11-09T11:20:30.3995920Z     raise URLError(err)
+2026-11-09T11:20:30.3996430Z urllib.error.URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unsuitable certificate purpose (_ssl.c:1032)>
+2026-11-09T11:20:30.3996940Z 
+2026-11-09T11:20:30.3997120Z ======================================================================
+2026-11-09T11:20:30.3997740Z FAIL: test_up_serves_the_app_and_health_and_runs_once (test_up.UpTests.test_up_serves_the_app_and_health_and_runs_once)
+2026-11-09T11:20:30.3998360Z ----------------------------------------------------------------------
+2026-11-09T11:20:30.3998640Z Traceback (most recent call last):
+2026-11-09T11:20:30.3999220Z   File "/Users/runner/work/composer/composer/tests/test_up.py", line 60, in test_up_serves_the_app_and_health_and_runs_once
+2026-11-09T11:20:30.3999740Z     proc = self.start(target, port, env)
+2026-11-09T11:20:30.4000190Z   File "/Users/runner/work/composer/composer/tests/test_up.py", line 51, in start
+2026-11-09T11:20:30.4000560Z     raise AssertionError(proc.stdout.read())
+2026-11-09T11:20:30.4000900Z AssertionError: Starting Composer 0.2.0: checking your data folder and settings...
+2026-11-09T11:20:30.4001470Z note: Composer needs a model key to write a brief. Run ./setup.sh --reconfigure provider. Until then the page shows the recorded brief.
+2026-11-09T11:20:30.4001940Z narration: off (text-only); daily brief: off
+2026-11-09T11:20:30.4002110Z 
+2026-11-09T11:20:30.4002110Z 
+2026-11-09T11:20:30.4002230Z ----------------------------------------------------------------------
+2026-11-09T11:20:30.4002500Z Ran 827 tests in 368.501s
+2026-11-09T11:20:30.4002610Z 
+2026-11-09T11:20:30.4002690Z FAILED (failures=1, errors=3, skipped=15)
+2026-11-09T11:20:30.4696070Z ##[error]Process completed with exit code 1.
+2026-11-09T11:20:30.5002140Z Post job cleanup.
+2026-11-09T11:20:30.9369760Z [command]/opt/homebrew/bin/git version
+2026-11-09T11:20:30.9645170Z git version 2.56.0
+2026-11-09T11:20:30.9670740Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/ff405ddd-7398-485a-baff-e925319b97ab/.gitconfig'
+2026-11-09T11:20:30.9681020Z Temporarily overriding HOME='/Users/runner/work/_temp/ff405ddd-7398-485a-baff-e925319b97ab' before making global git config changes
+2026-11-09T11:20:30.9683170Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-09T11:20:30.9684470Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/composer/composer
+2026-11-09T11:20:30.9802310Z Removing SSH command configuration
+2026-11-09T11:20:30.9806890Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-09T11:20:30.9881150Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-09T11:20:31.0956910Z Removing HTTP extra header
+2026-11-09T11:20:31.0962680Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-09T11:20:31.1037600Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-09T11:20:31.1910150Z Removing includeIf entries pointing to credentials config files
+2026-11-09T11:20:31.1915830Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-09T11:20:31.1984000Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-09T11:20:31.4010670Z Cleaning up orphan processes

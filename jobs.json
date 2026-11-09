@@ -1,0 +1,1273 @@
+{
+  "total_count": 11,
+  "jobs": [
+    {
+      "id": 129126615131,
+      "run_id": 42607360613,
+      "workflow_name": "ci",
+      "head_branch": "mac-install-fix",
+      "run_url": "https://api.github.com/repos/lensmith-ai/composer/actions/runs/42607360613",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVfOtYM8AAAAeEIvIWw",
+      "head_sha": "f8e19195acbd0973a5a29873939ae76ef4d41108",
+      "url": "https://api.github.com/repos/lensmith-ai/composer/actions/jobs/129126615131",
+      "html_url": "https://github.com/lensmith-ai/composer/actions/runs/42607360613/job/129126615131",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-09T11:14:03Z",
+      "started_at": "2026-11-09T11:14:05Z",
+      "completed_at": "2026-11-09T11:14:12Z",
+      "name": "secret scan (gitleaks, history and tree)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-09T11:14:06Z",
+          "completed_at": "2026-11-09T11:14:06Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-09T11:14:06Z",
+          "completed_at": "2026-11-09T11:14:08Z"
+        },
+        {
+          "name": "Install gitleaks (pinned version and SHA-256)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-09T11:14:08Z",
+          "completed_at": "2026-11-09T11:14:08Z"
+        },
+        {
+          "name": "Scan every commit",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-09T11:14:08Z",
+          "completed_at": "2026-11-09T11:14:09Z"
+        },
+        {
+          "name": "Scan the working tree",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-09T11:14:09Z",
+          "completed_at": "2026-11-09T11:14:10Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-09T11:14:10Z",
+          "completed_at": "2026-11-09T11:14:10Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-09T11:14:10Z",
+          "completed_at": "2026-11-09T11:14:10Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/lensmith-ai/composer/check-runs/129126615131",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000244,
+      "runner_name": "GitHub Actions 1000000244",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 129126615489,
+      "run_id": 42607360613,
+      "workflow_name": "ci",
+      "head_branch": "mac-install-fix",
+      "run_url": "https://api.github.com/repos/lensmith-ai/composer/actions/runs/42607360613",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVfOtYM8AAAAeEIvJwQ",
+      "head_sha": "f8e19195acbd0973a5a29873939ae76ef4d41108",
+      "url": "https://api.github.com/repos/lensmith-ai/composer/actions/jobs/129126615489",
+      "html_url": "https://github.com/lensmith-ai/composer/actions/runs/42607360613/job/129126615489",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-09T11:14:03Z",
+      "started_at": "2026-11-09T11:14:15Z",
+      "completed_at": "2026-11-09T11:14:58Z",
+      "name": "one-command install on macOS (python.org framework Python with group-writable venv templates, own folder, macos-15)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-09T11:14:15Z",
+          "completed_at": "2026-11-09T11:14:16Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-09T11:14:16Z",
+          "completed_at": "2026-11-09T11:14:18Z"
+        },
+        {
+          "name": "Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-09T11:14:18Z",
+          "completed_at": "2026-11-09T11:14:19Z"
+        },
+        {
+          "name": "Release tools (hash-locked), then the release files and install.sh as the release makes them",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-09T11:14:19Z",
+          "completed_at": "2026-11-09T11:14:34Z"
+        },
+        {
+          "name": "Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-09T11:14:34Z",
+          "completed_at": "2026-11-09T11:14:35Z"
+        },
+        {
+          "name": "Which Python the installer will find (python.org's installer build when this runner has it)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-09T11:14:35Z",
+          "completed_at": "2026-11-09T11:14:35Z"
+        },
+        {
+          "name": "Make the venv templates group-writable, as python.org's installer leaves them",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-09T11:14:35Z",
+          "completed_at": "2026-11-09T11:14:35Z"
+        },
+        {
+          "name": "One-command install from local files",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-09T11:14:35Z",
+          "completed_at": "2026-11-09T11:14:41Z"
+        },
+        {
+          "name": "The same command again (already installed)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-09T11:14:41Z",
+          "completed_at": "2026-11-09T11:14:42Z"
+        },
+        {
+          "name": "An interrupted install, then the rerun that removes what it left",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-09T11:14:43Z",
+          "completed_at": "2026-11-09T11:14:48Z"
+        },
+        {
+          "name": "lensmith composer --version and doctor",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-09T11:14:48Z",
+          "completed_at": "2026-11-09T11:14:48Z"
+        },
+        {
+          "name": "lensmith composer setup --reconfigure PART, each part, through the launcher",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-09T11:14:48Z",
+          "completed_at": "2026-11-09T11:14:52Z"
+        },
+        {
+          "name": "lensmith composer uninstall takes its shell-profile lines away",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-09T11:14:52Z",
+          "completed_at": "2026-11-09T11:14:53Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 24,
+          "started_at": "2026-11-09T11:14:53Z",
+          "completed_at": "2026-11-09T11:14:53Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 25,
+          "started_at": "2026-11-09T11:14:53Z",
+          "completed_at": "2026-11-09T11:14:53Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26,
+          "started_at": "2026-11-09T11:14:53Z",
+          "completed_at": "2026-11-09T11:14:54Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-11-09T11:14:54Z",
+          "completed_at": "2026-11-09T11:14:54Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/lensmith-ai/composer/check-runs/129126615489",
+      "labels": [
+        "macos-15"
+      ],
+      "runner_id": 1000000246,
+      "runner_name": "GitHub Actions 1000000246",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 129126615554,
+      "run_id": 42607360613,
+      "workflow_name": "ci",
+      "head_branch": "mac-install-fix",
+      "run_url": "https://api.github.com/repos/lensmith-ai/composer/actions/runs/42607360613",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVfOtYM8AAAAeEIvKAg",
+      "head_sha": "f8e19195acbd0973a5a29873939ae76ef4d41108",
+      "url": "https://api.github.com/repos/lensmith-ai/composer/actions/jobs/129126615554",
+      "html_url": "https://github.com/lensmith-ai/composer/actions/runs/42607360613/job/129126615554",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-09T11:14:03Z",
+      "started_at": "2026-11-09T11:14:05Z",
+      "completed_at": "2026-11-09T11:14:12Z",
+      "name": "lint workflows (actionlint)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-09T11:14:06Z",
+          "completed_at": "2026-11-09T11:14:07Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-09T11:14:07Z",
+          "completed_at": "2026-11-09T11:14:08Z"
+        },
+        {
+          "name": "Install actionlint (pinned version and SHA-256)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-09T11:14:08Z",
+          "completed_at": "2026-11-09T11:14:09Z"
+        },
+        {
+          "name": "actionlint (runs shellcheck on every run block)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-09T11:14:09Z",
+          "completed_at": "2026-11-09T11:14:10Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-09T11:14:10Z",
+          "completed_at": "2026-11-09T11:14:10Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-09T11:14:10Z",
+          "completed_at": "2026-11-09T11:14:10Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/lensmith-ai/composer/check-runs/129126615554",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000245,
+      "runner_name": "GitHub Actions 1000000245",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 129126615642,
+      "run_id": 42607360613,
+      "workflow_name": "ci",
+      "head_branch": "mac-install-fix",
+      "run_url": "https://api.github.com/repos/lensmith-ai/composer/actions/runs/42607360613",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVfOtYM8AAAAeEIvKWg",
+      "head_sha": "f8e19195acbd0973a5a29873939ae76ef4d41108",
+      "url": "https://api.github.com/repos/lensmith-ai/composer/actions/jobs/129126615642",
+      "html_url": "https://github.com/lensmith-ai/composer/actions/runs/42607360613/job/129126615642",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-09T11:14:03Z",
+      "started_at": "2026-11-09T11:14:07Z",
+      "completed_at": "2026-11-09T11:14:59Z",
+      "name": "one-command install on macOS (no Python on PATH, private Python through uv, macos-15)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-09T11:14:08Z",
+          "completed_at": "2026-11-09T11:14:09Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-09T11:14:09Z",
+          "completed_at": "2026-11-09T11:14:12Z"
+        },
+        {
+          "name": "Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-09T11:14:12Z",
+          "completed_at": "2026-11-09T11:14:13Z"
+        },
+        {
+          "name": "Release tools (hash-locked), then the release files and install.sh as the release makes them",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-09T11:14:13Z",
+          "completed_at": "2026-11-09T11:14:32Z"
+        },
+        {
+          "name": "Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-09T11:14:32Z",
+          "completed_at": "2026-11-09T11:14:33Z"
+        },
+        {
+          "name": "Which Python the installer will find (python.org's installer build when this runner has it)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-09T11:14:33Z",
+          "completed_at": "2026-11-09T11:14:33Z"
+        },
+        {
+          "name": "Make the venv templates group-writable, as python.org's installer leaves them",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-11-09T11:14:33Z",
+          "completed_at": "2026-11-09T11:14:33Z"
+        },
+        {
+          "name": "One-command install from local files",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-09T11:14:33Z",
+          "completed_at": "2026-11-09T11:14:42Z"
+        },
+        {
+          "name": "The same command again (already installed)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-09T11:14:42Z",
+          "completed_at": "2026-11-09T11:14:46Z"
+        },
+        {
+          "name": "An interrupted install, then the rerun that removes what it left",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-09T11:14:46Z",
+          "completed_at": "2026-11-09T11:14:51Z"
+        },
+        {
+          "name": "lensmith composer --version and doctor",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-09T11:14:51Z",
+          "completed_at": "2026-11-09T11:14:52Z"
+        },
+        {
+          "name": "lensmith composer setup --reconfigure PART, each part, through the launcher",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-09T11:14:52Z",
+          "completed_at": "2026-11-09T11:14:55Z"
+        },
+        {
+          "name": "lensmith composer uninstall takes its shell-profile lines away",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-09T11:14:55Z",
+          "completed_at": "2026-11-09T11:14:56Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 24,
+          "started_at": "2026-11-09T11:14:56Z",
+          "completed_at": "2026-11-09T11:14:56Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 25,
+          "started_at": "2026-11-09T11:14:56Z",
+          "completed_at": "2026-11-09T11:14:56Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26,
+          "started_at": "2026-11-09T11:14:56Z",
+          "completed_at": "2026-11-09T11:14:57Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-11-09T11:14:57Z",
+          "completed_at": "2026-11-09T11:14:57Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/lensmith-ai/composer/check-runs/129126615642",
+      "labels": [
+        "macos-15"
+      ],
+      "runner_id": 1000000248,
+      "runner_name": "GitHub Actions 1000000248",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 129126615667,
+      "run_id": 42607360613,
+      "workflow_name": "ci",
+      "head_branch": "mac-install-fix",
+      "run_url": "https://api.github.com/repos/lensmith-ai/composer/actions/runs/42607360613",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVfOtYM8AAAAeEIvKcw",
+      "head_sha": "f8e19195acbd0973a5a29873939ae76ef4d41108",
+      "url": "https://api.github.com/repos/lensmith-ai/composer/actions/jobs/129126615667",
+      "html_url": "https://github.com/lensmith-ai/composer/actions/runs/42607360613/job/129126615667",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-09T11:14:03Z",
+      "started_at": "2026-11-09T11:14:06Z",
+      "completed_at": "2026-11-09T11:14:16Z",
+      "name": "banned-text test (tree and full history)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-09T11:14:07Z",
+          "completed_at": "2026-11-09T11:14:08Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-09T11:14:08Z",
+          "completed_at": "2026-11-09T11:14:10Z"
+        },
+        {
+          "name": "Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-09T11:14:10Z",
+          "completed_at": "2026-11-09T11:14:10Z"
+        },
+        {
+          "name": "Banned text, names, paths and key shapes",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-09T11:14:10Z",
+          "completed_at": "2026-11-09T11:14:14Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-09T11:14:14Z",
+          "completed_at": "2026-11-09T11:14:14Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-09T11:14:14Z",
+          "completed_at": "2026-11-09T11:14:14Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-09T11:14:14Z",
+          "completed_at": "2026-11-09T11:14:14Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/lensmith-ai/composer/check-runs/129126615667",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000251,
+      "runner_name": "GitHub Actions 1000000251",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 129126615747,
+      "run_id": 42607360613,
+      "workflow_name": "ci",
+      "head_branch": "mac-install-fix",
+      "run_url": "https://api.github.com/repos/lensmith-ai/composer/actions/runs/42607360613",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVfOtYM8AAAAeEIvKww",
+      "head_sha": "f8e19195acbd0973a5a29873939ae76ef4d41108",
+      "url": "https://api.github.com/repos/lensmith-ai/composer/actions/jobs/129126615747",
+      "html_url": "https://github.com/lensmith-ai/composer/actions/runs/42607360613/job/129126615747",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-11-09T11:14:03Z",
+      "started_at": "2026-11-09T11:14:09Z",
+      "completed_at": "2026-11-09T11:20:35Z",
+      "name": "tests (macos-15, Python 3.13)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-09T11:14:10Z",
+          "completed_at": "2026-11-09T11:14:12Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-09T11:14:12Z",
+          "completed_at": "2026-11-09T11:14:15Z"
+        },
+        {
+          "name": "Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-09T11:14:15Z",
+          "completed_at": "2026-11-09T11:14:15Z"
+        },
+        {
+          "name": "Install (fetches claim-seal at its pinned commit; pip checks its SHA-256)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-09T11:14:15Z",
+          "completed_at": "2026-11-09T11:14:21Z"
+        },
+        {
+          "name": "Offline tests",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 5,
+          "started_at": "2026-11-09T11:14:21Z",
+          "completed_at": "2026-11-09T11:20:30Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-11-09T11:20:30Z",
+          "completed_at": "2026-11-09T11:20:30Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-09T11:20:30Z",
+          "completed_at": "2026-11-09T11:20:31Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-09T11:20:31Z",
+          "completed_at": "2026-11-09T11:20:34Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/lensmith-ai/composer/check-runs/129126615747",
+      "labels": [
+        "macos-15"
+      ],
+      "runner_id": 1000000247,
+      "runner_name": "GitHub Actions 1000000247",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 129126615770,
+      "run_id": 42607360613,
+      "workflow_name": "ci",
+      "head_branch": "mac-install-fix",
+      "run_url": "https://api.github.com/repos/lensmith-ai/composer/actions/runs/42607360613",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVfOtYM8AAAAeEIvK2g",
+      "head_sha": "f8e19195acbd0973a5a29873939ae76ef4d41108",
+      "url": "https://api.github.com/repos/lensmith-ai/composer/actions/jobs/129126615770",
+      "html_url": "https://github.com/lensmith-ai/composer/actions/runs/42607360613/job/129126615770",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-09T11:14:03Z",
+      "started_at": "2026-11-09T11:14:52Z",
+      "completed_at": "2026-11-09T11:15:59Z",
+      "name": "one-command install on macOS (python.org framework Python, default folder, macos-15-intel)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-09T11:14:53Z",
+          "completed_at": "2026-11-09T11:14:55Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-09T11:14:55Z",
+          "completed_at": "2026-11-09T11:14:58Z"
+        },
+        {
+          "name": "Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-09T11:14:58Z",
+          "completed_at": "2026-11-09T11:14:58Z"
+        },
+        {
+          "name": "Release tools (hash-locked), then the release files and install.sh as the release makes them",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-09T11:14:58Z",
+          "completed_at": "2026-11-09T11:15:27Z"
+        },
+        {
+          "name": "Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-09T11:15:27Z",
+          "completed_at": "2026-11-09T11:15:27Z"
+        },
+        {
+          "name": "Which Python the installer will find (python.org's installer build when this runner has it)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-09T11:15:27Z",
+          "completed_at": "2026-11-09T11:15:28Z"
+        },
+        {
+          "name": "Make the venv templates group-writable, as python.org's installer leaves them",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-11-09T11:15:28Z",
+          "completed_at": "2026-11-09T11:15:28Z"
+        },
+        {
+          "name": "One-command install from local files",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-09T11:15:28Z",
+          "completed_at": "2026-11-09T11:15:37Z"
+        },
+        {
+          "name": "The same command again (already installed)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-09T11:15:37Z",
+          "completed_at": "2026-11-09T11:15:40Z"
+        },
+        {
+          "name": "An interrupted install, then the rerun that removes what it left",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-09T11:15:40Z",
+          "completed_at": "2026-11-09T11:15:48Z"
+        },
+        {
+          "name": "lensmith composer --version and doctor",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-09T11:15:48Z",
+          "completed_at": "2026-11-09T11:15:50Z"
+        },
+        {
+          "name": "lensmith composer setup --reconfigure PART, each part, through the launcher",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-09T11:15:50Z",
+          "completed_at": "2026-11-09T11:15:55Z"
+        },
+        {
+          "name": "lensmith composer uninstall takes its shell-profile lines away",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-09T11:15:55Z",
+          "completed_at": "2026-11-09T11:15:56Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 24,
+          "started_at": "2026-11-09T11:15:56Z",
+          "completed_at": "2026-11-09T11:15:56Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 25,
+          "started_at": "2026-11-09T11:15:56Z",
+          "completed_at": "2026-11-09T11:15:56Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26,
+          "started_at": "2026-11-09T11:15:56Z",
+          "completed_at": "2026-11-09T11:15:57Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-11-09T11:15:57Z",
+          "completed_at": "2026-11-09T11:15:57Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/lensmith-ai/composer/check-runs/129126615770",
+      "labels": [
+        "macos-15-intel"
+      ],
+      "runner_id": 1000000254,
+      "runner_name": "GitHub Actions 1000000254",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 129126615789,
+      "run_id": 42607360613,
+      "workflow_name": "ci",
+      "head_branch": "mac-install-fix",
+      "run_url": "https://api.github.com/repos/lensmith-ai/composer/actions/runs/42607360613",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVfOtYM8AAAAeEIvK7Q",
+      "head_sha": "f8e19195acbd0973a5a29873939ae76ef4d41108",
+      "url": "https://api.github.com/repos/lensmith-ai/composer/actions/jobs/129126615789",
+      "html_url": "https://github.com/lensmith-ai/composer/actions/runs/42607360613/job/129126615789",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-09T11:14:03Z",
+      "started_at": "2026-11-09T11:14:06Z",
+      "completed_at": "2026-11-09T11:16:16Z",
+      "name": "tests (ubuntu-latest, Python 3.13)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-09T11:14:06Z",
+          "completed_at": "2026-11-09T11:14:07Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-09T11:14:07Z",
+          "completed_at": "2026-11-09T11:14:09Z"
+        },
+        {
+          "name": "Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-09T11:14:09Z",
+          "completed_at": "2026-11-09T11:14:09Z"
+        },
+        {
+          "name": "Install (fetches claim-seal at its pinned commit; pip checks its SHA-256)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-09T11:14:09Z",
+          "completed_at": "2026-11-09T11:14:15Z"
+        },
+        {
+          "name": "Offline tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-09T11:14:15Z",
+          "completed_at": "2026-11-09T11:16:13Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-09T11:16:13Z",
+          "completed_at": "2026-11-09T11:16:14Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-09T11:16:14Z",
+          "completed_at": "2026-11-09T11:16:14Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-09T11:16:14Z",
+          "completed_at": "2026-11-09T11:16:14Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/lensmith-ai/composer/check-runs/129126615789",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000252,
+      "runner_name": "GitHub Actions 1000000252",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 129126615799,
+      "run_id": 42607360613,
+      "workflow_name": "ci",
+      "head_branch": "mac-install-fix",
+      "run_url": "https://api.github.com/repos/lensmith-ai/composer/actions/runs/42607360613",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVfOtYM8AAAAeEIvK9w",
+      "head_sha": "f8e19195acbd0973a5a29873939ae76ef4d41108",
+      "url": "https://api.github.com/repos/lensmith-ai/composer/actions/jobs/129126615799",
+      "html_url": "https://github.com/lensmith-ai/composer/actions/runs/42607360613/job/129126615799",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-09T11:14:03Z",
+      "started_at": "2026-11-09T11:14:05Z",
+      "completed_at": "2026-11-09T11:16:34Z",
+      "name": "tests (ubuntu-latest, Python 3.10)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-09T11:14:06Z",
+          "completed_at": "2026-11-09T11:14:07Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-09T11:14:07Z",
+          "completed_at": "2026-11-09T11:14:08Z"
+        },
+        {
+          "name": "Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-09T11:14:08Z",
+          "completed_at": "2026-11-09T11:14:15Z"
+        },
+        {
+          "name": "Install (fetches claim-seal at its pinned commit; pip checks its SHA-256)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-09T11:14:15Z",
+          "completed_at": "2026-11-09T11:14:19Z"
+        },
+        {
+          "name": "Offline tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-09T11:14:19Z",
+          "completed_at": "2026-11-09T11:16:31Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-09T11:16:31Z",
+          "completed_at": "2026-11-09T11:16:32Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-09T11:16:32Z",
+          "completed_at": "2026-11-09T11:16:32Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-09T11:16:32Z",
+          "completed_at": "2026-11-09T11:16:32Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/lensmith-ai/composer/check-runs/129126615799",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000253,
+      "runner_name": "GitHub Actions 1000000253",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 129126615817,
+      "run_id": 42607360613,
+      "workflow_name": "ci",
+      "head_branch": "mac-install-fix",
+      "run_url": "https://api.github.com/repos/lensmith-ai/composer/actions/runs/42607360613",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVfOtYM8AAAAeEIvLCQ",
+      "head_sha": "f8e19195acbd0973a5a29873939ae76ef4d41108",
+      "url": "https://api.github.com/repos/lensmith-ai/composer/actions/jobs/129126615817",
+      "html_url": "https://github.com/lensmith-ai/composer/actions/runs/42607360613/job/129126615817",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-09T11:14:03Z",
+      "started_at": "2026-11-09T11:14:10Z",
+      "completed_at": "2026-11-09T11:14:49Z",
+      "name": "one-command install on macOS (python.org framework Python, default folder, macos-15)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-09T11:14:10Z",
+          "completed_at": "2026-11-09T11:14:11Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-09T11:14:11Z",
+          "completed_at": "2026-11-09T11:14:13Z"
+        },
+        {
+          "name": "Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-09T11:14:13Z",
+          "completed_at": "2026-11-09T11:14:14Z"
+        },
+        {
+          "name": "Release tools (hash-locked), then the release files and install.sh as the release makes them",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-09T11:14:14Z",
+          "completed_at": "2026-11-09T11:14:29Z"
+        },
+        {
+          "name": "Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-09T11:14:29Z",
+          "completed_at": "2026-11-09T11:14:30Z"
+        },
+        {
+          "name": "Which Python the installer will find (python.org's installer build when this runner has it)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-09T11:14:30Z",
+          "completed_at": "2026-11-09T11:14:30Z"
+        },
+        {
+          "name": "Make the venv templates group-writable, as python.org's installer leaves them",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-11-09T11:14:30Z",
+          "completed_at": "2026-11-09T11:14:30Z"
+        },
+        {
+          "name": "One-command install from local files",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-09T11:14:30Z",
+          "completed_at": "2026-11-09T11:14:36Z"
+        },
+        {
+          "name": "The same command again (already installed)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-09T11:14:36Z",
+          "completed_at": "2026-11-09T11:14:37Z"
+        },
+        {
+          "name": "An interrupted install, then the rerun that removes what it left",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-09T11:14:37Z",
+          "completed_at": "2026-11-09T11:14:42Z"
+        },
+        {
+          "name": "lensmith composer --version and doctor",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-09T11:14:42Z",
+          "completed_at": "2026-11-09T11:14:43Z"
+        },
+        {
+          "name": "lensmith composer setup --reconfigure PART, each part, through the launcher",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-09T11:14:43Z",
+          "completed_at": "2026-11-09T11:14:46Z"
+        },
+        {
+          "name": "lensmith composer uninstall takes its shell-profile lines away",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-09T11:14:46Z",
+          "completed_at": "2026-11-09T11:14:46Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 24,
+          "started_at": "2026-11-09T11:14:46Z",
+          "completed_at": "2026-11-09T11:14:46Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 25,
+          "started_at": "2026-11-09T11:14:46Z",
+          "completed_at": "2026-11-09T11:14:46Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26,
+          "started_at": "2026-11-09T11:14:46Z",
+          "completed_at": "2026-11-09T11:14:47Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-11-09T11:14:47Z",
+          "completed_at": "2026-11-09T11:14:47Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/lensmith-ai/composer/check-runs/129126615817",
+      "labels": [
+        "macos-15"
+      ],
+      "runner_id": 1000000250,
+      "runner_name": "GitHub Actions 1000000250",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 129126615956,
+      "run_id": 42607360613,
+      "workflow_name": "ci",
+      "head_branch": "mac-install-fix",
+      "run_url": "https://api.github.com/repos/lensmith-ai/composer/actions/runs/42607360613",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVfOtYM8AAAAeEIvLlA",
+      "head_sha": "f8e19195acbd0973a5a29873939ae76ef4d41108",
+      "url": "https://api.github.com/repos/lensmith-ai/composer/actions/jobs/129126615956",
+      "html_url": "https://github.com/lensmith-ai/composer/actions/runs/42607360613/job/129126615956",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-11-09T11:14:03Z",
+      "started_at": "2026-11-09T11:14:10Z",
+      "completed_at": "2026-11-09T11:21:44Z",
+      "name": "tests (macos-15, Python 3.10)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-09T11:14:12Z",
+          "completed_at": "2026-11-09T11:14:14Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-09T11:14:14Z",
+          "completed_at": "2026-11-09T11:14:17Z"
+        },
+        {
+          "name": "Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-09T11:14:17Z",
+          "completed_at": "2026-11-09T11:14:47Z"
+        },
+        {
+          "name": "Install (fetches claim-seal at its pinned commit; pip checks its SHA-256)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-09T11:14:47Z",
+          "completed_at": "2026-11-09T11:14:52Z"
+        },
+        {
+          "name": "Offline tests",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 5,
+          "started_at": "2026-11-09T11:14:52Z",
+          "completed_at": "2026-11-09T11:21:37Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-11-09T11:21:37Z",
+          "completed_at": "2026-11-09T11:21:37Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-09T11:21:37Z",
+          "completed_at": "2026-11-09T11:21:38Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-09T11:21:38Z",
+          "completed_at": "2026-11-09T11:21:42Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/lensmith-ai/composer/check-runs/129126615956",
+      "labels": [
+        "macos-15"
+      ],
+      "runner_id": 1000000249,
+      "runner_name": "GitHub Actions 1000000249",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    }
+  ]
+}
