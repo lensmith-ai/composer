@@ -53,7 +53,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # macOS 15 on Apple silicon, and the Intel build for the older Macs (macos-14 is not offered to this repository)
+          # macOS 15 on Apple silicon (macos-14 is not offered to this repository; the Intel build, macos-15-intel, ran green
+          # once and then could not start: "your spending limit needs to be increased" on the private repository)
           - case: python.org framework Python, default folder
             runner: macos-15
             templates: as-shipped
@@ -69,11 +70,6 @@ jobs:
             templates: as-shipped
             home: own
             path: bare
-          - case: python.org framework Python, default folder
-            runner: macos-15-intel
-            templates: as-shipped
-            home: default
-            path: inherit
     env:
       CASE: ${{ matrix.case }}
       TEMPLATES: ${{ matrix.templates }}
