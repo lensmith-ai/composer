@@ -51,10 +51,15 @@ class RootsTests(unittest.TestCase):
         cls.tmp = tempfile.TemporaryDirectory()
         d = Path(cls.tmp.name)
         cls.cert, cls.key = d / "cert.pem", d / "key.pem"
-        subprocess.run(["openssl", "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "2", "-subj", "/CN=localhost",
-                        "-addext", "subjectAltName=IP:127.0.0.1,DNS:localhost", "-addext", "basicConstraints=critical,CA:TRUE",
-                        "-addext", "keyUsage=critical,digitalSignature,keyEncipherment,keyCertSign",
-                        "-addext", "extendedKeyUsage=serverAuth",
+        # Its own openssl config, so the certificate is the same on every system: strict verification (Python 3.13's default)
+        # wants subject and authority key identifiers and a key usage, and openssl.cnf files differ (Debian's has them,
+        # Homebrew's on a Mac does not).
+        conf = d / "ca.cnf"
+        conf.write_text("[req]\ndistinguished_name = dn\nx509_extensions = v3\nprompt = no\n[dn]\nCN = localhost\n[v3]\n"
+                        "subjectKeyIdentifier = hash\nauthorityKeyIdentifier = keyid:always,issuer\n"
+                        "basicConstraints = critical,CA:TRUE\nkeyUsage = critical,digitalSignature,keyEncipherment,keyCertSign\n"
+                        "extendedKeyUsage = serverAuth\nsubjectAltName = IP:127.0.0.1,DNS:localhost\n", encoding="utf-8")
+        subprocess.run(["openssl", "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "2", "-config", str(conf),
                         "-keyout", str(cls.key), "-out", str(cls.cert)], check=True, capture_output=True)
         ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         ctx.load_cert_chain(cls.cert, cls.key)

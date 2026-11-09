@@ -204,7 +204,7 @@ if __name__ == "__main__":
                      settings={"narration": dict(settings.DEFAULTS["narration"])}, source_service=service,
                      lens_store=lenses.LensStore(WORK / "lenses"))
     quiet_handler = type("Quiet", (server.handler_for(app),), {"log_message": lambda *a: None})
-    httpd = server.ThreadingHTTPServer(("127.0.0.1", 0), quiet_handler)
+    httpd = ThreadingHTTPServer(("127.0.0.1", 0), quiet_handler)
     print(json.dumps({"app": f"http://127.0.0.1:{httpd.server_address[1]}/", "blog": f"{base}/blog", "notes": f"{base}/notes",
                       "work": str(WORK)}), flush=True)
     try:
