@@ -145,7 +145,7 @@ I have not read every line of the code. I do review what it does and how it beha
 
 Here is what guards it, in place of me reading the code:
 
-- **827 automated tests**, which use invented feeds and scripted model replies, so they need no network and no key. They were last run on 2026-11-09 on Python 3.12: all pass, 4 skipped. CI runs them on Ubuntu and macOS, on Python 3.10 and 3.13.
+- **837 automated tests**, which use invented feeds and scripted model replies, so they need no network and no key. They were last run on 2026-11-09 on Python 3.12: all pass, 4 skipped. CI runs them on Ubuntu and macOS, on Python 3.10 and 3.13.
 - **The installer is tested on its own.** A fault suite ran it 64 times across 27 scenarios (a download source down or slow, a file that fails its checksum, no Python, a folder it must refuse). Every run ended as it should. CI also runs the real install on macOS, and it passed on my own Mac on 2026-11-09 (built from commit 926837d).
 - **Browser tests** run the demo pages and the app page in Chromium and WebKit at three screen widths.
 - **A secret scan** (gitleaks) found nothing in any commit except one made-up marker string in a test, which its config allows. One test fails if private names, server paths or key shapes appear in the files or the history.
