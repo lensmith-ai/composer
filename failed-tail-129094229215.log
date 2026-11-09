@@ -1,0 +1,250 @@
+2026-11-09T10:01:47.9555574Z test_the_check_fails_when_a_package_is_left_out (test_third_party.ThirdPartyListTests.test_the_check_fails_when_a_package_is_left_out) ... ok
+2026-11-09T10:01:47.9557027Z test_the_gpl_parts_are_named_as_gpl (test_third_party.ThirdPartyListTests.test_the_gpl_parts_are_named_as_gpl) ... ok
+2026-11-09T10:01:47.9796730Z test_no_system_roots_and_no_certifi_fails_verification (test_tls.RootsTests.test_no_system_roots_and_no_certifi_fails_verification) ... ok
+2026-11-09T10:01:47.9836881Z test_no_system_roots_uses_certifi_and_succeeds (test_tls.RootsTests.test_no_system_roots_uses_certifi_and_succeeds) ... ok
+2026-11-09T10:01:47.9876750Z test_ssl_cert_file_is_the_persons_choice_and_certifi_is_not_added (test_tls.RootsTests.test_ssl_cert_file_is_the_persons_choice_and_certifi_is_not_added) ... ok
+2026-11-09T10:01:47.9902735Z test_system_roots_present_certifi_is_not_added (test_tls.RootsTests.test_system_roots_present_certifi_is_not_added) ... ok
+2026-11-09T10:01:47.9966708Z test_the_provider_and_feed_openers_use_the_same_rule (test_tls.RootsTests.test_the_provider_and_feed_openers_use_the_same_rule) ... ok
+2026-11-09T10:01:47.9993576Z test_the_real_certifi_is_installed_and_has_authorities (test_tls.RootsTests.test_the_real_certifi_is_installed_and_has_authorities) ... ok
+2026-11-09T10:01:48.4961480Z test_empty_default_paths_read_as_no_roots (test_tls.SystemRootsTests.test_empty_default_paths_read_as_no_roots) ... ok
+2026-11-09T10:01:48.5016774Z test_the_compose_route_still_refuses_a_topic (test_topic_field.TopicFieldTests.test_the_compose_route_still_refuses_a_topic) ... ok
+2026-11-09T10:01:48.5037458Z test_the_page_has_no_topic_field (test_topic_field.TopicFieldTests.test_the_page_has_no_topic_field) ... ok
+2026-11-09T10:01:48.5226942Z test_a_data_folder_open_to_others_is_refused_before_the_lock (test_trust_admission.AdmissionTests.test_a_data_folder_open_to_others_is_refused_before_the_lock) ... ok
+2026-11-09T10:01:48.5409794Z test_a_journal_that_names_a_folder_elsewhere_is_refused_before_anything_is_removed (test_trust_admission.AdmissionTests.test_a_journal_that_names_a_folder_elsewhere_is_refused_before_anything_is_removed) ... ok
+2026-11-09T10:01:48.5586945Z test_a_real_unfinished_restore_is_still_recovered (test_trust_admission.AdmissionTests.test_a_real_unfinished_restore_is_still_recovered) ... ok
+2026-11-09T10:01:48.5704470Z test_admission_comes_before_the_lock_and_before_recovery_even_with_no_current_data (test_trust_admission.AdmissionTests.test_admission_comes_before_the_lock_and_before_recovery_even_with_no_current_data) ... ok
+2026-11-09T10:01:48.5715109Z test_a_replaced_install_cannot_make_update_remove_a_protected_folder (test_trust_admission.AnotherAccountTests.test_a_replaced_install_cannot_make_update_remove_a_protected_folder) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 1001'
+2026-11-09T10:01:48.5727018Z test_only_the_three_places_inside_the_data_folder_pass (test_trust_admission.TheJournalRuleTests.test_only_the_three_places_inside_the_data_folder_pass) ... ok
+2026-11-09T10:01:48.6336821Z test_setup_sh_refuses_before_any_write (test_trust_contract.SetupShTrustTests.test_setup_sh_refuses_before_any_write) ... ok
+2026-11-09T10:01:48.6356772Z test_a_folder_owned_by_another_account_is_refused (test_trust_contract.TrustContractTests.test_a_folder_owned_by_another_account_is_refused) ... ok
+2026-11-09T10:01:48.6446628Z test_a_private_folder_passes (test_trust_contract.TrustContractTests.test_a_private_folder_passes) ... ok
+2026-11-09T10:01:48.6471483Z test_setup_refuses_a_folder_others_can_write_above_it (test_trust_contract.TrustContractTests.test_setup_refuses_a_folder_others_can_write_above_it) ... ok
+2026-11-09T10:01:48.6484796Z test_setup_refuses_an_app_folder_others_can_write (test_trust_contract.TrustContractTests.test_setup_refuses_an_app_folder_others_can_write) ... ok
+2026-11-09T10:01:48.6495510Z test_the_system_temporary_folder_is_refused_where_it_is_shared (test_trust_contract.TrustContractTests.test_the_system_temporary_folder_is_refused_where_it_is_shared) ... ok
+2026-11-09T10:01:48.6613941Z test_update_rollback_and_narration_refuse_once_a_folder_above_is_opened_up (test_trust_contract.TrustContractTests.test_update_rollback_and_narration_refuse_once_a_folder_above_is_opened_up) ... ok
+2026-11-09T10:01:48.7040154Z test_the_new_version_folder_is_private_and_the_app_still_passes_its_own_check (test_trust_contract.UpdateUnderAPermissiveUmaskTests.test_the_new_version_folder_is_private_and_the_app_still_passes_its_own_check) ... ok
+2026-11-09T10:01:48.7042140Z test_another_account_cannot_redirect_the_narration_check_through_an_open_tmp (test_trust_descendants.AnotherAccountTests.test_another_account_cannot_redirect_the_narration_check_through_an_open_tmp) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 1001'
+2026-11-09T10:01:48.7189735Z test_a_handed_cache_folder_open_to_others_stops_a_program_before_it_starts (test_trust_descendants.DescendantTests.test_a_handed_cache_folder_open_to_others_stops_a_program_before_it_starts) ... ok
+2026-11-09T10:01:48.8053439Z test_an_install_with_any_folder_open_to_others_is_refused (test_trust_descendants.DescendantTests.test_an_install_with_any_folder_open_to_others_is_refused) ... ok
+2026-11-09T10:01:48.8192367Z test_owned_dir_and_child_check_every_folder_on_the_way (test_trust_descendants.DescendantTests.test_owned_dir_and_child_check_every_folder_on_the_way) ... ok
+2026-11-09T10:01:48.9947869Z test_setup_refuses_an_existing_install_with_an_open_folder (test_trust_descendants.DescendantTests.test_setup_refuses_an_existing_install_with_an_open_folder) ... ok
+2026-11-09T10:01:49.0089265Z test_trusted_files_open_to_others_are_refused (test_trust_descendants.DescendantTests.test_trusted_files_open_to_others_are_refused) ... ok
+2026-11-09T10:01:49.0231795Z test_update_rollback_narration_and_the_parser_refuse_an_open_tmp (test_trust_descendants.DescendantTests.test_update_rollback_narration_and_the_parser_refuse_an_open_tmp) ... ok
+2026-11-09T10:01:49.0233132Z test_composer_never_makes_group_writable_files_whatever_the_umask (test_trust_descendants.TheRuleTests.test_composer_never_makes_group_writable_files_whatever_the_umask) ... ok
+2026-11-09T10:01:49.0238319Z test_the_rule (test_trust_descendants.TheRuleTests.test_the_rule) ... ok
+2026-11-09T10:01:49.0239530Z test_an_app_folder_planted_by_another_account_gets_no_scratch_folder (test_trust_doctor_narration_tmp.AnotherAccountTests.test_an_app_folder_planted_by_another_account_gets_no_scratch_folder) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 1001'
+2026-11-09T10:01:49.0334015Z test_an_app_folder_made_after_the_trust_row_is_checked_before_narration_writes (test_trust_doctor_narration_tmp.SameAccountTests.test_an_app_folder_made_after_the_trust_row_is_checked_before_narration_writes) ... ok
+2026-11-09T10:01:49.0424697Z test_narration_still_runs_when_no_app_folder_appears (test_trust_doctor_narration_tmp.SameAccountTests.test_narration_still_runs_when_no_app_folder_appears) ... ok
+2026-11-09T10:01:49.0426366Z test_a_replaced_install_cannot_make_doctor_send_your_key_elsewhere (test_trust_doctor_online.AnotherAccountTests.test_a_replaced_install_cannot_make_doctor_send_your_key_elsewhere) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 1001'
+2026-11-09T10:01:49.0585214Z test_a_trusted_install_still_runs_the_online_checks (test_trust_doctor_online.SameAccountTests.test_a_trusted_install_still_runs_the_online_checks) ... ok
+2026-11-09T10:01:49.0718863Z test_doctor_online_sends_nothing_when_the_trust_check_fails (test_trust_doctor_online.SameAccountTests.test_doctor_online_sends_nothing_when_the_trust_check_fails) ... ok
+2026-11-09T10:01:49.1147327Z test_doctor_reads_no_settings_and_no_key_file_after_the_refusal (test_trust_doctor_online.SameAccountTests.test_doctor_reads_no_settings_and_no_key_file_after_the_refusal) ... ok
+2026-11-09T10:01:49.1156199Z test_make_dirs_sets_the_mode_even_when_mkdir_gives_more (test_trust_explicit_modes.ExplicitModeTests.test_make_dirs_sets_the_mode_even_when_mkdir_gives_more) ... ok
+2026-11-09T10:01:49.3082422Z test_nothing_composer_makes_is_open_to_others_under_a_default_acl (test_trust_explicit_modes.ExplicitModeTests.test_nothing_composer_makes_is_open_to_others_under_a_default_acl) ... ok
+2026-11-09T10:01:49.3514167Z test_nothing_composer_makes_is_open_to_others_under_an_open_umask (test_trust_explicit_modes.ExplicitModeTests.test_nothing_composer_makes_is_open_to_others_under_an_open_umask) ... ok
+2026-11-09T10:01:49.3515422Z test_a_disk_without_permission_bits_gets_advice_that_can_work (test_trust_messages.AdviceRuleTests.test_a_disk_without_permission_bits_gets_advice_that_can_work) ... ok
+2026-11-09T10:01:49.3516676Z test_a_posix_disk_keeps_the_chmod_advice_and_names_the_folder (test_trust_messages.AdviceRuleTests.test_a_posix_disk_keeps_the_chmod_advice_and_names_the_folder) ... ok
+2026-11-09T10:01:49.3519916Z test_the_mount_table_names_the_filesystem_of_the_longest_mount_point (test_trust_messages.AdviceRuleTests.test_the_mount_table_names_the_filesystem_of_the_longest_mount_point) ... ok
+2026-11-09T10:01:49.3634881Z test_a_data_folder_refusal_says_data_folder_and_keeps_the_umask_fix (test_trust_messages.FolderNameTests.test_a_data_folder_refusal_says_data_folder_and_keeps_the_umask_fix) ... ok
+2026-11-09T10:01:49.4627468Z test_default_setup_and_setup_sh_name_the_option_to_use (test_trust_messages.LinkedHomeTests.test_default_setup_and_setup_sh_name_the_option_to_use) ... ok
+2026-11-09T10:01:49.4641055Z test_the_refusal_says_how_to_pass_the_real_path (test_trust_messages.LinkedHomeTests.test_the_refusal_says_how_to_pass_the_real_path) ... ok
+2026-11-09T10:01:49.4642361Z test_a_data_folder_on_a_fat_disk_is_refused_with_advice_that_can_work (test_trust_messages.RealFatDiskTests.test_a_data_folder_on_a_fat_disk_is_refused_with_advice_that_can_work) ... skipped 'a real FAT disk needs root, mkfs.vfat and unshare (a private mount namespace)'
+2026-11-09T10:01:49.4779487Z test_backup_out_in_a_shared_folder_names_out (test_trust_out_messages.OutMessageTests.test_backup_out_in_a_shared_folder_names_out) ... ok
+2026-11-09T10:01:49.4894550Z test_backup_out_swapped_for_a_link_after_its_check_names_out (test_trust_out_messages.OutMessageTests.test_backup_out_swapped_for_a_link_after_its_check_names_out) ... ok
+2026-11-09T10:01:49.4922816Z test_serve_out_in_a_shared_folder_names_out (test_trust_out_messages.OutMessageTests.test_serve_out_in_a_shared_folder_names_out) ... ok
+2026-11-09T10:01:49.4952297Z test_serve_out_through_a_link_names_out_and_the_real_path (test_trust_out_messages.OutMessageTests.test_serve_out_through_a_link_names_out_and_the_real_path) ... ok
+2026-11-09T10:01:49.4953717Z test_a_planted_link_beside_the_hop_target_gets_no_write (test_trust_serve_out_path.AnotherAccountTests.test_a_planted_link_beside_the_hop_target_gets_no_write) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 1001'
+2026-11-09T10:01:49.4977663Z note: Composer needs a model key to write a brief. Run ./setup.sh --reconfigure provider.. The page will show the recorded brief; Compose will fail until a key is set.
+2026-11-09T10:01:49.5026473Z test_a_relative_out_is_made_absolute_once (test_trust_serve_out_path.SameAccountTests.test_a_relative_out_is_made_absolute_once) ... ok
+2026-11-09T10:01:49.5051853Z note: Composer needs a model key to write a brief. Run ./setup.sh --reconfigure provider.. The page will show the recorded brief; Compose will fail until a key is set.
+2026-11-09T10:01:49.5099782Z test_serve_writes_where_it_checked_not_through_a_link_and_dot_dot (test_trust_serve_out_path.SameAccountTests.test_serve_writes_where_it_checked_not_through_a_link_and_dot_dot) ... ok
+2026-11-09T10:01:49.5101234Z test_another_account_cannot_choose_where_setup_writes_its_data (test_trust_setup_data.AnotherAccountTests.test_another_account_cannot_choose_where_setup_writes_its_data) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 1001'
+2026-11-09T10:01:49.5103003Z test_another_account_cannot_plant_inside_a_data_folder_setup_admitted (test_trust_setup_data.AnotherAccountTests.test_another_account_cannot_plant_inside_a_data_folder_setup_admitted) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 1001'
+2026-11-09T10:01:49.5130091Z test_setup_takes_data_as_written_and_never_resolves_it (test_trust_setup_data.GivenPathTests.test_setup_takes_data_as_written_and_never_resolves_it) ... ok
+2026-11-09T10:01:49.5146754Z test_a_data_folder_under_a_folder_others_can_write_is_refused_before_any_write (test_trust_setup_data.SetupDataTests.test_a_data_folder_under_a_folder_others_can_write_is_refused_before_any_write) ... ok
+2026-11-09T10:01:49.5157554Z test_a_folder_shared_by_every_account_is_refused (test_trust_setup_data.SetupDataTests.test_a_folder_shared_by_every_account_is_refused) ... ok
+2026-11-09T10:01:49.5266257Z test_a_good_data_folder_outside_still_works_and_is_private (test_trust_setup_data.SetupDataTests.test_a_good_data_folder_outside_still_works_and_is_private) ... ok
+2026-11-09T10:01:49.5282891Z test_a_link_on_the_way_to_the_data_folder_is_refused_and_its_target_is_untouched (test_trust_setup_data.SetupDataTests.test_a_link_on_the_way_to_the_data_folder_is_refused_and_its_target_is_untouched) ... ok
+2026-11-09T10:01:49.5405424Z test_an_existing_data_folder_with_something_open_to_others_is_refused (test_trust_setup_data.SetupDataTests.test_an_existing_data_folder_with_something_open_to_others_is_refused) ... ok
+2026-11-09T10:01:49.5416399Z test_the_data_folder_mode_is_never_set_through_a_link (test_trust_setup_data.SetupDataTests.test_the_data_folder_mode_is_never_set_through_a_link) ... ok
+2026-11-09T10:01:49.5417829Z test_another_account_cannot_redirect_the_launcher_through_a_hidden_hop (test_trust_symlink_hops.AnotherAccountTests.test_another_account_cannot_redirect_the_launcher_through_a_hidden_hop) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 1001'
+2026-11-09T10:01:49.5438763Z test_a_link_on_the_way_is_refused_and_the_real_path_is_named (test_trust_symlink_hops.SymlinkHopTests.test_a_link_on_the_way_is_refused_and_the_real_path_is_named) ... ok
+2026-11-09T10:01:49.5468583Z test_a_safe_link_is_refused_too_and_a_real_path_passes (test_trust_symlink_hops.SymlinkHopTests.test_a_safe_link_is_refused_too_and_a_real_path_passes) ... ok
+2026-11-09T10:01:49.5589359Z test_setup_sh_refuses_a_link_on_the_way_before_any_write (test_trust_symlink_hops.SymlinkHopTests.test_setup_sh_refuses_a_link_on_the_way_before_any_write) ... ok
+2026-11-09T10:01:49.5636777Z test_writable_folders_on_the_real_path_are_still_refused (test_trust_symlink_hops.SymlinkHopTests.test_writable_folders_on_the_real_path_are_still_refused) ... ok
+2026-11-09T10:01:49.5650780Z test_a_replaced_install_cannot_make_backup_write_elsewhere (test_trust_uninstall_backup.AnotherAccountTests.test_a_replaced_install_cannot_make_backup_write_elsewhere) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 1001'
+2026-11-09T10:01:49.5661597Z test_a_replaced_install_cannot_make_uninstall_create_a_file_elsewhere (test_trust_uninstall_backup.AnotherAccountTests.test_a_replaced_install_cannot_make_uninstall_create_a_file_elsewhere) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 1001'
+2026-11-09T10:01:49.5663090Z test_a_swap_after_the_manifest_check_cannot_make_uninstall_remove_elsewhere (test_trust_uninstall_backup.AnotherAccountTests.test_a_swap_after_the_manifest_check_cannot_make_uninstall_remove_elsewhere) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 1001'
+2026-11-09T10:01:49.5756617Z test_backup_never_writes_through_a_linked_backups_folder (test_trust_uninstall_backup.SameAccountTests.test_backup_never_writes_through_a_linked_backups_folder) ... ok
+2026-11-09T10:01:49.5866616Z test_backup_out_must_be_a_folder_no_other_account_can_change (test_trust_uninstall_backup.SameAccountTests.test_backup_out_must_be_a_folder_no_other_account_can_change) ... ok
+2026-11-09T10:01:49.5988807Z test_doctor_reports_the_trust_check_and_then_writes_and_starts_nothing (test_trust_uninstall_backup.SameAccountTests.test_doctor_reports_the_trust_check_and_then_writes_and_starts_nothing) ... ok
+2026-11-09T10:01:49.6014774Z test_serve_admits_its_data_folder_before_the_store_writes (test_trust_uninstall_backup.SameAccountTests.test_serve_admits_its_data_folder_before_the_store_writes) ... composer: refused: /home/runner/.composer-tests/composer-home-58upn6qt/home/shared can be written by other accounts (mode 0777). Fix: chmod go-w /home/runner/.composer-tests/composer-home-58upn6qt/home/shared, or put the brief folder somewhere else: --out <a folder of your own>. The brief folder and every folder above it must belong to you or root and be writable only by you or root, so no other account can change what Composer runs or keeps there
+2026-11-09T10:01:49.6018335Z ok
+2026-11-09T10:01:49.6141493Z test_the_run_lock_is_never_opened_through_a_link (test_trust_uninstall_backup.SameAccountTests.test_the_run_lock_is_never_opened_through_a_link) ... ok
+2026-11-09T10:01:49.6297047Z test_uninstall_and_backup_are_admitted_before_the_lock_or_any_write (test_trust_uninstall_backup.SameAccountTests.test_uninstall_and_backup_are_admitted_before_the_lock_or_any_write) ... ok
+2026-11-09T10:01:49.6440841Z test_uninstall_removes_inside_the_app_folder_it_opened (test_trust_uninstall_backup.SameAccountTests.test_uninstall_removes_inside_the_app_folder_it_opened) ... ok
+2026-11-09T10:01:49.6494656Z test_every_launcher_takes_the_write_bits_away_before_it_starts_anything (test_umask_launch.LauncherUmaskTests.test_every_launcher_takes_the_write_bits_away_before_it_starts_anything) ... ok
+2026-11-09T10:01:50.6812698Z test_python_started_by_the_launcher_under_umask_002_leaves_the_folder_acceptable (test_umask_launch.LauncherUmaskTests.test_python_started_by_the_launcher_under_umask_002_leaves_the_folder_acceptable) ... ok
+2026-11-09T10:01:50.8971090Z test_setup_sh_runs_nothing_under_a_group_writable_umask (test_umask_launch.SetupShUmaskTests.test_setup_sh_runs_nothing_under_a_group_writable_umask) ... ok
+2026-11-09T10:01:50.9017118Z test_bind_and_origin_rules (test_up.ProxyModeTests.test_bind_and_origin_rules) ... ok
+2026-11-09T10:01:50.9049395Z test_change_requests_need_the_public_origin (test_up.ProxyModeTests.test_change_requests_need_the_public_origin) ... ok
+2026-11-09T10:01:50.9085021Z test_only_the_proxy_network_and_the_public_host (test_up.ProxyModeTests.test_only_the_proxy_network_and_the_public_host) ... ok
+2026-11-09T10:01:51.1423412Z test_up_serves_the_app_and_health_and_runs_once (test_up.UpTests.test_up_serves_the_app_and_health_and_runs_once) ... ok
+2026-11-09T10:01:51.2275321Z test_up_without_setup_says_what_to_do (test_up.UpTests.test_up_without_setup_says_what_to_do) ... ok
+2026-11-09T10:01:59.4054253Z test_a_failed_update_leaves_the_old_version_current_and_working (test_update_native.NativeUpdateTests.test_a_failed_update_leaves_the_old_version_current_and_working) ... ok
+2026-11-09T10:02:04.3067320Z test_an_interrupted_update_on_a_broken_environment_still_rolls_back_and_uninstalls (test_update_native.NativeUpdateTests.test_an_interrupted_update_on_a_broken_environment_still_rolls_back_and_uninstalls) ... ok
+2026-11-09T10:02:15.7805795Z test_install_update_rollback_update_uninstall_setup_again_delete_data (test_update_native.NativeUpdateTests.test_install_update_rollback_update_uninstall_setup_again_delete_data) ... ok
+2026-11-09T10:02:21.2751786Z test_uninstall_and_delete_data_work_when_no_environment_starts (test_update_native.NativeUpdateTests.test_uninstall_and_delete_data_work_when_no_environment_starts) ... ok
+2026-11-09T10:02:21.2762652Z test_a_source_missing_from_the_sheet_is_refused (test_window.WindowTests.test_a_source_missing_from_the_sheet_is_refused) ... ok
+2026-11-09T10:02:21.2768485Z test_an_undetermined_relation_reads_cites (test_window.WindowTests.test_an_undetermined_relation_reads_cites) ... ok
+2026-11-09T10:02:21.2773738Z test_cited_phrases_are_our_words_with_links_and_fingerprints (test_window.WindowTests.test_cited_phrases_are_our_words_with_links_and_fingerprints) ... ok
+2026-11-09T10:02:21.2803672Z test_committed_site_matches_a_fresh_build (test_window.WindowTests.test_committed_site_matches_a_fresh_build) ... ok
+2026-11-09T10:02:21.2840802Z test_pages_load_only_their_own_files (test_window.WindowTests.test_pages_load_only_their_own_files) ... ok
+2026-11-09T10:02:21.2894511Z test_scripts_and_styles_make_no_request_and_carry_no_comments (test_window.WindowTests.test_scripts_and_styles_make_no_request_and_carry_no_comments) ... ok
+2026-11-09T10:02:21.2901865Z test_six_spools_keep_their_names_apart (test_window.WindowTests.test_six_spools_keep_their_names_apart) ... ok
+2026-11-09T10:02:21.2910502Z test_text_is_escaped (test_window.WindowTests.test_text_is_escaped) ... ok
+2026-11-09T10:02:21.2916740Z test_the_landing_page_says_what_the_recording_is (test_window.WindowTests.test_the_landing_page_says_what_the_recording_is) ... ok
+2026-11-09T10:02:21.2922529Z test_window_tells_the_recorded_run (test_window.WindowTests.test_window_tells_the_recorded_run) ... ok
+2026-11-09T10:02:21.2941357Z test_a_hard_linked_mp3_is_replaced_not_written_through (test_worker_fresh_audio.FreshAudioTests.test_a_hard_linked_mp3_is_replaced_not_written_through) ... ok
+2026-11-09T10:02:21.2953172Z test_a_hard_linked_wav_is_replaced_not_written_through (test_worker_fresh_audio.FreshAudioTests.test_a_hard_linked_wav_is_replaced_not_written_through) ... ok
+2026-11-09T10:02:21.2963788Z test_a_planted_temporary_name_is_never_reused (test_worker_fresh_audio.FreshAudioTests.test_a_planted_temporary_name_is_never_reused) ... ok
+2026-11-09T10:02:21.2964417Z 
+2026-11-09T10:02:21.2964689Z ======================================================================
+2026-11-09T10:02:21.2965524Z FAIL: test_a_half_made_folder_with_read_only_folders_is_removed_on_a_bsd_chmod (test_bsd_userland.BsdChmodRunTests.test_a_half_made_folder_with_read_only_folders_is_removed_on_a_bsd_chmod)
+2026-11-09T10:02:21.2966583Z The rerun path: chmod_u_w opens read-only folders so rm can remove them; no `--` anywhere.
+2026-11-09T10:02:21.2967337Z ----------------------------------------------------------------------
+2026-11-09T10:02:21.2967763Z Traceback (most recent call last):
+2026-11-09T10:02:21.2975788Z   File "/home/runner/work/composer/composer/tests/test_bsd_userland.py", line 184, in test_a_half_made_folder_with_read_only_folders_is_removed_on_a_bsd_chmod
+2026-11-09T10:02:21.2977075Z     self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
+2026-11-09T10:02:21.2977525Z     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:02:21.2977955Z AssertionError: 1 != 0 : Lensmith Composer 0.2.0 setup
+2026-11-09T10:02:21.2978279Z 
+2026-11-09T10:02:21.2978586Z Step 1 of 7: checking this computer and the app folder (nothing is written yet)
+2026-11-09T10:02:21.2979359Z   an earlier setup stopped in the middle of making /home/runner/.composer-tests/composer-home-zox27pdl/home/app/app/0.2.0; removing that half-made folder first
+2026-11-09T10:02:21.2980059Z chmod: --: No such file or directory
+2026-11-09T10:02:21.2980346Z 
+2026-11-09T10:02:21.2980489Z 
+2026-11-09T10:02:21.2980732Z ======================================================================
+2026-11-09T10:02:21.2981545Z FAIL: test_setup_makes_the_environment_with_group_writable_templates_on_a_bsd_chmod (test_bsd_userland.BsdChmodRunTests.test_setup_makes_the_environment_with_group_writable_templates_on_a_bsd_chmod)
+2026-11-09T10:02:21.2982390Z ----------------------------------------------------------------------
+2026-11-09T10:02:21.2982807Z Traceback (most recent call last):
+2026-11-09T10:02:21.2983531Z   File "/home/runner/work/composer/composer/tests/test_bsd_userland.py", line 150, in test_setup_makes_the_environment_with_group_writable_templates_on_a_bsd_chmod
+2026-11-09T10:02:21.2984276Z     self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
+2026-11-09T10:02:21.2984708Z     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:02:21.2985127Z AssertionError: 1 != 0 : Lensmith Composer 0.2.0 setup
+2026-11-09T10:02:21.2985454Z 
+2026-11-09T10:02:21.2985755Z Step 1 of 7: checking this computer and the app folder (nothing is written yet)
+2026-11-09T10:02:21.2986244Z 
+2026-11-09T10:02:21.2986506Z Step 2 of 7: looking for Python 3.10 or newer (Composer runs on it)
+2026-11-09T10:02:21.2987307Z Found python3 3.9.6 at /home/runner/.composer-tests/composer-sandbox-mfm3xg33/bin/python3; Composer needs 3.10 or newer.
+2026-11-09T10:02:21.2987945Z So there is no usable Python 3.10 or newer here, and Composer needs one.
+2026-11-09T10:02:21.2988295Z 
+2026-11-09T10:02:21.2988626Z Step 3 of 7: getting a private Python 3.12 (about 16 MB for uv, then about 20 to 40 MB for Python)
+2026-11-09T10:02:21.2989193Z   uv 0.5.29 first, the small tool that installs Python; then Python 3.12.9 itself.
+2026-11-09T10:02:21.2990017Z   Nothing goes outside /home/runner/.composer-tests/composer-home-zmx4swmt/home/app. A source that is down is skipped and the next one is tried; every file is checked against a pinned SHA-256.
+2026-11-09T10:02:21.2990905Z   A download that stalls for 30 seconds moves to the next source (COMPOSER_STALL_SECONDS changes that).
+2026-11-09T10:02:21.2991647Z   The download timeout is 300 seconds when uv itself downloads (set UV_HTTP_TIMEOUT to change it). A slow connection can take several minutes.
+2026-11-09T10:02:21.2992252Z   downloading uv 0.5.29 from github.com
+2026-11-09T10:02:21.2992601Z   uv 0.5.29 is ready; now Python 3.12.9
+2026-11-09T10:02:21.2992957Z   downloading Python 3.12.9 from github.com
+2026-11-09T10:02:21.2993531Z   installing Python 3.12.9 into /home/runner/.composer-tests/composer-home-zmx4swmt/home/app/python from the checked download
+2026-11-09T10:02:21.2994034Z 
+2026-11-09T10:02:21.2994451Z Step 4 of 7: making a private environment with Python 3.12.9 (Composer's own folder, so nothing else on this computer is touched)
+2026-11-09T10:02:21.2995011Z chmod: --: No such file or directory
+2026-11-09T10:02:21.2995365Z Downloading cpython-3.12.9-fake (17.1MiB)
+2026-11-09T10:02:21.2995724Z chmod: --: No such file or directory
+2026-11-09T10:02:21.2996118Z 
+2026-11-09T10:02:21.2996865Z setup.sh: stopped unexpectedly during step 4 (making a private environment with Python 3.12.9 (Composer's own folder, so nothing else on this computer is touched)); the message above, if any, is the program's own.
+2026-11-09T10:02:21.2997750Z   Next: run the same command again; if it stops here again, send the log or this screen.
+2026-11-09T10:02:21.2998410Z setup.sh: stopped; what it had made in /home/runner/.composer-tests/composer-home-zmx4swmt/home/app was removed again
+2026-11-09T10:02:21.2998882Z 
+2026-11-09T10:02:21.2999013Z 
+2026-11-09T10:02:21.2999234Z ======================================================================
+2026-11-09T10:02:21.3000070Z FAIL: test_a_folder_whose_name_starts_with_a_dash_and_a_relative_path_are_not_taken_for_options (test_bsd_userland.ChmodHelperTests.test_a_folder_whose_name_starts_with_a_dash_and_a_relative_path_are_not_taken_for_options)
+2026-11-09T10:02:21.3000938Z ----------------------------------------------------------------------
+2026-11-09T10:02:21.3001338Z Traceback (most recent call last):
+2026-11-09T10:02:21.3001864Z   File "/home/runner/work/composer/composer/tests/test_bsd_userland.py", line 206, in setUp
+2026-11-09T10:02:21.3002355Z     self.assertEqual(len(lines), 2)
+2026-11-09T10:02:21.3002690Z     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+2026-11-09T10:02:21.3003017Z AssertionError: 0 != 2
+2026-11-09T10:02:21.3003259Z 
+2026-11-09T10:02:21.3003479Z ======================================================================
+2026-11-09T10:02:21.3004118Z FAIL: test_a_missing_folder_is_an_error_not_a_silent_success (test_bsd_userland.ChmodHelperTests.test_a_missing_folder_is_an_error_not_a_silent_success)
+2026-11-09T10:02:21.3004792Z ----------------------------------------------------------------------
+2026-11-09T10:02:21.3005195Z Traceback (most recent call last):
+2026-11-09T10:02:21.3005673Z   File "/home/runner/work/composer/composer/tests/test_bsd_userland.py", line 206, in setUp
+2026-11-09T10:02:21.3006264Z     self.assertEqual(len(lines), 2)
+2026-11-09T10:02:21.3006676Z     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+2026-11-09T10:02:21.3007021Z AssertionError: 0 != 2
+2026-11-09T10:02:21.3007378Z 
+2026-11-09T10:02:21.3007625Z ======================================================================
+2026-11-09T10:02:21.3008422Z FAIL: test_go_w_takes_group_and_other_write_off_files_and_folders_but_not_through_links (test_bsd_userland.ChmodHelperTests.test_go_w_takes_group_and_other_write_off_files_and_folders_but_not_through_links)
+2026-11-09T10:02:21.3009234Z ----------------------------------------------------------------------
+2026-11-09T10:02:21.3009628Z Traceback (most recent call last):
+2026-11-09T10:02:21.3010104Z   File "/home/runner/work/composer/composer/tests/test_bsd_userland.py", line 206, in setUp
+2026-11-09T10:02:21.3010584Z     self.assertEqual(len(lines), 2)
+2026-11-09T10:02:21.3010915Z     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+2026-11-09T10:02:21.3011233Z AssertionError: 0 != 2
+2026-11-09T10:02:21.3011475Z 
+2026-11-09T10:02:21.3011693Z ======================================================================
+2026-11-09T10:02:21.3012391Z FAIL: test_u_w_gives_the_owner_write_back_on_read_only_folders_and_files (test_bsd_userland.ChmodHelperTests.test_u_w_gives_the_owner_write_back_on_read_only_folders_and_files)
+2026-11-09T10:02:21.3013115Z ----------------------------------------------------------------------
+2026-11-09T10:02:21.3013512Z Traceback (most recent call last):
+2026-11-09T10:02:21.3013986Z   File "/home/runner/work/composer/composer/tests/test_bsd_userland.py", line 206, in setUp
+2026-11-09T10:02:21.3014462Z     self.assertEqual(len(lines), 2)
+2026-11-09T10:02:21.3014789Z     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+2026-11-09T10:02:21.3015125Z AssertionError: 0 != 2
+2026-11-09T10:02:21.3015355Z 
+2026-11-09T10:02:21.3015571Z ======================================================================
+2026-11-09T10:02:21.3016295Z FAIL: test_no_shell_the_installer_runs_uses_a_gnu_only_form (test_bsd_userland.GnuIsmScanTests.test_no_shell_the_installer_runs_uses_a_gnu_only_form)
+2026-11-09T10:02:21.3017066Z ----------------------------------------------------------------------
+2026-11-09T10:02:21.3017467Z Traceback (most recent call last):
+2026-11-09T10:02:21.3018090Z   File "/home/runner/work/composer/composer/tests/test_bsd_userland.py", line 100, in test_no_shell_the_installer_runs_uses_a_gnu_only_form
+2026-11-09T10:02:21.3018690Z     self.assertEqual(found, [], "\n".join(found))
+2026-11-09T10:02:21.3019059Z     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:02:21.3019536Z AssertionError: Lists differ: ['scripts/install/install.sh.in:201: a `--[961 chars]ON"'] != []
+2026-11-09T10:02:21.3019944Z 
+2026-11-09T10:02:21.3020158Z First list contains 8 additional elements.
+2026-11-09T10:02:21.3020502Z First extra element 0:
+2026-11-09T10:02:21.3021059Z 'scripts/install/install.sh.in:201: a `--` after a chmod/chown mode (BSD reads it as a file name): chmod -R u+w -- "$STAGE" 2>/dev/null || true'
+2026-11-09T10:02:21.3021559Z 
+2026-11-09T10:02:21.3022138Z Diff is 1091 characters long. Set self.maxDiff to None to see it. : scripts/install/install.sh.in:201: a `--` after a chmod/chown mode (BSD reads it as a file name): chmod -R u+w -- "$STAGE" 2>/dev/null || true
+2026-11-09T10:02:21.3022995Z setup.sh:221: stat -c / stat -f -c (BSD stat takes -f FORMAT): fs=$(stat -f -c %T -- "$1" 2>/dev/null || true) 
+2026-11-09T10:02:21.3023595Z setup.sh:352: a `--` after a chmod/chown mode (BSD reads it as a file name): chmod -R u+w -- "$left"
+2026-11-09T10:02:21.3024324Z setup.sh:514: a `--` after a chmod/chown mode (BSD reads it as a file name): if [ "$MADE_VERSION" = 1 ]; then chmod -R go-w -- "$H/app/$VERSION" 2>/dev/null || true; fi
+2026-11-09T10:02:21.3025058Z setup.sh:555: a `--` after a chmod/chown mode (BSD reads it as a file name): chmod -R go-w -- "$H/bootstrap"
+2026-11-09T10:02:21.3025707Z setup.sh:695: a `--` after a chmod/chown mode (BSD reads it as a file name): chmod -R go-w -- "$H/python" 2>/dev/null || true
+2026-11-09T10:02:21.3026486Z setup.sh:795: a `--` after a chmod/chown mode (BSD reads it as a file name): chmod -R go-w -- "$H/app/$VERSION"
+2026-11-09T10:02:21.3027109Z setup.sh:811: a `--` after a chmod/chown mode (BSD reads it as a file name): chmod -R go-w -- "$H/app/$VERSION"
+2026-11-09T10:02:21.3027634Z 
+2026-11-09T10:02:21.3027855Z ======================================================================
+2026-11-09T10:02:21.3028539Z FAIL: test_the_group_writable_venv_test_has_teeth_without_the_fix (test_setup_sh_messages.SetupShMessageTests.test_the_group_writable_venv_test_has_teeth_without_the_fix)
+2026-11-09T10:02:21.3029324Z The same run with the chmod lines taken out of a copy of setup.sh fails: the test above can tell.
+2026-11-09T10:02:21.3029856Z ----------------------------------------------------------------------
+2026-11-09T10:02:21.3030246Z Traceback (most recent call last):
+2026-11-09T10:02:21.3030894Z   File "/home/runner/work/composer/composer/tests/test_setup_sh_messages.py", line 334, in test_the_group_writable_venv_test_has_teeth_without_the_fix
+2026-11-09T10:02:21.3031519Z     self.assertNotEqual(run.returncode, 0)
+2026-11-09T10:02:21.3031869Z     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:02:21.3032216Z AssertionError: 0 == 0
+2026-11-09T10:02:21.3032455Z 
+2026-11-09T10:02:21.3032693Z ----------------------------------------------------------------------
+2026-11-09T10:02:21.3033082Z Ran 824 tests in 98.227s
+2026-11-09T10:02:21.3033318Z 
+2026-11-09T10:02:21.3033529Z FAILED (failures=8, skipped=15)
+2026-11-09T10:02:21.3430318Z ##[error]Process completed with exit code 1.
+2026-11-09T10:02:21.3515591Z Post job cleanup.
+2026-11-09T10:02:21.4093097Z [command]/usr/bin/git version
+2026-11-09T10:02:21.4156602Z git version 2.56.0
+2026-11-09T10:02:21.4210460Z Temporarily overriding HOME='/home/runner/work/_temp/dd85144a-7572-44a6-8805-44f95fe65463' before making global git config changes
+2026-11-09T10:02:21.4211285Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-09T10:02:21.4216691Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/composer/composer
+2026-11-09T10:02:21.4304282Z Removing SSH command configuration
+2026-11-09T10:02:21.4306994Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-09T10:02:21.4352492Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-09T10:02:21.4731258Z Removing HTTP extra header
+2026-11-09T10:02:21.4760634Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-09T10:02:21.4817275Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-09T10:02:21.5126599Z Removing includeIf entries pointing to credentials config files
+2026-11-09T10:02:21.5146446Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-09T10:02:21.5166563Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-09T10:02:21.5602227Z Cleaning up orphan processes

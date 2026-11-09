@@ -1,0 +1,16 @@
+commit ba99bf88f49f6b8401643b0b0230f65315a06090
+ci run 42597678418 (https://github.com/lensmith-ai/composer/actions/runs/42597678418)
+status completed
+success | secret scan (gitleaks, history and tree) | job 129094228718 | 2026-11-09T10:00:35Z -> 2026-11-09T10:00:42Z
+failure | one-command install on macOS (Python from setup-python, default folder, macos-15-intel) | job 129094228976 | 2026-11-09T10:00:35Z -> 2026-11-09T10:01:33Z
+failure | one-command install on macOS (group-writable venv templates, own folder, macos-15) | job 129094229058 | 2026-11-09T10:00:35Z -> 2026-11-09T10:01:08Z
+failure | one-command install on macOS (Python from setup-python, default folder, macos-15) | job 129094229066 | 2026-11-09T10:00:36Z -> 2026-11-09T10:01:02Z
+failure | tests (windows-latest, Python 3.13) | job 129094229116 | 2026-11-09T10:00:38Z -> 2026-11-09T10:02:01Z
+failure | one-command install on macOS (no Python on PATH, private Python through uv, macos-15) | job 129094229121 | 2026-11-09T10:00:35Z -> 2026-11-09T10:01:06Z
+success | banned-text test (tree and full history) | job 129094229140 | 2026-11-09T10:00:35Z -> 2026-11-09T10:00:47Z
+failure | tests (windows-latest, Python 3.10) | job 129094229151 | 2026-11-09T10:00:35Z -> 2026-11-09T10:02:50Z
+success | lint workflows (actionlint) | job 129094229167 | 2026-11-09T10:00:35Z -> 2026-11-09T10:00:42Z
+cancelled | tests (macos-14, Python 3.10) | job 129094229211 | 2026-11-09T10:00:32Z -> 2026-11-09T10:00:33Z
+failure | tests (ubuntu-latest, Python 3.13) | job 129094229215 | 2026-11-09T10:00:34Z -> 2026-11-09T10:02:23Z
+failure | tests (ubuntu-latest, Python 3.10) | job 129094229218 | 2026-11-09T10:00:35Z -> 2026-11-09T10:03:05Z
+cancelled | tests (macos-14, Python 3.13) | job 129094229232 | 2026-11-09T10:00:32Z -> 2026-11-09T10:00:34Z

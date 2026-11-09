@@ -1,0 +1,250 @@
+2026-11-09T10:00:47.8926410Z   Downloading certifi-2026.10.23-py3-none-any.whl.metadata (2.5 kB)
+2026-11-09T10:00:47.8941180Z Collecting claim-seal @ https://github.com/lensmith-ai/claim-seal/archive/b0fdf6126196509984d3480867bd4cf861a19f98.tar.gz#sha256=cf4e8a2a419933657c548ee95ca524bbf04b4e60c8427cb02d01faeab5c5ad1e (from lensmith-composer==0.2.0)
+2026-11-09T10:00:48.2516990Z   Downloading b0fdf6126196509984d3480867bd4cf861a19f98.tar.gz (636 kB)
+2026-11-09T10:00:48.3375510Z      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 636.2/636.2 kB 19.7 MB/s  0:00:00
+2026-11-09T10:00:48.3683760Z   Installing build dependencies: started
+2026-11-09T10:00:48.7671520Z   Installing build dependencies: finished with status 'done'
+2026-11-09T10:00:48.7680370Z   Getting requirements to build wheel: started
+2026-11-09T10:00:49.1026610Z   Getting requirements to build wheel: finished with status 'done'
+2026-11-09T10:00:49.1036610Z   Preparing metadata (pyproject.toml): started
+2026-11-09T10:00:49.2512220Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2026-11-09T10:00:49.2566250Z Downloading certifi-2026.10.23-py3-none-any.whl (135 kB)
+2026-11-09T10:00:49.2615840Z Building wheels for collected packages: claim-seal
+2026-11-09T10:00:49.2623170Z   Building wheel for claim-seal (pyproject.toml): started
+2026-11-09T10:00:49.4414500Z   Building wheel for claim-seal (pyproject.toml): finished with status 'done'
+2026-11-09T10:00:49.4431520Z   Created wheel for claim-seal: filename=claim_seal-0.2.0-py3-none-any.whl size=96791 sha256=2511d8cdff415e1d8e4fdc6da5fddef89821b0bba15264d0c1a6d60e3911a32d
+2026-11-09T10:00:49.4434120Z   Stored in directory: /private/var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/pip-ephem-wheel-cache-07aqt0om/wheels/c1/92/e1/4915576a9c769627b7581d18e1e55454ab36f9f9cae676076b
+2026-11-09T10:00:49.4456680Z Successfully built claim-seal
+2026-11-09T10:00:49.4556400Z Installing collected packages: claim-seal, certifi, lensmith-composer
+2026-11-09T10:00:49.5970210Z 
+2026-11-09T10:00:49.5977840Z Successfully installed certifi-2026.10.23 claim-seal-0.2.0 lensmith-composer-0.2.0
+2026-11-09T10:00:49.6631550Z + /var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/tmp3zgpedct/venv/bin/python -m composer --version
+2026-11-09T10:00:49.7967480Z composer 0.2.0
+2026-11-09T10:00:49.8059500Z + /var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/tmp3zgpedct/venv/bin/python -m composer demo --fast
+2026-11-09T10:00:49.9280830Z + /var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/tmp3zgpedct/venv/bin/python -m pip uninstall --yes --quiet pip
+2026-11-09T10:00:50.2468020Z + /Library/Frameworks/Python.framework/Versions/3.13/bin/python -m cyclonedx_py environment --pyproject /Users/runner/work/composer/composer/pyproject.toml --mc-type application --output-reproducible --of JSON --sv 1.6 -o /Users/runner/work/_temp/dist/lensmith_composer-0.2.0.cdx.json /var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/tmp3zgpedct/venv/bin/python
+2026-11-09T10:00:51.8889540Z build: lensmith_composer-0.2.0-py3-none-any.whl, lensmith_composer-0.2.0.tar.gz, lensmith_composer-0.2.0.cdx.json (+26 optional narration parts, scope excluded), SHA256SUMS
+2026-11-09T10:00:52.8721460Z Collecting certifi==2026.10.23
+2026-11-09T10:00:52.8740180Z   Using cached certifi-2026.10.23-py3-none-any.whl.metadata (2.5 kB)
+2026-11-09T10:00:52.8772990Z Using cached certifi-2026.10.23-py3-none-any.whl (135 kB)
+2026-11-09T10:00:52.8820700Z Saved /private/var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/tmptr2c9cja/dl/certifi-2026.10.23-py3-none-any.whl
+2026-11-09T10:00:52.8822270Z Successfully downloaded certifi
+2026-11-09T10:00:53.2060430Z Collecting setuptools==84.2.1
+2026-11-09T10:00:53.2071230Z   Using cached setuptools-84.2.1-py3-none-any.whl.metadata (6.6 kB)
+2026-11-09T10:00:53.2349310Z Using cached setuptools-84.2.1-py3-none-any.whl (876 kB)
+2026-11-09T10:00:53.2640020Z Saved /private/var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/tmptr2c9cja/dl/setuptools-84.2.1-py3-none-any.whl
+2026-11-09T10:00:53.2641420Z Successfully downloaded setuptools
+2026-11-09T10:00:53.8897780Z * Getting build dependencies for wheel...
+2026-11-09T10:00:54.0254960Z running egg_info
+2026-11-09T10:00:54.0270620Z creating claim_seal.egg-info
+2026-11-09T10:00:54.0271760Z writing claim_seal.egg-info/PKG-INFO
+2026-11-09T10:00:54.0276460Z writing dependency_links to claim_seal.egg-info/dependency_links.txt
+2026-11-09T10:00:54.0278210Z writing entry points to claim_seal.egg-info/entry_points.txt
+2026-11-09T10:00:54.0279570Z writing top-level names to claim_seal.egg-info/top_level.txt
+2026-11-09T10:00:54.0280610Z writing manifest file 'claim_seal.egg-info/SOURCES.txt'
+2026-11-09T10:00:54.0329110Z reading manifest file 'claim_seal.egg-info/SOURCES.txt'
+2026-11-09T10:00:54.0330050Z adding license file 'LICENSE'
+2026-11-09T10:00:54.0334390Z writing manifest file 'claim_seal.egg-info/SOURCES.txt'
+2026-11-09T10:00:54.0640750Z * Building wheel...
+2026-11-09T10:00:54.1880430Z running bdist_wheel
+2026-11-09T10:00:54.1948190Z running build
+2026-11-09T10:00:54.1948400Z running build_py
+2026-11-09T10:00:54.1965640Z creating build/lib/claim_seal
+2026-11-09T10:00:54.1967690Z copying claim_seal/jev.py -> build/lib/claim_seal
+2026-11-09T10:00:54.2094940Z copying claim_seal/support.py -> build/lib/claim_seal
+2026-11-09T10:00:54.2102890Z copying claim_seal/resolve.py -> build/lib/claim_seal
+2026-11-09T10:00:54.2105720Z copying claim_seal/completion.py -> build/lib/claim_seal
+2026-11-09T10:00:54.2107430Z copying claim_seal/seal.py -> build/lib/claim_seal
+2026-11-09T10:00:54.2108910Z copying claim_seal/limits.py -> build/lib/claim_seal
+2026-11-09T10:00:54.2110280Z copying claim_seal/normalize.py -> build/lib/claim_seal
+2026-11-09T10:00:54.2112940Z copying claim_seal/relations.py -> build/lib/claim_seal
+2026-11-09T10:00:54.2114740Z copying claim_seal/__init__.py -> build/lib/claim_seal
+2026-11-09T10:00:54.2116520Z copying claim_seal/spans.py -> build/lib/claim_seal
+2026-11-09T10:00:54.2118200Z copying claim_seal/prompts.py -> build/lib/claim_seal
+2026-11-09T10:00:54.2119550Z copying claim_seal/attribution.py -> build/lib/claim_seal
+2026-11-09T10:00:54.2121380Z copying claim_seal/cli.py -> build/lib/claim_seal
+2026-11-09T10:00:54.2122730Z copying claim_seal/evidence.py -> build/lib/claim_seal
+2026-11-09T10:00:54.2124360Z copying claim_seal/__main__.py -> build/lib/claim_seal
+2026-11-09T10:00:54.2125750Z copying claim_seal/output.py -> build/lib/claim_seal
+2026-11-09T10:00:54.2127010Z copying claim_seal/adapters.py -> build/lib/claim_seal
+2026-11-09T10:00:54.2128300Z running egg_info
+2026-11-09T10:00:54.2145760Z writing claim_seal.egg-info/PKG-INFO
+2026-11-09T10:00:54.2151780Z writing dependency_links to claim_seal.egg-info/dependency_links.txt
+2026-11-09T10:00:54.2154530Z writing entry points to claim_seal.egg-info/entry_points.txt
+2026-11-09T10:00:54.2155750Z writing top-level names to claim_seal.egg-info/top_level.txt
+2026-11-09T10:00:54.2179240Z reading manifest file 'claim_seal.egg-info/SOURCES.txt'
+2026-11-09T10:00:54.2181490Z adding license file 'LICENSE'
+2026-11-09T10:00:54.2186280Z writing manifest file 'claim_seal.egg-info/SOURCES.txt'
+2026-11-09T10:00:54.2230310Z installing to build/bdist.macosx-10.13-universal2/wheel
+2026-11-09T10:00:54.2231040Z running install
+2026-11-09T10:00:54.2265270Z running install_lib
+2026-11-09T10:00:54.2280650Z creating build/bdist.macosx-10.13-universal2/wheel
+2026-11-09T10:00:54.2281380Z creating build/bdist.macosx-10.13-universal2/wheel/claim_seal
+2026-11-09T10:00:54.2282590Z copying build/lib/claim_seal/jev.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T10:00:54.2284600Z copying build/lib/claim_seal/support.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T10:00:54.2286120Z copying build/lib/claim_seal/resolve.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T10:00:54.2287650Z copying build/lib/claim_seal/completion.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T10:00:54.2290170Z copying build/lib/claim_seal/seal.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T10:00:54.2295790Z copying build/lib/claim_seal/limits.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T10:00:54.2297490Z copying build/lib/claim_seal/normalize.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T10:00:54.2299240Z copying build/lib/claim_seal/relations.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T10:00:54.2300510Z copying build/lib/claim_seal/__init__.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T10:00:54.2305490Z copying build/lib/claim_seal/spans.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T10:00:54.2309560Z copying build/lib/claim_seal/prompts.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T10:00:54.2312120Z copying build/lib/claim_seal/attribution.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T10:00:54.2314780Z copying build/lib/claim_seal/cli.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T10:00:54.2317170Z copying build/lib/claim_seal/evidence.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T10:00:54.2323130Z copying build/lib/claim_seal/__main__.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T10:00:54.2327230Z copying build/lib/claim_seal/output.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T10:00:54.2330260Z copying build/lib/claim_seal/adapters.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T10:00:54.2334820Z running install_egg_info
+2026-11-09T10:00:54.2396090Z Copying claim_seal.egg-info to build/bdist.macosx-10.13-universal2/wheel/./claim_seal-0.2.0-py3.13.egg-info
+2026-11-09T10:00:54.2414820Z running install_scripts
+2026-11-09T10:00:54.2434990Z creating build/bdist.macosx-10.13-universal2/wheel/claim_seal-0.2.0.dist-info/WHEEL
+2026-11-09T10:00:54.2438160Z creating '/var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/tmptr2c9cja/cs-wheel/.tmp-6hh5n6gs/claim_seal-0.2.0-py3-none-any.whl' and adding 'build/bdist.macosx-10.13-universal2/wheel' to it
+2026-11-09T10:00:54.2445340Z adding 'claim_seal/__init__.py'
+2026-11-09T10:00:54.2450370Z adding 'claim_seal/__main__.py'
+2026-11-09T10:00:54.2457910Z adding 'claim_seal/adapters.py'
+2026-11-09T10:00:54.2465070Z adding 'claim_seal/attribution.py'
+2026-11-09T10:00:54.2486710Z adding 'claim_seal/cli.py'
+2026-11-09T10:00:54.2487440Z adding 'claim_seal/completion.py'
+2026-11-09T10:00:54.2488000Z adding 'claim_seal/evidence.py'
+2026-11-09T10:00:54.2494590Z adding 'claim_seal/jev.py'
+2026-11-09T10:00:54.2496510Z adding 'claim_seal/limits.py'
+2026-11-09T10:00:54.2498040Z adding 'claim_seal/normalize.py'
+2026-11-09T10:00:54.2499490Z adding 'claim_seal/output.py'
+2026-11-09T10:00:54.2503980Z adding 'claim_seal/prompts.py'
+2026-11-09T10:00:54.2507940Z adding 'claim_seal/relations.py'
+2026-11-09T10:00:54.2514790Z adding 'claim_seal/resolve.py'
+2026-11-09T10:00:54.2516520Z adding 'claim_seal/seal.py'
+2026-11-09T10:00:54.2521460Z adding 'claim_seal/spans.py'
+2026-11-09T10:00:54.2542230Z adding 'claim_seal/support.py'
+2026-11-09T10:00:54.2543630Z adding 'claim_seal-0.2.0.dist-info/licenses/LICENSE'
+2026-11-09T10:00:54.2548440Z adding 'claim_seal-0.2.0.dist-info/METADATA'
+2026-11-09T10:00:54.2549230Z adding 'claim_seal-0.2.0.dist-info/WHEEL'
+2026-11-09T10:00:54.2550040Z adding 'claim_seal-0.2.0.dist-info/entry_points.txt'
+2026-11-09T10:00:54.2550850Z adding 'claim_seal-0.2.0.dist-info/top_level.txt'
+2026-11-09T10:00:54.2552340Z adding 'claim_seal-0.2.0.dist-info/RECORD'
+2026-11-09T10:00:54.2580680Z removing build/bdist.macosx-10.13-universal2/wheel
+2026-11-09T10:00:54.2748870Z Successfully built claim_seal-0.2.0-py3-none-any.whl
+2026-11-09T10:00:54.3090170Z make_installer: certifi-2026.10.23-py3-none-any.whl, claim-seal-b0fdf6126196509984d3480867bd4cf861a19f98.tar.gz, claim_seal-0.2.0-py3-none-any.whl, install-pins.json, install.sh, install.sh.sha256, setuptools-84.2.1-py3-none-any.whl
+2026-11-09T10:00:54.3471530Z -rw-r--r--  1 runner  staff   135082 Nov  9 10:00 /Users/runner/work/_temp/kit/certifi-2026.10.23-py3-none-any.whl
+2026-11-09T10:00:54.3472230Z -rw-r--r--  1 runner  staff    96791 Nov  9 10:00 /Users/runner/work/_temp/kit/claim_seal-0.2.0-py3-none-any.whl
+2026-11-09T10:00:54.3472900Z -rw-r--r--  1 runner  staff   636174 Nov  9 10:00 /Users/runner/work/_temp/kit/claim-seal-b0fdf6126196509984d3480867bd4cf861a19f98.tar.gz
+2026-11-09T10:00:54.3473530Z -rw-r--r--  1 runner  staff     1319 Nov  9 10:00 /Users/runner/work/_temp/kit/install-pins.json
+2026-11-09T10:00:54.3474000Z -rwxr-xr-x  1 runner  staff    26702 Nov  9 10:00 /Users/runner/work/_temp/kit/install.sh
+2026-11-09T10:00:54.3474480Z -rw-r--r--  1 runner  staff       77 Nov  9 10:00 /Users/runner/work/_temp/kit/install.sh.sha256
+2026-11-09T10:00:54.3475300Z -rw-r--r--  1 runner  staff   441211 Nov  9 10:00 /Users/runner/work/_temp/kit/lensmith_composer-0.2.0-py3-none-any.whl
+2026-11-09T10:00:54.3475960Z -rw-r--r--  1 runner  staff    20384 Nov  9 10:00 /Users/runner/work/_temp/kit/lensmith_composer-0.2.0.cdx.json
+2026-11-09T10:00:54.3476530Z -rw-r--r--  1 runner  staff  1150894 Nov  9 10:00 /Users/runner/work/_temp/kit/lensmith_composer-0.2.0.tar.gz
+2026-11-09T10:00:54.3477090Z -rw-r--r--  1 runner  staff   876263 Nov  9 10:00 /Users/runner/work/_temp/kit/setuptools-84.2.1-py3-none-any.whl
+2026-11-09T10:00:54.3554740Z ##[group]Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+2026-11-09T10:00:54.3555060Z with:
+2026-11-09T10:00:54.3555200Z   python-version: 3.12
+2026-11-09T10:00:54.3555370Z   check-latest: false
+2026-11-09T10:00:54.3558200Z   token: ***
+2026-11-09T10:00:54.3559190Z   mirror: https://raw.githubusercontent.com/actions/python-versions/main
+2026-11-09T10:00:54.3560110Z   update-environment: true
+2026-11-09T10:00:54.3560350Z   allow-prereleases: false
+2026-11-09T10:00:54.3560540Z   freethreaded: false
+2026-11-09T10:00:54.3560730Z env:
+2026-11-09T10:00:54.3560950Z   CASE: Python from setup-python, default folder
+2026-11-09T10:00:54.3561210Z   TEMPLATES: as-shipped
+2026-11-09T10:00:54.3561390Z   WHICH_HOME: default
+2026-11-09T10:00:54.3561550Z   WHICH_PATH: inherit
+2026-11-09T10:00:54.3561810Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.13.17/arm64
+2026-11-09T10:00:54.3562260Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.13.17/arm64/lib/pkgconfig
+2026-11-09T10:00:54.3562700Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.13.17/arm64
+2026-11-09T10:00:54.3563130Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.13.17/arm64
+2026-11-09T10:00:54.3563480Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.13.17/arm64
+2026-11-09T10:00:54.3563760Z ##[endgroup]
+2026-11-09T10:00:54.5023550Z ##[group]Installed versions
+2026-11-09T10:00:54.5320210Z Successfully set up CPython (3.12.10)
+2026-11-09T10:00:54.5320930Z ##[endgroup]
+2026-11-09T10:00:54.5426850Z ##[group]Run fw=/Library/Frameworks/Python.framework/Versions/3.12/bin
+2026-11-09T10:00:54.5427330Z [36;1mfw=/Library/Frameworks/Python.framework/Versions/3.12/bin[0m
+2026-11-09T10:00:54.5428130Z [36;1mif [ -x "$fw/python3" ]; then echo "$fw" >> "$GITHUB_PATH"; echo "python.org framework Python: $fw/python3"; else echo "no /Library framework Python on this runner; using setup-python's"; fi[0m
+2026-11-09T10:00:54.5429120Z [36;1mpython3 -c 'import sys, sysconfig; print(sys.executable, sys.version.split()[0], "framework=" + str(sysconfig.get_config_var("PYTHONFRAMEWORK")))'[0m
+2026-11-09T10:00:54.5468150Z shell: /bin/bash -e {0}
+2026-11-09T10:00:54.5468410Z env:
+2026-11-09T10:00:54.5468620Z   CASE: Python from setup-python, default folder
+2026-11-09T10:00:54.5468860Z   TEMPLATES: as-shipped
+2026-11-09T10:00:54.5469040Z   WHICH_HOME: default
+2026-11-09T10:00:54.5469220Z   WHICH_PATH: inherit
+2026-11-09T10:00:54.5469540Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T10:00:54.5469990Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/arm64/lib/pkgconfig
+2026-11-09T10:00:54.5470430Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T10:00:54.5470810Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T10:00:54.5471220Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T10:00:54.5471500Z ##[endgroup]
+2026-11-09T10:00:54.5842490Z python.org framework Python: /Library/Frameworks/Python.framework/Versions/3.12/bin/python3
+2026-11-09T10:00:54.7505330Z /Library/Frameworks/Python.framework/Versions/3.12/bin/python3 3.12.10 framework=Python
+2026-11-09T10:00:54.7566180Z ##[group]Run cd "$RUNNER_TEMP/kit"
+2026-11-09T10:00:54.7566470Z [36;1mcd "$RUNNER_TEMP/kit"[0m
+2026-11-09T10:00:54.7566850Z [36;1mif [ "$WHICH_HOME" = own ]; then H="$RUNNER_TEMP/composer-home"; else H="$HOME/.lensmith-composer"; fi[0m
+2026-11-09T10:00:54.7567400Z [36;1mecho "H=$H" >> "$GITHUB_ENV"[0m
+2026-11-09T10:00:54.7567630Z [36;1mif [ "$WHICH_PATH" = bare ]; then[0m
+2026-11-09T10:00:54.7568050Z [36;1m  # no Python 3.10+ anywhere the installer looks: it must fetch uv and a private Python, as on a fresh Mac[0m
+2026-11-09T10:00:54.7568770Z [36;1m  COMPOSER_PYTHON_PATH_ONLY=1 COMPOSER_FILES_DIR="$PWD" PATH=/usr/bin:/bin:/usr/sbin:/sbin sh install.sh --home "$H" --no-open --no-start --path[0m
+2026-11-09T10:00:54.7569270Z [36;1melse[0m
+2026-11-09T10:00:54.7569550Z [36;1m  COMPOSER_FILES_DIR="$PWD" sh install.sh --home "$H" --no-open --no-start --path[0m
+2026-11-09T10:00:54.7569900Z [36;1mfi[0m
+2026-11-09T10:00:54.7601900Z shell: /bin/bash -e {0}
+2026-11-09T10:00:54.7602150Z env:
+2026-11-09T10:00:54.7602360Z   CASE: Python from setup-python, default folder
+2026-11-09T10:00:54.7602630Z   TEMPLATES: as-shipped
+2026-11-09T10:00:54.7602800Z   WHICH_HOME: default
+2026-11-09T10:00:54.7602980Z   WHICH_PATH: inherit
+2026-11-09T10:00:54.7603260Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T10:00:54.7603740Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/arm64/lib/pkgconfig
+2026-11-09T10:00:54.7604340Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T10:00:54.7604740Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T10:00:54.7605130Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T10:00:54.7605440Z ##[endgroup]
+2026-11-09T10:00:54.8035700Z Lensmith Composer 0.2.0: one-command install
+2026-11-09T10:00:54.8036530Z 
+2026-11-09T10:00:54.8036920Z   What happens: 8 steps, about 1 to 3 minutes on a normal connection.
+2026-11-09T10:00:54.8038530Z   Everything goes in /Users/runner/.lensmith-composer. No sudo. At the end it makes a short command, lensmith: a link in ~/.local/bin if that
+2026-11-09T10:00:54.8040240Z   is yours and on your PATH, or (asked first) 3 lines in your shell profile. It tells you what it changed.
+2026-11-09T10:00:54.8042260Z   Besides /Users/runner/.lensmith-composer it writes only a log file and a temporary folder in /var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/ (the folder is removed again).
+2026-11-09T10:00:54.8044270Z   Every download is checked against a SHA-256 pinned in this release; a source that is down is skipped.
+2026-11-09T10:00:54.8162050Z   No terminal to ask on and no ANTHROPIC_API_KEY set: installing in demo mode (add a key later: composer setup --reconfigure provider).
+2026-11-09T10:00:54.8198050Z 
+2026-11-09T10:00:54.8199380Z Step 1 of 8 (0:00 elapsed): getting the installer kit (Composer 0.2.0's release source, about 1 MB, checked by SHA-256)
+2026-11-09T10:00:54.8501320Z   using your file /Users/runner/work/_temp/kit/lensmith_composer-0.2.0.tar.gz (its SHA-256 matches the pin)
+2026-11-09T10:00:54.8983020Z   kit ready
+2026-11-09T10:00:54.9284260Z Lensmith Composer 0.2.0 setup
+2026-11-09T10:00:54.9287610Z 
+2026-11-09T10:00:54.9358460Z Step 2 of 8 (0:00 elapsed): checking this computer and the app folder (nothing is written yet)
+2026-11-09T10:00:55.2723660Z 
+2026-11-09T10:00:55.2767810Z Step 3 of 8 (0:01 elapsed): looking for Python 3.10 or newer (Composer runs on it)
+2026-11-09T10:00:55.2769330Z   found Python 3.12.10 at /Library/Frameworks/Python.framework/Versions/3.12/bin/python3
+2026-11-09T10:00:55.6325280Z Composer 0.2.0 setup. App folder: /Users/runner/.lensmith-composer
+2026-11-09T10:00:55.6326300Z preflight: every check passed; nothing was written
+2026-11-09T10:00:55.7725270Z 
+2026-11-09T10:00:55.7782610Z Step 4 of 8 (0:01 elapsed): using Python 3.12.10 (nothing to download)
+2026-11-09T10:00:55.7798970Z 
+2026-11-09T10:00:55.7851370Z Step 5 of 8 (0:01 elapsed): making a private environment with Python 3.12.10 (Composer's own folder, so nothing else on this computer is touched)
+2026-11-09T10:00:57.9386240Z chmod: --: No such file or directory
+2026-11-09T10:00:57.9409780Z 
+2026-11-09T10:00:57.9412540Z setup.sh: stopped unexpectedly during step 5 (making a private environment with Python 3.12.10 (Composer's own folder, so nothing else on this computer is touched)); the message above, if any, is the program's own.
+2026-11-09T10:00:57.9416870Z   Next: run the same command again; if it stops here again, send the log (/var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/lensmith-composer-install-log.LHE3ZS) or this screen.
+2026-11-09T10:00:58.0590200Z setup.sh: stopped; what it had made in /Users/runner/.lensmith-composer was removed again
+2026-11-09T10:00:58.0897350Z ##[error]Process completed with exit code 1.
+2026-11-09T10:00:58.1014760Z Post job cleanup.
+2026-11-09T10:00:58.1993660Z [command]/opt/homebrew/bin/git version
+2026-11-09T10:00:58.2182720Z git version 2.56.0
+2026-11-09T10:00:58.2199810Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/67280b94-0e25-440c-a31d-b6fb4f8f6505/.gitconfig'
+2026-11-09T10:00:58.2214630Z Temporarily overriding HOME='/Users/runner/work/_temp/67280b94-0e25-440c-a31d-b6fb4f8f6505' before making global git config changes
+2026-11-09T10:00:58.2216330Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-09T10:00:58.2221730Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/composer/composer
+2026-11-09T10:00:58.2318200Z Removing SSH command configuration
+2026-11-09T10:00:58.2327630Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-09T10:00:58.2436710Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-09T10:00:58.3305740Z Removing HTTP extra header
+2026-11-09T10:00:58.3309730Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-09T10:00:58.3370900Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-09T10:00:58.4103420Z Removing includeIf entries pointing to credentials config files
+2026-11-09T10:00:58.4107500Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-09T10:00:58.4164850Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-09T10:00:58.5038610Z Cleaning up orphan processes

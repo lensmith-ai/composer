@@ -1,0 +1,250 @@
+2026-11-09T10:01:58.3024725Z ======================================================================
+2026-11-09T10:01:58.3025216Z ERROR: test_status_carries_the_run_as_text_lines_and_keeps_phase_records (test_stage_lines.JobLinesTests.test_status_carries_the_run_as_text_lines_and_keeps_phase_records)
+2026-11-09T10:01:58.3025334Z ----------------------------------------------------------------------
+2026-11-09T10:01:58.3025420Z Traceback (most recent call last):
+2026-11-09T10:01:58.3025594Z   File "D:\a\composer\composer\tests\test_stage_lines.py", line 185, in setUp
+2026-11-09T10:01:58.3025882Z     self.app = server.App(Registry(read_file(BUNDLED)), lambda: "model", data_root=self.tmp.name, compose=compose)
+2026-11-09T10:01:58.3026024Z                ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3026253Z   File "D:\a\composer\composer\composer\server.py", line 150, in __init__
+2026-11-09T10:01:58.3026480Z     self.jobs = JobStore(root, worker=job_worker or self._job_worker, on_finished=on_finished)
+2026-11-09T10:01:58.3026591Z                 ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3026767Z   File "D:\a\composer\composer\composer\job_store.py", line 50, in __init__
+2026-11-09T10:01:58.3026845Z     self._initialize_or_recover()
+2026-11-09T10:01:58.3026905Z     ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+2026-11-09T10:01:58.3027133Z   File "D:\a\composer\composer\composer\job_store.py", line 445, in _initialize_or_recover
+2026-11-09T10:01:58.3027280Z     self._atomic_text(self.generation_path("g1") / "VERSION", "1\n")
+2026-11-09T10:01:58.3027374Z     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3027570Z   File "D:\a\composer\composer\composer\job_store.py", line 542, in _atomic_text
+2026-11-09T10:01:58.3027712Z     descriptor = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+2026-11-09T10:01:58.3027806Z                                                     ^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3027937Z AttributeError: module 'os' has no attribute 'O_DIRECTORY'
+2026-11-09T10:01:58.3027941Z 
+2026-11-09T10:01:58.3028024Z ======================================================================
+2026-11-09T10:01:58.3028281Z ERROR: test_serve_prints_progress_too (test_terminal.WiringTests.test_serve_prints_progress_too)
+2026-11-09T10:01:58.3028394Z ----------------------------------------------------------------------
+2026-11-09T10:01:58.3028480Z Traceback (most recent call last):
+2026-11-09T10:01:58.3028744Z   File "D:\a\composer\composer\tests\test_terminal.py", line 160, in test_serve_prints_progress_too
+2026-11-09T10:01:58.3028930Z     text = self.started_app("serve", "--out", str(home / "briefs"), "--port", "18998")
+2026-11-09T10:01:58.3029121Z   File "D:\a\composer\composer\tests\test_terminal.py", line 145, in started_app
+2026-11-09T10:01:58.3029220Z     self.assertEqual(cli.main(list(argv)), 0)
+2026-11-09T10:01:58.3029288Z                      ~~~~~~~~^^^^^^^^^^^^
+2026-11-09T10:01:58.3029434Z   File "D:\a\composer\composer\composer\cli.py", line 507, in main
+2026-11-09T10:01:58.3029501Z     return args.func(args)
+2026-11-09T10:01:58.3029570Z            ~~~~~~~~~^^^^^^
+2026-11-09T10:01:58.3029734Z   File "D:\a\composer\composer\composer\cli.py", line 171, in cmd_serve
+2026-11-09T10:01:58.3030002Z     app = server.App(reg, lambda: from_env(args.provider, args.model), make_checker=lambda: checker_from_env(),
+2026-11-09T10:01:58.3030312Z                      compose=terminal.with_progress(pipeline.compose), out_dir=out, data_root=data_root, passphrase=passphrase,
+2026-11-09T10:01:58.3030461Z     ...<2 lines>...
+2026-11-09T10:01:58.3030599Z                              source_path.parent / "composer-packages.json")),
+2026-11-09T10:01:58.3030784Z                      lens_store=lenses.LensStore(source_path.parent / "composer-lenses"))
+2026-11-09T10:01:58.3030947Z   File "D:\a\composer\composer\composer\server.py", line 150, in __init__
+2026-11-09T10:01:58.3031159Z     self.jobs = JobStore(root, worker=job_worker or self._job_worker, on_finished=on_finished)
+2026-11-09T10:01:58.3031269Z                 ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3031443Z   File "D:\a\composer\composer\composer\job_store.py", line 50, in __init__
+2026-11-09T10:01:58.3031530Z     self._initialize_or_recover()
+2026-11-09T10:01:58.3031595Z     ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+2026-11-09T10:01:58.3031817Z   File "D:\a\composer\composer\composer\job_store.py", line 445, in _initialize_or_recover
+2026-11-09T10:01:58.3031958Z     self._atomic_text(self.generation_path("g1") / "VERSION", "1\n")
+2026-11-09T10:01:58.3032062Z     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3032334Z   File "D:\a\composer\composer\composer\job_store.py", line 542, in _atomic_text
+2026-11-09T10:01:58.3032464Z     descriptor = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+2026-11-09T10:01:58.3032557Z                                                     ^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3032679Z AttributeError: module 'os' has no attribute 'O_DIRECTORY'
+2026-11-09T10:01:58.3032690Z 
+2026-11-09T10:01:58.3032774Z ======================================================================
+2026-11-09T10:01:58.3033192Z ERROR: test_up_prints_progress_for_a_brief_started_from_the_page (test_terminal.WiringTests.test_up_prints_progress_for_a_brief_started_from_the_page)
+2026-11-09T10:01:58.3033313Z ----------------------------------------------------------------------
+2026-11-09T10:01:58.3033402Z Traceback (most recent call last):
+2026-11-09T10:01:58.3033741Z   File "D:\a\composer\composer\tests\test_terminal.py", line 152, in test_up_prints_progress_for_a_brief_started_from_the_page
+2026-11-09T10:01:58.3034016Z     installer.run(home=target, data=None, answers_file=None, assume_yes=True, reconfigure=[], data_only=False,
+2026-11-09T10:01:58.3034160Z     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3034257Z                   out=lambda *_: None, interactive=False)
+2026-11-09T10:01:58.3034345Z                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3034515Z   File "D:\a\composer\composer\composer\installer.py", line 664, in run
+2026-11-09T10:01:58.3034791Z     return _run(home=home, data=data, answers_file=answers_file, assume_yes=assume_yes, reconfigure=reconfigure,
+2026-11-09T10:01:58.3035049Z                 data_only=data_only, home_created_by_bootstrap=home_created_by_bootstrap, check_only=check_only,
+2026-11-09T10:01:58.3035293Z                 out=out, read=read, secret=secret, interactive=interactive, detect=detect, get=get, check=check,
+2026-11-09T10:01:58.3035538Z                 install=install, download=download, install_parser=install_parser, test_call=test_call)
+2026-11-09T10:01:58.3035709Z   File "D:\a\composer\composer\composer\installer.py", line 767, in _run
+2026-11-09T10:01:58.3035789Z     S.generation_dir(data)
+2026-11-09T10:01:58.3035861Z     ~~~~~~~~~~~~~~~~^^^^^^
+2026-11-09T10:01:58.3036053Z   File "D:\a\composer\composer\composer\settings.py", line 57, in generation_dir
+2026-11-09T10:01:58.3036129Z     JobStore(data, worker=None)
+2026-11-09T10:01:58.3036199Z     ~~~~~~~~^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3036371Z   File "D:\a\composer\composer\composer\job_store.py", line 50, in __init__
+2026-11-09T10:01:58.3036454Z     self._initialize_or_recover()
+2026-11-09T10:01:58.3036521Z     ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+2026-11-09T10:01:58.3036820Z   File "D:\a\composer\composer\composer\job_store.py", line 445, in _initialize_or_recover
+2026-11-09T10:01:58.3036971Z     self._atomic_text(self.generation_path("g1") / "VERSION", "1\n")
+2026-11-09T10:01:58.3037065Z     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3037346Z   File "D:\a\composer\composer\composer\job_store.py", line 542, in _atomic_text
+2026-11-09T10:01:58.3037502Z     descriptor = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+2026-11-09T10:01:58.3037584Z                                                     ^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3037719Z AttributeError: module 'os' has no attribute 'O_DIRECTORY'
+2026-11-09T10:01:58.3037723Z 
+2026-11-09T10:01:58.3037810Z ======================================================================
+2026-11-09T10:01:58.3038224Z ERROR: test_the_compose_route_still_refuses_a_topic (test_topic_field.TopicFieldTests.test_the_compose_route_still_refuses_a_topic)
+2026-11-09T10:01:58.3038356Z ----------------------------------------------------------------------
+2026-11-09T10:01:58.3038438Z Traceback (most recent call last):
+2026-11-09T10:01:58.3038749Z   File "D:\a\composer\composer\tests\test_topic_field.py", line 25, in test_the_compose_route_still_refuses_a_topic
+2026-11-09T10:01:58.3039065Z     app = server.App(Registry(read_file(BUNDLED)), lambda: "model", data_root=Path(tmp.name) / "data")
+2026-11-09T10:01:58.3039242Z   File "D:\a\composer\composer\composer\server.py", line 150, in __init__
+2026-11-09T10:01:58.3039461Z     self.jobs = JobStore(root, worker=job_worker or self._job_worker, on_finished=on_finished)
+2026-11-09T10:01:58.3039578Z                 ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3039747Z   File "D:\a\composer\composer\composer\job_store.py", line 50, in __init__
+2026-11-09T10:01:58.3039828Z     self._initialize_or_recover()
+2026-11-09T10:01:58.3039887Z     ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+2026-11-09T10:01:58.3040117Z   File "D:\a\composer\composer\composer\job_store.py", line 445, in _initialize_or_recover
+2026-11-09T10:01:58.3040260Z     self._atomic_text(self.generation_path("g1") / "VERSION", "1\n")
+2026-11-09T10:01:58.3040363Z     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3040558Z   File "D:\a\composer\composer\composer\job_store.py", line 542, in _atomic_text
+2026-11-09T10:01:58.3040698Z     descriptor = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+2026-11-09T10:01:58.3040786Z                                                     ^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3040909Z AttributeError: module 'os' has no attribute 'O_DIRECTORY'
+2026-11-09T10:01:58.3040921Z 
+2026-11-09T10:01:58.3041007Z ======================================================================
+2026-11-09T10:01:58.3041483Z ERROR: test_only_the_three_places_inside_the_data_folder_pass (test_trust_admission.TheJournalRuleTests.test_only_the_three_places_inside_the_data_folder_pass)
+2026-11-09T10:01:58.3041618Z ----------------------------------------------------------------------
+2026-11-09T10:01:58.3041704Z Traceback (most recent call last):
+2026-11-09T10:01:58.3042060Z   File "D:\a\composer\composer\tests\test_trust_admission.py", line 51, in test_only_the_three_places_inside_the_data_folder_pass
+2026-11-09T10:01:58.3042166Z     self.assertEqual(L._restore_paths(data, good),
+2026-11-09T10:01:58.3042244Z                      ~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+2026-11-09T10:01:58.3042438Z   File "D:\a\composer\composer\composer\lifecycle.py", line 450, in _restore_paths
+2026-11-09T10:01:58.3042520Z     raise bad(value)
+2026-11-09T10:01:58.3043800Z composer.lifecycle.LifecycleError: refused: the recovery journal (\somewhere\data\recovery\journal\events.jsonl) names '\\somewhere\\data\\generations\\g2' for an unfinished restore, which is not where Composer keeps it inside the data folder; nothing was moved or removed. If you did not make this record, look at the journal before running Composer again
+2026-11-09T10:01:58.3043806Z 
+2026-11-09T10:01:58.3044414Z ======================================================================
+2026-11-09T10:01:58.3044630Z ERROR: test_bind_and_origin_rules (test_up.ProxyModeTests.test_bind_and_origin_rules)
+2026-11-09T10:01:58.3044768Z ----------------------------------------------------------------------
+2026-11-09T10:01:58.3044848Z Traceback (most recent call last):
+2026-11-09T10:01:58.3045007Z   File "D:\a\composer\composer\tests\test_up.py", line 99, in setUp
+2026-11-09T10:01:58.3045146Z     self.app = server.App(Registry.load(None), lambda: object(),
+2026-11-09T10:01:58.3045239Z                ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3045441Z                           compose=lambda **_: (_ for _ in ()).throw(AssertionError("no compose here")))
+2026-11-09T10:01:58.3045567Z                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3045745Z   File "D:\a\composer\composer\composer\server.py", line 150, in __init__
+2026-11-09T10:01:58.3045964Z     self.jobs = JobStore(root, worker=job_worker or self._job_worker, on_finished=on_finished)
+2026-11-09T10:01:58.3046161Z                 ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3046339Z   File "D:\a\composer\composer\composer\job_store.py", line 50, in __init__
+2026-11-09T10:01:58.3046413Z     self._initialize_or_recover()
+2026-11-09T10:01:58.3046483Z     ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+2026-11-09T10:01:58.3046702Z   File "D:\a\composer\composer\composer\job_store.py", line 445, in _initialize_or_recover
+2026-11-09T10:01:58.3046853Z     self._atomic_text(self.generation_path("g1") / "VERSION", "1\n")
+2026-11-09T10:01:58.3046957Z     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3047146Z   File "D:\a\composer\composer\composer\job_store.py", line 542, in _atomic_text
+2026-11-09T10:01:58.3047298Z     descriptor = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+2026-11-09T10:01:58.3047389Z                                                     ^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3047519Z AttributeError: module 'os' has no attribute 'O_DIRECTORY'
+2026-11-09T10:01:58.3047524Z 
+2026-11-09T10:01:58.3047617Z ======================================================================
+2026-11-09T10:01:58.3047955Z ERROR: test_change_requests_need_the_public_origin (test_up.ProxyModeTests.test_change_requests_need_the_public_origin)
+2026-11-09T10:01:58.3048086Z ----------------------------------------------------------------------
+2026-11-09T10:01:58.3048170Z Traceback (most recent call last):
+2026-11-09T10:01:58.3048318Z   File "D:\a\composer\composer\tests\test_up.py", line 99, in setUp
+2026-11-09T10:01:58.3048460Z     self.app = server.App(Registry.load(None), lambda: object(),
+2026-11-09T10:01:58.3048552Z                ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3048756Z                           compose=lambda **_: (_ for _ in ()).throw(AssertionError("no compose here")))
+2026-11-09T10:01:58.3048882Z                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3049052Z   File "D:\a\composer\composer\composer\server.py", line 150, in __init__
+2026-11-09T10:01:58.3049278Z     self.jobs = JobStore(root, worker=job_worker or self._job_worker, on_finished=on_finished)
+2026-11-09T10:01:58.3049393Z                 ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3049575Z   File "D:\a\composer\composer\composer\job_store.py", line 50, in __init__
+2026-11-09T10:01:58.3049655Z     self._initialize_or_recover()
+2026-11-09T10:01:58.3049716Z     ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+2026-11-09T10:01:58.3049950Z   File "D:\a\composer\composer\composer\job_store.py", line 445, in _initialize_or_recover
+2026-11-09T10:01:58.3050097Z     self._atomic_text(self.generation_path("g1") / "VERSION", "1\n")
+2026-11-09T10:01:58.3050447Z     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3050644Z   File "D:\a\composer\composer\composer\job_store.py", line 542, in _atomic_text
+2026-11-09T10:01:58.3050792Z     descriptor = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+2026-11-09T10:01:58.3050883Z                                                     ^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3051024Z AttributeError: module 'os' has no attribute 'O_DIRECTORY'
+2026-11-09T10:01:58.3051028Z 
+2026-11-09T10:01:58.3051115Z ======================================================================
+2026-11-09T10:01:58.3051471Z ERROR: test_only_the_proxy_network_and_the_public_host (test_up.ProxyModeTests.test_only_the_proxy_network_and_the_public_host)
+2026-11-09T10:01:58.3051587Z ----------------------------------------------------------------------
+2026-11-09T10:01:58.3051673Z Traceback (most recent call last):
+2026-11-09T10:01:58.3051829Z   File "D:\a\composer\composer\tests\test_up.py", line 99, in setUp
+2026-11-09T10:01:58.3051962Z     self.app = server.App(Registry.load(None), lambda: object(),
+2026-11-09T10:01:58.3052060Z                ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3052318Z                           compose=lambda **_: (_ for _ in ()).throw(AssertionError("no compose here")))
+2026-11-09T10:01:58.3052449Z                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3052625Z   File "D:\a\composer\composer\composer\server.py", line 150, in __init__
+2026-11-09T10:01:58.3052843Z     self.jobs = JobStore(root, worker=job_worker or self._job_worker, on_finished=on_finished)
+2026-11-09T10:01:58.3052967Z                 ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3053140Z   File "D:\a\composer\composer\composer\job_store.py", line 50, in __init__
+2026-11-09T10:01:58.3053220Z     self._initialize_or_recover()
+2026-11-09T10:01:58.3053286Z     ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+2026-11-09T10:01:58.3053506Z   File "D:\a\composer\composer\composer\job_store.py", line 445, in _initialize_or_recover
+2026-11-09T10:01:58.3053662Z     self._atomic_text(self.generation_path("g1") / "VERSION", "1\n")
+2026-11-09T10:01:58.3053759Z     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3053953Z   File "D:\a\composer\composer\composer\job_store.py", line 542, in _atomic_text
+2026-11-09T10:01:58.3054109Z     descriptor = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+2026-11-09T10:01:58.3054196Z                                                     ^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3054333Z AttributeError: module 'os' has no attribute 'O_DIRECTORY'
+2026-11-09T10:01:58.3054337Z 
+2026-11-09T10:01:58.3054428Z ======================================================================
+2026-11-09T10:01:58.3055006Z FAIL: test_a_failed_runtime_install_leaves_nothing_that_looks_installed (test_review_fixes.NarrationAndSecretsFixTests.test_a_failed_runtime_install_leaves_nothing_that_looks_installed)
+2026-11-09T10:01:58.3055134Z ----------------------------------------------------------------------
+2026-11-09T10:01:58.3055214Z Traceback (most recent call last):
+2026-11-09T10:01:58.3055605Z   File "D:\a\composer\composer\tests\test_review_fixes.py", line 159, in test_a_failed_runtime_install_leaves_nothing_that_looks_installed
+2026-11-09T10:01:58.3055736Z     self.assertFalse((home / "narration" / "venv").exists())
+2026-11-09T10:01:58.3055830Z     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3055914Z AssertionError: True is not false
+2026-11-09T10:01:58.3055919Z 
+2026-11-09T10:01:58.3056002Z ======================================================================
+2026-11-09T10:01:58.3056516Z FAIL: test_a_server_that_never_answers_the_handshake_is_cut_at_the_total_limit (test_security.TotalTimeTests.test_a_server_that_never_answers_the_handshake_is_cut_at_the_total_limit)
+2026-11-09T10:01:58.3056898Z ----------------------------------------------------------------------
+2026-11-09T10:01:58.3056977Z Traceback (most recent call last):
+2026-11-09T10:01:58.3057386Z   File "D:\a\composer\composer\tests\test_security.py", line 188, in test_a_server_that_never_answers_the_handshake_is_cut_at_the_total_limit
+2026-11-09T10:01:58.3057522Z     self.assertLess(time.monotonic() - started, 5)
+2026-11-09T10:01:58.3057608Z     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3057709Z AssertionError: 30.002072499999997 not less than 5
+2026-11-09T10:01:58.3057713Z 
+2026-11-09T10:01:58.3057799Z ======================================================================
+2026-11-09T10:01:58.3058347Z FAIL: test_a_posix_disk_keeps_the_chmod_advice_and_names_the_folder (test_trust_messages.AdviceRuleTests.test_a_posix_disk_keeps_the_chmod_advice_and_names_the_folder) (what='app folder')
+2026-11-09T10:01:58.3058464Z ----------------------------------------------------------------------
+2026-11-09T10:01:58.3058546Z Traceback (most recent call last):
+2026-11-09T10:01:58.3058920Z   File "D:\a\composer\composer\tests\test_trust_messages.py", line 63, in test_a_posix_disk_keeps_the_chmod_advice_and_names_the_folder
+2026-11-09T10:01:58.3059098Z     self.assertIn("Fix: chmod go-w /somewhere/x", why)
+2026-11-09T10:01:58.3059190Z     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3059854Z AssertionError: 'Fix: chmod go-w /somewhere/x' not found in '\\somewhere\\x can be written by other accounts (mode 0775). Fix: chmod go-w \\somewhere\\x, or put the app folder somewhere else: --home <a folder of your own> (or COMPOSER_HOME)'
+2026-11-09T10:01:58.3059859Z 
+2026-11-09T10:01:58.3059946Z ======================================================================
+2026-11-09T10:01:58.3060488Z FAIL: test_a_posix_disk_keeps_the_chmod_advice_and_names_the_folder (test_trust_messages.AdviceRuleTests.test_a_posix_disk_keeps_the_chmod_advice_and_names_the_folder) (what='data folder')
+2026-11-09T10:01:58.3060605Z ----------------------------------------------------------------------
+2026-11-09T10:01:58.3060696Z Traceback (most recent call last):
+2026-11-09T10:01:58.3061072Z   File "D:\a\composer\composer\tests\test_trust_messages.py", line 63, in test_a_posix_disk_keeps_the_chmod_advice_and_names_the_folder
+2026-11-09T10:01:58.3061181Z     self.assertIn("Fix: chmod go-w /somewhere/x", why)
+2026-11-09T10:01:58.3061268Z     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3061922Z AssertionError: 'Fix: chmod go-w /somewhere/x' not found in '\\somewhere\\x can be written by other accounts (mode 0775). Fix: chmod go-w \\somewhere\\x, or put the data folder somewhere else: --data <a folder of your own> (or COMPOSER_DATA)'
+2026-11-09T10:01:58.3061927Z 
+2026-11-09T10:01:58.3062012Z ======================================================================
+2026-11-09T10:01:58.3062526Z FAIL: test_the_mount_table_names_the_filesystem_of_the_longest_mount_point (test_trust_messages.AdviceRuleTests.test_the_mount_table_names_the_filesystem_of_the_longest_mount_point)
+2026-11-09T10:01:58.3062642Z ----------------------------------------------------------------------
+2026-11-09T10:01:58.3062725Z Traceback (most recent call last):
+2026-11-09T10:01:58.3063281Z   File "D:\a\composer\composer\tests\test_trust_messages.py", line 40, in test_the_mount_table_names_the_filesystem_of_the_longest_mount_point
+2026-11-09T10:01:58.3063482Z     self.assertEqual(H.filesystem_type("/media/usb disk/cdata", MOUNTINFO), "vfat")
+2026-11-09T10:01:58.3063601Z     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T10:01:58.3063677Z AssertionError: None != 'vfat'
+2026-11-09T10:01:58.3063682Z 
+2026-11-09T10:01:58.3063805Z ----------------------------------------------------------------------
+2026-11-09T10:01:58.3063883Z Ran 812 tests in 57.747s
+2026-11-09T10:01:58.3063888Z 
+2026-11-09T10:01:58.3063981Z FAILED (failures=5, errors=183, skipped=177)
+2026-11-09T10:01:58.3987485Z ##[error]Process completed with exit code 1.
+2026-11-09T10:01:58.4193223Z Post job cleanup.
+2026-11-09T10:01:58.5537834Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-11-09T10:01:58.5843533Z git version 2.56.0.windows.4
+2026-11-09T10:01:58.5918930Z Temporarily overriding HOME='D:\a\_temp\51883c6d-69c3-45eb-9b5a-e4991adbcba4' before making global git config changes
+2026-11-09T10:01:58.5921241Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-09T10:01:58.5922157Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\composer\composer
+2026-11-09T10:01:58.6232823Z Removing SSH command configuration
+2026-11-09T10:01:58.6246747Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-11-09T10:01:58.6559481Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-11-09T10:01:59.2090279Z Removing HTTP extra header
+2026-11-09T10:01:59.2099911Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-09T10:01:59.2410672Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-11-09T10:01:59.7311098Z Removing includeIf entries pointing to credentials config files
+2026-11-09T10:01:59.7321182Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-09T10:01:59.7625847Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-11-09T10:02:00.2871295Z Cleaning up orphan processes
