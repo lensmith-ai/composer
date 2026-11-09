@@ -106,7 +106,7 @@ The full app, on your computer or your own server. In plain words:
 - Releases you can check: SHA256SUMS, a CycloneDX SBOM, GitHub build-provenance attestations for every file the workflow built (plus an SBOM attestation for the wheel and sdist) and for the container
   image, and a release note checked by claim-seal against this file. `scripts/release/rc.py` builds release
   candidates the same way, from chosen commits, for testing before a release.
-- Tests on Linux, macOS and Windows with Python 3.10 and 3.13, a secret scan, a workflow lint, and a nightly check
+- Tests on Linux and macOS (Windows is not supported natively: use WSL2 or the container) with Python 3.10 and 3.13, a secret scan, a workflow lint, and a nightly check
   of the server setup and the pages in two browsers.
 
 ### Fixed

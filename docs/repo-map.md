@@ -23,7 +23,7 @@
 | `tests/deploy/proof.sh` | the always-on proof: HTTPS through Caddy with the login, the app port closed, a backup restored |
 | `scripts/release/` | the release build (sdist, wheel, SBOM, checksums), release candidates (`rc.py`), the claim-sealed release note, and the installer maker (`make_installer.py`) |
 | `scripts/install/` | the one-command installer: its template (`install.sh.in`), the builder that pins every file by SHA-256, and the pinned dependency hashes |
-| `.github/workflows/` | tests on Linux, macOS and Windows, the scans, CodeQL, the nightly proof, and the release (built from the signed tag) |
+| `.github/workflows/` | tests on Linux and macOS, the scans, CodeQL, the nightly proof, and the release (built from the signed tag) |
 | `.github/allowed_signers` | the maintainer's public signing key, which the release workflow checks the tag against |
 
 

@@ -80,7 +80,7 @@ What Composer does to stay safe, and where its limits are:
   filesystems without POSIX owners are not certified; an access-control entry the permission bits do not show, or
   a mount another account administers, is outside what Composer can see.
   *Not defended:* a program already running as you (it can change your files and Composer's directly, so a race
-  against it crosses no boundary), root, and systems without POSIX owners and permission bits (on Windows the check
+  against it crosses no boundary), root, and systems without POSIX owners and permission bits (Windows is not supported natively; there the check
   does not run, and a version or narration folder that cannot be removed through a folder descriptor is left in
   place with a note on standard error).
   *Places you name, outside the contract:* some commands write only where you point them, never in the app or data

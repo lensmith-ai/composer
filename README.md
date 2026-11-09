@@ -25,7 +25,7 @@ The private version of Composer writes the briefs I read. I click through to the
 
 ## Install it
 
-On a Mac or a Linux computer, paste this in a terminal and press Enter:
+Composer runs on macOS and Linux. Windows is not supported natively. On a Mac or a Linux computer, paste this in a terminal and press Enter:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/lensmith-ai/composer/main/install.sh | sh
@@ -42,7 +42,7 @@ lensmith composer
 
 Every file the installer downloads is checked against a SHA-256 written into the script, and you can download the
 script and read it first. No sudo. The steps, what it changes on your computer, what to do if something fails, and how
-to remove it: [docs/install.md](docs/install.md). On Windows, use WSL2 or the container ([docs/setup.md](docs/setup.md)).
+to remove it: [docs/install.md](docs/install.md). On Windows, run it inside WSL2 (Ubuntu) or use the container ([docs/setup.md](docs/setup.md)); Composer is not tested on native Windows.
 
 ## Try it without installing
 

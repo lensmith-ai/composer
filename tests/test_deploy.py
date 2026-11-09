@@ -163,7 +163,8 @@ class WorkflowTests(unittest.TestCase):
 
     def test_ci_matrix_is_the_claimed_platforms_and_pythons(self):
         ci = workflows()["ci.yml"]
-        self.assertIn("os: [ubuntu-latest, macos-14, windows-latest]", ci)
+        self.assertIn("os: [ubuntu-latest, macos-15]", ci)
+        self.assertNotIn("windows", ci)  # native Windows is not supported (README, docs/setup.md, install.sh): WSL2 or the container
         self.assertIn('python: ["3.10", "3.13"]', ci)
 
     def test_downloaded_tools_are_checked(self):
