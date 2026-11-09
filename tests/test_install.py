@@ -4,6 +4,7 @@ import json
 import os
 import pty
 import select
+import signal
 import shutil
 import socket
 import stat
@@ -203,6 +204,9 @@ class InteractiveSetupTests(unittest.TestCase):
                     transcript = self._wait_for(fd, prompt.encode(), transcript)
                     os.write(fd, reply.encode() + b"\n")
                 transcript = self._wait_for(fd, b"Check it:", transcript)
+            except BaseException:
+                os.kill(pid, signal.SIGKILL)  # a child still waiting at a prompt would hang waitpid below, and the job with it
+                raise
             finally:
                 _, status = os.waitpid(pid, 0)
                 os.close(fd)
