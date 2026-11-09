@@ -372,6 +372,30 @@ jobs:
       - name: Version
         id: v
         run: echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+      - name: Serial number for the wheel's SBOM
+        # cyclonedx-py --output-reproducible leaves out serialNumber, and actions/attest refuses a CycloneDX file
+        # without one ("Unsupported SBOM format", v0.2.0's first run). The serial is a UUIDv5 of the tag, so the
+        # same tag always gets the same serial. Runs before SHA256SUMS and the attestations, which cover the result.
+        working-directory: release
+        env:
+          SBOM: lensmith_composer-${{ steps.v.outputs.version }}.cdx.json
+        run: |
+          python3 - <<'PY'
+          import json, os, uuid
+          path = os.environ["SBOM"]
+          with open(path, encoding="utf-8") as f:
+              bom = json.load(f)
+          if bom.get("bomFormat") != "CycloneDX":
+              raise SystemExit(f"{path}: not a CycloneDX file")
+          if not bom.get("serialNumber"):
+              tag = os.environ["TAG"]
+              bom = {"serialNumber": "urn:uuid:" + str(uuid.uuid5(uuid.NAMESPACE_URL,
+                     f"https://github.com/lensmith-ai/composer/releases/tag/{tag}")), **bom}
+              with open(path, "w", encoding="utf-8") as f:
+                  json.dump(bom, f, indent=2, sort_keys=True)
+                  f.write("\n")
+          print(path, bom["serialNumber"])
+          PY
       - name: SHA256SUMS over every file attached to the release
         working-directory: release
         run: |
