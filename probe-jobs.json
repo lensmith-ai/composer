@@ -1,0 +1,367 @@
+{
+  "total_count": 8,
+  "jobs": [
+    {
+      "id": 129091390629,
+      "run_id": 42596824627,
+      "workflow_name": "mac-proof-report",
+      "head_branch": "mac-install-fix",
+      "run_url": "https://api.github.com/repos/lensmith-ai/composer/actions/runs/42596824627",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVfOtYM8AAAAeDnJMpQ",
+      "head_sha": "6c937ec6c9049f79f6f8cf014b2d7963435abd53",
+      "url": "https://api.github.com/repos/lensmith-ai/composer/actions/jobs/129091390629",
+      "html_url": "https://github.com/lensmith-ai/composer/actions/runs/42596824627/job/129091390629",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "created_at": "2026-11-09T09:53:29Z",
+      "started_at": "2026-11-09T09:53:29Z",
+      "completed_at": "2026-11-09T09:53:30Z",
+      "name": "probe macos-14",
+      "steps": [
+
+      ],
+      "check_run_url": "https://api.github.com/repos/lensmith-ai/composer/check-runs/129091390629",
+      "labels": [
+        "macos-14"
+      ],
+      "runner_id": 0,
+      "runner_name": "",
+      "runner_group_id": 0,
+      "runner_group_name": ""
+    },
+    {
+      "id": 129091390881,
+      "run_id": 42596824627,
+      "workflow_name": "mac-proof-report",
+      "head_branch": "mac-install-fix",
+      "run_url": "https://api.github.com/repos/lensmith-ai/composer/actions/runs/42596824627",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVfOtYM8AAAAeDnJNoQ",
+      "head_sha": "6c937ec6c9049f79f6f8cf014b2d7963435abd53",
+      "url": "https://api.github.com/repos/lensmith-ai/composer/actions/jobs/129091390881",
+      "html_url": "https://github.com/lensmith-ai/composer/actions/runs/42596824627/job/129091390881",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "created_at": "2026-11-09T09:53:29Z",
+      "started_at": "2026-11-09T09:53:29Z",
+      "completed_at": "2026-11-09T09:53:31Z",
+      "name": "probe macos-14-large",
+      "steps": [
+
+      ],
+      "check_run_url": "https://api.github.com/repos/lensmith-ai/composer/check-runs/129091390881",
+      "labels": [
+        "macos-14-large"
+      ],
+      "runner_id": 0,
+      "runner_name": "",
+      "runner_group_id": 0,
+      "runner_group_name": ""
+    },
+    {
+      "id": 129091391007,
+      "run_id": 42596824627,
+      "workflow_name": "mac-proof-report",
+      "head_branch": "mac-install-fix",
+      "run_url": "https://api.github.com/repos/lensmith-ai/composer/actions/runs/42596824627",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVfOtYM8AAAAeDnJOHw",
+      "head_sha": "6c937ec6c9049f79f6f8cf014b2d7963435abd53",
+      "url": "https://api.github.com/repos/lensmith-ai/composer/actions/jobs/129091391007",
+      "html_url": "https://github.com/lensmith-ai/composer/actions/runs/42596824627/job/129091391007",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-09T09:53:29Z",
+      "started_at": "2026-11-09T09:53:33Z",
+      "completed_at": "2026-11-09T09:53:38Z",
+      "name": "probe macos-15",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-09T09:53:34Z",
+          "completed_at": "2026-11-09T09:53:34Z"
+        },
+        {
+          "name": "Run sw_vers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-09T09:53:34Z",
+          "completed_at": "2026-11-09T09:53:35Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-09T09:53:35Z",
+          "completed_at": "2026-11-09T09:53:35Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/lensmith-ai/composer/check-runs/129091391007",
+      "labels": [
+        "macos-15"
+      ],
+      "runner_id": 1000000157,
+      "runner_name": "GitHub Actions 1000000157",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 129091391021,
+      "run_id": 42596824627,
+      "workflow_name": "mac-proof-report",
+      "head_branch": "mac-install-fix",
+      "run_url": "https://api.github.com/repos/lensmith-ai/composer/actions/runs/42596824627",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVfOtYM8AAAAeDnJOLQ",
+      "head_sha": "6c937ec6c9049f79f6f8cf014b2d7963435abd53",
+      "url": "https://api.github.com/repos/lensmith-ai/composer/actions/jobs/129091391021",
+      "html_url": "https://github.com/lensmith-ai/composer/actions/runs/42596824627/job/129091391021",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-09T09:53:29Z",
+      "started_at": "2026-11-09T09:53:35Z",
+      "completed_at": "2026-11-09T09:53:39Z",
+      "name": "probe macos-26-intel",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-09T09:53:36Z",
+          "completed_at": "2026-11-09T09:53:36Z"
+        },
+        {
+          "name": "Run sw_vers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-09T09:53:36Z",
+          "completed_at": "2026-11-09T09:53:37Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-09T09:53:37Z",
+          "completed_at": "2026-11-09T09:53:38Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/lensmith-ai/composer/check-runs/129091391021",
+      "labels": [
+        "macos-26-intel"
+      ],
+      "runner_id": 1000000158,
+      "runner_name": "GitHub Actions 1000000158",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 129091391032,
+      "run_id": 42596824627,
+      "workflow_name": "mac-proof-report",
+      "head_branch": "mac-install-fix",
+      "run_url": "https://api.github.com/repos/lensmith-ai/composer/actions/runs/42596824627",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVfOtYM8AAAAeDnJOOA",
+      "head_sha": "6c937ec6c9049f79f6f8cf014b2d7963435abd53",
+      "url": "https://api.github.com/repos/lensmith-ai/composer/actions/jobs/129091391032",
+      "html_url": "https://github.com/lensmith-ai/composer/actions/runs/42596824627/job/129091391032",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-09T09:53:29Z",
+      "started_at": "2026-11-09T09:53:35Z",
+      "completed_at": "2026-11-09T09:53:39Z",
+      "name": "probe macos-15-intel",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-09T09:53:36Z",
+          "completed_at": "2026-11-09T09:53:36Z"
+        },
+        {
+          "name": "Run sw_vers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-09T09:53:36Z",
+          "completed_at": "2026-11-09T09:53:36Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-09T09:53:36Z",
+          "completed_at": "2026-11-09T09:53:36Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/lensmith-ai/composer/check-runs/129091391032",
+      "labels": [
+        "macos-15-intel"
+      ],
+      "runner_id": 1000000151,
+      "runner_name": "GitHub Actions 1000000151",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 129091391189,
+      "run_id": 42596824627,
+      "workflow_name": "mac-proof-report",
+      "head_branch": "mac-install-fix",
+      "run_url": "https://api.github.com/repos/lensmith-ai/composer/actions/runs/42596824627",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVfOtYM8AAAAeDnJO1Q",
+      "head_sha": "6c937ec6c9049f79f6f8cf014b2d7963435abd53",
+      "url": "https://api.github.com/repos/lensmith-ai/composer/actions/jobs/129091391189",
+      "html_url": "https://github.com/lensmith-ai/composer/actions/runs/42596824627/job/129091391189",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-09T09:53:29Z",
+      "started_at": "2026-11-09T09:53:37Z",
+      "completed_at": "2026-11-09T09:53:40Z",
+      "name": "probe macos-latest",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-09T09:53:38Z",
+          "completed_at": "2026-11-09T09:53:38Z"
+        },
+        {
+          "name": "Run sw_vers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-09T09:53:38Z",
+          "completed_at": "2026-11-09T09:53:38Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-09T09:53:38Z",
+          "completed_at": "2026-11-09T09:53:38Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/lensmith-ai/composer/check-runs/129091391189",
+      "labels": [
+        "macos-latest"
+      ],
+      "runner_id": 1000000163,
+      "runner_name": "GitHub Actions 1000000163",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 129091391248,
+      "run_id": 42596824627,
+      "workflow_name": "mac-proof-report",
+      "head_branch": "mac-install-fix",
+      "run_url": "https://api.github.com/repos/lensmith-ai/composer/actions/runs/42596824627",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVfOtYM8AAAAeDnJPEA",
+      "head_sha": "6c937ec6c9049f79f6f8cf014b2d7963435abd53",
+      "url": "https://api.github.com/repos/lensmith-ai/composer/actions/jobs/129091391248",
+      "html_url": "https://github.com/lensmith-ai/composer/actions/runs/42596824627/job/129091391248",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-09T09:53:29Z",
+      "started_at": "2026-11-09T09:53:34Z",
+      "completed_at": "2026-11-09T09:53:38Z",
+      "name": "probe macos-26",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-09T09:53:34Z",
+          "completed_at": "2026-11-09T09:53:34Z"
+        },
+        {
+          "name": "Run sw_vers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-09T09:53:34Z",
+          "completed_at": "2026-11-09T09:53:35Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-09T09:53:35Z",
+          "completed_at": "2026-11-09T09:53:35Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/lensmith-ai/composer/check-runs/129091391248",
+      "labels": [
+        "macos-26"
+      ],
+      "runner_id": 1000000152,
+      "runner_name": "GitHub Actions 1000000152",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 129091468555,
+      "run_id": 42596824627,
+      "workflow_name": "mac-proof-report",
+      "head_branch": "mac-install-fix",
+      "run_url": "https://api.github.com/repos/lensmith-ai/composer/actions/runs/42596824627",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVfOtYM8AAAAeDnN9Cw",
+      "head_sha": "6c937ec6c9049f79f6f8cf014b2d7963435abd53",
+      "url": "https://api.github.com/repos/lensmith-ai/composer/actions/jobs/129091468555",
+      "html_url": "https://github.com/lensmith-ai/composer/actions/runs/42596824627/job/129091468555",
+      "status": "in_progress",
+      "conclusion": null,
+      "created_at": "2026-11-09T09:53:41Z",
+      "started_at": "2026-11-09T09:53:43Z",
+      "completed_at": null,
+      "name": "report",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-09T09:53:44Z",
+          "completed_at": "2026-11-09T09:53:44Z"
+        },
+        {
+          "name": "Wait for the ci run of this commit, then publish its job results",
+          "status": "in_progress",
+          "conclusion": null,
+          "number": 2,
+          "started_at": "2026-11-09T09:53:44Z",
+          "completed_at": null
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/lensmith-ai/composer/check-runs/129091468555",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000164,
+      "runner_name": "GitHub Actions 1000000164",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    }
+  ]
+}

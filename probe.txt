@@ -1,0 +1,7 @@
+probe: probe macos-14 -> cancelled (runner )
+probe: probe macos-14-large -> cancelled (runner )
+probe: probe macos-15 -> success (runner GitHub Actions 1000000157)
+probe: probe macos-26-intel -> success (runner GitHub Actions 1000000158)
+probe: probe macos-15-intel -> success (runner GitHub Actions 1000000151)
+probe: probe macos-latest -> success (runner GitHub Actions 1000000163)
+probe: probe macos-26 -> success (runner GitHub Actions 1000000152)
