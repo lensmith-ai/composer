@@ -208,6 +208,7 @@ class InteractiveSetupTests(unittest.TestCase):
                     transcript = self._wait_for(fd, prompt.encode(), transcript)
                     os.write(fd, reply.encode() + b"\n")
                 transcript = self._wait_for(fd, b"Check it:", transcript)
+                transcript = self._drain(fd, transcript)  # a Mac's pty holds about 1 KB: a child that still has lines to print blocks until they are read
             except BaseException:
                 os.kill(pid, signal.SIGKILL)  # a child still waiting at a prompt would hang waitpid below, and the job with it
                 raise
@@ -221,6 +222,22 @@ class InteractiveSetupTests(unittest.TestCase):
             cfg = S.load(data)
             self.assertEqual((cfg["schedule"]["enabled"], cfg["schedule"]["time"], cfg["schedule"]["timezone"]),
                              (True, "07:15", "UTC"))
+
+    @staticmethod
+    def _drain(fd, seen, timeout=30):
+        """Read what the child still prints until it closes the terminal (end of file or an I/O error)."""
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            ready, _, _ = select.select([fd], [], [], 0.5)
+            if ready:
+                try:
+                    chunk = os.read(fd, 4096)
+                except OSError:
+                    break
+                if not chunk:
+                    break
+                seen += chunk
+        return seen
 
     @staticmethod
     def _wait_for(fd, needle, seen, timeout=30):
