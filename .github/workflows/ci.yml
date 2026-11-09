@@ -46,25 +46,35 @@ jobs:
     # install (a half-made version folder with read-only folders and its marker) and the rerun that removes it; then
     # `lensmith composer --version`, `doctor`, and `uninstall` with its shell-profile lines taken away again.
     # Case 3 has no usable Python on PATH, so the installer fetches uv and a private Python (the download path).
-    name: one-command install on macOS (${{ matrix.case }})
-    runs-on: macos-14
+    name: one-command install on macOS (${{ matrix.case }}, ${{ matrix.runner }})
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
         include:
+          # macOS 15 on Apple silicon, and the Intel build for the older Macs; macos-14 is not offered to this repository
+          # ("The configuration 'macos-14-arm64-us-default' is not supported"), so the matrix above is red on it for that reason alone
           - case: Python from setup-python, default folder
+            runner: macos-15
             templates: as-shipped
             home: default
             path: inherit
           - case: group-writable venv templates, own folder
+            runner: macos-15
             templates: group-writable
             home: own
             path: inherit
           - case: no Python on PATH, private Python through uv
+            runner: macos-15
             templates: as-shipped
             home: own
             path: bare
+          - case: Python from setup-python, default folder
+            runner: macos-15-intel
+            templates: as-shipped
+            home: default
+            path: inherit
     env:
       CASE: ${{ matrix.case }}
       TEMPLATES: ${{ matrix.templates }}
