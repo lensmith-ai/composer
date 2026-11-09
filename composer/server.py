@@ -27,10 +27,11 @@ import re
 import threading
 import tempfile
 from urllib.parse import urlsplit
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 
 from . import app_static, demo, discovery, html_extract, lenses, live_files, page, pipeline, receipts, sources_registry, stage_lines
+from .httpd import LocalHTTPServer
 from .job_store import JobStore, StoreError
 from .narration import options_fragment
 from .prompt import DEFAULT_INSIGHTS, INSIGHT_RANGE
@@ -716,7 +717,7 @@ def serve(app: App, host: str, port: int, *, trusted=None, public_origin: str = 
           open_browser: bool = False) -> None:
     from . import terminal
     check_bind(host, app.passphrase, trusted)
-    httpd = ThreadingHTTPServer((host, port), handler_for(app, local_only=host in LOOPBACK, trusted=trusted,
+    httpd = LocalHTTPServer((host, port), handler_for(app, local_only=host in LOOPBACK, trusted=trusted,
                                                           public_origin=public_origin))
     if on_ready is not None:
         on_ready(httpd)

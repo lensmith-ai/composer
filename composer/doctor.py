@@ -23,12 +23,12 @@ import sys
 import tempfile
 import threading
 import time
-from http.server import ThreadingHTTPServer
 from pathlib import Path
 
 from . import __version__, demo
 from . import home as H
 from . import settings as S
+from .httpd import LocalHTTPServer
 from .providers import NO_CHECKER_KEY_MESSAGE, NO_KEY_MESSAGE
 from .job_store import DATA_SCHEMA
 
@@ -405,7 +405,7 @@ def parity_checks(r: Report, home: Path, cfg: dict | None, *, render=None) -> No
               settings={"narration": ncfg}, on_finished=chain(narrator.on_finished))
     narrator.attach(app.jobs)
     quiet = type("QuietHandler", (handler_for(app, local_only=True),), {"log_message": lambda *a: None})
-    httpd = ThreadingHTTPServer(("127.0.0.1", 0), quiet)
+    httpd = LocalHTTPServer(("127.0.0.1", 0), quiet)
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
     port = httpd.server_address[1]
     try:

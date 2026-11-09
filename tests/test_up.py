@@ -163,6 +163,20 @@ class ProxyModeTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             server.parse_trusted("not a network")
 
+class NoReverseLookupTests(unittest.TestCase):
+    def test_binding_does_not_ask_the_resolver_for_the_fully_qualified_name(self):
+        """socket.getfqdn blocked `composer up` on a macOS runner; the server must not call it (found by CI there)."""
+        from unittest import mock
+        from composer.httpd import LocalHTTPServer
+        from http.server import BaseHTTPRequestHandler
+        with mock.patch("socket.getfqdn", side_effect=AssertionError("getfqdn was called")):
+            httpd = LocalHTTPServer(("127.0.0.1", 0), BaseHTTPRequestHandler)
+            try:
+                self.assertEqual(httpd.server_name, "127.0.0.1")
+                self.assertEqual(httpd.server_port, httpd.server_address[1])
+            finally:
+                httpd.server_close()
+
 
 if __name__ == "__main__":
     unittest.main()

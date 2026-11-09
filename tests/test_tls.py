@@ -53,6 +53,8 @@ class RootsTests(unittest.TestCase):
         cls.cert, cls.key = d / "cert.pem", d / "key.pem"
         subprocess.run(["openssl", "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "2", "-subj", "/CN=localhost",
                         "-addext", "subjectAltName=IP:127.0.0.1,DNS:localhost", "-addext", "basicConstraints=critical,CA:TRUE",
+                        "-addext", "keyUsage=critical,digitalSignature,keyEncipherment,keyCertSign",
+                        "-addext", "extendedKeyUsage=serverAuth",
                         "-keyout", str(cls.key), "-out", str(cls.cert)], check=True, capture_output=True)
         ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         ctx.load_cert_chain(cls.cert, cls.key)
