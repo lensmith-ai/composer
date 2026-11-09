@@ -1,15 +1,7 @@
-## What changed
+## Please read first
 
-<!-- One or two sentences: what this does and why. -->
+Issues are welcome. Pull requests are not merged. Composer is kept by one person, who has not read every line of the code and would rather not take changes that cannot be checked.
 
-## How it was tested
+If you have a fix, please close this pull request and describe the problem and the fix in an issue instead. It may be rebuilt and tested here. See [CONTRIBUTING.md](../CONTRIBUTING.md).
 
-- [ ] `python -m unittest discover -s tests -t tests` passes
-- [ ] New behaviour has a test (and a security fix has a regression test)
-- [ ] Every command added to README.md or docs/ was run, or is marked "runs on your VPS"
-- [ ] CHANGELOG.md has a line under [Unreleased]
-- [ ] Screenshots attached, for any change to a page
-
-## Parity
-
-<!-- Which parity-matrix rows this touches, if any. -->
+A security problem does not go in an issue or a pull request: use "Report a vulnerability" on the Security tab, as [SECURITY.md](../SECURITY.md) says.
