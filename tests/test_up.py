@@ -4,6 +4,7 @@ import http.client
 import ipaddress
 import json
 import os
+import signal
 import socket
 import subprocess
 import sys
@@ -39,7 +40,8 @@ def get(port, path, host=None):
 class UpTests(unittest.TestCase):
     def start(self, target, port, env):
         proc = subprocess.Popen([sys.executable, "-m", "composer", "up", "--home", str(target), "--port", str(port)],
-                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, cwd=ROOT, env=env)
+                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, cwd=ROOT,
+                                env=dict(env, PYTHONFAULTHANDLER="1"))
         deadline = time.monotonic() + 20
         while time.monotonic() < deadline:
             try:
@@ -47,8 +49,12 @@ class UpTests(unittest.TestCase):
                     return proc
             except OSError:
                 time.sleep(0.1)
-        proc.kill()
-        raise AssertionError(proc.stdout.read())
+        proc.send_signal(signal.SIGABRT)  # faulthandler is on: the child prints where it is stuck, and ends
+        try:
+            proc.wait(10)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+        raise AssertionError(f"/health never answered 200; the child said:\n{proc.stdout.read()}")
 
     def test_up_serves_the_app_and_health_and_runs_once(self):
         with fake_home() as home:

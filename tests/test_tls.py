@@ -35,7 +35,16 @@ class _Hello(http.server.BaseHTTPRequestHandler):
         pass
 
 
-@unittest.skipUnless(shutil.which("openssl"), "openssl makes the throwaway authority")
+def _openssl_makes_the_authority() -> bool:
+    """OpenSSL 1.1.1 or newer (not macOS's LibreSSL, whose self-signed certificate is refused as an authority:
+    "unsuitable certificate purpose"). The code under test is the same everywhere; only the test's own certificate differs."""
+    if not shutil.which("openssl"):
+        return False
+    version = subprocess.run(["openssl", "version"], capture_output=True, text=True).stdout
+    return "LibreSSL" not in version
+
+
+@unittest.skipUnless(_openssl_makes_the_authority(), "no OpenSSL here to make the throwaway authority (macOS ships LibreSSL)")
 class RootsTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
