@@ -843,7 +843,7 @@ def drop_group_other_write(root: Path) -> None:
     """Take group and other write off everything under root (links are skipped, never followed). A Python whose venv
     templates are group- or other-writable (python.org's on a Mac, a CI runner's tool cache) copies those modes into every
     environment it makes, and the trust contract refuses such files; setup.sh does the same right after it makes one."""
-    if os.name != "posix":
+    if os.name != "posix" or os.path.islink(root):
         return
     for dirpath, dirnames, filenames in os.walk(root):
         for path in [dirpath] + [os.path.join(dirpath, n) for n in dirnames + filenames]:

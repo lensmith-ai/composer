@@ -475,6 +475,8 @@ class DropGroupOtherWriteTests(unittest.TestCase):
             self.assertEqual(script.stat().st_mode & 0o777, 0o755)
             self.assertEqual((root / "venv" / "bin").stat().st_mode & 0o777, 0o755)
             self.assertEqual(outside.stat().st_mode & 0o777, 0o666)  # a link's target is never followed
+            H.drop_group_other_write(root / "venv" / "link")  # nor is a link given as the folder itself
+            self.assertEqual(outside.stat().st_mode & 0o777, 0o666)
 
 
 if __name__ == "__main__":

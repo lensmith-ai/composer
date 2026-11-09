@@ -55,12 +55,12 @@ jobs:
         include:
           # macOS 15 on Apple silicon, and the Intel build for the older Macs; macos-14 is not offered to this repository
           # ("The configuration 'macos-14-arm64-us-default' is not supported"), so the matrix above is red on it for that reason alone
-          - case: Python from setup-python, default folder
+          - case: python.org framework Python, default folder
             runner: macos-15
             templates: as-shipped
             home: default
             path: inherit
-          - case: group-writable venv templates, own folder
+          - case: python.org framework Python with group-writable venv templates, own folder
             runner: macos-15
             templates: group-writable
             home: own
@@ -70,7 +70,7 @@ jobs:
             templates: as-shipped
             home: own
             path: bare
-          - case: Python from setup-python, default folder
+          - case: python.org framework Python, default folder
             runner: macos-15-intel
             templates: as-shipped
             home: default
@@ -122,12 +122,14 @@ jobs:
           fi
       - name: The same command again (already installed)
         run: |
+          set -o pipefail
           cd "$RUNNER_TEMP/kit"
           if [ "$WHICH_PATH" = bare ]; then export COMPOSER_PYTHON_PATH_ONLY=1 PATH=/usr/bin:/bin:/usr/sbin:/sbin; fi
           COMPOSER_FILES_DIR="$PWD" sh install.sh --home "$H" --no-open --no-start --path 2>&1 | tee "$RUNNER_TEMP/rerun.txt"
           grep -q "is already installed in" "$RUNNER_TEMP/rerun.txt"
       - name: An interrupted install, then the rerun that removes what it left
         run: |
+          set -o pipefail
           cd "$RUNNER_TEMP/kit"
           if [ "$WHICH_PATH" = bare ]; then export COMPOSER_PYTHON_PATH_ONLY=1 PATH=/usr/bin:/bin:/usr/sbin:/sbin; fi
           v=$(sed -n 's/^version = "\([0-9][0-9A-Za-z.+_-]*\)"$/\1/p' "$GITHUB_WORKSPACE/pyproject.toml" | head -n 1)
