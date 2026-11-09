@@ -97,6 +97,13 @@ class NativeUpdateTests(unittest.TestCase):
             (h / name).mkdir(mode=0o700, exist_ok=True)
         venv = h / "app" / A / "venv"
         self.sh(sys.executable, "-m", "venv", venv)
+        # setup.sh does this right after it makes the venv: a Python whose venv templates are group- or other-writable
+        # (python.org's on a Mac, the runners' tool cache on Linux) would otherwise leave files the trust contract refuses
+        for root, dirs, files in os.walk(venv):
+            for name in dirs + files:
+                path = os.path.join(root, name)
+                if not os.path.islink(path):
+                    os.chmod(path, os.stat(path).st_mode & ~0o022)
         self.sh(venv / "bin" / "python", "-m", "pip", "install", "--quiet", "--no-index", "--no-deps",
                 "--disable-pip-version-check", self.wheel_a)
         os.symlink(A, h / "app" / "current")
