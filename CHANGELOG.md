@@ -117,6 +117,7 @@ The full app, on your computer or your own server. In plain words:
   checked for the same kind of difference, `composer update` and the narration setup take group-write off the venv
   templates python.org's Python leaves in a new environment, the sand animation sets its styles one property at a time (a page
   policy without `unsafe-inline` refuses a whole style string in WebKit), and CI now runs the one-command install on a Mac.
+- `composer up` and `composer doctor` no longer wait for a reverse-DNS lookup of the computer's own address before they listen, which held the start for a long time on a Mac with a slow or absent network.
 - setup.sh refused its own environment when python.org's Python made group-writable template files in it, and a
   rerun then died on the half-made version folder. It now takes the group-write bit off right away and removes a
   half-made folder it marked itself.

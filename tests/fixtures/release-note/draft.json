@@ -3,9 +3,23 @@
  "version": "9.9.0",
  "lede": "A fixture release.",
  "items": [
-  {"insight": "The container image runs as an unprivileged user.",
-   "sources": [{"id": "changelog", "ref": "Changelog 9.9.0"}]},
-  {"insight": "All 12 offline tests passed on Linux.",
-   "sources": [{"id": "tests", "ref": "Test results 9.9.0"}]}
+  {
+   "insight": "The container image runs as an unprivileged user.",
+   "sources": [
+    {
+     "id": "changelog",
+     "ref": "Changelog 9.9.0, Added 1"
+    }
+   ]
+  },
+  {
+   "insight": "The page no longer shows a blank card when a feed is empty.",
+   "sources": [
+    {
+     "id": "changelog",
+     "ref": "Changelog 9.9.0, Fixed 1"
+    }
+   ]
+  }
  ]
 }

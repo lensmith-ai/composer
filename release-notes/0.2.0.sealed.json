@@ -1,0 +1,1619 @@
+{
+ "schema": "composer-release-note-seal/v1",
+ "version": "0.2.0",
+ "sealed_on": "2026-11-09",
+ "judge": "claude-cli:sonnet",
+ "replayed": false,
+ "draft_sha256": "3432df940236feaa93cff594c40214bf8f092c3e7b5bb348c3a0e18ae41feaca",
+ "changelog_section_sha256": "adc5fdfb95d64e73278fdb8a9e58beb8f8497dc08bf477ae0cec59aca5fc4d96",
+ "result": {
+  "status": "ok",
+  "brief": {
+   "items": [
+    {
+     "insight": "One command installs the app on macOS and Linux: it finds Python 3.10 or newer or gets a private one, and installs Composer into one folder, ~/.lensmith-composer.",
+     "sources": [
+      {
+       "id": "changelog",
+       "ref": "Changelog 0.2.0, Added 1",
+       "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+       "resolved_title": "Changelog 0.2.0, Added 1"
+      }
+     ],
+     "verification": {
+      "verdict": "supported",
+      "why": "Source says it \"finds Python 3.10 or newer or gets a private one, installs Composer and its two dependencies into ~/.lensmith-composer\" on macOS and Linux.",
+      "citations": [
+       {
+        "source": "changelog",
+        "ref": "Changelog 0.2.0, Added 1",
+        "resolution": "exact",
+        "match_score": null,
+        "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+        "matched_title": "Changelog 0.2.0, Added 1",
+        "bears": "The changelog describes a single curl-piped install command for macOS and Linux that finds or fetches Python and installs Composer plus dependencies into ~/.lensmith-composer, matching the claim.",
+        "span": {
+         "field": "insight",
+         "start": 49,
+         "end": 161,
+         "quote": "it finds Python 3.10 or newer or gets a private one, and installs Composer into one folder, ~/.lensmith-composer",
+         "coordinate_system": "unicode-code-point-v1",
+         "producer": "model-exact-quote-v1",
+         "sentence_relation": "says"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "insight": "Every file the installer fetches is checked against a SHA-256 pinned in the script.",
+     "sources": [
+      {
+       "id": "changelog",
+       "ref": "Changelog 0.2.0, Added 2",
+       "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+       "resolved_title": "Changelog 0.2.0, Added 2"
+      }
+     ],
+     "verification": {
+      "verdict": "supported",
+      "why": "Source says \"every file is checked against a SHA-256 pinned in the script\", in a sentence about every file the installer fetches.",
+      "citations": [
+       {
+        "source": "changelog",
+        "ref": "Changelog 0.2.0, Added 2",
+        "resolution": "exact",
+        "match_score": null,
+        "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+        "matched_title": "Changelog 0.2.0, Added 2",
+        "bears": "The changelog says each file the installer fetches comes from an ordered list of sources and is verified against a SHA-256 pinned in the script, matching the claim.",
+        "span": {
+         "field": "insight",
+         "start": 0,
+         "end": 83,
+         "quote": "Every file the installer fetches is checked against a SHA-256 pinned in the script.",
+         "coordinate_system": "unicode-code-point-v1",
+         "producer": "model-exact-quote-v1",
+         "sentence_relation": "says"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "insight": "The app runs at http://127.0.0.1:8765/ with a phone-width page, your saved briefs, an optional daily brief and a weekly backup.",
+     "sources": [
+      {
+       "id": "changelog",
+       "ref": "Changelog 0.2.0, Added 9",
+       "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+       "resolved_title": "Changelog 0.2.0, Added 9"
+      }
+     ],
+     "verification": {
+      "verdict": "supported",
+      "why": "The source says composer up starts the app at that URL with the phone-width page, saved briefs, an optional daily brief and a weekly backup.",
+      "citations": [
+       {
+        "source": "changelog",
+        "ref": "Changelog 0.2.0, Added 9",
+        "resolution": "exact",
+        "match_score": null,
+        "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+        "matched_title": "Changelog 0.2.0, Added 9",
+        "bears": "The changelog entry lists the same address and the same four components, with 'if you want one' matching 'optional', so it backs the claim directly.",
+        "span": {
+         "field": "insight",
+         "start": 0,
+         "end": 127,
+         "quote": "The app runs at http://127.0.0.1:8765/ with a phone-width page, your saved briefs, an optional daily brief and a weekly backup.",
+         "coordinate_system": "unicode-code-point-v1",
+         "producer": "model-exact-quote-v1",
+         "sentence_relation": "says"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "insight": "Optional narration reads the brief's own spoken script aloud with Kokoro, made on your computer after the text is final.",
+     "sources": [
+      {
+       "id": "changelog",
+       "ref": "Changelog 0.2.0, Added 22",
+       "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+       "resolved_title": "Changelog 0.2.0, Added 22"
+      }
+     ],
+     "verification": {
+      "verdict": "supported",
+      "why": "Source says narration \"reads the brief's own spoken script aloud with Kokoro, made on your computer after the text is final.\"",
+      "citations": [
+       {
+        "source": "changelog",
+        "ref": "Changelog 0.2.0, Added 22",
+        "resolution": "exact",
+        "match_score": null,
+        "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+        "matched_title": "Changelog 0.2.0, Added 22",
+        "bears": "The changelog entry describes the same optional narration feature, matching the claim's wording on Kokoro, local generation and timing, and adds the Listen button.",
+        "span": {
+         "field": "insight",
+         "start": 19,
+         "end": 119,
+         "quote": "reads the brief's own spoken script aloud with Kokoro, made on your computer after the text is final",
+         "coordinate_system": "unicode-code-point-v1",
+         "producer": "model-exact-quote-v1",
+         "sentence_relation": "says"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "insight": "Composer can run on your own server, with a container image, a Compose file with Caddy in front for HTTPS and one login, and a step-by-step guide.",
+     "sources": [
+      {
+       "id": "changelog",
+       "ref": "Changelog 0.2.0, Added 24",
+       "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+       "resolved_title": "Changelog 0.2.0, Added 24"
+      }
+     ],
+     "verification": {
+      "verdict": "supported",
+      "why": "Source lists 'a container image', 'a Compose file with Caddy in front for HTTPS and one login', and 'a step-by-step guide'.",
+      "citations": [
+       {
+        "source": "changelog",
+        "ref": "Changelog 0.2.0, Added 24",
+        "resolution": "exact",
+        "match_score": null,
+        "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+        "matched_title": "Changelog 0.2.0, Added 24",
+        "bears": "The changelog entry announces self-hosting with the same three parts the claim lists: a container image, a Caddy-fronted Compose file, and a guide. It adds image details the claim leaves out.",
+        "span": {
+         "field": "insight",
+         "start": 42,
+         "end": 145,
+         "quote": "a container image, a Compose file with Caddy in front for HTTPS and one login, and a step-by-step guide",
+         "coordinate_system": "unicode-code-point-v1",
+         "producer": "model-exact-quote-v1",
+         "sentence_relation": "says"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "insight": "The insight cards carry no claim marks; the checked claims are marked in the opened insight sheet.",
+     "sources": [
+      {
+       "id": "changelog",
+       "ref": "Changelog 0.2.0, Added 16",
+       "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+       "resolved_title": "Changelog 0.2.0, Added 16"
+      }
+     ],
+     "verification": {
+      "verdict": "supported",
+      "why": "Source says cards carry no claim marks and \"the checked claims are marked in that sheet\".",
+      "citations": [
+       {
+        "source": "changelog",
+        "ref": "Changelog 0.2.0, Added 16",
+        "resolution": "exact",
+        "match_score": null,
+        "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+        "matched_title": "Changelog 0.2.0, Added 16",
+        "bears": "The changelog states that cards show no claim marks and that checked claims appear marked only inside the opened insight sheet, matching the claim directly.",
+        "span": {
+         "field": "insight",
+         "start": 0,
+         "end": 38,
+         "quote": "The insight cards carry no claim marks",
+         "coordinate_system": "unicode-code-point-v1",
+         "producer": "model-exact-quote-v1",
+         "sentence_relation": "says"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "insight": "The one-command install ends by naming the optional extras (lensmith composer setup --reconfigure parser, provider, checker, narration, schedule or port); it still asks one question.",
+     "sources": [
+      {
+       "id": "changelog",
+       "ref": "Changelog 0.2.0, Fixed 1",
+       "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+       "resolved_title": "Changelog 0.2.0, Fixed 1"
+      }
+     ],
+     "verification": {
+      "verdict": "supported",
+      "why": "Source states the same sentence verbatim: install 'ends by naming the optional extras' and 'still asks one question'.",
+      "citations": [
+       {
+        "source": "changelog",
+        "ref": "Changelog 0.2.0, Fixed 1",
+        "resolution": "exact",
+        "match_score": null,
+        "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+        "matched_title": "Changelog 0.2.0, Fixed 1",
+        "bears": "The 0.2.0 changelog entry states this behaviour directly, listing the extras and the single remaining question, so it fully backs the claim.",
+        "span": {
+         "field": "insight",
+         "start": 0,
+         "end": 58,
+         "quote": "The one-command install ends by naming the optional extras",
+         "coordinate_system": "unicode-code-point-v1",
+         "producer": "model-exact-quote-v1",
+         "sentence_relation": "says"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "insight": "The installer no longer stops on a Mac with a chmod error.",
+     "sources": [
+      {
+       "id": "changelog",
+       "ref": "Changelog 0.2.0, Fixed 2",
+       "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+       "resolved_title": "Changelog 0.2.0, Fixed 2"
+      }
+     ],
+     "verification": {
+      "verdict": "supported",
+      "why": "Changelog states \"The installer no longer stops on a Mac with chmod: --: No such file or directory\", which is a chmod error.",
+      "citations": [
+       {
+        "source": "changelog",
+        "ref": "Changelog 0.2.0, Fixed 2",
+        "resolution": "exact",
+        "match_score": null,
+        "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+        "matched_title": "Changelog 0.2.0, Fixed 2",
+        "bears": "The changelog reports the Mac installer stopping on a chmod 'No such file or directory' failure as fixed, and explains the cause, which directly backs the claim.",
+        "span": {
+         "field": "insight",
+         "start": 0,
+         "end": 58,
+         "quote": "The installer no longer stops on a Mac with a chmod error.",
+         "coordinate_system": "unicode-code-point-v1",
+         "producer": "model-exact-quote-v1",
+         "sentence_relation": "says"
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "verification": {
+   "resolution": {
+    "citations": 8,
+    "exact": 8,
+    "fuzzy": 0,
+    "unresolved": 0
+   },
+   "model": "claude-cli:sonnet",
+   "status": "ok",
+   "claims_checked": 8,
+   "claims_total": 8,
+   "wall_s": 33.85,
+   "attempts": 8,
+   "sharding": {
+    "pool_size": 2,
+    "deadline_s": 120.0,
+    "rejected": [],
+    "shards": [
+     {
+      "claim": 0,
+      "status": "ok",
+      "reason": null,
+      "attempts": 1,
+      "queue_wait_s": 0.003,
+      "wall_s": 8.66,
+      "model_executed": "claude-cli:sonnet",
+      "prompt_sha256_8": "c698fd61",
+      "error": null
+     },
+     {
+      "claim": 1,
+      "status": "ok",
+      "reason": null,
+      "attempts": 1,
+      "queue_wait_s": 0.003,
+      "wall_s": 8.317,
+      "model_executed": "claude-cli:sonnet",
+      "prompt_sha256_8": "75827535",
+      "error": null
+     },
+     {
+      "claim": 2,
+      "status": "ok",
+      "reason": null,
+      "attempts": 1,
+      "queue_wait_s": 8.321,
+      "wall_s": 10.253,
+      "model_executed": "claude-cli:sonnet",
+      "prompt_sha256_8": "71b9c02c",
+      "error": null
+     },
+     {
+      "claim": 3,
+      "status": "ok",
+      "reason": null,
+      "attempts": 1,
+      "queue_wait_s": 8.663,
+      "wall_s": 9.178,
+      "model_executed": "claude-cli:sonnet",
+      "prompt_sha256_8": "f2403446",
+      "error": null
+     },
+     {
+      "claim": 4,
+      "status": "ok",
+      "reason": null,
+      "attempts": 1,
+      "queue_wait_s": 17.841,
+      "wall_s": 8.914,
+      "model_executed": "claude-cli:sonnet",
+      "prompt_sha256_8": "3128a47b",
+      "error": null
+     },
+     {
+      "claim": 5,
+      "status": "ok",
+      "reason": null,
+      "attempts": 1,
+      "queue_wait_s": 18.574,
+      "wall_s": 7.638,
+      "model_executed": "claude-cli:sonnet",
+      "prompt_sha256_8": "37b3e000",
+      "error": null
+     },
+     {
+      "claim": 6,
+      "status": "ok",
+      "reason": null,
+      "attempts": 1,
+      "queue_wait_s": 26.212,
+      "wall_s": 6.898,
+      "model_executed": "claude-cli:sonnet",
+      "prompt_sha256_8": "b73ef594",
+      "error": null
+     },
+     {
+      "claim": 7,
+      "status": "ok",
+      "reason": null,
+      "attempts": 1,
+      "queue_wait_s": 26.756,
+      "wall_s": 7.092,
+      "model_executed": "claude-cli:sonnet",
+      "prompt_sha256_8": "9b07b990",
+      "error": null
+     }
+    ]
+   },
+   "spans": {
+    "status": "ok",
+    "eligible": 8,
+    "produced": 8,
+    "dropped": 0,
+    "not_proposed": 0,
+    "dropped_by_reason": {},
+    "contract": "citation-span/v1",
+    "model_executed": "claude-cli:sonnet"
+   },
+   "verdicts": {
+    "supported": 8,
+    "partial": 0,
+    "unsupported": 0,
+    "unresolved": 0,
+    "unchecked": 0
+   }
+  },
+  "claim_evidence": {
+   "contract": "claim-evidence/v1",
+   "outcomes": [
+    {
+     "claim_ref": {
+      "kind": "item",
+      "item_index": 0,
+      "analysis_index": null,
+      "field": "insight",
+      "claim_sha256": "d145f7cb9cc925a810f4a16e4586b9eb99e6e5fe02106c364f0d32323b0c85af"
+     },
+     "citation_index": 0,
+     "source": "changelog",
+     "response_id": "changelog-0.2.0-1",
+     "retrieved_at": null,
+     "support_state": "supported",
+     "state_reason": "EVIDENCE-SPANS-LOCATED",
+     "evidence": "present",
+     "relation": "says",
+     "relation_coarse": "stated",
+     "relation_is_judgement": true,
+     "relation_source": "judge",
+     "corroboration": 1,
+     "strength": 93,
+     "evidence_spans": [
+      {
+       "normalizer": "norm/v1",
+       "coordinate_system": "normalized-codepoint",
+       "start": 0,
+       "end": 45,
+       "sha256": "1fb383bbc37dd2fcd906b948f3ed6f10476288129400335c2d30ced5a3a84841",
+       "response_sha256": "e0a241f7dce2eec4c08766648dffc8697e3023ed8585e7c086ad79bfa5de520e"
+      },
+      {
+       "normalizer": "norm/v1",
+       "coordinate_system": "normalized-codepoint",
+       "start": 135,
+       "end": 256,
+       "sha256": "137d2ab0ba4ccac6d9aa146acbf3742841848ee7f057ad6c4f7e326ad8c00356",
+       "response_sha256": "e0a241f7dce2eec4c08766648dffc8697e3023ed8585e7c086ad79bfa5de520e"
+      }
+     ],
+     "span_counts": {
+      "proposed": 2,
+      "located": 2
+     },
+     "display_policy": {
+      "text_retained": false,
+      "text_displayable": false
+     }
+    },
+    {
+     "claim_ref": {
+      "kind": "item",
+      "item_index": 1,
+      "analysis_index": null,
+      "field": "insight",
+      "claim_sha256": "ae2bec4923c6f080103a8fb7dd23c384649d36d4f4b5161c3f137a34b7d6c175"
+     },
+     "citation_index": 0,
+     "source": "changelog",
+     "response_id": "changelog-0.2.0-2",
+     "retrieved_at": null,
+     "support_state": "supported",
+     "state_reason": "EVIDENCE-SPANS-LOCATED",
+     "evidence": "present",
+     "relation": "says",
+     "relation_coarse": "stated",
+     "relation_is_judgement": true,
+     "relation_source": "judge",
+     "corroboration": 1,
+     "strength": 96,
+     "evidence_spans": [
+      {
+       "normalizer": "norm/v1",
+       "coordinate_system": "normalized-codepoint",
+       "start": 0,
+       "end": 66,
+       "sha256": "02c9a2bb444b910e0fe145ee077a5dfa05d5b430346ab17788ed13e4748e270b",
+       "response_sha256": "73487cf3de77bf3b891497e58b228dbc1ad6b762509fd080138eebad005c0547"
+      },
+      {
+       "normalizer": "norm/v1",
+       "coordinate_system": "normalized-codepoint",
+       "start": 341,
+       "end": 405,
+       "sha256": "a9739d8ed41dd6536c1e85e3dc4f2ceee53182d4caed19ce069da550d29dc32b",
+       "response_sha256": "73487cf3de77bf3b891497e58b228dbc1ad6b762509fd080138eebad005c0547"
+      }
+     ],
+     "span_counts": {
+      "proposed": 2,
+      "located": 2
+     },
+     "display_policy": {
+      "text_retained": false,
+      "text_displayable": false
+     }
+    },
+    {
+     "claim_ref": {
+      "kind": "item",
+      "item_index": 2,
+      "analysis_index": null,
+      "field": "insight",
+      "claim_sha256": "3bf71bd920489f0d0cc32d3257c0e1222a4d02f45a88b0e6befea667bd56a33f"
+     },
+     "citation_index": 0,
+     "source": "changelog",
+     "response_id": "changelog-0.2.0-9",
+     "retrieved_at": null,
+     "support_state": "supported",
+     "state_reason": "EVIDENCE-SPANS-LOCATED",
+     "evidence": "present",
+     "relation": "says",
+     "relation_coarse": "stated",
+     "relation_is_judgement": true,
+     "relation_source": "judge",
+     "corroboration": 1,
+     "strength": 95,
+     "evidence_spans": [
+      {
+       "normalizer": "norm/v1",
+       "coordinate_system": "normalized-codepoint",
+       "start": 0,
+       "end": 253,
+       "sha256": "90118ac0eaae2755a9d3d1a6cde9e0e8a4c08f4894de1fd44fc147edd591e394",
+       "response_sha256": "37666a57885a90757452711fa2b95fc35515c713b1975585ee81ba7945467e75"
+      }
+     ],
+     "span_counts": {
+      "proposed": 1,
+      "located": 1
+     },
+     "display_policy": {
+      "text_retained": false,
+      "text_displayable": false
+     }
+    },
+    {
+     "claim_ref": {
+      "kind": "item",
+      "item_index": 3,
+      "analysis_index": null,
+      "field": "insight",
+      "claim_sha256": "cdee6027033d728cdc2ebc45505c5bf13c40ee86c25aa966281c134f524c2fbb"
+     },
+     "citation_index": 0,
+     "source": "changelog",
+     "response_id": "changelog-0.2.0-22",
+     "retrieved_at": null,
+     "support_state": "supported",
+     "state_reason": "EVIDENCE-SPANS-LOCATED",
+     "evidence": "present",
+     "relation": "says",
+     "relation_coarse": "stated",
+     "relation_is_judgement": true,
+     "relation_source": "judge",
+     "corroboration": 1,
+     "strength": 96,
+     "evidence_spans": [
+      {
+       "normalizer": "norm/v1",
+       "coordinate_system": "normalized-codepoint",
+       "start": 0,
+       "end": 142,
+       "sha256": "261297c900ec505220c2d14516b9ca5872d48b6f9bfef7a364d126bfc59eb592",
+       "response_sha256": "f7a6602601656996d0dc98e37ab103398c930d40fbd5110327585f00dd3f18dc"
+      }
+     ],
+     "span_counts": {
+      "proposed": 1,
+      "located": 1
+     },
+     "display_policy": {
+      "text_retained": false,
+      "text_displayable": false
+     }
+    },
+    {
+     "claim_ref": {
+      "kind": "item",
+      "item_index": 4,
+      "analysis_index": null,
+      "field": "insight",
+      "claim_sha256": "afa74343dac0ebf2c426707d10832feece328cca4084a6e646e4bfbeddded981"
+     },
+     "citation_index": 0,
+     "source": "changelog",
+     "response_id": "changelog-0.2.0-24",
+     "retrieved_at": null,
+     "support_state": "supported",
+     "state_reason": "EVIDENCE-SPANS-LOCATED",
+     "evidence": "present",
+     "relation": "says",
+     "relation_coarse": "stated",
+     "relation_is_judgement": true,
+     "relation_source": "judge",
+     "corroboration": 1,
+     "strength": 95,
+     "evidence_spans": [
+      {
+       "normalizer": "norm/v1",
+       "coordinate_system": "normalized-codepoint",
+       "start": 0,
+       "end": 195,
+       "sha256": "7d7049e17ab62b022c6cfa09da1285a7a81620597ab69543bd3c63dd7d960fa2",
+       "response_sha256": "7d7049e17ab62b022c6cfa09da1285a7a81620597ab69543bd3c63dd7d960fa2"
+      }
+     ],
+     "span_counts": {
+      "proposed": 1,
+      "located": 1
+     },
+     "display_policy": {
+      "text_retained": false,
+      "text_displayable": false
+     }
+    },
+    {
+     "claim_ref": {
+      "kind": "item",
+      "item_index": 5,
+      "analysis_index": null,
+      "field": "insight",
+      "claim_sha256": "ea66161ca34565076d617810ca57652bf32c68ab9bb0ad684e0adecb612ce468"
+     },
+     "citation_index": 0,
+     "source": "changelog",
+     "response_id": "changelog-0.2.0-16",
+     "retrieved_at": null,
+     "support_state": "supported",
+     "state_reason": "EVIDENCE-SPANS-LOCATED",
+     "evidence": "present",
+     "relation": "says",
+     "relation_coarse": "stated",
+     "relation_is_judgement": true,
+     "relation_source": "judge",
+     "corroboration": 1,
+     "strength": 97,
+     "evidence_spans": [
+      {
+       "normalizer": "norm/v1",
+       "coordinate_system": "normalized-codepoint",
+       "start": 0,
+       "end": 82,
+       "sha256": "edded0a0107f7cd1dae6a7d7f1ed1061acb39c1a65012a66d2a73ef6ada3e811",
+       "response_sha256": "1e9fdd77d516c5eb2d0b229f07b1cc519b15f8e1a728bdb94e69eacbd111df24"
+      },
+      {
+       "normalizer": "norm/v1",
+       "coordinate_system": "normalized-codepoint",
+       "start": 156,
+       "end": 199,
+       "sha256": "62008d7c23236a6d42d1905f41fe3168734c0772801221bd76e6e2938980b8f4",
+       "response_sha256": "1e9fdd77d516c5eb2d0b229f07b1cc519b15f8e1a728bdb94e69eacbd111df24"
+      }
+     ],
+     "span_counts": {
+      "proposed": 2,
+      "located": 2
+     },
+     "display_policy": {
+      "text_retained": false,
+      "text_displayable": false
+     }
+    },
+    {
+     "claim_ref": {
+      "kind": "item",
+      "item_index": 6,
+      "analysis_index": null,
+      "field": "insight",
+      "claim_sha256": "4b892e5bccc7eb2763ed8035cf9db5d652e277ee0fad80d65dfefe4b45778885"
+     },
+     "citation_index": 0,
+     "source": "changelog",
+     "response_id": "changelog-0.2.0-31",
+     "retrieved_at": null,
+     "support_state": "supported",
+     "state_reason": "EVIDENCE-SPANS-LOCATED",
+     "evidence": "present",
+     "relation": "says",
+     "relation_coarse": "stated",
+     "relation_is_judgement": true,
+     "relation_source": "judge",
+     "corroboration": 1,
+     "strength": 97,
+     "evidence_spans": [
+      {
+       "normalizer": "norm/v1",
+       "coordinate_system": "normalized-codepoint",
+       "start": 0,
+       "end": 193,
+       "sha256": "40da5c7b60d097a896e97546f7aa0d4d7da753655a384f3e0a9f9d2266825ca6",
+       "response_sha256": "19e678e2443a75d53d3cec8c36842c300495402d01b77dba56c01bafc251e901"
+      }
+     ],
+     "span_counts": {
+      "proposed": 1,
+      "located": 1
+     },
+     "display_policy": {
+      "text_retained": false,
+      "text_displayable": false
+     }
+    },
+    {
+     "claim_ref": {
+      "kind": "item",
+      "item_index": 7,
+      "analysis_index": null,
+      "field": "insight",
+      "claim_sha256": "7dd1ed450b11d3e587bf1a59548c83512eb219d8c89c81f9f87dfc24f8c3a19e"
+     },
+     "citation_index": 0,
+     "source": "changelog",
+     "response_id": "changelog-0.2.0-32",
+     "retrieved_at": null,
+     "support_state": "supported",
+     "state_reason": "EVIDENCE-SPANS-LOCATED",
+     "evidence": "present",
+     "relation": "says",
+     "relation_coarse": "stated",
+     "relation_is_judgement": true,
+     "relation_source": "judge",
+     "corroboration": 1,
+     "strength": 93,
+     "evidence_spans": [
+      {
+       "normalizer": "norm/v1",
+       "coordinate_system": "normalized-codepoint",
+       "start": 0,
+       "end": 80,
+       "sha256": "6e7f358b5dfeb5d177392fddeef7567cd8b2e6205a67b7ebe9260574bc4b70f0",
+       "response_sha256": "8d6bfc5c836e7dd4bca17dcd3ef0ed2fab336d44b696b8fc4020fcd949aceca0"
+      }
+     ],
+     "span_counts": {
+      "proposed": 1,
+      "located": 1
+     },
+     "display_policy": {
+      "text_retained": false,
+      "text_displayable": false
+     }
+    }
+   ],
+   "verification": {
+    "capture_time_result": "verified",
+    "rule_ids": [
+     "EVIDENCE-SPANS-LOCATED"
+    ],
+    "seal": {
+     "algorithm": "sha256-digest-chain/v1",
+     "key_id": null,
+     "value": "eeed1614e9c375d4044d7c12b1a28b3dac780fc4e80b9dd63ab22e038f54ca0e"
+    }
+   }
+  },
+  "lineage": {
+   "sources": [
+    {
+     "response_id": "changelog-0.2.0-1",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 1",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "e0a241f7dce2eec4c08766648dffc8697e3023ed8585e7c086ad79bfa5de520e",
+     "byte_length": 435,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "e0a241f7dce2eec4c08766648dffc8697e3023ed8585e7c086ad79bfa5de520e",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-2",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 2",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "73487cf3de77bf3b891497e58b228dbc1ad6b762509fd080138eebad005c0547",
+     "byte_length": 522,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "73487cf3de77bf3b891497e58b228dbc1ad6b762509fd080138eebad005c0547",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-3",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 3",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "77b8eda3430879d13f3308c0d3096681ac659b89cbd85e936bb3f0a22340a768",
+     "byte_length": 53,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "77b8eda3430879d13f3308c0d3096681ac659b89cbd85e936bb3f0a22340a768",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-4",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 4",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "41776d6eb712c4b5fe15f219e6290e299c3b796957d1946433b12e9431d3dd51",
+     "byte_length": 222,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "41776d6eb712c4b5fe15f219e6290e299c3b796957d1946433b12e9431d3dd51",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-5",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 5",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "046a2467806975f04af17c8dd5bd4aea514ab0cb5ecdd6c92e8317744148005d",
+     "byte_length": 327,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "046a2467806975f04af17c8dd5bd4aea514ab0cb5ecdd6c92e8317744148005d",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-6",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 6",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "15e5e248aa341356b839753df2edc704cec35f04499dd2a2c1302d3a6eca1f88",
+     "byte_length": 283,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "15e5e248aa341356b839753df2edc704cec35f04499dd2a2c1302d3a6eca1f88",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-7",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 7",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "24e3f389244da4b37368ab9ed87775b55d3f82b65af50be3fda75790f8ba1d65",
+     "byte_length": 207,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "24e3f389244da4b37368ab9ed87775b55d3f82b65af50be3fda75790f8ba1d65",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-8",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 8",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "6fe48602fc29a3d59d079eb978d5726017137f53ec17ddd34cf313da217f76ec",
+     "byte_length": 262,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "6fe48602fc29a3d59d079eb978d5726017137f53ec17ddd34cf313da217f76ec",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-9",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 9",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "37666a57885a90757452711fa2b95fc35515c713b1975585ee81ba7945467e75",
+     "byte_length": 313,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "37666a57885a90757452711fa2b95fc35515c713b1975585ee81ba7945467e75",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-10",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 10",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "321c436338e291849ba27af3c83d28b00830db84fcf7da3c843b1cad7095eb33",
+     "byte_length": 357,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "321c436338e291849ba27af3c83d28b00830db84fcf7da3c843b1cad7095eb33",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-11",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 11",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "e4bfa83e2c19cbe602422378bd2a7d65143767dd05cc0e2710feb2e955c34567",
+     "byte_length": 390,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "e4bfa83e2c19cbe602422378bd2a7d65143767dd05cc0e2710feb2e955c34567",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-12",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 12",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "f996c2d08af48f8bfd120e39b9170b47ae103a5f53e1ac53b756add07411dd63",
+     "byte_length": 617,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "f996c2d08af48f8bfd120e39b9170b47ae103a5f53e1ac53b756add07411dd63",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-13",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 13",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "bbcd2717085f5be2620ebef4a6500373b2502ebd6c9dd8d5e7e59355727043d6",
+     "byte_length": 433,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "bbcd2717085f5be2620ebef4a6500373b2502ebd6c9dd8d5e7e59355727043d6",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-14",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 14",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "94e7d7780f3c0cabec5d7b5a2895e1b54e358b86a02436324f32f4e4ca0e8984",
+     "byte_length": 421,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "94e7d7780f3c0cabec5d7b5a2895e1b54e358b86a02436324f32f4e4ca0e8984",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-15",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 15",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "b144b2d729e80415a21adabbfa1647b7e878ef81e1c9d733c580a7971ea3f4fc",
+     "byte_length": 286,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "b144b2d729e80415a21adabbfa1647b7e878ef81e1c9d733c580a7971ea3f4fc",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-16",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 16",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "1e9fdd77d516c5eb2d0b229f07b1cc519b15f8e1a728bdb94e69eacbd111df24",
+     "byte_length": 537,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "1e9fdd77d516c5eb2d0b229f07b1cc519b15f8e1a728bdb94e69eacbd111df24",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-17",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 17",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "f6ee54875e8d51082145cc9644fd4b9acb70efb5bdc18f588c4fb38ee2552e85",
+     "byte_length": 342,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "f6ee54875e8d51082145cc9644fd4b9acb70efb5bdc18f588c4fb38ee2552e85",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-18",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 18",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "7b05cc7dc023c6b1c0d5353f05e149b6ac1625b232ae4970064815c837803bd9",
+     "byte_length": 556,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "7b05cc7dc023c6b1c0d5353f05e149b6ac1625b232ae4970064815c837803bd9",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-19",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 19",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "bd3ede7d6292ea006354ec545bbf2160bf04b211be97647fba9d6fb38944f6b1",
+     "byte_length": 360,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "bd3ede7d6292ea006354ec545bbf2160bf04b211be97647fba9d6fb38944f6b1",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-20",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 20",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "7fd1a69554279dee8c54200d71212f113dc092c08360f88f1172129626107526",
+     "byte_length": 155,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "7fd1a69554279dee8c54200d71212f113dc092c08360f88f1172129626107526",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-21",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 21",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "0f0f6ffadecbaea57046b570ac902b425ce9373b27668411d88a7a9ca5bd700c",
+     "byte_length": 109,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "0f0f6ffadecbaea57046b570ac902b425ce9373b27668411d88a7a9ca5bd700c",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-22",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 22",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "f7a6602601656996d0dc98e37ab103398c930d40fbd5110327585f00dd3f18dc",
+     "byte_length": 345,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "f7a6602601656996d0dc98e37ab103398c930d40fbd5110327585f00dd3f18dc",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-23",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 23",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "956db35b10f906d856365ab6dcbef9a9b5758a2bc829394efeeb00a76cb8855e",
+     "byte_length": 335,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "956db35b10f906d856365ab6dcbef9a9b5758a2bc829394efeeb00a76cb8855e",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-24",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 24",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "7d7049e17ab62b022c6cfa09da1285a7a81620597ab69543bd3c63dd7d960fa2",
+     "byte_length": 195,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "7d7049e17ab62b022c6cfa09da1285a7a81620597ab69543bd3c63dd7d960fa2",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-25",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 25",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "b879c89a2f0232d4330090df9a9b8b71f4e43feb874da02486462728d667b12e",
+     "byte_length": 336,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "b879c89a2f0232d4330090df9a9b8b71f4e43feb874da02486462728d667b12e",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-26",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 26",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "5f67279e7e73cc18c4793f79c14dc4da35264f3f8bd2b2d3d8e9279c6ab51670",
+     "byte_length": 77,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "5f67279e7e73cc18c4793f79c14dc4da35264f3f8bd2b2d3d8e9279c6ab51670",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-27",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 27",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "a2587e76f9979999f742cba089f8b9a650bcf4e38545690efddea6579afdf504",
+     "byte_length": 228,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "a2587e76f9979999f742cba089f8b9a650bcf4e38545690efddea6579afdf504",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-28",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 28",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "45e7d8ea0ae3fd8736d38ca51910fd233ff76881644ba685843b61b3e48e7942",
+     "byte_length": 164,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "45e7d8ea0ae3fd8736d38ca51910fd233ff76881644ba685843b61b3e48e7942",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-29",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 29",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "877f54960e786ac78eedebe9663d5ab6e243d8a6af1ffbb53b106393e806c48a",
+     "byte_length": 377,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "877f54960e786ac78eedebe9663d5ab6e243d8a6af1ffbb53b106393e806c48a",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-30",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Added 30",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "1f6bfec2a717a50641d6d91dd6b8c2a2372a1952138d6b79d91aa256b4acbaa5",
+     "byte_length": 217,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "1f6bfec2a717a50641d6d91dd6b8c2a2372a1952138d6b79d91aa256b4acbaa5",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-31",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Fixed 1",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "19e678e2443a75d53d3cec8c36842c300495402d01b77dba56c01bafc251e901",
+     "byte_length": 257,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "19e678e2443a75d53d3cec8c36842c300495402d01b77dba56c01bafc251e901",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-32",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Fixed 2",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "8d6bfc5c836e7dd4bca17dcd3ef0ed2fab336d44b696b8fc4020fcd949aceca0",
+     "byte_length": 595,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "8d6bfc5c836e7dd4bca17dcd3ef0ed2fab336d44b696b8fc4020fcd949aceca0",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-33",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Fixed 3",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "fb0080fb5230d28a68a327c568b33cb4d554fbb35446a6637f8531da19c2a0ee",
+     "byte_length": 198,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "fb0080fb5230d28a68a327c568b33cb4d554fbb35446a6637f8531da19c2a0ee",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-34",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Fixed 4",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "2598d8d12f02a2e742384fd0b8b9d72762432028da140103baeb8de046a38b5e",
+     "byte_length": 255,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "2598d8d12f02a2e742384fd0b8b9d72762432028da140103baeb8de046a38b5e",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-35",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Fixed 5",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "d8baa7957d67dc4e1d795cc9c07515ddad837741ca0bf06316290a5674d2ebd6",
+     "byte_length": 88,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "d8baa7957d67dc4e1d795cc9c07515ddad837741ca0bf06316290a5674d2ebd6",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-36",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Changed 1",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "4f84ee81ed8679e751553e80d552382347ca449096db70f87c3f939fa96b1c55",
+     "byte_length": 239,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "4f84ee81ed8679e751553e80d552382347ca449096db70f87c3f939fa96b1c55",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-37",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Changed 2",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "fcdf7dcf1ff7e070cf4bf401ac4a637f2383d644f5fc7e46a151e085fd70f5a6",
+     "byte_length": 50,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "fcdf7dcf1ff7e070cf4bf401ac4a637f2383d644f5fc7e46a151e085fd70f5a6",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-38",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Changed 3",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "5ad6440dbd3c32d6a7efab00f2a2fa34239c47e8ea4d876d6ce1c5d3eb75a2a6",
+     "byte_length": 156,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "5ad6440dbd3c32d6a7efab00f2a2fa34239c47e8ea4d876d6ce1c5d3eb75a2a6",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-39",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Changed 4",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "caaebdf30784c248c384e5a40e776f5371961610088a21cb567da2a88c124143",
+     "byte_length": 215,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "caaebdf30784c248c384e5a40e776f5371961610088a21cb567da2a88c124143",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-40",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Changed 5",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "d2d497eac3501525e7e81a1a9d6d682c70e24e9ab5503520670bf2ee4f000031",
+     "byte_length": 414,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "d2d497eac3501525e7e81a1a9d6d682c70e24e9ab5503520670bf2ee4f000031",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-41",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Security 1",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "fae51312f1a51002f63d41f67c3ebf5d94e6ece889525adb96ea85ba004487b1",
+     "byte_length": 1140,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "fae51312f1a51002f63d41f67c3ebf5d94e6ece889525adb96ea85ba004487b1",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-42",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Security 2",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "3b78805f9d042fd2a9f9c45636b77a965a80dabe00911452a32d5d813ae1606e",
+     "byte_length": 438,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "3b78805f9d042fd2a9f9c45636b77a965a80dabe00911452a32d5d813ae1606e",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-43",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Security 3",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "48140675cf19b5a9880c3f56f6bd126621a9dfcf76eac884effc741e8bd118be",
+     "byte_length": 401,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "48140675cf19b5a9880c3f56f6bd126621a9dfcf76eac884effc741e8bd118be",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-44",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Security 4",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "21ee1e5abb000f57d7b9c3f6d8170a5f0ca809e803136d224cf15a9b760f9983",
+     "byte_length": 255,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "21ee1e5abb000f57d7b9c3f6d8170a5f0ca809e803136d224cf15a9b760f9983",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-45",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Security 5",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "74888c722b9e325d5071405e68961c471726d906b8b60cc7b61244dfb9bfc363",
+     "byte_length": 486,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "74888c722b9e325d5071405e68961c471726d906b8b60cc7b61244dfb9bfc363",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-46",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Security 6",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "a964b6dbf370f83a4b52db7be04dfbcff83d417e6560d6e0a6be39b8d4f7fb0e",
+     "byte_length": 219,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "a964b6dbf370f83a4b52db7be04dfbcff83d417e6560d6e0a6be39b8d4f7fb0e",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-47",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Security 7",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "9a0640dd1e76e8358ee229e5d6e9e932b262700a67540bcbb22e719dabae9474",
+     "byte_length": 472,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "9a0640dd1e76e8358ee229e5d6e9e932b262700a67540bcbb22e719dabae9474",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-48",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Security 8",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "fa79a76932ded089aff6cb97c12049a0d7b25cdcb76a055e059aae4f9cd74cc3",
+     "byte_length": 216,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "fa79a76932ded089aff6cb97c12049a0d7b25cdcb76a055e059aae4f9cd74cc3",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.0-49",
+     "source": "changelog",
+     "key": "Changelog 0.2.0, Security 9",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.0/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "a1a1cdd7da22995c8338017fe04a46636986d1920e2563f9678584557b53076f",
+     "byte_length": 908,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "a1a1cdd7da22995c8338017fe04a46636986d1920e2563f9678584557b53076f",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    }
+   ]
+  },
+  "attribution": [
+   {
+    "item": 1,
+    "citation_index": 0,
+    "attribution_verb": "finds",
+    "attribution_strength": "strong",
+    "relation": "says",
+    "flag": null,
+    "message": null,
+    "field": "insight",
+    "source": "changelog",
+    "sentence": "One command installs the app on macOS and Linux: it finds Python 3.10 or newer or gets a private one, and installs Composer into one folder, ~/.lensmith-composer."
+   },
+   {
+    "item": 2,
+    "citation_index": 0,
+    "attribution_verb": null,
+    "attribution_strength": null,
+    "relation": "says",
+    "flag": null,
+    "message": null,
+    "field": "insight",
+    "source": "changelog",
+    "sentence": "Every file the installer fetches is checked against a SHA-256 pinned in the script."
+   },
+   {
+    "item": 3,
+    "citation_index": 0,
+    "attribution_verb": null,
+    "attribution_strength": null,
+    "relation": "says",
+    "flag": null,
+    "message": null,
+    "field": "insight",
+    "source": "changelog",
+    "sentence": "The app runs at http://127.0.0.1:8765/ with a phone-width page, your saved briefs, an optional daily brief and a weekly backup."
+   },
+   {
+    "item": 4,
+    "citation_index": 0,
+    "attribution_verb": null,
+    "attribution_strength": null,
+    "relation": "says",
+    "flag": null,
+    "message": null,
+    "field": "insight",
+    "source": "changelog",
+    "sentence": "Optional narration reads the brief's own spoken script aloud with Kokoro, made on your computer after the text is final."
+   },
+   {
+    "item": 5,
+    "citation_index": 0,
+    "attribution_verb": null,
+    "attribution_strength": null,
+    "relation": "says",
+    "flag": null,
+    "message": null,
+    "field": "insight",
+    "source": "changelog",
+    "sentence": "Composer can run on your own server, with a container image, a Compose file with Caddy in front for HTTPS and one login, and a step-by-step guide."
+   },
+   {
+    "item": 6,
+    "citation_index": 0,
+    "attribution_verb": "claims",
+    "attribution_strength": "hedged",
+    "relation": "says",
+    "flag": "understated",
+    "message": "understated (informational, not a problem): the writing hedges (\"claims\"), but the source states it, as the judge read it",
+    "field": "insight",
+    "source": "changelog",
+    "sentence": "The insight cards carry no claim marks; the checked claims are marked in the opened insight sheet."
+   },
+   {
+    "item": 7,
+    "citation_index": 0,
+    "attribution_verb": null,
+    "attribution_strength": null,
+    "relation": "says",
+    "flag": null,
+    "message": null,
+    "field": "insight",
+    "source": "changelog",
+    "sentence": "The one-command install ends by naming the optional extras (lensmith composer setup --reconfigure parser, provider, checker, narration, schedule or port); it still asks one question."
+   },
+   {
+    "item": 8,
+    "citation_index": 0,
+    "attribution_verb": null,
+    "attribution_strength": null,
+    "relation": "says",
+    "flag": null,
+    "message": null,
+    "field": "insight",
+    "source": "changelog",
+    "sentence": "The installer no longer stops on a Mac with a chmod error."
+   }
+  ]
+ }
+}

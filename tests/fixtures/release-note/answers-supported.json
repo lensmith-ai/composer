@@ -2,18 +2,54 @@
  "about": "Recorded judge answers for the fixture draft, keyed by line text. Written for the tests; not a model's judgement.",
  "answers": {
   "The container image runs as an unprivileged user.": {
-   "verdict": "supported", "why": "The changelog says the image runs as an unprivileged user.",
-   "relation": "says", "strength": 95,
-   "citation_spans": [{"citation_index": 0, "span_quote": "runs as an unprivileged user", "span_relation": "says"}],
-   "evidence_spans": [{"citation_index": 0, "support_span": "A container image that runs as an unprivileged user"}],
-   "citation_bears": [{"citation_index": 0, "how_it_bears": "It is the changelog line itself."}]
+   "verdict": "supported",
+   "why": "The changelog says the image runs as an unprivileged user.",
+   "relation": "says",
+   "strength": 95,
+   "citation_spans": [
+    {
+     "citation_index": 0,
+     "span_quote": "runs as an unprivileged user",
+     "span_relation": "says"
+    }
+   ],
+   "evidence_spans": [
+    {
+     "citation_index": 0,
+     "support_span": "A container image that runs as an unprivileged user"
+    }
+   ],
+   "citation_bears": [
+    {
+     "citation_index": 0,
+     "how_it_bears": "It is the changelog line itself."
+    }
+   ]
   },
-  "All 12 offline tests passed on Linux.": {
-   "verdict": "supported", "why": "The results say 12 ran and 12 passed on Linux.",
-   "relation": "says", "strength": 95,
-   "citation_spans": [{"citation_index": 0, "span_quote": "All 12 offline tests passed on Linux", "span_relation": "says"}],
-   "evidence_spans": [{"citation_index": 0, "support_span": "the offline test suite ran 12 tests: 12 passed, 0 failed"}],
-   "citation_bears": [{"citation_index": 0, "how_it_bears": "It gives the counts."}]
+  "The page no longer shows a blank card when a feed is empty.": {
+   "verdict": "supported",
+   "why": "The changelog says so.",
+   "relation": "says",
+   "strength": 95,
+   "citation_spans": [
+    {
+     "citation_index": 0,
+     "span_quote": "The page no longer shows a blank card when a feed is empty",
+     "span_relation": "says"
+    }
+   ],
+   "evidence_spans": [
+    {
+     "citation_index": 0,
+     "support_span": "The page no longer shows a blank card when a feed is empty"
+    }
+   ],
+   "citation_bears": [
+    {
+     "citation_index": 0,
+     "how_it_bears": "It is the changelog line itself."
+    }
+   ]
   }
  }
 }

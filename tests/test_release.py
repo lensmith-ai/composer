@@ -1,9 +1,13 @@
-"""The release scripts: the claim-sealed release note and the test-results file it reads. Offline: the judge's
-answers are replayed from fixtures. Without claim-seal installed, the release-note tests are skipped."""
+"""The release scripts: the claim-sealed release note (sealed once on the maintainer's server, re-verified offline by the
+workflow) and the test-results file. Offline: the judge's answers are replayed from fixtures. Without claim-seal installed, the release-note tests are skipped."""
 import contextlib
 import importlib.util
 import io
 import json
+import os
+import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -55,75 +59,142 @@ class ChangelogTests(unittest.TestCase):
         text = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
         self.assertTrue(self.rn.changelog_section(text, base), base)
 
-    def test_tests_text_says_counts_and_skip_reasons(self):
-        r = json.loads((FIX / "test-results.json").read_text(encoding="utf-8"))
-        r = dict(r, skipped=1, passed=11, skips=[{"test": "t", "reason": "pending phase P1"}])
-        text = self.rn.tests_text([r])
-        self.assertIn("ran 12 tests: 11 passed, 0 failed, 0 had errors and 1 were skipped", text)
-        self.assertIn("pending phase P1", text)
-
 
 @unittest.skipUnless(HAVE_SEAL, "claim-seal is not installed (pip install .)")
 class ReleaseNoteTests(unittest.TestCase):
-    def run_note(self, answers: str, out: Path, tests: str = "test-results.json"):
-        rn = load("release_note")
-        err = io.StringIO()
-        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(err):
-            code = rn.main(["--version", "9.9.0", "--draft", str(FIX / "draft.json"), "--tests", str(FIX / tests),
-                            "--changelog", str(FIX / "CHANGELOG.md"), "--judge", f"replay:{FIX / answers}",
-                            "--out-dir", str(out)])
-        return code, err.getvalue()
+    """seal (the maintainer's one model call, replayed here) and verify (the workflow's offline re-check)."""
 
-    def test_all_supported_writes_a_sealed_note(self):
+    def setUp(self):
+        self.rn = load("release_note")
+        self.tmp = Path(tempfile.mkdtemp(prefix="composer-note-"))
+        self.addCleanup(shutil.rmtree, self.tmp, True)
+        self.draft = self.tmp / "draft.json"
+        self.changelog = self.tmp / "CHANGELOG.md"
+        shutil.copy(FIX / "draft.json", self.draft)
+        shutil.copy(FIX / "CHANGELOG.md", self.changelog)
+        self.sealed = self.tmp / "sealed.json"
+
+    def run_main(self, *argv):
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            code = self.rn.main([str(a) for a in argv])
+        return code, out.getvalue(), err.getvalue()
+
+    def seal(self, answers="answers-supported.json"):
+        return self.run_main("seal", "--version", "9.9.0", "--draft", self.draft, "--changelog", self.changelog,
+                             "--judge", f"replay:{FIX / answers}", "--out", self.sealed)
+
+    def verify(self, *extra, out=None):
+        return self.run_main("verify", "--version", "9.9.0", "--draft", self.draft, "--changelog", self.changelog,
+                             "--sealed", self.sealed, "--out-dir", out or self.tmp / "note", "--allow-replay", *extra)
+
+    def test_a_sealed_note_verifies_offline_and_writes_the_note(self):
         import claim_seal
-        with tempfile.TemporaryDirectory() as tmp:
-            code, err = self.run_note("answers-supported.json", Path(tmp))
-            self.assertEqual(code, 0, err)
-            note = (Path(tmp) / "release-note.md").read_text(encoding="utf-8")
-            check = json.loads((Path(tmp) / "release-note-check.json").read_text(encoding="utf-8"))
+        code, out, err = self.seal()
+        self.assertEqual(code, 0, err)
+        code, out, err = self.verify()
+        self.assertEqual(code, 0, err)
+        note = (self.tmp / "note" / "release-note.md").read_text(encoding="utf-8")
+        check = json.loads((self.tmp / "note" / "release-note-check.json").read_text(encoding="utf-8"))
         self.assertTrue(claim_seal.verify_seal(check["claim_evidence"]))
-        seal = check["claim_evidence"]["verification"]["seal"]["value"]
-        self.assertIn(seal, note)
+        self.assertIn(check["claim_evidence"]["verification"]["seal"]["value"], note)
         self.assertIn("# Lensmith Composer 9.9.0", note)
         self.assertIn("all 2 are supported", note)
-        self.assertIn("REPLAYED", note)  # a replayed check never passes itself off as a fresh one
         self.assertIn("no telemetry", note)
 
-    def test_one_unsupported_line_stops_the_release(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            code, err = self.run_note("answers-one-unsupported.json", Path(tmp))
-            self.assertEqual(code, 1)
-            self.assertIn("line 2 is unsupported", err)
-            self.assertEqual(list(Path(tmp).iterdir()), [])
+    def test_verify_needs_no_model_and_no_secret(self):
+        self.seal()
+        env = {k: v for k, v in os.environ.items() if "KEY" not in k and "TOKEN" not in k and "SECRET" not in k}
+        run = subprocess.run([sys.executable, str(ROOT / "scripts" / "release" / "release_note.py"), "verify", "--version", "9.9.0",
+                              "--draft", str(self.draft), "--changelog", str(self.changelog), "--sealed", str(self.sealed),
+                              "--out-dir", str(self.tmp / "n2"), "--allow-replay"], capture_output=True, text=True, env=env,
+                             cwd=self.tmp)
+        self.assertEqual(run.returncode, 0, run.stderr)
 
-    def test_unknown_source_title_stops_the_release(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            draft = json.loads((FIX / "draft.json").read_text(encoding="utf-8"))
-            draft["items"][0]["sources"][0]["ref"] = "Roadmap for an imagined future"
-            path = Path(tmp) / "draft.json"
-            path.write_text(json.dumps(draft), encoding="utf-8")
-            rn = load("release_note")
-            err = io.StringIO()
-            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(err):
-                code = rn.main(["--version", "9.9.0", "--draft", str(path), "--tests", str(FIX / "test-results.json"),
-                                "--changelog", str(FIX / "CHANGELOG.md"),
-                                "--judge", f"replay:{FIX / 'answers-supported.json'}", "--out-dir", str(Path(tmp) / "o")])
-            self.assertEqual(code, 1)
-            self.assertIn("line 1", err.getvalue())
-            self.assertFalse((Path(tmp) / "o").exists())
+    def test_a_replayed_seal_is_refused_unless_a_test_allows_it(self):
+        self.seal()
+        code, out, err = self.run_main("verify", "--version", "9.9.0", "--draft", self.draft, "--changelog", self.changelog,
+                                       "--sealed", self.sealed, "--out-dir", self.tmp / "n3")
+        self.assertEqual(code, 1)
+        self.assertIn("replayed answers", err)
 
-    def test_red_test_results_are_refused(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            red = json.loads((FIX / "test-results.json").read_text(encoding="utf-8"))
-            red.update(ok=False, failed=1, passed=11)
-            path = Path(tmp) / "red.json"
-            path.write_text(json.dumps(red), encoding="utf-8")
-            rn = load("release_note")
-            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
-                code = rn.main(["--version", "9.9.0", "--draft", str(FIX / "draft.json"), "--tests", str(path),
-                                "--changelog", str(FIX / "CHANGELOG.md"),
-                                "--judge", f"replay:{FIX / 'answers-supported.json'}", "--out-dir", str(Path(tmp) / "o")])
-            self.assertEqual(code, 2)
+    def test_an_edited_note_fails(self):
+        self.seal()
+        d = json.loads(self.draft.read_text(encoding="utf-8"))
+        d["items"][0]["insight"] += " (and faster)"
+        self.draft.write_text(json.dumps(d), encoding="utf-8")
+        code, out, err = self.verify()
+        self.assertEqual(code, 1)
+        self.assertIn("changed after it was sealed", err)
+        self.assertIn("not the lines that were checked", err)
+        self.assertFalse((self.tmp / "note").exists())
+
+    def test_an_edited_lede_fails_too(self):
+        self.seal()
+        d = json.loads(self.draft.read_text(encoding="utf-8"))
+        d["lede"] = "Something the check never saw."
+        self.draft.write_text(json.dumps(d), encoding="utf-8")
+        code, _, err = self.verify()
+        self.assertEqual(code, 1)
+        self.assertIn("changed after it was sealed", err)
+
+    def test_an_edited_changelog_entry_fails(self):
+        self.seal()
+        self.changelog.write_text(self.changelog.read_text(encoding="utf-8").replace("unprivileged user", "root user"),
+                                  encoding="utf-8")
+        code, _, err = self.verify()
+        self.assertEqual(code, 1)
+        self.assertIn("changelog entry for 9.9.0 changed", err)
+
+    def test_changes_outside_the_checked_entry_do_not_matter(self):
+        self.seal()
+        self.changelog.write_text(self.changelog.read_text(encoding="utf-8").replace("## [Unreleased]\n", "## [Unreleased]\n\n- Later work.\n"),
+                                  encoding="utf-8")
+        self.assertEqual(self.verify()[0], 0)
+
+    def test_a_tampered_seal_or_verdict_fails(self):
+        self.seal()
+        sealed = json.loads(self.sealed.read_text(encoding="utf-8"))
+        sealed["result"]["claim_evidence"]["outcomes"][0]["strength"] = 5
+        self.sealed.write_text(json.dumps(sealed), encoding="utf-8")
+        code, _, err = self.verify()
+        self.assertEqual(code, 1)
+        self.assertIn("does not recompute", err)
+        sealed = json.loads(self.sealed.read_text(encoding="utf-8"))
+        sealed["result"]["brief"]["items"][0]["verification"]["verdict"] = "unsupported"
+        self.sealed.write_text(json.dumps(sealed), encoding="utf-8")
+        code, _, err = self.verify()
+        self.assertIn("is unsupported", err)
+
+    def test_the_wrong_version_fails(self):
+        self.seal()
+        code, _, err = self.run_main("verify", "--version", "9.9.1", "--draft", self.draft, "--changelog", self.changelog,
+                                     "--sealed", self.sealed, "--out-dir", self.tmp / "n4", "--allow-replay")
+        self.assertNotEqual(code, 0)
+
+    def test_one_unsupported_line_stops_the_sealing(self):
+        code, out, err = self.seal("answers-one-unsupported.json")
+        self.assertEqual(code, 1)
+        self.assertIn("line 2 is unsupported", err)
+        self.assertFalse(self.sealed.exists())
+
+    def test_unknown_source_title_stops_the_sealing(self):
+        d = json.loads(self.draft.read_text(encoding="utf-8"))
+        d["items"][0]["sources"][0]["ref"] = "Roadmap for an imagined future"
+        self.draft.write_text(json.dumps(d), encoding="utf-8")
+        code, _, err = self.seal()
+        self.assertEqual(code, 1)
+        self.assertIn("line 1", err)
+        self.assertFalse(self.sealed.exists())
+
+    def test_the_committed_note_is_sealed_for_this_changelog(self):
+        """The real note for this version: it verifies against the repository's own draft and changelog (the release
+        workflow's re-check, here at test time), so an edit to either after sealing fails the suite, not just the release."""
+        sealed = ROOT / "release-notes" / "0.2.0.sealed.json"
+        self.assertTrue(sealed.is_file(), "release-notes/0.2.0.sealed.json is missing: run scripts/seal-release-note.sh")
+        code, _, err = self.run_main("verify", "--version", "0.2.0", "--draft", ROOT / "release-notes" / "0.2.0.json",
+                                     "--changelog", ROOT / "CHANGELOG.md", "--sealed", sealed, "--out-dir", self.tmp / "real")
+        self.assertEqual(code, 0, err)
 
 
 class TestResultsCommitTests(unittest.TestCase):

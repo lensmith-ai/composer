@@ -156,6 +156,27 @@ class ReleaseGateTests(unittest.TestCase):
         self.assertEqual(len(lines), 1)
         self.assertRegex(lines[0], r'^\* namespaces="git" ssh-ed25519 AAAA[0-9A-Za-z+/]{40,}$')
 
+class NoModelKeyOnGitHubTests(unittest.TestCase):
+    """Owner decision: no Anthropic key on GitHub. The note is checked once on the maintainer's computer and sealed; the
+    workflow only re-verifies the saved seal."""
+
+    def test_no_workflow_asks_for_a_model_key_or_a_secret_environment(self):
+        for path in sorted((ROOT / ".github" / "workflows").glob("*.y*ml")):
+            text = path.read_text(encoding="utf-8")
+            self.assertNotIn("ANTHROPIC", text, path.name)
+            self.assertNotIn("OPENAI", text, path.name)
+            self.assertNotRegex(text, r"(?m)^\s+environment:\s*release\b", path.name)
+            self.assertEqual(sorted(set(re.findall(r"secrets\.([A-Z_]+)", text))), ["GITHUB_TOKEN"] if "secrets." in text else [], path.name)
+
+    def test_the_release_note_job_only_verifies_a_saved_seal(self):
+        block = jobs(WORKFLOW.read_text(encoding="utf-8"))["release-note"]
+        self.assertIn("release_note.py verify", block)
+        self.assertNotIn("release_note.py seal", block)
+        self.assertNotIn("--judge", block)
+        self.assertIn(".sealed.json", block)
+        # read from the tagged commit's own files, not fetched from main
+        self.assertNotIn("gh api", block)
+
 
 if __name__ == "__main__":
     unittest.main()

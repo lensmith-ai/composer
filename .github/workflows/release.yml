@@ -4,13 +4,13 @@
 #   verify-tag    the tag is annotated, names itself, points at the checked-out commit, is on main, carries a good
 #                 signature from the owner's key (.github/allowed_signers as it stands on main), matches
 #                 pyproject.toml, and has no release yet. Every other job needs it and builds from that tag.
-#   test          the offline suite on Linux, recorded as test-results.json (the release note's second source)
+#   test          the offline suite on Linux, recorded as test-results.json
 #   build         sdist + wheel with hash-locked tools; the wheel installed into an empty venv and run;
 #                 a CycloneDX SBOM of that venv (+ the optional narration parts, scope "excluded"); SHA256SUMS
 #   installer     install.sh for this release (every file it fetches pinned by SHA-256) and the dependency files it
 #                 may fetch from the release, made from the build job's files
-#   release-note  the note, every line checked by claim-seal against CHANGELOG.md and test-results.json;
-#                 any line that is not supported stops the release
+#   release-note  the note: re-verifies, offline, the claim-seal check made on the maintainer's computer before the tag;
+#                 a note, changelog entry or seal that changed after sealing stops the release (no model, no secret)
 #   image         the default image (no narration) for linux/amd64 and linux/arm64, pushed to ghcr.io ONLY under an
 #                 unreleased candidate tag (candidate-<commit>), its SBOM (syft, CycloneDX) and both attested to the
 #                 image digest. A candidate tag is a staging image, not a release: nothing names it as one.
@@ -194,11 +194,12 @@ jobs:
           if-no-files-found: error
 
   release-note:
+    # No model key and no secret here. The note was checked by claim-seal once, on the maintainer's own computer before the
+    # tag (scripts/seal-release-note.sh), and the sealed result is committed (release-notes/<version>.sealed.json). This job
+    # only re-verifies that saved seal offline, and fails if the note, the changelog entry or the seal changed after it.
     needs: [verify-tag, test, build]
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # The model key for the claim-seal judge lives in this environment's secrets, nowhere else.
-    environment: release
     permissions:
       contents: read
     env:
@@ -212,27 +213,11 @@ jobs:
         with:
           python-version: "3.13"
       - run: python -m pip install .
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          name: test-results
-      - name: The note's draft, from main
-        # The draft only picks which lines to check; claim-seal still checks every line against this tag's changelog
-        # and test results. Reading it from main means a line that fails the check can be fixed and the run repeated
-        # without moving the signed tag.
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -eu
-          version="${TAG#v}"
-          gh api -H "Accept: application/vnd.github.raw+json" \
-            "repos/$GITHUB_REPOSITORY/contents/release-notes/$version.json?ref=main" > draft.json
-      - name: Claim-sealed release note
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      - name: Re-verify the sealed release note (offline)
         run: |
           version="${TAG#v}"
-          python scripts/release/release_note.py --version "$version" --draft draft.json \
-            --tests test-results.json --out-dir note
+          python scripts/release/release_note.py verify --version "$version" --draft "release-notes/$version.json" \
+            --sealed "release-notes/$version.sealed.json" --out-dir note
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: note
