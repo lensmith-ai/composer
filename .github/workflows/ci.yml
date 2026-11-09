@@ -71,7 +71,7 @@ jobs:
           python scripts/release/make_installer.py --dist "$RUNNER_TEMP/dist" --out "$RUNNER_TEMP/installer"
           mkdir "$RUNNER_TEMP/kit"
           cp "$RUNNER_TEMP/dist"/lensmith_composer-* "$RUNNER_TEMP/installer"/* "$RUNNER_TEMP/kit/"
-          ls -l "$RUNNER_TEMP/kit"
+          find "$RUNNER_TEMP/kit" -type f -exec ls -l {} +
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
@@ -85,7 +85,7 @@ jobs:
         run: |
           d=$(python3 -c 'import os, venv; print(os.path.join(os.path.dirname(venv.__file__), "scripts"))')
           sudo chmod -R g+w "$d"
-          ls -ld "$d" "$d"/common/* | head
+          find "$d" -maxdepth 2 -type f -exec ls -l {} +
       - name: One-command install from local files
         env:
           WHICH_HOME: ${{ matrix.home }}
