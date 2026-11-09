@@ -1,5 +1,6 @@
 """Setup: guards before any write, an answers-file install, an interactive install on a real terminal (pty, and
 an expect script when `expect` is installed), the key stored 0600 and never shown, and setup.sh's own guards."""
+import faulthandler
 import json
 import os
 import pty
@@ -192,6 +193,9 @@ class InteractiveSetupTests(unittest.TestCase):
              ("Through which lens [", ""), ("Port on this computer [", "")]
 
     def test_interactive_setup_on_a_pty(self):
+        # a hang here (seen on a macOS runner) must show where it is and end the run, not hold a job to its time limit
+        faulthandler.dump_traceback_later(150, exit=True)
+        self.addCleanup(faulthandler.cancel_dump_traceback_later)
         with fake_home() as home:
             target = home / ".lensmith-composer"
             pid, fd = pty.fork()

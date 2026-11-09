@@ -34,6 +34,12 @@ from .prompt import DEFAULT_INSIGHTS, INSIGHT_RANGE
 from .providers import ProviderError, checker_from_env, from_env
 
 
+EXTRAS_HELP = """Optional extras, any time: lensmith composer setup --reconfigure parser | provider (model) | checker | narration | schedule | port
+  parser = cleaner article text, provider = your key and model, checker = the model that checks each claim,
+  narration = a spoken voice (Kokoro), schedule = a daily brief, port = the port Composer uses.
+  Each one asks only about that part and changes nothing else. None of them is needed to start."""
+
+
 def _registry(args) -> registry.Registry:
     return registry.Registry.load(getattr(args, "sources_file", None))
 
@@ -364,7 +370,8 @@ def cmd_uninstall(args) -> int:
 
 def parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="composer", description="Read feeds, write a brief through your lens, "
-                                                             "check every claim against its source.")
+                                                             "check every claim against its source.",
+                                epilog=EXTRAS_HELP, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--version", action="version", version=f"composer {__version__}")
     sub = p.add_subparsers(dest="command", required=True)
 
@@ -428,7 +435,7 @@ def parser() -> argparse.ArgumentParser:
     st.add_argument("--answers", metavar="FILE", help="answers file (.toml or .json): no questions")
     st.add_argument("--yes", action="store_true", help="no questions: every default")
     st.add_argument("--reconfigure", action="append", metavar="PART",
-                    help="ask one part again: provider, checker, sources, parser, narration, schedule or port")
+                    help="ask one part again: provider (key and model), checker, sources, parser, narration, schedule or port")
     st.add_argument("--data-only", action="store_true", help="settings and key in the data folder only (container)")
     st.add_argument("--home-created", action="store_true", help=argparse.SUPPRESS)
     st.add_argument("--check-only", action="store_true", help="run every check, ask nothing, write nothing")

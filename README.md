@@ -40,6 +40,16 @@ type:
 lensmith composer
 ```
 
+The install asks nothing else. The extras are there when you want them, any time:
+
+```sh
+lensmith composer setup --reconfigure parser | provider (model) | checker | narration | schedule | port
+```
+
+`parser` reads article pages more cleanly, `provider` is your key and model, `checker` is the model that checks each
+claim, `narration` is a spoken voice (Kokoro), `schedule` is a daily brief, and `port` is the port Composer uses. Each one
+asks only about that part and changes nothing else.
+
 Every file the installer downloads is checked against a SHA-256 written into the script, and you can download the
 script and read it first. No sudo. The steps, what it changes on your computer, what to do if something fails, and how
 to remove it: [docs/install.md](docs/install.md). On Windows, run it inside WSL2 (Ubuntu) or use the container ([docs/setup.md](docs/setup.md)); Composer is not tested on native Windows.

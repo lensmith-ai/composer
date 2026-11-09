@@ -304,6 +304,12 @@ case "$SHORTCUT_HOW" in
   *) NEXT="$H/bin/lensmith composer" ;;
 esac
 say ""
+case "$SHORTCUT_HOW" in link|have|profile) EXTRA_CMD="lensmith composer" ;; *) EXTRA_CMD="$H/bin/lensmith composer" ;; esac
+say "Optional extras, any time: $EXTRA_CMD setup --reconfigure parser | provider (model) | checker | narration | schedule | port"
+say "  parser = cleaner article text, provider = your key and model, checker = the model that checks each claim,"
+say "  narration = a spoken voice (Kokoro), schedule = a daily brief, port = the port Composer uses."
+say "  Each one asks only about that part and changes nothing else. None of them is needed to start."
+say ""
 if [ "$START" != 1 ]; then
   say "Start it now:  $H/bin/lensmith composer"
   say "Next time:     $NEXT"

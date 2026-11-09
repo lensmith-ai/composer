@@ -183,3 +183,59 @@ class LensmithCommandTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+EXTRAS_LINE = ("Optional extras, any time: lensmith composer setup --reconfigure "
+               "parser | provider (model) | checker | narration | schedule | port")
+
+
+@unittest.skipUnless(os.name == "posix" and shutil.which("sh"), "POSIX shell")
+class ReconfigureThroughLensmithTests(unittest.TestCase):
+    """The extras the install does not ask about are reached with `lensmith composer setup --reconfigure PART`: each part,
+    through the real launcher `composer setup` wrote, on a real (offline, no key) install."""
+
+    PARTS = ("parser", "provider", "checker", "narration", "schedule", "port", "sources")
+
+    @classmethod
+    def setUpClass(cls):
+        cls.tmp = Path(tempfile.mkdtemp(prefix="composer-reconf-"))
+        cls.user = cls.tmp / "user"
+        cls.user.mkdir(mode=0o700)
+        cls.home = cls.user / ".lensmith-composer"
+        cls.env = {"PATH": os.environ["PATH"], "HOME": str(cls.user), "COMPOSER_NO_TEST_CALL": "1", "LANG": "C"}
+        run = subprocess.run([sys.executable, "-m", "composer", "setup", "--yes", "--home", str(cls.home)], cwd=ROOT,
+                             capture_output=True, text=True, timeout=120, env={**cls.env, "PYTHONPATH": str(ROOT)})
+        assert run.returncode == 0, run.stdout + run.stderr
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.tmp, True)
+
+    def lensmith(self, *args):
+        return subprocess.run([str(self.home / "bin" / "lensmith"), *args], capture_output=True, text=True, timeout=120,
+                              env=self.env, stdin=subprocess.DEVNULL)
+
+    def test_each_part_reconfigures_through_the_lensmith_launcher(self):
+        for part in self.PARTS:
+            with self.subTest(part=part):
+                run = self.lensmith("composer", "setup", "--reconfigure", part, "--yes", "--no-test-call")
+                self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
+                self.assertIn("setup. App folder:", run.stdout)
+                self.assertNotIn("takes one of", run.stdout + run.stderr)
+
+    def test_an_unknown_part_is_refused_and_names_the_parts(self):
+        run = self.lensmith("composer", "setup", "--reconfigure", "nonsense", "--yes")
+        self.assertNotEqual(run.returncode, 0)
+        self.assertIn("--reconfigure takes one of", run.stdout + run.stderr)
+
+    def test_help_prints_the_extras_lines_and_they_match_the_installer_and_the_readme(self):
+        run = self.lensmith("composer", "--help")
+        self.assertEqual(run.returncode, 0, run.stderr)
+        self.assertIn(EXTRAS_LINE, run.stdout)
+        shell = (ROOT / "scripts" / "install" / "install.sh.in").read_text(encoding="utf-8")
+        self.assertIn("setup --reconfigure parser | provider (model) | checker | narration | schedule | port", shell)
+        for line in run.stdout.splitlines():
+            if line.startswith("  parser = ") or line.startswith("  narration = ") or line.startswith("  Each one asks"):
+                self.assertIn(line, shell)
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn("lensmith composer setup --reconfigure parser | provider (model) | checker | narration | schedule | port", readme)

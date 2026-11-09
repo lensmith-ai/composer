@@ -110,15 +110,19 @@ jobs:
           find "$d" -maxdepth 2 -type f -exec ls -l {} +
       - name: One-command install from local files
         run: |
+          set -o pipefail
           cd "$RUNNER_TEMP/kit"
           if [ "$WHICH_HOME" = own ]; then H="$RUNNER_TEMP/composer-home"; else H="$HOME/.lensmith-composer"; fi
           echo "H=$H" >> "$GITHUB_ENV"
           if [ "$WHICH_PATH" = bare ]; then
             # no Python 3.10+ anywhere the installer looks: it must fetch uv and a private Python, as on a fresh Mac
-            COMPOSER_PYTHON_PATH_ONLY=1 COMPOSER_FILES_DIR="$PWD" PATH=/usr/bin:/bin:/usr/sbin:/sbin sh install.sh --home "$H" --no-open --no-start --path
+            COMPOSER_PYTHON_PATH_ONLY=1 COMPOSER_FILES_DIR="$PWD" PATH=/usr/bin:/bin:/usr/sbin:/sbin sh install.sh --home "$H" --no-open --no-start --path 2>&1 | tee "$RUNNER_TEMP/first.txt"
           else
-            COMPOSER_FILES_DIR="$PWD" sh install.sh --home "$H" --no-open --no-start --path
+            COMPOSER_FILES_DIR="$PWD" sh install.sh --home "$H" --no-open --no-start --path 2>&1 | tee "$RUNNER_TEMP/first.txt"
           fi
+          # the install ends by naming the optional extras (it asks nothing more)
+          grep -q "Optional extras, any time: lensmith composer setup --reconfigure parser | provider (model) | checker | narration | schedule | port" "$RUNNER_TEMP/first.txt"
+          grep -v "^20" "$RUNNER_TEMP/first.txt" | grep -A3 "^Optional extras"
       - name: The same command again (already installed)
         run: |
           set -o pipefail
@@ -147,6 +151,13 @@ jobs:
           "$H/bin/lensmith" composer doctor | tee "$RUNNER_TEMP/doctor.txt"
           grep -q ", 0 failed" "$RUNNER_TEMP/doctor.txt"
           echo "MACOS-INSTALL-PROOF: ok | $CASE | $said | $(grep 'passed, 0 failed' "$RUNNER_TEMP/doctor.txt") | $(uname -sm) macOS $(sw_vers -productVersion) | $("$H"/app/current/venv/bin/python -c 'import sys; print("Python " + sys.version.split()[0])')"
+      - name: lensmith composer setup --reconfigure PART, each part, through the launcher
+        run: |
+          for part in parser provider checker narration schedule port sources; do
+            "$H/bin/lensmith" composer setup --reconfigure "$part" --yes --no-test-call < /dev/null > "$RUNNER_TEMP/reconf.txt" 2>&1 || { cat "$RUNNER_TEMP/reconf.txt"; exit 1; }
+            echo "reconfigure $part: ok"
+          done
+          "$H/bin/lensmith" composer --help | grep -A1 "^Optional extras, any time"
       - name: lensmith composer uninstall takes its shell-profile lines away
         run: |
           # (cat, not grep on three names: grep exits 2 when one of the profiles does not exist)

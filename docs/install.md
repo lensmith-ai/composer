@@ -30,7 +30,11 @@ Eight numbered steps, each with what is happening and why, and how many minutes 
 
 It asks you one question, at the start so you can walk away afterwards: your Anthropic key. Typing is hidden. Press
 Enter to skip it. Without a key you get the recorded demo brief. Add a key later with
-`~/.lensmith-composer/bin/composer setup --reconfigure provider`.
+`lensmith composer setup --reconfigure provider`.
+
+The other extras are not asked about at install time. The install ends by naming them, and `lensmith composer --help` does too:
+`lensmith composer setup --reconfigure parser | provider (model) | checker | narration | schedule | port`. Each asks only about that
+part and changes nothing else.
 
 Everything goes in one folder, `~/.lensmith-composer`. No sudo. Outside it, it writes only a log file, a temporary
 folder it removes again, and the `lensmith` shortcut described under "Next time" (it tells you what it changed). To remove it: `lensmith composer uninstall`.

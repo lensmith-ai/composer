@@ -111,6 +111,7 @@ The full app, on your computer or your own server. In plain words:
 
 ### Fixed
 
+- The one-command install ends by naming the optional extras (`lensmith composer setup --reconfigure parser | provider (model) | checker | narration | schedule | port`); it still asks one question. The same line is in the README and in `lensmith composer --help`.
 - The installer no longer stops on a Mac with `chmod: --: No such file or directory`: macOS's `chmod` reads the mode first and
   takes a `--` after it for a file name, and the installer's tests ran only on Linux. Every command the installer runs was
   checked for the same kind of difference, `composer update` and the narration setup take group-write off the venv
