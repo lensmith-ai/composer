@@ -1,0 +1,14 @@
+[
+  {
+    "path": ".github",
+    "blob_href": "https://github.com/lensmith-ai/composer/blob/b82f2ab20361c07055cffd288c6452e1b08a47c2/.github",
+    "start_line": 4293,
+    "start_column": null,
+    "end_line": 4293,
+    "end_column": null,
+    "annotation_level": "failure",
+    "title": "",
+    "message": "Process completed with exit code 1.",
+    "raw_details": ""
+  }
+]
