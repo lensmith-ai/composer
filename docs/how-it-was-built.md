@@ -12,7 +12,7 @@ The short version is in the [README](../README.md#how-this-was-built).
 
 | Check | Result |
 |---|---|
-| Offline tests | 837 tests pass on Python 3.12, with 4 skipped (they need `expect`, Docker, a network install, or an account other than root). Run on 2026-11-09 on the release branch. Before the release they also ran on Python 3.10 and 3.13 in clean containers. The tests use invented fixture feeds and scripted model replies: no network, no key. CI runs them on Ubuntu and macOS (`.github/workflows/ci.yml`) |
+| Offline tests | 837 tests ran on Python 3.12: 833 passed and 4 were skipped (they need `expect`, Docker, a network install, or an account other than root). Run on 2026-11-09 on the release branch. Before the release they also ran on Python 3.10 and 3.13 in clean containers. The tests use invented fixture feeds and scripted model replies: no network, no key. CI runs them on Ubuntu and macOS (`.github/workflows/ci.yml`) |
 | The one-command installer | 64 runs across 27 scenarios (a download source down or slow, a file that fails its checksum, no Python, a folder it must refuse), all ended as they should; installed from supplied files with the network switched off. CI also runs the real install on macOS. It passed on my own Mac on 2026-11-09, from the files built at commit 926837d |
 | Browser flows | the demo pages and the app page's flows run in Chromium and the WebKit engine at 390, 1280 and 1600 px (`.github/workflows/stranger.yml`) |
 | The commands in the README | `composer demo`, `demo --fast`, `--version`, `sources list`, `compose --help` and `pip install .` were run again on 2026-11-09. `compose` itself was not, because it needs a key and costs money |
