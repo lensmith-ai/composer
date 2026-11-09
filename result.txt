@@ -1,0 +1,22 @@
+commit 474a50f1f06149c556aafaf64794fd691b95de26
+ci run 42609748916 (https://github.com/lensmith-ai/composer/actions/runs/42609748916)
+status completed
+success | banned-text test (tree and full history) | job 129134818738 | 2026-11-09T11:31:46Z -> 2026-11-09T11:31:53Z
+failure | tests (macos-15, Python 3.13) | job 129134818917 | 2026-11-09T11:31:46Z -> 2026-11-09T11:34:34Z
+failure | tests (macos-15, Python 3.10) | job 129134818956 | 2026-11-09T11:31:53Z -> 2026-11-09T11:36:13Z
+success | secret scan (gitleaks, history and tree) | job 129134818958 | 2026-11-09T11:31:46Z -> 2026-11-09T11:31:53Z
+success | tests (ubuntu-latest, Python 3.10) | job 129134819020 | 2026-11-09T11:31:46Z -> 2026-11-09T11:34:31Z
+success | lint workflows (actionlint) | job 129134819064 | 2026-11-09T11:31:46Z -> 2026-11-09T11:31:55Z
+success | one-command install on macOS (python.org framework Python with group-writable venv templates, own folder, macos-15) | job 129134819091 | 2026-11-09T11:31:52Z -> 2026-11-09T11:32:47Z
+success | tests (ubuntu-latest, Python 3.13) | job 129134819100 | 2026-11-09T11:31:46Z -> 2026-11-09T11:33:51Z
+success | one-command install on macOS (python.org framework Python, default folder, macos-15) | job 129134819128 | 2026-11-09T11:31:46Z -> 2026-11-09T11:32:42Z
+success | one-command install on macOS (python.org framework Python, default folder, macos-15-intel) | job 129134819156 | 2026-11-09T11:32:37Z -> 2026-11-09T11:33:59Z
+success | one-command install on macOS (no Python on PATH, private Python through uv, macos-15) | job 129134819201 | 2026-11-09T11:31:46Z -> 2026-11-09T11:32:33Z
+2026-11-09T11:32:36.4936000Z [36;1mecho "MACOS-INSTALL-PROOF: ok | $CASE | $said | $(grep 'passed, 0 failed' "$RUNNER_TEMP/doctor.txt") | $(uname -sm) macOS $(sw_vers -productVersion) | $("$H"/app/current/venv/bin/python -c 'import sys; print("Python " + sys.version.split()[0])')"[0m
+2026-11-09T11:32:37.6671780Z MACOS-INSTALL-PROOF: ok | python.org framework Python with group-writable venv templates, own folder | composer 0.2.0 | doctor: 11 passed, 0 failed, 5 skipped | Darwin arm64 macOS 15.8.2 | Python 3.12.10
+2026-11-09T11:32:33.0674220Z [36;1mecho "MACOS-INSTALL-PROOF: ok | $CASE | $said | $(grep 'passed, 0 failed' "$RUNNER_TEMP/doctor.txt") | $(uname -sm) macOS $(sw_vers -productVersion) | $("$H"/app/current/venv/bin/python -c 'import sys; print("Python " + sys.version.split()[0])')"[0m
+2026-11-09T11:32:34.0498390Z MACOS-INSTALL-PROOF: ok | python.org framework Python, default folder | composer 0.2.0 | doctor: 11 passed, 0 failed, 5 skipped | Darwin arm64 macOS 15.8.2 | Python 3.12.10
+2026-11-09T11:33:46.1704310Z [36;1mecho "MACOS-INSTALL-PROOF: ok | $CASE | $said | $(grep 'passed, 0 failed' "$RUNNER_TEMP/doctor.txt") | $(uname -sm) macOS $(sw_vers -productVersion) | $("$H"/app/current/venv/bin/python -c 'import sys; print("Python " + sys.version.split()[0])')"[0m
+2026-11-09T11:33:48.1422550Z MACOS-INSTALL-PROOF: ok | python.org framework Python, default folder | composer 0.2.0 | doctor: 11 passed, 0 failed, 5 skipped | Darwin x86_64 macOS 15.7.9 | Python 3.12.10
+2026-11-09T11:32:25.9548270Z [36;1mecho "MACOS-INSTALL-PROOF: ok | $CASE | $said | $(grep 'passed, 0 failed' "$RUNNER_TEMP/doctor.txt") | $(uname -sm) macOS $(sw_vers -productVersion) | $("$H"/app/current/venv/bin/python -c 'import sys; print("Python " + sys.version.split()[0])')"[0m
+2026-11-09T11:32:26.6493870Z MACOS-INSTALL-PROOF: ok | no Python on PATH, private Python through uv | composer 0.2.0 | doctor: 11 passed, 0 failed, 5 skipped | Darwin arm64 macOS 15.8.2 | Python 3.12.9

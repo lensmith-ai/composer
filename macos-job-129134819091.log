@@ -1,0 +1,1598 @@
+﻿2026-11-09T11:31:53.0568640Z Current runner version: '2.338.2'
+2026-11-09T11:31:53.0585160Z ##[group]Runner Image Provisioner
+2026-11-09T11:31:53.0585770Z Hosted Compute Agent
+2026-11-09T11:31:53.0586130Z Version: 20261103.629
+2026-11-09T11:31:53.0586530Z Commit: 15dbd9ccb5dbf34fae002b6ed1a2670f52df37bc
+2026-11-09T11:31:53.0586990Z Build Date: 2026-11-03T17:26:59Z
+2026-11-09T11:31:53.0587420Z Worker ID: {7a6ac864-f33e-4045-b430-58ec9883fef6}
+2026-11-09T11:31:53.0587890Z Region: westus
+2026-11-09T11:31:53.0588240Z Cloud: MacCloud
+2026-11-09T11:31:53.0588600Z ##[endgroup]
+2026-11-09T11:31:53.0589500Z ##[group]Operating System
+2026-11-09T11:31:53.0589890Z macOS
+2026-11-09T11:31:53.0590210Z 15.8.2
+2026-11-09T11:31:53.0590550Z 24H232
+2026-11-09T11:31:53.0590880Z ##[endgroup]
+2026-11-09T11:31:53.0591250Z ##[group]Runner Image
+2026-11-09T11:31:53.0591630Z Image: macos-15-arm64
+2026-11-09T11:31:53.0592010Z Version: 20261104.0514.1
+2026-11-09T11:31:53.0592910Z Included Software: https://github.com/actions/runner-images/blob/macos-15-arm64/20261104.0514/images/macos/macos-15-arm64-Readme.md
+2026-11-09T11:31:53.0593960Z Image Release: https://github.com/actions/runner-images/releases/tag/macos-15-arm64%2F20261104.0514
+2026-11-09T11:31:53.0594640Z ##[endgroup]
+2026-11-09T11:31:53.0595400Z ##[group]GITHUB_TOKEN Permissions
+2026-11-09T11:31:53.0596850Z Contents: read
+2026-11-09T11:31:53.0597220Z Metadata: read
+2026-11-09T11:31:53.0597580Z ##[endgroup]
+2026-11-09T11:31:53.0599140Z Secret source: Actions
+2026-11-09T11:31:53.0599730Z Cache mode: write
+2026-11-09T11:31:53.0600180Z Prepare workflow directory
+2026-11-09T11:31:53.0960420Z Prepare all required actions
+2026-11-09T11:31:53.1001160Z Getting action download info
+2026-11-09T11:31:53.5139050Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)
+2026-11-09T11:31:53.9205540Z Download action repository 'actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0' (SHA:6d4fd22b20465ccc0f7354476588e8df7c9ca0e0)
+2026-11-09T11:31:54.5140240Z Complete job name: one-command install on macOS (python.org framework Python with group-writable venv templates, own folder, macos-15)
+2026-11-09T11:31:54.5870180Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+2026-11-09T11:31:54.5870920Z with:
+2026-11-09T11:31:54.5871260Z   persist-credentials: false
+2026-11-09T11:31:54.5871640Z   repository: lensmith-ai/composer
+2026-11-09T11:31:54.5874620Z   token: ***
+2026-11-09T11:31:54.5874930Z   ssh-strict: true
+2026-11-09T11:31:54.5875250Z   ssh-user: git
+2026-11-09T11:31:54.5875560Z   clean: true
+2026-11-09T11:31:54.5875890Z   sparse-checkout-cone-mode: true
+2026-11-09T11:31:54.5876270Z   fetch-depth: 1
+2026-11-09T11:31:54.5876580Z   fetch-tags: false
+2026-11-09T11:31:54.5876910Z   show-progress: true
+2026-11-09T11:31:54.5877500Z   lfs: false
+2026-11-09T11:31:54.5877810Z   submodules: false
+2026-11-09T11:31:54.5878140Z   set-safe-directory: true
+2026-11-09T11:31:54.5878510Z   allow-unsafe-pr-checkout: false
+2026-11-09T11:31:54.5879140Z env:
+2026-11-09T11:31:54.5879610Z   CASE: python.org framework Python with group-writable venv templates, own folder
+2026-11-09T11:31:54.5880210Z   TEMPLATES: group-writable
+2026-11-09T11:31:54.5880560Z   WHICH_HOME: own
+2026-11-09T11:31:54.5880960Z   WHICH_PATH: inherit
+2026-11-09T11:31:54.5881290Z ##[endgroup]
+2026-11-09T11:31:55.1622820Z Syncing repository: lensmith-ai/composer
+2026-11-09T11:31:55.1626950Z ##[group]Getting Git version info
+2026-11-09T11:31:55.1630830Z Working directory is '/Users/runner/work/composer/composer'
+2026-11-09T11:31:55.1638110Z [command]/opt/homebrew/bin/git version
+2026-11-09T11:31:55.2541900Z git version 2.56.0
+2026-11-09T11:31:55.2563170Z ##[endgroup]
+2026-11-09T11:31:55.2575740Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/0f5ebe07-e18c-42f6-8b7d-d18969dcae98/.gitconfig'
+2026-11-09T11:31:55.2589440Z Temporarily overriding HOME='/Users/runner/work/_temp/0f5ebe07-e18c-42f6-8b7d-d18969dcae98' before making global git config changes
+2026-11-09T11:31:55.2612070Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-09T11:31:55.2616630Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/composer/composer
+2026-11-09T11:31:55.2842120Z Deleting the contents of '/Users/runner/work/composer/composer'
+2026-11-09T11:31:55.2853560Z ##[group]Determining repository object format
+2026-11-09T11:31:55.2858310Z ##[endgroup]
+2026-11-09T11:31:55.2862790Z ##[group]Initializing the repository
+2026-11-09T11:31:55.2866690Z [command]/opt/homebrew/bin/git init /Users/runner/work/composer/composer
+2026-11-09T11:31:55.3207040Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-09T11:31:55.3211410Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-09T11:31:55.3215240Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-09T11:31:55.3218310Z hint: call:
+2026-11-09T11:31:55.3220110Z hint:
+2026-11-09T11:31:55.3222090Z hint: 	git config --global init.defaultBranch <name>
+2026-11-09T11:31:55.3224510Z hint:
+2026-11-09T11:31:55.3226880Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-09T11:31:55.3230780Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-09T11:31:55.3233740Z hint:
+2026-11-09T11:31:55.3235630Z hint: 	git branch -m <name>
+2026-11-09T11:31:55.3237610Z hint:
+2026-11-09T11:31:55.3240310Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-09T11:31:55.3245270Z Initialized empty Git repository in /Users/runner/work/composer/composer/.git/
+2026-11-09T11:31:55.3254770Z [command]/opt/homebrew/bin/git remote add origin https://github.com/lensmith-ai/composer
+2026-11-09T11:31:55.3369690Z ##[endgroup]
+2026-11-09T11:31:55.3384860Z ##[group]Disabling automatic garbage collection
+2026-11-09T11:31:55.3388380Z [command]/opt/homebrew/bin/git config --local gc.auto 0
+2026-11-09T11:31:55.3512270Z ##[endgroup]
+2026-11-09T11:31:55.3517620Z ##[group]Setting up auth
+2026-11-09T11:31:55.3521460Z Removing SSH command configuration
+2026-11-09T11:31:55.3537190Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-09T11:31:55.3625620Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-09T11:31:55.5349080Z Removing HTTP extra header
+2026-11-09T11:31:55.5353260Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-09T11:31:55.5428960Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-09T11:31:55.7395960Z Removing includeIf entries pointing to credentials config files
+2026-11-09T11:31:55.7432760Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-09T11:31:55.7472620Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-09T11:31:55.9445550Z [command]/opt/homebrew/bin/git config --file /Users/runner/work/_temp/git-credentials-39c38265-3a65-4c2b-86a3-aa85044e3ef8.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-09T11:31:55.9503370Z [command]/opt/homebrew/bin/git config --local includeIf.gitdir:/Users/runner/work/composer/composer/.git.path /Users/runner/work/_temp/git-credentials-39c38265-3a65-4c2b-86a3-aa85044e3ef8.config
+2026-11-09T11:31:55.9629130Z [command]/opt/homebrew/bin/git config --local includeIf.gitdir:/Users/runner/work/composer/composer/.git/worktrees/*.path /Users/runner/work/_temp/git-credentials-39c38265-3a65-4c2b-86a3-aa85044e3ef8.config
+2026-11-09T11:31:55.9712770Z [command]/opt/homebrew/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-39c38265-3a65-4c2b-86a3-aa85044e3ef8.config
+2026-11-09T11:31:55.9799050Z [command]/opt/homebrew/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-39c38265-3a65-4c2b-86a3-aa85044e3ef8.config
+2026-11-09T11:31:55.9868960Z ##[endgroup]
+2026-11-09T11:31:55.9870330Z ##[group]Fetching the repository
+2026-11-09T11:31:55.9874660Z [command]/opt/homebrew/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +474a50f1f06149c556aafaf64794fd691b95de26:refs/remotes/origin/mac-install-fix
+2026-11-09T11:31:56.7575520Z From https://github.com/lensmith-ai/composer
+2026-11-09T11:31:56.7578090Z  * [new ref]         474a50f1f06149c556aafaf64794fd691b95de26 -> origin/mac-install-fix
+2026-11-09T11:31:56.7582220Z [command]/opt/homebrew/bin/git branch --list --remote origin/mac-install-fix
+2026-11-09T11:31:56.7670190Z   origin/mac-install-fix
+2026-11-09T11:31:56.7682180Z [command]/opt/homebrew/bin/git rev-parse refs/remotes/origin/mac-install-fix
+2026-11-09T11:31:56.7758480Z 474a50f1f06149c556aafaf64794fd691b95de26
+2026-11-09T11:31:56.7761990Z ##[endgroup]
+2026-11-09T11:31:56.7763770Z ##[group]Determining the checkout info
+2026-11-09T11:31:56.7765280Z ##[endgroup]
+2026-11-09T11:31:56.7766750Z [command]/opt/homebrew/bin/git sparse-checkout disable
+2026-11-09T11:31:56.7860890Z [command]/opt/homebrew/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-09T11:31:56.7957360Z ##[group]Checking out the ref
+2026-11-09T11:31:56.7959580Z [command]/opt/homebrew/bin/git checkout --progress --force -B mac-install-fix refs/remotes/origin/mac-install-fix
+2026-11-09T11:31:56.8550420Z Switched to a new branch 'mac-install-fix'
+2026-11-09T11:31:56.8551840Z branch 'mac-install-fix' set up to track 'origin/mac-install-fix'.
+2026-11-09T11:31:56.8555560Z ##[endgroup]
+2026-11-09T11:31:56.8699970Z [command]/opt/homebrew/bin/git log -1 --format=%H
+2026-11-09T11:31:56.8781530Z 474a50f1f06149c556aafaf64794fd691b95de26
+2026-11-09T11:31:56.8839700Z ##[group]Removing auth
+2026-11-09T11:31:56.8843160Z Removing SSH command configuration
+2026-11-09T11:31:56.8845390Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-09T11:31:56.8886470Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-09T11:31:57.0134080Z Removing HTTP extra header
+2026-11-09T11:31:57.0136650Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-09T11:31:57.0420010Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-09T11:31:57.2493870Z Removing includeIf entries pointing to credentials config files
+2026-11-09T11:31:57.2580790Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-09T11:31:57.2582170Z includeif.gitdir:/Users/runner/work/composer/composer/.git.path
+2026-11-09T11:31:57.2597250Z includeif.gitdir:/Users/runner/work/composer/composer/.git/worktrees/*.path
+2026-11-09T11:31:57.2601460Z includeif.gitdir:/github/workspace/.git.path
+2026-11-09T11:31:57.2603360Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-09T11:31:57.2605030Z [command]/opt/homebrew/bin/git config --local --get-all includeif.gitdir:/Users/runner/work/composer/composer/.git.path
+2026-11-09T11:31:57.2696680Z /Users/runner/work/_temp/git-credentials-39c38265-3a65-4c2b-86a3-aa85044e3ef8.config
+2026-11-09T11:31:57.2716500Z [command]/opt/homebrew/bin/git config --local --unset includeif.gitdir:/Users/runner/work/composer/composer/.git.path \/Users\/runner\/work\/_temp\/git\-credentials\-39c38265\-3a65\-4c2b\-86a3\-aa85044e3ef8\.config
+2026-11-09T11:31:57.2966130Z [command]/opt/homebrew/bin/git config --local --get-all includeif.gitdir:/Users/runner/work/composer/composer/.git/worktrees/*.path
+2026-11-09T11:31:57.2967140Z /Users/runner/work/_temp/git-credentials-39c38265-3a65-4c2b-86a3-aa85044e3ef8.config
+2026-11-09T11:31:57.2971660Z [command]/opt/homebrew/bin/git config --local --unset includeif.gitdir:/Users/runner/work/composer/composer/.git/worktrees/*.path \/Users\/runner\/work\/_temp\/git\-credentials\-39c38265\-3a65\-4c2b\-86a3\-aa85044e3ef8\.config
+2026-11-09T11:31:57.3151220Z [command]/opt/homebrew/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-11-09T11:31:57.3271460Z /github/runner_temp/git-credentials-39c38265-3a65-4c2b-86a3-aa85044e3ef8.config
+2026-11-09T11:31:57.3276770Z [command]/opt/homebrew/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path \/github\/runner_temp\/git\-credentials\-39c38265\-3a65\-4c2b\-86a3\-aa85044e3ef8\.config
+2026-11-09T11:31:57.3422770Z [command]/opt/homebrew/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-09T11:31:57.3507600Z /github/runner_temp/git-credentials-39c38265-3a65-4c2b-86a3-aa85044e3ef8.config
+2026-11-09T11:31:57.3530570Z [command]/opt/homebrew/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path \/github\/runner_temp\/git\-credentials\-39c38265\-3a65\-4c2b\-86a3\-aa85044e3ef8\.config
+2026-11-09T11:31:57.3652740Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-09T11:31:57.4881420Z Removing credentials config '/Users/runner/work/_temp/git-credentials-39c38265-3a65-4c2b-86a3-aa85044e3ef8.config'
+2026-11-09T11:31:57.4887760Z ##[endgroup]
+2026-11-09T11:31:57.5193410Z ##[group]Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+2026-11-09T11:31:57.5194510Z with:
+2026-11-09T11:31:57.5194990Z   python-version: 3.13
+2026-11-09T11:31:57.5195620Z   check-latest: false
+2026-11-09T11:31:57.5201550Z   token: ***
+2026-11-09T11:31:57.5202320Z   mirror: https://raw.githubusercontent.com/actions/python-versions/main
+2026-11-09T11:31:57.5203280Z   update-environment: true
+2026-11-09T11:31:57.5203850Z   allow-prereleases: false
+2026-11-09T11:31:57.5204480Z   freethreaded: false
+2026-11-09T11:31:57.5205050Z env:
+2026-11-09T11:31:57.5205740Z   CASE: python.org framework Python with group-writable venv templates, own folder
+2026-11-09T11:31:57.5206680Z   TEMPLATES: group-writable
+2026-11-09T11:31:57.5207160Z   WHICH_HOME: own
+2026-11-09T11:31:57.5207640Z   WHICH_PATH: inherit
+2026-11-09T11:31:57.5208080Z ##[endgroup]
+2026-11-09T11:31:57.8153730Z ##[group]Installed versions
+2026-11-09T11:31:58.0349490Z Successfully set up CPython (3.13.17)
+2026-11-09T11:31:58.0493240Z ##[endgroup]
+2026-11-09T11:31:58.1097530Z ##[group]Run python -m pip install --require-hashes -r scripts/release/release-tools.txt
+2026-11-09T11:31:58.1099490Z [36;1mpython -m pip install --require-hashes -r scripts/release/release-tools.txt[0m
+2026-11-09T11:31:58.1100750Z [36;1mpython scripts/release/build.py --out "$RUNNER_TEMP/dist"[0m
+2026-11-09T11:31:58.1102780Z [36;1mpython scripts/release/make_installer.py --dist "$RUNNER_TEMP/dist" --out "$RUNNER_TEMP/installer"[0m
+2026-11-09T11:31:58.1103940Z [36;1mmkdir "$RUNNER_TEMP/kit"[0m
+2026-11-09T11:31:58.1105100Z [36;1mcp "$RUNNER_TEMP/dist"/lensmith_composer-* "$RUNNER_TEMP/installer"/* "$RUNNER_TEMP/kit/"[0m
+2026-11-09T11:31:58.1106270Z [36;1mfind "$RUNNER_TEMP/kit" -type f -exec ls -l {} +[0m
+2026-11-09T11:31:58.1405580Z shell: /bin/bash -e {0}
+2026-11-09T11:31:58.1406150Z env:
+2026-11-09T11:31:58.1407110Z   CASE: python.org framework Python with group-writable venv templates, own folder
+2026-11-09T11:31:58.1408020Z   TEMPLATES: group-writable
+2026-11-09T11:31:58.1408710Z   WHICH_HOME: own
+2026-11-09T11:31:58.1409160Z   WHICH_PATH: inherit
+2026-11-09T11:31:58.1409890Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.13.17/arm64
+2026-11-09T11:31:58.1411960Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.13.17/arm64/lib/pkgconfig
+2026-11-09T11:31:58.1413070Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.13.17/arm64
+2026-11-09T11:31:58.1414060Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.13.17/arm64
+2026-11-09T11:31:58.1415090Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.13.17/arm64
+2026-11-09T11:31:58.1415910Z ##[endgroup]
+2026-11-09T11:32:00.4611250Z Collecting arrow==1.4.0 (from -r scripts/release/release-tools.txt (line 7))
+2026-11-09T11:32:00.5167050Z   Downloading arrow-1.4.0-py3-none-any.whl (68 kB)
+2026-11-09T11:32:00.6121200Z Collecting attrs==26.1.0 (from -r scripts/release/release-tools.txt (line 11))
+2026-11-09T11:32:00.6167810Z   Downloading attrs-26.1.0-py3-none-any.whl (67 kB)
+2026-11-09T11:32:00.6508870Z Collecting boolean-py==5.0 (from -r scripts/release/release-tools.txt (line 17))
+2026-11-09T11:32:00.6576060Z   Downloading boolean_py-5.0-py3-none-any.whl (26 kB)
+2026-11-09T11:32:00.6793680Z Collecting build==1.6.1 (from -r scripts/release/release-tools.txt (line 21))
+2026-11-09T11:32:00.6862110Z   Downloading build-1.6.1-py3-none-any.whl (31 kB)
+2026-11-09T11:32:00.7276170Z Collecting chardet==7.7.0 (from -r scripts/release/release-tools.txt (line 25))
+2026-11-09T11:32:00.7373400Z   Downloading chardet-7.7.0-cp313-cp313-macosx_11_0_arm64.whl (1.2 MB)
+2026-11-09T11:32:00.8156030Z      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 15.0 MB/s  0:00:00
+2026-11-09T11:32:00.8597910Z Collecting cyclonedx-bom==7.5.0 (from -r scripts/release/release-tools.txt (line 73))
+2026-11-09T11:32:00.8652490Z   Downloading cyclonedx_bom-7.5.0-py3-none-any.whl (61 kB)
+2026-11-09T11:32:01.0455960Z Collecting cyclonedx-python-lib==11.12.0 (from -r scripts/release/release-tools.txt (line 77))
+2026-11-09T11:32:01.0582190Z   Downloading cyclonedx_python_lib-11.12.0-py3-none-any.whl (529 kB)
+2026-11-09T11:32:01.0807360Z      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 529.5/529.5 kB 17.3 MB/s  0:00:00
+2026-11-09T11:32:01.1085190Z Collecting defusedxml==0.7.1 (from -r scripts/release/release-tools.txt (line 81))
+2026-11-09T11:32:01.1126870Z   Downloading defusedxml-0.7.1-py2.py3-none-any.whl (25 kB)
+2026-11-09T11:32:01.1313510Z Collecting fqdn==1.6.0 (from -r scripts/release/release-tools.txt (line 85))
+2026-11-09T11:32:01.1359300Z   Downloading fqdn-1.6.0-py3-none-any.whl (12 kB)
+2026-11-09T11:32:01.1524470Z Collecting idna==3.20 (from -r scripts/release/release-tools.txt (line 89))
+2026-11-09T11:32:01.1561620Z   Downloading idna-3.20-py3-none-any.whl (69 kB)
+2026-11-09T11:32:01.1728990Z Collecting isoduration==20.11.0 (from -r scripts/release/release-tools.txt (line 93))
+2026-11-09T11:32:01.1774100Z   Downloading isoduration-20.11.0-py3-none-any.whl (11 kB)
+2026-11-09T11:32:01.2115060Z Collecting jsonpointer==3.6 (from -r scripts/release/release-tools.txt (line 97))
+2026-11-09T11:32:01.2180560Z   Downloading jsonpointer-3.6-py3-none-any.whl (9.3 kB)
+2026-11-09T11:32:01.2459470Z Collecting jsonschema==4.26.0 (from -r scripts/release/release-tools.txt (line 101))
+2026-11-09T11:32:01.2523090Z   Downloading jsonschema-4.26.0-py3-none-any.whl (90 kB)
+2026-11-09T11:32:01.2685400Z Collecting jsonschema-specifications==2025.9.1 (from -r scripts/release/release-tools.txt (line 105))
+2026-11-09T11:32:01.2727320Z   Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl (18 kB)
+2026-11-09T11:32:01.2878290Z Collecting lark==1.3.1 (from -r scripts/release/release-tools.txt (line 109))
+2026-11-09T11:32:01.2916270Z   Downloading lark-1.3.1-py3-none-any.whl (113 kB)
+2026-11-09T11:32:01.3142820Z Collecting license-expression==30.4.4 (from -r scripts/release/release-tools.txt (line 113))
+2026-11-09T11:32:01.3194920Z   Downloading license_expression-30.4.4-py3-none-any.whl (120 kB)
+2026-11-09T11:32:01.5035170Z Collecting lxml==6.1.3 (from -r scripts/release/release-tools.txt (line 117))
+2026-11-09T11:32:01.5124350Z   Downloading lxml-6.1.3-cp313-cp313-macosx_10_13_universal2.whl (8.6 MB)
+2026-11-09T11:32:01.6494980Z      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 8.6/8.6 MB 65.9 MB/s  0:00:00
+2026-11-09T11:32:01.6774540Z Collecting packageurl-python==0.17.6 (from -r scripts/release/release-tools.txt (line 295))
+2026-11-09T11:32:01.6820370Z   Downloading packageurl_python-0.17.6-py3-none-any.whl (36 kB)
+2026-11-09T11:32:01.7048540Z Collecting packaging==26.3 (from -r scripts/release/release-tools.txt (line 301))
+2026-11-09T11:32:01.7110990Z   Downloading packaging-26.3-py3-none-any.whl (129 kB)
+2026-11-09T11:32:01.7470020Z Collecting pip-requirements-parser==32.0.1 (from -r scripts/release/release-tools.txt (line 308))
+2026-11-09T11:32:01.7528980Z   Downloading pip_requirements_parser-32.0.1-py3-none-any.whl (35 kB)
+2026-11-09T11:32:01.7766600Z Collecting py-serializable==2.1.0 (from -r scripts/release/release-tools.txt (line 312))
+2026-11-09T11:32:01.7812520Z   Downloading py_serializable-2.1.0-py3-none-any.whl (23 kB)
+2026-11-09T11:32:01.8012400Z Collecting pyparsing==3.3.3 (from -r scripts/release/release-tools.txt (line 316))
+2026-11-09T11:32:01.8054680Z   Downloading pyparsing-3.3.3-py3-none-any.whl (126 kB)
+2026-11-09T11:32:01.8237110Z Collecting pyproject-hooks==1.3.3 (from -r scripts/release/release-tools.txt (line 320))
+2026-11-09T11:32:01.8288850Z   Downloading pyproject_hooks-1.3.3-py3-none-any.whl (10 kB)
+2026-11-09T11:32:01.8457390Z Collecting python-dateutil==4.0.0 (from -r scripts/release/release-tools.txt (line 324))
+2026-11-09T11:32:01.8521390Z   Downloading python_dateutil-4.0.0-py3-none-any.whl (92 kB)
+2026-11-09T11:32:01.8735850Z Collecting referencing==0.37.0 (from -r scripts/release/release-tools.txt (line 328))
+2026-11-09T11:32:01.8787560Z   Downloading referencing-0.37.0-py3-none-any.whl (26 kB)
+2026-11-09T11:32:01.8955860Z Collecting rfc3339-validator==0.1.4 (from -r scripts/release/release-tools.txt (line 335))
+2026-11-09T11:32:01.9005630Z   Downloading rfc3339_validator-0.1.4-py2.py3-none-any.whl (3.5 kB)
+2026-11-09T11:32:01.9156740Z Collecting rfc3986-validator==0.1.1 (from -r scripts/release/release-tools.txt (line 339))
+2026-11-09T11:32:01.9223710Z   Downloading rfc3986_validator-0.1.1-py2.py3-none-any.whl (4.2 kB)
+2026-11-09T11:32:01.9429740Z Collecting rfc3987-syntax==1.1.0 (from -r scripts/release/release-tools.txt (line 343))
+2026-11-09T11:32:01.9501750Z   Downloading rfc3987_syntax-1.1.0-py3-none-any.whl (8.0 kB)
+2026-11-09T11:32:02.1785370Z Collecting rpds-py==2026.9.1 (from -r scripts/release/release-tools.txt (line 347))
+2026-11-09T11:32:02.1887220Z   Downloading rpds_py-2026.9.1-cp313-cp313-macosx_11_0_arm64.whl (340 kB)
+2026-11-09T11:32:02.2096250Z Collecting six==1.17.0 (from -r scripts/release/release-tools.txt (line 479))
+2026-11-09T11:32:02.2140400Z   Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-11-09T11:32:02.2301820Z Collecting sortedcontainers==2.4.0 (from -r scripts/release/release-tools.txt (line 483))
+2026-11-09T11:32:02.2345490Z   Downloading sortedcontainers-2.4.0-py2.py3-none-any.whl (29 kB)
+2026-11-09T11:32:02.2680730Z Collecting tzdata==2026.6 (from -r scripts/release/release-tools.txt (line 487))
+2026-11-09T11:32:02.2774280Z   Downloading tzdata-2026.6-py2.py3-none-any.whl (348 kB)
+2026-11-09T11:32:02.3026070Z Collecting uri-template==1.3.0 (from -r scripts/release/release-tools.txt (line 493))
+2026-11-09T11:32:02.3084290Z   Downloading uri_template-1.3.0-py3-none-any.whl (11 kB)
+2026-11-09T11:32:02.3293740Z Collecting webcolors==25.10.0 (from -r scripts/release/release-tools.txt (line 497))
+2026-11-09T11:32:02.3333880Z   Downloading webcolors-25.10.0-py3-none-any.whl (14 kB)
+2026-11-09T11:32:02.4088820Z Collecting setuptools==84.2.1 (from -r scripts/release/release-tools.txt (line 503))
+2026-11-09T11:32:02.4146850Z   Downloading setuptools-84.2.1-py3-none-any.whl (876 kB)
+2026-11-09T11:32:02.4262750Z      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 876.3/876.3 kB 70.0 MB/s  0:00:00
+2026-11-09T11:32:02.6013780Z Installing collected packages: sortedcontainers, boolean-py, webcolors, uri-template, tzdata, six, setuptools, rpds-py, rfc3986-validator, pyproject-hooks, pyparsing, packaging, packageurl-python, lxml, license-expression, lark, jsonpointer, idna, fqdn, defusedxml, chardet, attrs, rfc3987-syntax, rfc3339-validator, referencing, python-dateutil, py-serializable, pip-requirements-parser, build, jsonschema-specifications, cyclonedx-python-lib, arrow, jsonschema, isoduration, cyclonedx-bom
+2026-11-09T11:32:04.6326170Z 
+2026-11-09T11:32:04.6370840Z Successfully installed arrow-1.4.0 attrs-26.1.0 boolean-py-5.0 build-1.6.1 chardet-7.7.0 cyclonedx-bom-7.5.0 cyclonedx-python-lib-11.12.0 defusedxml-0.7.1 fqdn-1.6.0 idna-3.20 isoduration-20.11.0 jsonpointer-3.6 jsonschema-4.26.0 jsonschema-specifications-2025.9.1 lark-1.3.1 license-expression-30.4.4 lxml-6.1.3 packageurl-python-0.17.6 packaging-26.3 pip-requirements-parser-32.0.1 py-serializable-2.1.0 pyparsing-3.3.3 pyproject-hooks-1.3.3 python-dateutil-4.0.0 referencing-0.37.0 rfc3339-validator-0.1.4 rfc3986-validator-0.1.1 rfc3987-syntax-1.1.0 rpds-py-2026.9.1 setuptools-84.2.1 six-1.17.0 sortedcontainers-2.4.0 tzdata-2026.6 uri-template-1.3.0 webcolors-25.10.0
+2026-11-09T11:32:04.9584670Z + /Library/Frameworks/Python.framework/Versions/3.13/bin/python -m build --no-isolation --sdist --wheel --outdir /Users/runner/work/_temp/dist /Users/runner/work/composer/composer
+2026-11-09T11:32:05.1189810Z * Getting build dependencies for sdist...
+2026-11-09T11:32:05.3633300Z running egg_info
+2026-11-09T11:32:05.3650300Z creating lensmith_composer.egg-info
+2026-11-09T11:32:05.3654360Z writing lensmith_composer.egg-info/PKG-INFO
+2026-11-09T11:32:05.3668660Z writing dependency_links to lensmith_composer.egg-info/dependency_links.txt
+2026-11-09T11:32:05.3670110Z writing entry points to lensmith_composer.egg-info/entry_points.txt
+2026-11-09T11:32:05.3671890Z writing requirements to lensmith_composer.egg-info/requires.txt
+2026-11-09T11:32:05.3673150Z writing top-level names to lensmith_composer.egg-info/top_level.txt
+2026-11-09T11:32:05.3674370Z writing manifest file 'lensmith_composer.egg-info/SOURCES.txt'
+2026-11-09T11:32:05.3778440Z reading manifest file 'lensmith_composer.egg-info/SOURCES.txt'
+2026-11-09T11:32:05.3779940Z reading manifest template 'MANIFEST.in'
+2026-11-09T11:32:05.3804170Z warning: no previously-included files matching '__pycache__' found anywhere in distribution
+2026-11-09T11:32:05.3805750Z warning: no previously-included files matching '*.py[cod]' found anywhere in distribution
+2026-11-09T11:32:05.3807010Z adding license file 'LICENSE'
+2026-11-09T11:32:05.3820860Z writing manifest file 'lensmith_composer.egg-info/SOURCES.txt'
+2026-11-09T11:32:05.4228510Z * Building sdist...
+2026-11-09T11:32:05.6167770Z running sdist
+2026-11-09T11:32:05.6248320Z running egg_info
+2026-11-09T11:32:05.6249120Z writing lensmith_composer.egg-info/PKG-INFO
+2026-11-09T11:32:05.6250890Z writing dependency_links to lensmith_composer.egg-info/dependency_links.txt
+2026-11-09T11:32:05.6254210Z writing entry points to lensmith_composer.egg-info/entry_points.txt
+2026-11-09T11:32:05.6255740Z writing requirements to lensmith_composer.egg-info/requires.txt
+2026-11-09T11:32:05.6257180Z writing top-level names to lensmith_composer.egg-info/top_level.txt
+2026-11-09T11:32:05.6327960Z reading manifest file 'lensmith_composer.egg-info/SOURCES.txt'
+2026-11-09T11:32:05.6378020Z reading manifest template 'MANIFEST.in'
+2026-11-09T11:32:05.6395810Z warning: no previously-included files matching '__pycache__' found anywhere in distribution
+2026-11-09T11:32:05.6401340Z warning: no previously-included files matching '*.py[cod]' found anywhere in distribution
+2026-11-09T11:32:05.6402650Z adding license file 'LICENSE'
+2026-11-09T11:32:05.6425110Z writing manifest file 'lensmith_composer.egg-info/SOURCES.txt'
+2026-11-09T11:32:05.6427490Z running check
+2026-11-09T11:32:05.6460460Z creating lensmith_composer-0.2.0
+2026-11-09T11:32:05.6463060Z creating lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6464080Z creating lensmith_composer-0.2.0/composer/adapters
+2026-11-09T11:32:05.6465250Z creating lensmith_composer-0.2.0/composer/data
+2026-11-09T11:32:05.6466410Z creating lensmith_composer-0.2.0/composer/narration
+2026-11-09T11:32:05.6467420Z creating lensmith_composer-0.2.0/composer/web
+2026-11-09T11:32:05.6467910Z creating lensmith_composer-0.2.0/composer/web/app
+2026-11-09T11:32:05.6487720Z creating lensmith_composer-0.2.0/composer/web/window
+2026-11-09T11:32:05.6489170Z creating lensmith_composer-0.2.0/docs
+2026-11-09T11:32:05.6491460Z creating lensmith_composer-0.2.0/docs/demo
+2026-11-09T11:32:05.6492110Z creating lensmith_composer-0.2.0/docs/demo/window
+2026-11-09T11:32:05.6492560Z creating lensmith_composer-0.2.0/docs/readme
+2026-11-09T11:32:05.6493050Z creating lensmith_composer-0.2.0/examples
+2026-11-09T11:32:05.6493550Z creating lensmith_composer-0.2.0/lensmith_composer.egg-info
+2026-11-09T11:32:05.6494260Z creating lensmith_composer-0.2.0/scripts/install
+2026-11-09T11:32:05.6494720Z creating lensmith_composer-0.2.0/scripts/release
+2026-11-09T11:32:05.6495210Z creating lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.6495680Z creating lensmith_composer-0.2.0/tests/browser
+2026-11-09T11:32:05.6496150Z creating lensmith_composer-0.2.0/tests/deploy
+2026-11-09T11:32:05.6496640Z creating lensmith_composer-0.2.0/tests/fixtures
+2026-11-09T11:32:05.6497100Z creating lensmith_composer-0.2.0/tests/fixtures/release-note
+2026-11-09T11:32:05.6497660Z creating lensmith_composer-0.2.0/tests/fixtures/toi-shaped
+2026-11-09T11:32:05.6498140Z creating lensmith_composer-0.2.0/tests/install_faults
+2026-11-09T11:32:05.6498690Z creating lensmith_composer-0.2.0/tests/install_faults/images
+2026-11-09T11:32:05.6499210Z creating lensmith_composer-0.2.0/tests/setup
+2026-11-09T11:32:05.6499710Z creating lensmith_composer-0.2.0/tests/stranger
+2026-11-09T11:32:05.6500110Z copying files to lensmith_composer-0.2.0...
+2026-11-09T11:32:05.6500440Z copying .dockerignore -> lensmith_composer-0.2.0
+2026-11-09T11:32:05.6507790Z copying .env.example -> lensmith_composer-0.2.0
+2026-11-09T11:32:05.6543160Z copying CHANGELOG.md -> lensmith_composer-0.2.0
+2026-11-09T11:32:05.6550510Z copying Caddyfile -> lensmith_composer-0.2.0
+2026-11-09T11:32:05.6553980Z copying Dockerfile -> lensmith_composer-0.2.0
+2026-11-09T11:32:05.6558560Z copying LICENSE -> lensmith_composer-0.2.0
+2026-11-09T11:32:05.6565350Z copying MANIFEST.in -> lensmith_composer-0.2.0
+2026-11-09T11:32:05.6570690Z copying README.md -> lensmith_composer-0.2.0
+2026-11-09T11:32:05.6575540Z copying SECURITY.md -> lensmith_composer-0.2.0
+2026-11-09T11:32:05.6590630Z copying THIRD-PARTY.md -> lensmith_composer-0.2.0
+2026-11-09T11:32:05.6608580Z copying compose.yaml -> lensmith_composer-0.2.0
+2026-11-09T11:32:05.6618960Z copying pyproject.toml -> lensmith_composer-0.2.0
+2026-11-09T11:32:05.6620360Z copying setup.sh -> lensmith_composer-0.2.0
+2026-11-09T11:32:05.6637540Z copying composer/__init__.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6647990Z copying composer/__main__.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6653230Z copying composer/answers.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6663120Z copying composer/app_static.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6667580Z copying composer/cli.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6683870Z copying composer/demo.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6696640Z copying composer/discovery.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6710230Z copying composer/doctor.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6717740Z copying composer/extraction-requirements.lock -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6724590Z copying composer/fetch.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6783790Z copying composer/home.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6787200Z copying composer/html_extract.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6788840Z copying composer/httpd.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6789630Z copying composer/installer.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6790140Z copying composer/job_store.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6790840Z copying composer/lenses.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6791560Z copying composer/lifecycle.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6795750Z copying composer/live_files.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6805540Z copying composer/packages.json -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6824000Z copying composer/page.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6826940Z copying composer/pipeline.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6838770Z copying composer/prompt.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6848720Z copying composer/providers.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6856030Z copying composer/quotes.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6860980Z copying composer/receipts.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6866260Z copying composer/registry.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6875990Z copying composer/sanitize.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6881420Z copying composer/scheduler.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6885290Z copying composer/seal.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6892200Z copying composer/server.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6899190Z copying composer/settings.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6903910Z copying composer/shelf_index.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6907500Z copying composer/sources.json -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6911760Z copying composer/sources_registry.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6928490Z copying composer/stage_lines.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6944090Z copying composer/terminal.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.6950530Z copying composer/tls.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.7158600Z copying composer/window.py -> lensmith_composer-0.2.0/composer
+2026-11-09T11:32:05.7204860Z copying composer/adapters/__init__.py -> lensmith_composer-0.2.0/composer/adapters
+2026-11-09T11:32:05.7230320Z copying composer/adapters/common.py -> lensmith_composer-0.2.0/composer/adapters
+2026-11-09T11:32:05.7235340Z copying composer/adapters/hn_json_api.py -> lensmith_composer-0.2.0/composer/adapters
+2026-11-09T11:32:05.7251070Z copying composer/adapters/html_index.py -> lensmith_composer-0.2.0/composer/adapters
+2026-11-09T11:32:05.7258620Z copying composer/adapters/rss_or_atom.py -> lensmith_composer-0.2.0/composer/adapters
+2026-11-09T11:32:05.7265710Z copying composer/adapters/thin.py -> lensmith_composer-0.2.0/composer/adapters
+2026-11-09T11:32:05.7272980Z copying composer/data/models.json -> lensmith_composer-0.2.0/composer/data
+2026-11-09T11:32:05.7291100Z copying composer/data/recorded-run.json -> lensmith_composer-0.2.0/composer/data
+2026-11-09T11:32:05.7296230Z copying composer/narration/__init__.py -> lensmith_composer-0.2.0/composer/narration
+2026-11-09T11:32:05.7305350Z copying composer/narration/requirements.lock -> lensmith_composer-0.2.0/composer/narration
+2026-11-09T11:32:05.7316240Z copying composer/narration/worker.py -> lensmith_composer-0.2.0/composer/narration
+2026-11-09T11:32:05.7318380Z copying composer/web/page.css -> lensmith_composer-0.2.0/composer/web
+2026-11-09T11:32:05.7324210Z copying composer/web/page.js -> lensmith_composer-0.2.0/composer/web
+2026-11-09T11:32:05.7327560Z copying composer/web/app/app.css -> lensmith_composer-0.2.0/composer/web/app
+2026-11-09T11:32:05.7343560Z copying composer/web/app/app.js -> lensmith_composer-0.2.0/composer/web/app
+2026-11-09T11:32:05.7381280Z copying composer/web/app/boot-note.js -> lensmith_composer-0.2.0/composer/web/app
+2026-11-09T11:32:05.7483020Z copying composer/web/app/boot.js -> lensmith_composer-0.2.0/composer/web/app
+2026-11-09T11:32:05.7508410Z copying composer/web/app/claimseal.js -> lensmith_composer-0.2.0/composer/web/app
+2026-11-09T11:32:05.7510510Z copying composer/web/app/composer-entry-transition.js -> lensmith_composer-0.2.0/composer/web/app
+2026-11-09T11:32:05.7514320Z copying composer/web/app/entry-transition.css -> lensmith_composer-0.2.0/composer/web/app
+2026-11-09T11:32:05.7514920Z copying composer/web/app/index.html -> lensmith_composer-0.2.0/composer/web/app
+2026-11-09T11:32:05.7515540Z copying composer/web/app/sand-engine.js -> lensmith_composer-0.2.0/composer/web/app
+2026-11-09T11:32:05.7517060Z copying composer/web/window/composer-entry-transition.js -> lensmith_composer-0.2.0/composer/web/window
+2026-11-09T11:32:05.7544700Z copying composer/web/window/entry-transition.css -> lensmith_composer-0.2.0/composer/web/window
+2026-11-09T11:32:05.7546670Z copying composer/web/window/sand-engine.js -> lensmith_composer-0.2.0/composer/web/window
+2026-11-09T11:32:05.7601880Z copying composer/web/window/surface.css -> lensmith_composer-0.2.0/composer/web/window
+2026-11-09T11:32:05.7611760Z copying composer/web/window/window.css -> lensmith_composer-0.2.0/composer/web/window
+2026-11-09T11:32:05.7616690Z copying composer/web/window/window.js -> lensmith_composer-0.2.0/composer/web/window
+2026-11-09T11:32:05.7624350Z copying docs/adding-sources.md -> lensmith_composer-0.2.0/docs
+2026-11-09T11:32:05.7634190Z copying docs/cost.md -> lensmith_composer-0.2.0/docs
+2026-11-09T11:32:05.7636220Z copying docs/deploy-vps.md -> lensmith_composer-0.2.0/docs
+2026-11-09T11:32:05.7646850Z copying docs/how-a-brief-is-made.md -> lensmith_composer-0.2.0/docs
+2026-11-09T11:32:05.7656750Z copying docs/how-it-was-built.md -> lensmith_composer-0.2.0/docs
+2026-11-09T11:32:05.7667430Z copying docs/install-the-app.md -> lensmith_composer-0.2.0/docs
+2026-11-09T11:32:05.7675660Z copying docs/install.md -> lensmith_composer-0.2.0/docs
+2026-11-09T11:32:05.7679640Z copying docs/models.md -> lensmith_composer-0.2.0/docs
+2026-11-09T11:32:05.7682390Z copying docs/releasing.md -> lensmith_composer-0.2.0/docs
+2026-11-09T11:32:05.7687380Z copying docs/repo-map.md -> lensmith_composer-0.2.0/docs
+2026-11-09T11:32:05.7693500Z copying docs/setup.md -> lensmith_composer-0.2.0/docs
+2026-11-09T11:32:05.7701170Z copying docs/sources-and-your-responsibility.md -> lensmith_composer-0.2.0/docs
+2026-11-09T11:32:05.7708220Z copying docs/verify-a-release.md -> lensmith_composer-0.2.0/docs
+2026-11-09T11:32:05.7710760Z copying docs/ways-to-run.md -> lensmith_composer-0.2.0/docs
+2026-11-09T11:32:05.7720850Z copying docs/what-is-kept.md -> lensmith_composer-0.2.0/docs
+2026-11-09T11:32:05.7725410Z copying docs/demo/brief.html -> lensmith_composer-0.2.0/docs/demo
+2026-11-09T11:32:05.7733040Z copying docs/demo/frame.js -> lensmith_composer-0.2.0/docs/demo
+2026-11-09T11:32:05.7741680Z copying docs/demo/index.html -> lensmith_composer-0.2.0/docs/demo
+2026-11-09T11:32:05.7750100Z copying docs/demo/site.css -> lensmith_composer-0.2.0/docs/demo
+2026-11-09T11:32:05.7757620Z copying docs/demo/window/composer-entry-transition.js -> lensmith_composer-0.2.0/docs/demo/window
+2026-11-09T11:32:05.7767520Z copying docs/demo/window/entry-transition.css -> lensmith_composer-0.2.0/docs/demo/window
+2026-11-09T11:32:05.7780070Z copying docs/demo/window/index.html -> lensmith_composer-0.2.0/docs/demo/window
+2026-11-09T11:32:05.7791410Z copying docs/demo/window/sand-engine.js -> lensmith_composer-0.2.0/docs/demo/window
+2026-11-09T11:32:05.7800880Z copying docs/demo/window/standalone.js -> lensmith_composer-0.2.0/docs/demo/window
+2026-11-09T11:32:05.7803600Z copying docs/demo/window/surface.css -> lensmith_composer-0.2.0/docs/demo/window
+2026-11-09T11:32:05.7810650Z copying docs/demo/window/window.css -> lensmith_composer-0.2.0/docs/demo/window
+2026-11-09T11:32:05.7819860Z copying docs/demo/window/window.js -> lensmith_composer-0.2.0/docs/demo/window
+2026-11-09T11:32:05.7826420Z copying docs/readme/brief.png -> lensmith_composer-0.2.0/docs/readme
+2026-11-09T11:32:05.7844670Z copying docs/readme/capture.mjs -> lensmith_composer-0.2.0/docs/readme
+2026-11-09T11:32:05.7850100Z copying docs/readme/card-open.png -> lensmith_composer-0.2.0/docs/readme
+2026-11-09T11:32:05.7866890Z copying docs/readme/cards.png -> lensmith_composer-0.2.0/docs/readme
+2026-11-09T11:32:05.7883450Z copying examples/composer-sources.example.json -> lensmith_composer-0.2.0/examples
+2026-11-09T11:32:05.7891010Z copying lensmith_composer.egg-info/PKG-INFO -> lensmith_composer-0.2.0/lensmith_composer.egg-info
+2026-11-09T11:32:05.7893040Z copying lensmith_composer.egg-info/SOURCES.txt -> lensmith_composer-0.2.0/lensmith_composer.egg-info
+2026-11-09T11:32:05.7894770Z copying lensmith_composer.egg-info/dependency_links.txt -> lensmith_composer-0.2.0/lensmith_composer.egg-info
+2026-11-09T11:32:05.7897550Z copying lensmith_composer.egg-info/entry_points.txt -> lensmith_composer-0.2.0/lensmith_composer.egg-info
+2026-11-09T11:32:05.7914720Z copying lensmith_composer.egg-info/requires.txt -> lensmith_composer-0.2.0/lensmith_composer.egg-info
+2026-11-09T11:32:05.7915510Z copying lensmith_composer.egg-info/top_level.txt -> lensmith_composer-0.2.0/lensmith_composer.egg-info
+2026-11-09T11:32:05.7916220Z copying scripts/install/build_install.py -> lensmith_composer-0.2.0/scripts/install
+2026-11-09T11:32:05.7924090Z copying scripts/install/install.sh.in -> lensmith_composer-0.2.0/scripts/install
+2026-11-09T11:32:05.7933460Z copying scripts/install/pinned-extras.json -> lensmith_composer-0.2.0/scripts/install
+2026-11-09T11:32:05.7943290Z copying scripts/release/build.py -> lensmith_composer-0.2.0/scripts/release
+2026-11-09T11:32:05.7948580Z copying scripts/release/make_installer.py -> lensmith_composer-0.2.0/scripts/release
+2026-11-09T11:32:05.7957970Z copying scripts/release/optional-components.json -> lensmith_composer-0.2.0/scripts/release
+2026-11-09T11:32:05.7967350Z copying scripts/release/rc.py -> lensmith_composer-0.2.0/scripts/release
+2026-11-09T11:32:05.7978380Z copying scripts/release/release-tools.in -> lensmith_composer-0.2.0/scripts/release
+2026-11-09T11:32:05.7989850Z copying scripts/release/release-tools.txt -> lensmith_composer-0.2.0/scripts/release
+2026-11-09T11:32:05.8027490Z copying scripts/release/release_note.py -> lensmith_composer-0.2.0/scripts/release
+2026-11-09T11:32:05.8068330Z copying scripts/release/test_results.py -> lensmith_composer-0.2.0/scripts/release
+2026-11-09T11:32:05.8078190Z copying tests/cross_account.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8088380Z copying tests/helpers.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8096680Z copying tests/install_helpers.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8110040Z copying tests/test_adapters.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8121100Z copying tests/test_add_source.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8135570Z copying tests/test_ai_note.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8155120Z copying tests/test_app_page.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8166280Z copying tests/test_article_parser.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8179530Z copying tests/test_banned.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8190390Z copying tests/test_bsd_userland.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8199020Z copying tests/test_checker.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8207410Z copying tests/test_claim_view.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8214080Z copying tests/test_cleanup_notes.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8219160Z copying tests/test_csp_inline_style.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8226190Z copying tests/test_daily_tasks.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8231420Z copying tests/test_demo.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8234500Z copying tests/test_deploy.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8243090Z copying tests/test_doctor_scheduler.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8250950Z copying tests/test_every_day_note.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8257420Z copying tests/test_feeds_rc3.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8270810Z copying tests/test_fresh_files.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8273490Z copying tests/test_health_and_head.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8279800Z copying tests/test_install.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8284090Z copying tests/test_install_script.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8287250Z copying tests/test_install_shortcut.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8292220Z copying tests/test_job_routes.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8300920Z copying tests/test_job_store.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8307700Z copying tests/test_lens_form.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8312470Z copying tests/test_lenses.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8315620Z copying tests/test_lensmith_command.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8321310Z copying tests/test_lifecycle.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8330140Z copying tests/test_make_installer.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8334930Z copying tests/test_narration.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8338050Z copying tests/test_no_key.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8340990Z copying tests/test_owned_folders.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8344820Z copying tests/test_owned_races.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8351790Z copying tests/test_p1b_artifacts.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8366980Z copying tests/test_p1b_routes.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8374300Z copying tests/test_p1b_sources.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8396960Z copying tests/test_packages.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8413580Z copying tests/test_page_index_offer.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8430280Z copying tests/test_page_leave.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8450480Z copying tests/test_page_requests.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8476480Z copying tests/test_pipeline.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8493460Z copying tests/test_providers.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8507520Z copying tests/test_quote_rule.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8518190Z copying tests/test_rc.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8525840Z copying tests/test_registry.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8535060Z copying tests/test_release.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8543900Z copying tests/test_release_workflow_gates.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8550310Z copying tests/test_reply_metadata.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8553040Z copying tests/test_review_fixes.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8562020Z copying tests/test_security.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8571070Z copying tests/test_server_cli.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8581390Z copying tests/test_setup_models.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8593150Z copying tests/test_setup_sh_keys.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8596590Z copying tests/test_setup_sh_messages.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8603600Z copying tests/test_shelf_index.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8606270Z copying tests/test_stage_lines.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8612930Z copying tests/test_stranger_harness.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8615780Z copying tests/test_terminal.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8618460Z copying tests/test_third_party.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8626720Z copying tests/test_tls.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8629320Z copying tests/test_topic_field.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8632510Z copying tests/test_trust_admission.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8637740Z copying tests/test_trust_contract.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8647380Z copying tests/test_trust_descendants.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8652910Z copying tests/test_trust_doctor_narration_tmp.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8656670Z copying tests/test_trust_doctor_online.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8665820Z copying tests/test_trust_explicit_modes.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8674500Z copying tests/test_trust_messages.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8681910Z copying tests/test_trust_out_messages.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8696160Z copying tests/test_trust_serve_out_path.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8704240Z copying tests/test_trust_setup_data.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8712800Z copying tests/test_trust_symlink_hops.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8716180Z copying tests/test_trust_uninstall_backup.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8721790Z copying tests/test_umask_launch.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8723850Z copying tests/test_up.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8725800Z copying tests/test_update_native.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8728870Z copying tests/test_window.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8736290Z copying tests/test_worker_fresh_audio.py -> lensmith_composer-0.2.0/tests
+2026-11-09T11:32:05.8737960Z copying tests/browser/claim_intro_flow.mjs -> lensmith_composer-0.2.0/tests/browser
+2026-11-09T11:32:05.8741260Z copying tests/browser/csp_flow.mjs -> lensmith_composer-0.2.0/tests/browser
+2026-11-09T11:32:05.8743490Z copying tests/browser/fixture_app.py -> lensmith_composer-0.2.0/tests/browser
+2026-11-09T11:32:05.8750550Z copying tests/browser/parity_flow.mjs -> lensmith_composer-0.2.0/tests/browser
+2026-11-09T11:32:05.8759760Z copying tests/browser/rc4_parity_flow.mjs -> lensmith_composer-0.2.0/tests/browser
+2026-11-09T11:32:05.8769750Z copying tests/browser/skip_flow.mjs -> lensmith_composer-0.2.0/tests/browser
+2026-11-09T11:32:05.8782920Z copying tests/deploy/proof.sh -> lensmith_composer-0.2.0/tests/deploy
+2026-11-09T11:32:05.8795010Z copying tests/fixtures/article-1.html -> lensmith_composer-0.2.0/tests/fixtures
+2026-11-09T11:32:05.8807280Z copying tests/fixtures/article-2.html -> lensmith_composer-0.2.0/tests/fixtures
+2026-11-09T11:32:05.8814220Z copying tests/fixtures/blog-nofeed-index.html -> lensmith_composer-0.2.0/tests/fixtures
+2026-11-09T11:32:05.8821550Z copying tests/fixtures/blog-post-audit-log.html -> lensmith_composer-0.2.0/tests/fixtures
+2026-11-09T11:32:05.8827910Z copying tests/fixtures/blog-post-fine-print.html -> lensmith_composer-0.2.0/tests/fixtures
+2026-11-09T11:32:05.8837050Z copying tests/fixtures/blog-post-latency.html -> lensmith_composer-0.2.0/tests/fixtures
+2026-11-09T11:32:05.8843240Z copying tests/fixtures/blog-post-small-models.html -> lensmith_composer-0.2.0/tests/fixtures
+2026-11-09T11:32:05.8850340Z copying tests/fixtures/feed-atom.xml -> lensmith_composer-0.2.0/tests/fixtures
+2026-11-09T11:32:05.8855860Z copying tests/fixtures/feed-entities.xml -> lensmith_composer-0.2.0/tests/fixtures
+2026-11-09T11:32:05.8862060Z copying tests/fixtures/feed-quotes.xml -> lensmith_composer-0.2.0/tests/fixtures
+2026-11-09T11:32:05.8868240Z copying tests/fixtures/feed-rss.xml -> lensmith_composer-0.2.0/tests/fixtures
+2026-11-09T11:32:05.8876060Z copying tests/fixtures/feed-thin.xml -> lensmith_composer-0.2.0/tests/fixtures
+2026-11-09T11:32:05.8878200Z copying tests/fixtures/index-page.html -> lensmith_composer-0.2.0/tests/fixtures
+2026-11-09T11:32:05.8883270Z copying tests/fixtures/thin-article.html -> lensmith_composer-0.2.0/tests/fixtures
+2026-11-09T11:32:05.8896550Z copying tests/fixtures/thin-empty-article.html -> lensmith_composer-0.2.0/tests/fixtures
+2026-11-09T11:32:05.8902180Z copying tests/fixtures/release-note/CHANGELOG.md -> lensmith_composer-0.2.0/tests/fixtures/release-note
+2026-11-09T11:32:05.8907300Z copying tests/fixtures/release-note/answers-one-unsupported.json -> lensmith_composer-0.2.0/tests/fixtures/release-note
+2026-11-09T11:32:05.8915990Z copying tests/fixtures/release-note/answers-supported.json -> lensmith_composer-0.2.0/tests/fixtures/release-note
+2026-11-09T11:32:05.8919930Z copying tests/fixtures/release-note/draft.json -> lensmith_composer-0.2.0/tests/fixtures/release-note
+2026-11-09T11:32:05.8923260Z copying tests/fixtures/release-note/test-results.json -> lensmith_composer-0.2.0/tests/fixtures/release-note
+2026-11-09T11:32:05.8925310Z copying tests/fixtures/toi-shaped/feed-india.xml -> lensmith_composer-0.2.0/tests/fixtures/toi-shaped
+2026-11-09T11:32:05.8928450Z copying tests/fixtures/toi-shaped/feed-recent.xml -> lensmith_composer-0.2.0/tests/fixtures/toi-shaped
+2026-11-09T11:32:05.8934680Z copying tests/fixtures/toi-shaped/feed-top.xml -> lensmith_composer-0.2.0/tests/fixtures/toi-shaped
+2026-11-09T11:32:05.8939990Z copying tests/fixtures/toi-shaped/home.html -> lensmith_composer-0.2.0/tests/fixtures/toi-shaped
+2026-11-09T11:32:05.8942630Z copying tests/fixtures/toi-shaped/rss-page.html -> lensmith_composer-0.2.0/tests/fixtures/toi-shaped
+2026-11-09T11:32:05.8945080Z copying tests/install_faults/fake_net.py -> lensmith_composer-0.2.0/tests/install_faults
+2026-11-09T11:32:05.8955220Z copying tests/install_faults/make_release.py -> lensmith_composer-0.2.0/tests/install_faults
+2026-11-09T11:32:05.8965860Z copying tests/install_faults/run_faults.py -> lensmith_composer-0.2.0/tests/install_faults
+2026-11-09T11:32:05.8982010Z copying tests/install_faults/images/bare.Dockerfile -> lensmith_composer-0.2.0/tests/install_faults/images
+2026-11-09T11:32:05.8989170Z copying tests/install_faults/images/py312-gw.Dockerfile -> lensmith_composer-0.2.0/tests/install_faults/images
+2026-11-09T11:32:05.9001060Z copying tests/install_faults/images/py312.Dockerfile -> lensmith_composer-0.2.0/tests/install_faults/images
+2026-11-09T11:32:05.9008300Z copying tests/install_faults/images/py39.Dockerfile -> lensmith_composer-0.2.0/tests/install_faults/images
+2026-11-09T11:32:05.9013320Z copying tests/install_faults/images/server.Dockerfile -> lensmith_composer-0.2.0/tests/install_faults/images
+2026-11-09T11:32:05.9015670Z copying tests/install_faults/images/unzip.Dockerfile -> lensmith_composer-0.2.0/tests/install_faults/images
+2026-11-09T11:32:05.9023210Z copying tests/install_faults/images/wget.Dockerfile -> lensmith_composer-0.2.0/tests/install_faults/images
+2026-11-09T11:32:05.9027410Z copying tests/setup/interactive.exp -> lensmith_composer-0.2.0/tests/setup
+2026-11-09T11:32:05.9030280Z copying tests/stranger/browser_flow.mjs -> lensmith_composer-0.2.0/tests/stranger
+2026-11-09T11:32:05.9045930Z copying tests/stranger/browser_smoke.mjs -> lensmith_composer-0.2.0/tests/stranger
+2026-11-09T11:32:05.9050370Z copying tests/stranger/fixtures.py -> lensmith_composer-0.2.0/tests/stranger
+2026-11-09T11:32:05.9052220Z copying tests/stranger/in_container.sh -> lensmith_composer-0.2.0/tests/stranger
+2026-11-09T11:32:05.9078810Z copying tests/stranger/results.py -> lensmith_composer-0.2.0/tests/stranger
+2026-11-09T11:32:05.9080430Z copying tests/stranger/run.sh -> lensmith_composer-0.2.0/tests/stranger
+2026-11-09T11:32:05.9081540Z copying tests/stranger/scan_banned.py -> lensmith_composer-0.2.0/tests/stranger
+2026-11-09T11:32:05.9082790Z copying tests/stranger/setup.exp -> lensmith_composer-0.2.0/tests/stranger
+2026-11-09T11:32:05.9084710Z Writing lensmith_composer-0.2.0/setup.cfg
+2026-11-09T11:32:05.9086890Z Creating tar archive
+2026-11-09T11:32:06.1715720Z removing 'lensmith_composer-0.2.0' (and everything under it)
+2026-11-09T11:32:06.2330100Z * Getting build dependencies for wheel...
+2026-11-09T11:32:06.5005400Z running egg_info
+2026-11-09T11:32:06.5033540Z writing lensmith_composer.egg-info/PKG-INFO
+2026-11-09T11:32:06.5065860Z writing dependency_links to lensmith_composer.egg-info/dependency_links.txt
+2026-11-09T11:32:06.5070940Z writing entry points to lensmith_composer.egg-info/entry_points.txt
+2026-11-09T11:32:06.5072630Z writing requirements to lensmith_composer.egg-info/requires.txt
+2026-11-09T11:32:06.5074240Z writing top-level names to lensmith_composer.egg-info/top_level.txt
+2026-11-09T11:32:06.5258040Z reading manifest file 'lensmith_composer.egg-info/SOURCES.txt'
+2026-11-09T11:32:06.5289090Z reading manifest template 'MANIFEST.in'
+2026-11-09T11:32:06.5309150Z warning: no previously-included files matching '__pycache__' found anywhere in distribution
+2026-11-09T11:32:06.5311250Z warning: no previously-included files matching '*.py[cod]' found anywhere in distribution
+2026-11-09T11:32:06.5312260Z adding license file 'LICENSE'
+2026-11-09T11:32:06.5333310Z writing manifest file 'lensmith_composer.egg-info/SOURCES.txt'
+2026-11-09T11:32:06.5654770Z * Building wheel...
+2026-11-09T11:32:06.8316080Z running bdist_wheel
+2026-11-09T11:32:06.8432960Z running build
+2026-11-09T11:32:06.8481700Z running build_py
+2026-11-09T11:32:06.8517860Z creating build/lib/composer
+2026-11-09T11:32:06.8529040Z copying composer/fetch.py -> build/lib/composer
+2026-11-09T11:32:06.8536560Z copying composer/sources_registry.py -> build/lib/composer
+2026-11-09T11:32:06.8546120Z copying composer/server.py -> build/lib/composer
+2026-11-09T11:32:06.8549990Z copying composer/receipts.py -> build/lib/composer
+2026-11-09T11:32:06.8555350Z copying composer/home.py -> build/lib/composer
+2026-11-09T11:32:06.8562260Z copying composer/window.py -> build/lib/composer
+2026-11-09T11:32:06.8566210Z copying composer/seal.py -> build/lib/composer
+2026-11-09T11:32:06.8570280Z copying composer/terminal.py -> build/lib/composer
+2026-11-09T11:32:06.8575150Z copying composer/discovery.py -> build/lib/composer
+2026-11-09T11:32:06.8580680Z copying composer/registry.py -> build/lib/composer
+2026-11-09T11:32:06.8583220Z copying composer/httpd.py -> build/lib/composer
+2026-11-09T11:32:06.8588310Z copying composer/html_extract.py -> build/lib/composer
+2026-11-09T11:32:06.8598360Z copying composer/shelf_index.py -> build/lib/composer
+2026-11-09T11:32:06.8605410Z copying composer/app_static.py -> build/lib/composer
+2026-11-09T11:32:06.8610510Z copying composer/__init__.py -> build/lib/composer
+2026-11-09T11:32:06.8633050Z copying composer/page.py -> build/lib/composer
+2026-11-09T11:32:06.8643530Z copying composer/installer.py -> build/lib/composer
+2026-11-09T11:32:06.8657020Z copying composer/tls.py -> build/lib/composer
+2026-11-09T11:32:06.8663950Z copying composer/answers.py -> build/lib/composer
+2026-11-09T11:32:06.8672170Z copying composer/providers.py -> build/lib/composer
+2026-11-09T11:32:06.8678920Z copying composer/cli.py -> build/lib/composer
+2026-11-09T11:32:06.8701850Z copying composer/lifecycle.py -> build/lib/composer
+2026-11-09T11:32:06.8702420Z copying composer/pipeline.py -> build/lib/composer
+2026-11-09T11:32:06.8723840Z copying composer/settings.py -> build/lib/composer
+2026-11-09T11:32:06.8733390Z copying composer/stage_lines.py -> build/lib/composer
+2026-11-09T11:32:06.8742250Z copying composer/lenses.py -> build/lib/composer
+2026-11-09T11:32:06.8750070Z copying composer/scheduler.py -> build/lib/composer
+2026-11-09T11:32:06.8753240Z copying composer/quotes.py -> build/lib/composer
+2026-11-09T11:32:06.8755570Z copying composer/prompt.py -> build/lib/composer
+2026-11-09T11:32:06.8765210Z copying composer/live_files.py -> build/lib/composer
+2026-11-09T11:32:06.8770020Z copying composer/demo.py -> build/lib/composer
+2026-11-09T11:32:06.8775360Z copying composer/job_store.py -> build/lib/composer
+2026-11-09T11:32:06.8783590Z copying composer/sanitize.py -> build/lib/composer
+2026-11-09T11:32:06.8793140Z copying composer/doctor.py -> build/lib/composer
+2026-11-09T11:32:06.8793590Z copying composer/__main__.py -> build/lib/composer
+2026-11-09T11:32:06.8797590Z creating build/lib/composer/adapters
+2026-11-09T11:32:06.8798020Z copying composer/adapters/hn_json_api.py -> build/lib/composer/adapters
+2026-11-09T11:32:06.8807530Z copying composer/adapters/__init__.py -> build/lib/composer/adapters
+2026-11-09T11:32:06.8808880Z copying composer/adapters/thin.py -> build/lib/composer/adapters
+2026-11-09T11:32:06.8810020Z copying composer/adapters/common.py -> build/lib/composer/adapters
+2026-11-09T11:32:06.8811600Z copying composer/adapters/rss_or_atom.py -> build/lib/composer/adapters
+2026-11-09T11:32:06.8812750Z copying composer/adapters/html_index.py -> build/lib/composer/adapters
+2026-11-09T11:32:06.8813790Z creating build/lib/composer/narration
+2026-11-09T11:32:06.8814670Z copying composer/narration/worker.py -> build/lib/composer/narration
+2026-11-09T11:32:06.8818800Z copying composer/narration/__init__.py -> build/lib/composer/narration
+2026-11-09T11:32:06.8822190Z running egg_info
+2026-11-09T11:32:06.8876170Z writing lensmith_composer.egg-info/PKG-INFO
+2026-11-09T11:32:06.8888090Z writing dependency_links to lensmith_composer.egg-info/dependency_links.txt
+2026-11-09T11:32:06.8894710Z writing entry points to lensmith_composer.egg-info/entry_points.txt
+2026-11-09T11:32:06.8895240Z writing requirements to lensmith_composer.egg-info/requires.txt
+2026-11-09T11:32:06.8895830Z writing top-level names to lensmith_composer.egg-info/top_level.txt
+2026-11-09T11:32:06.9003240Z reading manifest file 'lensmith_composer.egg-info/SOURCES.txt'
+2026-11-09T11:32:06.9028500Z reading manifest template 'MANIFEST.in'
+2026-11-09T11:32:06.9051130Z warning: no previously-included files matching '__pycache__' found anywhere in distribution
+2026-11-09T11:32:06.9058410Z warning: no previously-included files matching '*.py[cod]' found anywhere in distribution
+2026-11-09T11:32:06.9059220Z adding license file 'LICENSE'
+2026-11-09T11:32:06.9126130Z writing manifest file 'lensmith_composer.egg-info/SOURCES.txt'
+2026-11-09T11:32:06.9165820Z copying composer/extraction-requirements.lock -> build/lib/composer
+2026-11-09T11:32:06.9179230Z copying composer/packages.json -> build/lib/composer
+2026-11-09T11:32:06.9190500Z copying composer/sources.json -> build/lib/composer
+2026-11-09T11:32:06.9194670Z creating build/lib/composer/data
+2026-11-09T11:32:06.9200650Z copying composer/data/models.json -> build/lib/composer/data
+2026-11-09T11:32:06.9204390Z copying composer/data/recorded-run.json -> build/lib/composer/data
+2026-11-09T11:32:06.9215320Z creating build/lib/composer/web
+2026-11-09T11:32:06.9216490Z copying composer/web/page.css -> build/lib/composer/web
+2026-11-09T11:32:06.9217700Z copying composer/web/page.js -> build/lib/composer/web
+2026-11-09T11:32:06.9219470Z creating build/lib/composer/web/app
+2026-11-09T11:32:06.9220460Z copying composer/web/app/app.css -> build/lib/composer/web/app
+2026-11-09T11:32:06.9221020Z copying composer/web/app/app.js -> build/lib/composer/web/app
+2026-11-09T11:32:06.9224240Z copying composer/web/app/boot-note.js -> build/lib/composer/web/app
+2026-11-09T11:32:06.9231180Z copying composer/web/app/boot.js -> build/lib/composer/web/app
+2026-11-09T11:32:06.9237060Z copying composer/web/app/claimseal.js -> build/lib/composer/web/app
+2026-11-09T11:32:06.9237640Z copying composer/web/app/composer-entry-transition.js -> build/lib/composer/web/app
+2026-11-09T11:32:06.9238140Z copying composer/web/app/entry-transition.css -> build/lib/composer/web/app
+2026-11-09T11:32:06.9238590Z copying composer/web/app/index.html -> build/lib/composer/web/app
+2026-11-09T11:32:06.9242930Z copying composer/web/app/sand-engine.js -> build/lib/composer/web/app
+2026-11-09T11:32:06.9251260Z creating build/lib/composer/web/window
+2026-11-09T11:32:06.9252590Z copying composer/web/window/composer-entry-transition.js -> build/lib/composer/web/window
+2026-11-09T11:32:06.9256710Z copying composer/web/window/entry-transition.css -> build/lib/composer/web/window
+2026-11-09T11:32:06.9263440Z copying composer/web/window/sand-engine.js -> build/lib/composer/web/window
+2026-11-09T11:32:06.9276660Z copying composer/web/window/surface.css -> build/lib/composer/web/window
+2026-11-09T11:32:06.9285940Z copying composer/web/window/window.css -> build/lib/composer/web/window
+2026-11-09T11:32:06.9293090Z copying composer/web/window/window.js -> build/lib/composer/web/window
+2026-11-09T11:32:06.9302290Z copying composer/narration/requirements.lock -> build/lib/composer/narration
+2026-11-09T11:32:06.9394810Z installing to build/bdist.macosx-10.13-universal2/wheel
+2026-11-09T11:32:06.9395760Z running install
+2026-11-09T11:32:06.9476920Z running install_lib
+2026-11-09T11:32:06.9565180Z creating build/bdist.macosx-10.13-universal2/wheel
+2026-11-09T11:32:06.9570460Z creating build/bdist.macosx-10.13-universal2/wheel/composer
+2026-11-09T11:32:06.9573040Z copying build/lib/composer/fetch.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9580260Z copying build/lib/composer/sources.json -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9584020Z copying build/lib/composer/sources_registry.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9588610Z copying build/lib/composer/server.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9595050Z copying build/lib/composer/receipts.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9599440Z copying build/lib/composer/home.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9604020Z copying build/lib/composer/window.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9612530Z creating build/bdist.macosx-10.13-universal2/wheel/composer/narration
+2026-11-09T11:32:06.9615570Z copying build/lib/composer/narration/worker.py -> build/bdist.macosx-10.13-universal2/wheel/./composer/narration
+2026-11-09T11:32:06.9623590Z copying build/lib/composer/narration/__init__.py -> build/bdist.macosx-10.13-universal2/wheel/./composer/narration
+2026-11-09T11:32:06.9625770Z copying build/lib/composer/narration/requirements.lock -> build/bdist.macosx-10.13-universal2/wheel/./composer/narration
+2026-11-09T11:32:06.9627440Z copying build/lib/composer/seal.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9629100Z copying build/lib/composer/terminal.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9637500Z copying build/lib/composer/discovery.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9639270Z copying build/lib/composer/registry.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9640420Z creating build/bdist.macosx-10.13-universal2/wheel/composer/web
+2026-11-09T11:32:06.9646580Z creating build/bdist.macosx-10.13-universal2/wheel/composer/web/app
+2026-11-09T11:32:06.9648320Z copying build/lib/composer/web/app/boot.js -> build/bdist.macosx-10.13-universal2/wheel/./composer/web/app
+2026-11-09T11:32:06.9650200Z copying build/lib/composer/web/app/index.html -> build/bdist.macosx-10.13-universal2/wheel/./composer/web/app
+2026-11-09T11:32:06.9654250Z copying build/lib/composer/web/app/claimseal.js -> build/bdist.macosx-10.13-universal2/wheel/./composer/web/app
+2026-11-09T11:32:06.9660140Z copying build/lib/composer/web/app/boot-note.js -> build/bdist.macosx-10.13-universal2/wheel/./composer/web/app
+2026-11-09T11:32:06.9664860Z copying build/lib/composer/web/app/composer-entry-transition.js -> build/bdist.macosx-10.13-universal2/wheel/./composer/web/app
+2026-11-09T11:32:06.9672220Z copying build/lib/composer/web/app/app.css -> build/bdist.macosx-10.13-universal2/wheel/./composer/web/app
+2026-11-09T11:32:06.9677800Z copying build/lib/composer/web/app/entry-transition.css -> build/bdist.macosx-10.13-universal2/wheel/./composer/web/app
+2026-11-09T11:32:06.9683970Z copying build/lib/composer/web/app/sand-engine.js -> build/bdist.macosx-10.13-universal2/wheel/./composer/web/app
+2026-11-09T11:32:06.9686930Z copying build/lib/composer/web/app/app.js -> build/bdist.macosx-10.13-universal2/wheel/./composer/web/app
+2026-11-09T11:32:06.9690820Z copying build/lib/composer/web/page.js -> build/bdist.macosx-10.13-universal2/wheel/./composer/web
+2026-11-09T11:32:06.9692650Z copying build/lib/composer/web/page.css -> build/bdist.macosx-10.13-universal2/wheel/./composer/web
+2026-11-09T11:32:06.9703300Z creating build/bdist.macosx-10.13-universal2/wheel/composer/web/window
+2026-11-09T11:32:06.9705240Z copying build/lib/composer/web/window/composer-entry-transition.js -> build/bdist.macosx-10.13-universal2/wheel/./composer/web/window
+2026-11-09T11:32:06.9707280Z copying build/lib/composer/web/window/surface.css -> build/bdist.macosx-10.13-universal2/wheel/./composer/web/window
+2026-11-09T11:32:06.9709090Z copying build/lib/composer/web/window/window.js -> build/bdist.macosx-10.13-universal2/wheel/./composer/web/window
+2026-11-09T11:32:06.9711750Z copying build/lib/composer/web/window/entry-transition.css -> build/bdist.macosx-10.13-universal2/wheel/./composer/web/window
+2026-11-09T11:32:06.9715020Z copying build/lib/composer/web/window/window.css -> build/bdist.macosx-10.13-universal2/wheel/./composer/web/window
+2026-11-09T11:32:06.9717330Z copying build/lib/composer/web/window/sand-engine.js -> build/bdist.macosx-10.13-universal2/wheel/./composer/web/window
+2026-11-09T11:32:06.9720820Z copying build/lib/composer/httpd.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9722730Z copying build/lib/composer/html_extract.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9724190Z copying build/lib/composer/shelf_index.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9728760Z copying build/lib/composer/app_static.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9733490Z copying build/lib/composer/__init__.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9737640Z copying build/lib/composer/page.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9741820Z copying build/lib/composer/installer.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9743180Z copying build/lib/composer/tls.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9744640Z copying build/lib/composer/answers.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9749850Z creating build/bdist.macosx-10.13-universal2/wheel/composer/adapters
+2026-11-09T11:32:06.9751770Z copying build/lib/composer/adapters/hn_json_api.py -> build/bdist.macosx-10.13-universal2/wheel/./composer/adapters
+2026-11-09T11:32:06.9752930Z copying build/lib/composer/adapters/__init__.py -> build/bdist.macosx-10.13-universal2/wheel/./composer/adapters
+2026-11-09T11:32:06.9753700Z copying build/lib/composer/adapters/thin.py -> build/bdist.macosx-10.13-universal2/wheel/./composer/adapters
+2026-11-09T11:32:06.9754400Z copying build/lib/composer/adapters/common.py -> build/bdist.macosx-10.13-universal2/wheel/./composer/adapters
+2026-11-09T11:32:06.9755250Z copying build/lib/composer/adapters/rss_or_atom.py -> build/bdist.macosx-10.13-universal2/wheel/./composer/adapters
+2026-11-09T11:32:06.9759710Z copying build/lib/composer/adapters/html_index.py -> build/bdist.macosx-10.13-universal2/wheel/./composer/adapters
+2026-11-09T11:32:06.9764080Z copying build/lib/composer/providers.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9766030Z copying build/lib/composer/cli.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9772560Z copying build/lib/composer/lifecycle.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9774290Z copying build/lib/composer/pipeline.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9778170Z copying build/lib/composer/packages.json -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9784530Z copying build/lib/composer/settings.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9795420Z copying build/lib/composer/stage_lines.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9796110Z copying build/lib/composer/lenses.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9796700Z copying build/lib/composer/scheduler.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9800100Z copying build/lib/composer/quotes.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9805040Z copying build/lib/composer/prompt.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9809930Z copying build/lib/composer/live_files.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9815770Z copying build/lib/composer/demo.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9821540Z copying build/lib/composer/job_store.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9829500Z creating build/bdist.macosx-10.13-universal2/wheel/composer/data
+2026-11-09T11:32:06.9833120Z copying build/lib/composer/data/models.json -> build/bdist.macosx-10.13-universal2/wheel/./composer/data
+2026-11-09T11:32:06.9837880Z copying build/lib/composer/data/recorded-run.json -> build/bdist.macosx-10.13-universal2/wheel/./composer/data
+2026-11-09T11:32:06.9843660Z copying build/lib/composer/extraction-requirements.lock -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9848890Z copying build/lib/composer/sanitize.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9853190Z copying build/lib/composer/doctor.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9858470Z copying build/lib/composer/__main__.py -> build/bdist.macosx-10.13-universal2/wheel/./composer
+2026-11-09T11:32:06.9863290Z running install_egg_info
+2026-11-09T11:32:06.9881530Z Copying lensmith_composer.egg-info to build/bdist.macosx-10.13-universal2/wheel/./lensmith_composer-0.2.0-py3.13.egg-info
+2026-11-09T11:32:06.9894970Z running install_scripts
+2026-11-09T11:32:06.9912750Z creating build/bdist.macosx-10.13-universal2/wheel/lensmith_composer-0.2.0.dist-info/WHEEL
+2026-11-09T11:32:06.9916180Z creating '/Users/runner/work/_temp/dist/.tmp-ssz5flar/lensmith_composer-0.2.0-py3-none-any.whl' and adding 'build/bdist.macosx-10.13-universal2/wheel' to it
+2026-11-09T11:32:06.9922060Z adding 'composer/__init__.py'
+2026-11-09T11:32:06.9923490Z adding 'composer/__main__.py'
+2026-11-09T11:32:06.9927360Z adding 'composer/answers.py'
+2026-11-09T11:32:06.9928000Z adding 'composer/app_static.py'
+2026-11-09T11:32:06.9935580Z adding 'composer/cli.py'
+2026-11-09T11:32:06.9937690Z adding 'composer/demo.py'
+2026-11-09T11:32:06.9945290Z adding 'composer/discovery.py'
+2026-11-09T11:32:06.9953120Z adding 'composer/doctor.py'
+2026-11-09T11:32:06.9964720Z adding 'composer/extraction-requirements.lock'
+2026-11-09T11:32:06.9967860Z adding 'composer/fetch.py'
+2026-11-09T11:32:06.9981650Z adding 'composer/home.py'
+2026-11-09T11:32:06.9982480Z adding 'composer/html_extract.py'
+2026-11-09T11:32:06.9983170Z adding 'composer/httpd.py'
+2026-11-09T11:32:07.0013240Z adding 'composer/installer.py'
+2026-11-09T11:32:07.0025560Z adding 'composer/job_store.py'
+2026-11-09T11:32:07.0030020Z adding 'composer/lenses.py'
+2026-11-09T11:32:07.0042950Z adding 'composer/lifecycle.py'
+2026-11-09T11:32:07.0046220Z adding 'composer/live_files.py'
+2026-11-09T11:32:07.0047290Z adding 'composer/packages.json'
+2026-11-09T11:32:07.0049270Z adding 'composer/page.py'
+2026-11-09T11:32:07.0054590Z adding 'composer/pipeline.py'
+2026-11-09T11:32:07.0061720Z adding 'composer/prompt.py'
+2026-11-09T11:32:07.0064140Z adding 'composer/providers.py'
+2026-11-09T11:32:07.0068090Z adding 'composer/quotes.py'
+2026-11-09T11:32:07.0069390Z adding 'composer/receipts.py'
+2026-11-09T11:32:07.0073390Z adding 'composer/registry.py'
+2026-11-09T11:32:07.0074870Z adding 'composer/sanitize.py'
+2026-11-09T11:32:07.0077580Z adding 'composer/scheduler.py'
+2026-11-09T11:32:07.0080010Z adding 'composer/seal.py'
+2026-11-09T11:32:07.0091570Z adding 'composer/server.py'
+2026-11-09T11:32:07.0092720Z adding 'composer/settings.py'
+2026-11-09T11:32:07.0094710Z adding 'composer/shelf_index.py'
+2026-11-09T11:32:07.0095880Z adding 'composer/sources.json'
+2026-11-09T11:32:07.0102100Z adding 'composer/sources_registry.py'
+2026-11-09T11:32:07.0102940Z adding 'composer/stage_lines.py'
+2026-11-09T11:32:07.0105200Z adding 'composer/terminal.py'
+2026-11-09T11:32:07.0106880Z adding 'composer/tls.py'
+2026-11-09T11:32:07.0114430Z adding 'composer/window.py'
+2026-11-09T11:32:07.0115710Z adding 'composer/adapters/__init__.py'
+2026-11-09T11:32:07.0116870Z adding 'composer/adapters/common.py'
+2026-11-09T11:32:07.0118330Z adding 'composer/adapters/hn_json_api.py'
+2026-11-09T11:32:07.0122740Z adding 'composer/adapters/html_index.py'
+2026-11-09T11:32:07.0123910Z adding 'composer/adapters/rss_or_atom.py'
+2026-11-09T11:32:07.0128290Z adding 'composer/adapters/thin.py'
+2026-11-09T11:32:07.0147650Z adding 'composer/data/models.json'
+2026-11-09T11:32:07.0149460Z adding 'composer/data/recorded-run.json'
+2026-11-09T11:32:07.0150450Z adding 'composer/narration/__init__.py'
+2026-11-09T11:32:07.0178760Z adding 'composer/narration/requirements.lock'
+2026-11-09T11:32:07.0190600Z adding 'composer/narration/worker.py'
+2026-11-09T11:32:07.0196920Z adding 'composer/web/page.css'
+2026-11-09T11:32:07.0206760Z adding 'composer/web/page.js'
+2026-11-09T11:32:07.0228190Z adding 'composer/web/app/app.css'
+2026-11-09T11:32:07.0324520Z adding 'composer/web/app/app.js'
+2026-11-09T11:32:07.0327030Z adding 'composer/web/app/boot-note.js'
+2026-11-09T11:32:07.0328680Z adding 'composer/web/app/boot.js'
+2026-11-09T11:32:07.0336040Z adding 'composer/web/app/claimseal.js'
+2026-11-09T11:32:07.0348030Z adding 'composer/web/app/composer-entry-transition.js'
+2026-11-09T11:32:07.0354610Z adding 'composer/web/app/entry-transition.css'
+2026-11-09T11:32:07.0371770Z adding 'composer/web/app/index.html'
+2026-11-09T11:32:07.0379220Z adding 'composer/web/app/sand-engine.js'
+2026-11-09T11:32:07.0384220Z adding 'composer/web/window/composer-entry-transition.js'
+2026-11-09T11:32:07.0385670Z adding 'composer/web/window/entry-transition.css'
+2026-11-09T11:32:07.0392390Z adding 'composer/web/window/sand-engine.js'
+2026-11-09T11:32:07.0395320Z adding 'composer/web/window/surface.css'
+2026-11-09T11:32:07.0397750Z adding 'composer/web/window/window.css'
+2026-11-09T11:32:07.0405590Z adding 'composer/web/window/window.js'
+2026-11-09T11:32:07.0416940Z adding 'lensmith_composer-0.2.0.dist-info/licenses/LICENSE'
+2026-11-09T11:32:07.0429400Z adding 'lensmith_composer-0.2.0.dist-info/METADATA'
+2026-11-09T11:32:07.0432840Z adding 'lensmith_composer-0.2.0.dist-info/WHEEL'
+2026-11-09T11:32:07.0436720Z adding 'lensmith_composer-0.2.0.dist-info/entry_points.txt'
+2026-11-09T11:32:07.0442830Z adding 'lensmith_composer-0.2.0.dist-info/top_level.txt'
+2026-11-09T11:32:07.0452420Z adding 'lensmith_composer-0.2.0.dist-info/RECORD'
+2026-11-09T11:32:07.0456500Z removing build/bdist.macosx-10.13-universal2/wheel
+2026-11-09T11:32:07.0859190Z WARNING Package 'composer.data' is absent from the `packages` configuration.
+2026-11-09T11:32:07.0860750Z !!
+2026-11-09T11:32:07.0861650Z Successfully built lensmith_composer-0.2.0.tar.gz and lensmith_composer-0.2.0-py3-none-any.whl
+2026-11-09T11:32:07.0865750Z 
+2026-11-09T11:32:07.0866070Z         ********************************************************************************
+2026-11-09T11:32:07.0867940Z         ############################
+2026-11-09T11:32:07.0868250Z         # Package would be ignored #
+2026-11-09T11:32:07.0868510Z         ############################
+2026-11-09T11:32:07.0868910Z         Python recognizes 'composer.data' as an importable package[^1],
+2026-11-09T11:32:07.0869420Z         but it is absent from setuptools' `packages` configuration.
+2026-11-09T11:32:07.0869710Z 
+2026-11-09T11:32:07.0870000Z         This leads to an ambiguous overall configuration. If you want to distribute this
+2026-11-09T11:32:07.0871010Z         package, please make sure that 'composer.data' is explicitly added
+2026-11-09T11:32:07.0871450Z         to the `packages` configuration field.
+2026-11-09T11:32:07.0878420Z 
+2026-11-09T11:32:07.0878670Z         Alternatively, you can also rely on setuptools' discovery methods
+2026-11-09T11:32:07.0881570Z         (for example by using `find_namespace_packages(...)`/`find_namespace:`
+2026-11-09T11:32:07.0882000Z         instead of `find_packages(...)`/`find:`).
+2026-11-09T11:32:07.0882270Z 
+2026-11-09T11:32:07.0882500Z         You can read more about "package discovery" on setuptools documentation page:
+2026-11-09T11:32:07.0882850Z 
+2026-11-09T11:32:07.0883220Z         - https://setuptools.pypa.io/en/latest/userguide/package_discovery.html
+2026-11-09T11:32:07.0883750Z 
+2026-11-09T11:32:07.0884480Z         If you don't want 'composer.data' to be distributed and are
+2026-11-09T11:32:07.0889970Z         already explicitly excluding 'composer.data' via
+2026-11-09T11:32:07.0891290Z         `find_namespace_packages(...)/find_namespace` or `find_packages(...)/find`,
+2026-11-09T11:32:07.0892910Z         you can try to use `exclude_package_data`, or `include-package-data=False` in
+2026-11-09T11:32:07.0893380Z         combination with a more fine grained `package-data` configuration.
+2026-11-09T11:32:07.0893630Z 
+2026-11-09T11:32:07.0893830Z         You can read more about "package data files" on setuptools documentation page:
+2026-11-09T11:32:07.0894570Z 
+2026-11-09T11:32:07.0895080Z         - https://setuptools.pypa.io/en/latest/userguide/datafiles.html
+2026-11-09T11:32:07.0895450Z 
+2026-11-09T11:32:07.0895510Z 
+2026-11-09T11:32:07.0895770Z         [^1]: For Python, any directory (with suitable naming) can be imported,
+2026-11-09T11:32:07.0896220Z               even if it does not contain any `.py` files.
+2026-11-09T11:32:07.0897580Z               On the other hand, currently there is no concept of package data
+2026-11-09T11:32:07.0898740Z               directory, all directories are treated like packages.
+2026-11-09T11:32:07.0899530Z         ********************************************************************************
+2026-11-09T11:32:07.0900020Z 
+2026-11-09T11:32:07.0900200Z !!
+2026-11-09T11:32:07.0900840Z WARNING Package 'composer.web' is absent from the `packages` configuration.
+2026-11-09T11:32:07.0901650Z !!
+2026-11-09T11:32:07.0901860Z 
+2026-11-09T11:32:07.0902130Z         ********************************************************************************
+2026-11-09T11:32:07.0902790Z         ############################
+2026-11-09T11:32:07.0903320Z         # Package would be ignored #
+2026-11-09T11:32:07.0903870Z         ############################
+2026-11-09T11:32:07.0906050Z         Python recognizes 'composer.web' as an importable package[^1],
+2026-11-09T11:32:07.0907170Z         but it is absent from setuptools' `packages` configuration.
+2026-11-09T11:32:07.0907710Z 
+2026-11-09T11:32:07.0908200Z         This leads to an ambiguous overall configuration. If you want to distribute this
+2026-11-09T11:32:07.0909320Z         package, please make sure that 'composer.web' is explicitly added
+2026-11-09T11:32:07.0910170Z         to the `packages` configuration field.
+2026-11-09T11:32:07.0910610Z 
+2026-11-09T11:32:07.0911000Z         Alternatively, you can also rely on setuptools' discovery methods
+2026-11-09T11:32:07.0912040Z         (for example by using `find_namespace_packages(...)`/`find_namespace:`
+2026-11-09T11:32:07.0912940Z         instead of `find_packages(...)`/`find:`).
+2026-11-09T11:32:07.0913440Z 
+2026-11-09T11:32:07.0913910Z         You can read more about "package discovery" on setuptools documentation page:
+2026-11-09T11:32:07.0914620Z 
+2026-11-09T11:32:07.0915150Z         - https://setuptools.pypa.io/en/latest/userguide/package_discovery.html
+2026-11-09T11:32:07.0915840Z 
+2026-11-09T11:32:07.0916180Z         If you don't want 'composer.web' to be distributed and are
+2026-11-09T11:32:07.0917380Z         already explicitly excluding 'composer.web' via
+2026-11-09T11:32:07.0919280Z         `find_namespace_packages(...)/find_namespace` or `find_packages(...)/find`,
+2026-11-09T11:32:07.0920410Z         you can try to use `exclude_package_data`, or `include-package-data=False` in
+2026-11-09T11:32:07.0921510Z         combination with a more fine grained `package-data` configuration.
+2026-11-09T11:32:07.0922150Z 
+2026-11-09T11:32:07.0922620Z         You can read more about "package data files" on setuptools documentation page:
+2026-11-09T11:32:07.0923310Z 
+2026-11-09T11:32:07.0923840Z         - https://setuptools.pypa.io/en/latest/userguide/datafiles.html
+2026-11-09T11:32:07.0924450Z 
+2026-11-09T11:32:07.0924450Z 
+2026-11-09T11:32:07.0924860Z         [^1]: For Python, any directory (with suitable naming) can be imported,
+2026-11-09T11:32:07.0925750Z               even if it does not contain any `.py` files.
+2026-11-09T11:32:07.0926590Z               On the other hand, currently there is no concept of package data
+2026-11-09T11:32:07.0927490Z               directory, all directories are treated like packages.
+2026-11-09T11:32:07.0928260Z         ********************************************************************************
+2026-11-09T11:32:07.0928770Z 
+2026-11-09T11:32:07.0928920Z !!
+2026-11-09T11:32:07.0929590Z WARNING Package 'composer.web.app' is absent from the `packages` configuration.
+2026-11-09T11:32:07.0930440Z !!
+2026-11-09T11:32:07.0930640Z 
+2026-11-09T11:32:07.0930910Z         ********************************************************************************
+2026-11-09T11:32:07.0931570Z         ############################
+2026-11-09T11:32:07.0932100Z         # Package would be ignored #
+2026-11-09T11:32:07.0932620Z         ############################
+2026-11-09T11:32:07.0933370Z         Python recognizes 'composer.web.app' as an importable package[^1],
+2026-11-09T11:32:07.0934330Z         but it is absent from setuptools' `packages` configuration.
+2026-11-09T11:32:07.0935070Z 
+2026-11-09T11:32:07.0935550Z         This leads to an ambiguous overall configuration. If you want to distribute this
+2026-11-09T11:32:07.0936730Z         package, please make sure that 'composer.web.app' is explicitly added
+2026-11-09T11:32:07.0937620Z         to the `packages` configuration field.
+2026-11-09T11:32:07.0938050Z 
+2026-11-09T11:32:07.0938460Z         Alternatively, you can also rely on setuptools' discovery methods
+2026-11-09T11:32:07.0939540Z         (for example by using `find_namespace_packages(...)`/`find_namespace:`
+2026-11-09T11:32:07.0940400Z         instead of `find_packages(...)`/`find:`).
+2026-11-09T11:32:07.0940850Z 
+2026-11-09T11:32:07.0941330Z         You can read more about "package discovery" on setuptools documentation page:
+2026-11-09T11:32:07.0942090Z 
+2026-11-09T11:32:07.0943460Z         - https://setuptools.pypa.io/en/latest/userguide/package_discovery.html
+2026-11-09T11:32:07.0944280Z 
+2026-11-09T11:32:07.0944640Z         If you don't want 'composer.web.app' to be distributed and are
+2026-11-09T11:32:07.0945610Z         already explicitly excluding 'composer.web.app' via
+2026-11-09T11:32:07.0946640Z         `find_namespace_packages(...)/find_namespace` or `find_packages(...)/find`,
+2026-11-09T11:32:07.0947840Z         you can try to use `exclude_package_data`, or `include-package-data=False` in
+2026-11-09T11:32:07.0948980Z         combination with a more fine grained `package-data` configuration.
+2026-11-09T11:32:07.0949640Z 
+2026-11-09T11:32:07.0950110Z         You can read more about "package data files" on setuptools documentation page:
+2026-11-09T11:32:07.0950920Z 
+2026-11-09T11:32:07.0951440Z         - https://setuptools.pypa.io/en/latest/userguide/datafiles.html
+2026-11-09T11:32:07.0952230Z 
+2026-11-09T11:32:07.0952260Z 
+2026-11-09T11:32:07.0952700Z         [^1]: For Python, any directory (with suitable naming) can be imported,
+2026-11-09T11:32:07.0953660Z               even if it does not contain any `.py` files.
+2026-11-09T11:32:07.0954500Z               On the other hand, currently there is no concept of package data
+2026-11-09T11:32:07.0956030Z               directory, all directories are treated like packages.
+2026-11-09T11:32:07.0957040Z         ********************************************************************************
+2026-11-09T11:32:07.0957580Z 
+2026-11-09T11:32:07.0957750Z !!
+2026-11-09T11:32:07.0958450Z WARNING Package 'composer.web.window' is absent from the `packages` configuration.
+2026-11-09T11:32:07.0960810Z !!
+2026-11-09T11:32:07.0961070Z 
+2026-11-09T11:32:07.0961370Z         ********************************************************************************
+2026-11-09T11:32:07.0962070Z         ############################
+2026-11-09T11:32:07.0962650Z         # Package would be ignored #
+2026-11-09T11:32:07.0963220Z         ############################
+2026-11-09T11:32:07.0964170Z         Python recognizes 'composer.web.window' as an importable package[^1],
+2026-11-09T11:32:07.0965200Z         but it is absent from setuptools' `packages` configuration.
+2026-11-09T11:32:07.0965760Z 
+2026-11-09T11:32:07.0966290Z         This leads to an ambiguous overall configuration. If you want to distribute this
+2026-11-09T11:32:07.0971540Z         package, please make sure that 'composer.web.window' is explicitly added
+2026-11-09T11:32:07.0971900Z         to the `packages` configuration field.
+2026-11-09T11:32:07.0972060Z 
+2026-11-09T11:32:07.0972260Z         Alternatively, you can also rely on setuptools' discovery methods
+2026-11-09T11:32:07.0972740Z         (for example by using `find_namespace_packages(...)`/`find_namespace:`
+2026-11-09T11:32:07.0973060Z         instead of `find_packages(...)`/`find:`).
+2026-11-09T11:32:07.0973230Z 
+2026-11-09T11:32:07.0973410Z         You can read more about "package discovery" on setuptools documentation page:
+2026-11-09T11:32:07.0973670Z 
+2026-11-09T11:32:07.0973890Z         - https://setuptools.pypa.io/en/latest/userguide/package_discovery.html
+2026-11-09T11:32:07.0974150Z 
+2026-11-09T11:32:07.0974310Z         If you don't want 'composer.web.window' to be distributed and are
+2026-11-09T11:32:07.0974660Z         already explicitly excluding 'composer.web.window' via
+2026-11-09T11:32:07.0975030Z         `find_namespace_packages(...)/find_namespace` or `find_packages(...)/find`,
+2026-11-09T11:32:07.0975450Z         you can try to use `exclude_package_data`, or `include-package-data=False` in
+2026-11-09T11:32:07.0975850Z         combination with a more fine grained `package-data` configuration.
+2026-11-09T11:32:07.0976080Z 
+2026-11-09T11:32:07.0976250Z         You can read more about "package data files" on setuptools documentation page:
+2026-11-09T11:32:07.0978440Z 
+2026-11-09T11:32:07.0979550Z         - https://setuptools.pypa.io/en/latest/userguide/datafiles.html
+2026-11-09T11:32:07.0980250Z 
+2026-11-09T11:32:07.0980260Z 
+2026-11-09T11:32:07.0981650Z         [^1]: For Python, any directory (with suitable naming) can be imported,
+2026-11-09T11:32:07.0982590Z               even if it does not contain any `.py` files.
+2026-11-09T11:32:07.0983510Z               On the other hand, currently there is no concept of package data
+2026-11-09T11:32:07.0984860Z               directory, all directories are treated like packages.
+2026-11-09T11:32:07.0985770Z         ********************************************************************************
+2026-11-09T11:32:07.0986350Z 
+2026-11-09T11:32:07.0986510Z !!
+2026-11-09T11:32:09.6428180Z + /var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/tmp4yqzzoyp/venv/bin/python -m pip install --disable-pip-version-check --no-cache-dir /Users/runner/work/_temp/dist/lensmith_composer-0.2.0-py3-none-any.whl
+2026-11-09T11:32:09.9667420Z Processing /Users/runner/work/_temp/dist/lensmith_composer-0.2.0-py3-none-any.whl
+2026-11-09T11:32:10.0211160Z Collecting certifi==2026.10.23 (from lensmith-composer==0.2.0)
+2026-11-09T11:32:10.0428080Z   Downloading certifi-2026.10.23-py3-none-any.whl.metadata (2.5 kB)
+2026-11-09T11:32:10.0457820Z Collecting claim-seal @ https://github.com/lensmith-ai/claim-seal/archive/b0fdf6126196509984d3480867bd4cf861a19f98.tar.gz#sha256=cf4e8a2a419933657c548ee95ca524bbf04b4e60c8427cb02d01faeab5c5ad1e (from lensmith-composer==0.2.0)
+2026-11-09T11:32:10.3727370Z   Downloading b0fdf6126196509984d3480867bd4cf861a19f98.tar.gz (636 kB)
+2026-11-09T11:32:10.4626480Z      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 636.2/636.2 kB 16.2 MB/s  0:00:00
+2026-11-09T11:32:10.4946100Z   Installing build dependencies: started
+2026-11-09T11:32:11.1673320Z   Installing build dependencies: finished with status 'done'
+2026-11-09T11:32:11.1684090Z   Getting requirements to build wheel: started
+2026-11-09T11:32:11.7597320Z   Getting requirements to build wheel: finished with status 'done'
+2026-11-09T11:32:11.7619040Z   Preparing metadata (pyproject.toml): started
+2026-11-09T11:32:12.0140650Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2026-11-09T11:32:12.0263080Z Downloading certifi-2026.10.23-py3-none-any.whl (135 kB)
+2026-11-09T11:32:12.0338300Z Building wheels for collected packages: claim-seal
+2026-11-09T11:32:12.0345430Z   Building wheel for claim-seal (pyproject.toml): started
+2026-11-09T11:32:12.2995590Z   Building wheel for claim-seal (pyproject.toml): finished with status 'done'
+2026-11-09T11:32:12.3011250Z   Created wheel for claim-seal: filename=claim_seal-0.2.0-py3-none-any.whl size=96791 sha256=1ffbb54996a76961dd9ca153545824c1026c3c4ee529cf0a6220ada896b6fe72
+2026-11-09T11:32:12.3013940Z   Stored in directory: /private/var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/pip-ephem-wheel-cache-uxrr6461/wheels/c1/92/e1/4915576a9c769627b7581d18e1e55454ab36f9f9cae676076b
+2026-11-09T11:32:12.3060680Z Successfully built claim-seal
+2026-11-09T11:32:12.3241480Z Installing collected packages: claim-seal, certifi, lensmith-composer
+2026-11-09T11:32:12.5657920Z 
+2026-11-09T11:32:12.5667830Z Successfully installed certifi-2026.10.23 claim-seal-0.2.0 lensmith-composer-0.2.0
+2026-11-09T11:32:12.6961960Z + /var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/tmp4yqzzoyp/venv/bin/python -m composer --version
+2026-11-09T11:32:12.9224780Z composer 0.2.0
+2026-11-09T11:32:12.9459390Z + /var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/tmp4yqzzoyp/venv/bin/python -m composer demo --fast
+2026-11-09T11:32:13.1258450Z + /var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/tmp4yqzzoyp/venv/bin/python -m pip uninstall --yes --quiet pip
+2026-11-09T11:32:13.7576900Z + /Library/Frameworks/Python.framework/Versions/3.13/bin/python -m cyclonedx_py environment --pyproject /Users/runner/work/composer/composer/pyproject.toml --mc-type application --output-reproducible --of JSON --sv 1.6 -o /Users/runner/work/_temp/dist/lensmith_composer-0.2.0.cdx.json /var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/tmp4yqzzoyp/venv/bin/python
+2026-11-09T11:32:16.1425180Z build: lensmith_composer-0.2.0-py3-none-any.whl, lensmith_composer-0.2.0.tar.gz, lensmith_composer-0.2.0.cdx.json (+26 optional narration parts, scope excluded), SHA256SUMS
+2026-11-09T11:32:16.8650630Z Collecting certifi==2026.10.23
+2026-11-09T11:32:16.8679420Z   Using cached certifi-2026.10.23-py3-none-any.whl.metadata (2.5 kB)
+2026-11-09T11:32:16.8736690Z Using cached certifi-2026.10.23-py3-none-any.whl (135 kB)
+2026-11-09T11:32:16.8799120Z Saved /private/var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/tmppj6q9zwn/dl/certifi-2026.10.23-py3-none-any.whl
+2026-11-09T11:32:16.8799940Z Successfully downloaded certifi
+2026-11-09T11:32:17.3405070Z Collecting setuptools==84.2.1
+2026-11-09T11:32:17.3436570Z   Using cached setuptools-84.2.1-py3-none-any.whl.metadata (6.6 kB)
+2026-11-09T11:32:17.3667890Z Using cached setuptools-84.2.1-py3-none-any.whl (876 kB)
+2026-11-09T11:32:17.3763910Z Saved /private/var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/tmppj6q9zwn/dl/setuptools-84.2.1-py3-none-any.whl
+2026-11-09T11:32:17.3766610Z Successfully downloaded setuptools
+2026-11-09T11:32:18.0059040Z * Getting build dependencies for wheel...
+2026-11-09T11:32:18.2071110Z running egg_info
+2026-11-09T11:32:18.2086760Z creating claim_seal.egg-info
+2026-11-09T11:32:18.2087320Z writing claim_seal.egg-info/PKG-INFO
+2026-11-09T11:32:18.2205240Z writing dependency_links to claim_seal.egg-info/dependency_links.txt
+2026-11-09T11:32:18.2211920Z writing entry points to claim_seal.egg-info/entry_points.txt
+2026-11-09T11:32:18.2218090Z writing top-level names to claim_seal.egg-info/top_level.txt
+2026-11-09T11:32:18.2222020Z writing manifest file 'claim_seal.egg-info/SOURCES.txt'
+2026-11-09T11:32:18.2381310Z reading manifest file 'claim_seal.egg-info/SOURCES.txt'
+2026-11-09T11:32:18.2385530Z adding license file 'LICENSE'
+2026-11-09T11:32:18.2398870Z writing manifest file 'claim_seal.egg-info/SOURCES.txt'
+2026-11-09T11:32:18.2808100Z * Building wheel...
+2026-11-09T11:32:18.4539410Z running bdist_wheel
+2026-11-09T11:32:18.4858900Z running build
+2026-11-09T11:32:18.4870330Z running build_py
+2026-11-09T11:32:18.4929890Z creating build/lib/claim_seal
+2026-11-09T11:32:18.4931410Z copying claim_seal/jev.py -> build/lib/claim_seal
+2026-11-09T11:32:18.4936030Z copying claim_seal/support.py -> build/lib/claim_seal
+2026-11-09T11:32:18.4943290Z copying claim_seal/resolve.py -> build/lib/claim_seal
+2026-11-09T11:32:18.4956910Z copying claim_seal/completion.py -> build/lib/claim_seal
+2026-11-09T11:32:18.4959680Z copying claim_seal/seal.py -> build/lib/claim_seal
+2026-11-09T11:32:18.4962520Z copying claim_seal/limits.py -> build/lib/claim_seal
+2026-11-09T11:32:18.4964630Z copying claim_seal/normalize.py -> build/lib/claim_seal
+2026-11-09T11:32:18.4971190Z copying claim_seal/relations.py -> build/lib/claim_seal
+2026-11-09T11:32:18.4974140Z copying claim_seal/__init__.py -> build/lib/claim_seal
+2026-11-09T11:32:18.4976250Z copying claim_seal/spans.py -> build/lib/claim_seal
+2026-11-09T11:32:18.4979250Z copying claim_seal/prompts.py -> build/lib/claim_seal
+2026-11-09T11:32:18.4986890Z copying claim_seal/attribution.py -> build/lib/claim_seal
+2026-11-09T11:32:18.4995980Z copying claim_seal/cli.py -> build/lib/claim_seal
+2026-11-09T11:32:18.5004890Z copying claim_seal/evidence.py -> build/lib/claim_seal
+2026-11-09T11:32:18.5016790Z copying claim_seal/__main__.py -> build/lib/claim_seal
+2026-11-09T11:32:18.5022200Z copying claim_seal/output.py -> build/lib/claim_seal
+2026-11-09T11:32:18.5062540Z copying claim_seal/adapters.py -> build/lib/claim_seal
+2026-11-09T11:32:18.5063890Z running egg_info
+2026-11-09T11:32:18.5067140Z writing claim_seal.egg-info/PKG-INFO
+2026-11-09T11:32:18.5081290Z writing dependency_links to claim_seal.egg-info/dependency_links.txt
+2026-11-09T11:32:18.5084390Z writing entry points to claim_seal.egg-info/entry_points.txt
+2026-11-09T11:32:18.5085840Z writing top-level names to claim_seal.egg-info/top_level.txt
+2026-11-09T11:32:18.5122120Z reading manifest file 'claim_seal.egg-info/SOURCES.txt'
+2026-11-09T11:32:18.5125400Z adding license file 'LICENSE'
+2026-11-09T11:32:18.5133220Z writing manifest file 'claim_seal.egg-info/SOURCES.txt'
+2026-11-09T11:32:18.5175100Z installing to build/bdist.macosx-10.13-universal2/wheel
+2026-11-09T11:32:18.5176310Z running install
+2026-11-09T11:32:18.5223910Z running install_lib
+2026-11-09T11:32:18.5241790Z creating build/bdist.macosx-10.13-universal2/wheel
+2026-11-09T11:32:18.5243080Z creating build/bdist.macosx-10.13-universal2/wheel/claim_seal
+2026-11-09T11:32:18.5244340Z copying build/lib/claim_seal/jev.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T11:32:18.5246200Z copying build/lib/claim_seal/support.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T11:32:18.5248500Z copying build/lib/claim_seal/resolve.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T11:32:18.5250410Z copying build/lib/claim_seal/completion.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T11:32:18.5253420Z copying build/lib/claim_seal/seal.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T11:32:18.5254970Z copying build/lib/claim_seal/limits.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T11:32:18.5256780Z copying build/lib/claim_seal/normalize.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T11:32:18.5258900Z copying build/lib/claim_seal/relations.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T11:32:18.5262550Z copying build/lib/claim_seal/__init__.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T11:32:18.5264910Z copying build/lib/claim_seal/spans.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T11:32:18.5267810Z copying build/lib/claim_seal/prompts.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T11:32:18.5274770Z copying build/lib/claim_seal/attribution.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T11:32:18.5297190Z copying build/lib/claim_seal/cli.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T11:32:18.5305050Z copying build/lib/claim_seal/evidence.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T11:32:18.5329330Z copying build/lib/claim_seal/__main__.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T11:32:18.5338790Z copying build/lib/claim_seal/output.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T11:32:18.5339630Z copying build/lib/claim_seal/adapters.py -> build/bdist.macosx-10.13-universal2/wheel/./claim_seal
+2026-11-09T11:32:18.5340380Z running install_egg_info
+2026-11-09T11:32:18.5391910Z Copying claim_seal.egg-info to build/bdist.macosx-10.13-universal2/wheel/./claim_seal-0.2.0-py3.13.egg-info
+2026-11-09T11:32:18.5410480Z running install_scripts
+2026-11-09T11:32:18.5426570Z creating build/bdist.macosx-10.13-universal2/wheel/claim_seal-0.2.0.dist-info/WHEEL
+2026-11-09T11:32:18.5430820Z creating '/var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/tmppj6q9zwn/cs-wheel/.tmp-v_cdx8s_/claim_seal-0.2.0-py3-none-any.whl' and adding 'build/bdist.macosx-10.13-universal2/wheel' to it
+2026-11-09T11:32:18.5439630Z adding 'claim_seal/__init__.py'
+2026-11-09T11:32:18.5440890Z adding 'claim_seal/__main__.py'
+2026-11-09T11:32:18.5441890Z adding 'claim_seal/adapters.py'
+2026-11-09T11:32:18.5463190Z adding 'claim_seal/attribution.py'
+2026-11-09T11:32:18.5463870Z adding 'claim_seal/cli.py'
+2026-11-09T11:32:18.5464530Z adding 'claim_seal/completion.py'
+2026-11-09T11:32:18.5465160Z adding 'claim_seal/evidence.py'
+2026-11-09T11:32:18.5482210Z adding 'claim_seal/jev.py'
+2026-11-09T11:32:18.5482590Z adding 'claim_seal/limits.py'
+2026-11-09T11:32:18.5482840Z adding 'claim_seal/normalize.py'
+2026-11-09T11:32:18.5483160Z adding 'claim_seal/output.py'
+2026-11-09T11:32:18.5483400Z adding 'claim_seal/prompts.py'
+2026-11-09T11:32:18.5483690Z adding 'claim_seal/relations.py'
+2026-11-09T11:32:18.5484390Z adding 'claim_seal/resolve.py'
+2026-11-09T11:32:18.5486680Z adding 'claim_seal/seal.py'
+2026-11-09T11:32:18.5491390Z adding 'claim_seal/spans.py'
+2026-11-09T11:32:18.5500320Z adding 'claim_seal/support.py'
+2026-11-09T11:32:18.5504300Z adding 'claim_seal-0.2.0.dist-info/licenses/LICENSE'
+2026-11-09T11:32:18.5520460Z adding 'claim_seal-0.2.0.dist-info/METADATA'
+2026-11-09T11:32:18.5522160Z adding 'claim_seal-0.2.0.dist-info/WHEEL'
+2026-11-09T11:32:18.5523170Z adding 'claim_seal-0.2.0.dist-info/entry_points.txt'
+2026-11-09T11:32:18.5524020Z adding 'claim_seal-0.2.0.dist-info/top_level.txt'
+2026-11-09T11:32:18.5524870Z adding 'claim_seal-0.2.0.dist-info/RECORD'
+2026-11-09T11:32:18.5525760Z removing build/bdist.macosx-10.13-universal2/wheel
+2026-11-09T11:32:18.5808360Z Successfully built claim_seal-0.2.0-py3-none-any.whl
+2026-11-09T11:32:18.6233710Z make_installer: certifi-2026.10.23-py3-none-any.whl, claim-seal-b0fdf6126196509984d3480867bd4cf861a19f98.tar.gz, claim_seal-0.2.0-py3-none-any.whl, install-pins.json, install.sh, install.sh.sha256, setuptools-84.2.1-py3-none-any.whl
+2026-11-09T11:32:18.6674560Z -rw-r--r--  1 runner  staff   135082 Nov  9 11:32 /Users/runner/work/_temp/kit/certifi-2026.10.23-py3-none-any.whl
+2026-11-09T11:32:18.6676550Z -rw-r--r--  1 runner  staff    96791 Nov  9 11:32 /Users/runner/work/_temp/kit/claim_seal-0.2.0-py3-none-any.whl
+2026-11-09T11:32:18.6678510Z -rw-r--r--  1 runner  staff   636174 Nov  9 11:32 /Users/runner/work/_temp/kit/claim-seal-b0fdf6126196509984d3480867bd4cf861a19f98.tar.gz
+2026-11-09T11:32:18.6681330Z -rw-r--r--  1 runner  staff     1319 Nov  9 11:32 /Users/runner/work/_temp/kit/install-pins.json
+2026-11-09T11:32:18.6682920Z -rwxr-xr-x  1 runner  staff    28052 Nov  9 11:32 /Users/runner/work/_temp/kit/install.sh
+2026-11-09T11:32:18.6684420Z -rw-r--r--  1 runner  staff       77 Nov  9 11:32 /Users/runner/work/_temp/kit/install.sh.sha256
+2026-11-09T11:32:18.6685930Z -rw-r--r--  1 runner  staff   442282 Nov  9 11:32 /Users/runner/work/_temp/kit/lensmith_composer-0.2.0-py3-none-any.whl
+2026-11-09T11:32:18.6687590Z -rw-r--r--  1 runner  staff    20384 Nov  9 11:32 /Users/runner/work/_temp/kit/lensmith_composer-0.2.0.cdx.json
+2026-11-09T11:32:18.6689360Z -rw-r--r--  1 runner  staff  1155059 Nov  9 11:32 /Users/runner/work/_temp/kit/lensmith_composer-0.2.0.tar.gz
+2026-11-09T11:32:18.6690240Z -rw-r--r--  1 runner  staff   876263 Nov  9 11:32 /Users/runner/work/_temp/kit/setuptools-84.2.1-py3-none-any.whl
+2026-11-09T11:32:18.6834860Z ##[group]Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+2026-11-09T11:32:18.6836320Z with:
+2026-11-09T11:32:18.6837140Z   python-version: 3.12
+2026-11-09T11:32:18.6838210Z   check-latest: false
+2026-11-09T11:32:18.6841350Z   token: ***
+2026-11-09T11:32:18.6841690Z   mirror: https://raw.githubusercontent.com/actions/python-versions/main
+2026-11-09T11:32:18.6843560Z   update-environment: true
+2026-11-09T11:32:18.6844430Z   allow-prereleases: false
+2026-11-09T11:32:18.6844740Z   freethreaded: false
+2026-11-09T11:32:18.6845050Z env:
+2026-11-09T11:32:18.6845390Z   CASE: python.org framework Python with group-writable venv templates, own folder
+2026-11-09T11:32:18.6845830Z   TEMPLATES: group-writable
+2026-11-09T11:32:18.6846090Z   WHICH_HOME: own
+2026-11-09T11:32:18.6846300Z   WHICH_PATH: inherit
+2026-11-09T11:32:18.6846630Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.13.17/arm64
+2026-11-09T11:32:18.6847220Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.13.17/arm64/lib/pkgconfig
+2026-11-09T11:32:18.6847750Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.13.17/arm64
+2026-11-09T11:32:18.6848250Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.13.17/arm64
+2026-11-09T11:32:18.6848730Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.13.17/arm64
+2026-11-09T11:32:18.6849060Z ##[endgroup]
+2026-11-09T11:32:19.1972330Z ##[group]Installed versions
+2026-11-09T11:32:19.2043120Z Successfully set up CPython (3.12.10)
+2026-11-09T11:32:19.2043680Z ##[endgroup]
+2026-11-09T11:32:19.2173100Z ##[group]Run fw=/Library/Frameworks/Python.framework/Versions/3.12/bin
+2026-11-09T11:32:19.2173570Z [36;1mfw=/Library/Frameworks/Python.framework/Versions/3.12/bin[0m
+2026-11-09T11:32:19.2174260Z [36;1mif [ -x "$fw/python3" ]; then echo "$fw" >> "$GITHUB_PATH"; echo "python.org framework Python: $fw/python3"; else echo "no /Library framework Python on this runner; using setup-python's"; fi[0m
+2026-11-09T11:32:19.2175170Z [36;1mpython3 -c 'import sys, sysconfig; print(sys.executable, sys.version.split()[0], "framework=" + str(sysconfig.get_config_var("PYTHONFRAMEWORK")))'[0m
+2026-11-09T11:32:19.2219800Z shell: /bin/bash -e {0}
+2026-11-09T11:32:19.2220000Z env:
+2026-11-09T11:32:19.2220330Z   CASE: python.org framework Python with group-writable venv templates, own folder
+2026-11-09T11:32:19.2220690Z   TEMPLATES: group-writable
+2026-11-09T11:32:19.2220890Z   WHICH_HOME: own
+2026-11-09T11:32:19.2221060Z   WHICH_PATH: inherit
+2026-11-09T11:32:19.2221440Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:19.2221880Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/arm64/lib/pkgconfig
+2026-11-09T11:32:19.2222290Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:19.2222680Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:19.2223050Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:19.2223360Z ##[endgroup]
+2026-11-09T11:32:19.2715780Z python.org framework Python: /Library/Frameworks/Python.framework/Versions/3.12/bin/python3
+2026-11-09T11:32:19.4603240Z /Library/Frameworks/Python.framework/Versions/3.12/bin/python3 3.12.10 framework=Python
+2026-11-09T11:32:19.4682250Z ##[group]Run d=$(python3 -c 'import os, venv; print(os.path.join(os.path.dirname(venv.__file__), "scripts"))')
+2026-11-09T11:32:19.4682950Z [36;1md=$(python3 -c 'import os, venv; print(os.path.join(os.path.dirname(venv.__file__), "scripts"))')[0m
+2026-11-09T11:32:19.4683430Z [36;1msudo chmod -R g+w "$d"[0m
+2026-11-09T11:32:19.4683710Z [36;1mfind "$d" -maxdepth 2 -type f -exec ls -l {} +[0m
+2026-11-09T11:32:19.4721990Z shell: /bin/bash -e {0}
+2026-11-09T11:32:19.4722200Z env:
+2026-11-09T11:32:19.4722530Z   CASE: python.org framework Python with group-writable venv templates, own folder
+2026-11-09T11:32:19.4722900Z   TEMPLATES: group-writable
+2026-11-09T11:32:19.4723100Z   WHICH_HOME: own
+2026-11-09T11:32:19.4723270Z   WHICH_PATH: inherit
+2026-11-09T11:32:19.4723630Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:19.4724060Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/arm64/lib/pkgconfig
+2026-11-09T11:32:19.4724560Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:19.4724950Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:19.4725320Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:19.4725610Z ##[endgroup]
+2026-11-09T11:32:19.6837520Z -rw-rw-r--  1 root  admin  2170 Apr  8  2025 /Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/venv/scripts/common/activate
+2026-11-09T11:32:19.6839200Z -rw-rw-r--  1 root  admin  9033 Apr  8  2025 /Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/venv/scripts/common/Activate.ps1
+2026-11-09T11:32:19.6841400Z -rw-rw-r--  1 root  admin   934 Apr  8  2025 /Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/venv/scripts/posix/activate.csh
+2026-11-09T11:32:19.6842240Z -rw-rw-r--  1 root  admin  2209 Apr  8  2025 /Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/venv/scripts/posix/activate.fish
+2026-11-09T11:32:19.6878660Z ##[group]Run set -o pipefail
+2026-11-09T11:32:19.6878940Z [36;1mset -o pipefail[0m
+2026-11-09T11:32:19.6879130Z [36;1mcd "$RUNNER_TEMP/kit"[0m
+2026-11-09T11:32:19.6879540Z [36;1mif [ "$WHICH_HOME" = own ]; then H="$RUNNER_TEMP/composer-home"; else H="$HOME/.lensmith-composer"; fi[0m
+2026-11-09T11:32:19.6879960Z [36;1mecho "H=$H" >> "$GITHUB_ENV"[0m
+2026-11-09T11:32:19.6880220Z [36;1mif [ "$WHICH_PATH" = bare ]; then[0m
+2026-11-09T11:32:19.6880710Z [36;1m  # no Python 3.10+ anywhere the installer looks: it must fetch uv and a private Python, as on a fresh Mac[0m
+2026-11-09T11:32:19.6881500Z [36;1m  COMPOSER_PYTHON_PATH_ONLY=1 COMPOSER_FILES_DIR="$PWD" PATH=/usr/bin:/bin:/usr/sbin:/sbin sh install.sh --home "$H" --no-open --no-start --path 2>&1 | tee "$RUNNER_TEMP/first.txt"[0m
+2026-11-09T11:32:19.6882130Z [36;1melse[0m
+2026-11-09T11:32:19.6882540Z [36;1m  COMPOSER_FILES_DIR="$PWD" sh install.sh --home "$H" --no-open --no-start --path 2>&1 | tee "$RUNNER_TEMP/first.txt"[0m
+2026-11-09T11:32:19.6882980Z [36;1mfi[0m
+2026-11-09T11:32:19.6883230Z [36;1m# the install ends by naming the optional extras (it asks nothing more)[0m
+2026-11-09T11:32:19.6883910Z [36;1mgrep -q "Optional extras, any time: lensmith composer setup --reconfigure parser | provider (model) | checker | narration | schedule | port" "$RUNNER_TEMP/first.txt"[0m
+2026-11-09T11:32:19.6884610Z [36;1mgrep -v "^20" "$RUNNER_TEMP/first.txt" | grep -A3 "^Optional extras"[0m
+2026-11-09T11:32:19.6919830Z shell: /bin/bash -e {0}
+2026-11-09T11:32:19.6920020Z env:
+2026-11-09T11:32:19.6920340Z   CASE: python.org framework Python with group-writable venv templates, own folder
+2026-11-09T11:32:19.6920680Z   TEMPLATES: group-writable
+2026-11-09T11:32:19.6920890Z   WHICH_HOME: own
+2026-11-09T11:32:19.6921060Z   WHICH_PATH: inherit
+2026-11-09T11:32:19.6921510Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:19.6921970Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/arm64/lib/pkgconfig
+2026-11-09T11:32:19.6922390Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:19.6922770Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:19.6923220Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:19.6923680Z ##[endgroup]
+2026-11-09T11:32:19.7609030Z Lensmith Composer 0.2.0: one-command install
+2026-11-09T11:32:19.7609370Z 
+2026-11-09T11:32:19.7610690Z   What happens: 8 steps, about 1 to 3 minutes on a normal connection.
+2026-11-09T11:32:19.7612440Z   Everything goes in /Users/runner/work/_temp/composer-home. No sudo. At the end it makes a short command, lensmith: a link in ~/.local/bin if that
+2026-11-09T11:32:19.7614230Z   is yours and on your PATH, or (asked first) 3 lines in your shell profile. It tells you what it changed.
+2026-11-09T11:32:19.7616480Z   Besides /Users/runner/work/_temp/composer-home it writes only a log file and a temporary folder in /var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/ (the folder is removed again).
+2026-11-09T11:32:19.7618590Z   Every download is checked against a SHA-256 pinned in this release; a source that is down is skipped.
+2026-11-09T11:32:19.7860750Z   No terminal to ask on and no ANTHROPIC_API_KEY set: installing in demo mode (add a key later: composer setup --reconfigure provider).
+2026-11-09T11:32:19.8033010Z 
+2026-11-09T11:32:19.8033550Z Step 1 of 8 (0:00 elapsed): getting the installer kit (Composer 0.2.0's release source, about 1 MB, checked by SHA-256)
+2026-11-09T11:32:19.8416570Z   using your file /Users/runner/work/_temp/kit/lensmith_composer-0.2.0.tar.gz (its SHA-256 matches the pin)
+2026-11-09T11:32:19.9074630Z   kit ready
+2026-11-09T11:32:19.9435670Z Lensmith Composer 0.2.0 setup
+2026-11-09T11:32:19.9438020Z 
+2026-11-09T11:32:19.9514570Z Step 2 of 8 (0:00 elapsed): checking this computer and the app folder (nothing is written yet)
+2026-11-09T11:32:20.3764530Z 
+2026-11-09T11:32:20.3898090Z Step 3 of 8 (0:01 elapsed): looking for Python 3.10 or newer (Composer runs on it)
+2026-11-09T11:32:20.3958240Z   found Python 3.12.10 at /Library/Frameworks/Python.framework/Versions/3.12/bin/python3
+2026-11-09T11:32:20.9987150Z Composer 0.2.0 setup. App folder: /Users/runner/work/_temp/composer-home
+2026-11-09T11:32:20.9988300Z preflight: every check passed; nothing was written
+2026-11-09T11:32:21.3066480Z 
+2026-11-09T11:32:21.3138850Z Step 4 of 8 (0:02 elapsed): using Python 3.12.10 (nothing to download)
+2026-11-09T11:32:21.3145050Z 
+2026-11-09T11:32:21.3196120Z Step 5 of 8 (0:02 elapsed): making a private environment with Python 3.12.10 (Composer's own folder, so nothing else on this computer is touched)
+2026-11-09T11:32:24.8616570Z 
+2026-11-09T11:32:24.8696370Z Step 6 of 8 (0:05 elapsed): installing Composer 0.2.0, certifi and claim-seal into it (each checked by SHA-256)
+2026-11-09T11:32:25.0028300Z   three files, each checked by SHA-256: Composer 0.2.0, certifi 2026.10.23 (the list of trusted certificate authorities), claim-seal 0.2.0 (the claim checker)
+2026-11-09T11:32:25.0265750Z   using your file /Users/runner/work/_temp/kit/lensmith_composer-0.2.0-py3-none-any.whl (its SHA-256 matches the pin)
+2026-11-09T11:32:25.0478070Z   using your file /Users/runner/work/_temp/kit/certifi-2026.10.23-py3-none-any.whl (its SHA-256 matches the pin)
+2026-11-09T11:32:25.0764240Z   using your file /Users/runner/work/_temp/kit/claim_seal-0.2.0-py3-none-any.whl (its SHA-256 matches the pin)
+2026-11-09T11:32:25.0827540Z   installing from the checked files (pip also checks each file's SHA-256; no index is asked)
+2026-11-09T11:32:26.0857120Z Looking in links: /Users/runner/work/_temp/composer-home/tmp/kit
+2026-11-09T11:32:26.0888840Z Processing /Users/runner/work/_temp/composer-home/tmp/kit/lensmith_composer-0.2.0-py3-none-any.whl (from -r /Users/runner/work/_temp/composer-home/tmp/kit/requirements.txt (line 1))
+2026-11-09T11:32:26.0939580Z Processing /Users/runner/work/_temp/composer-home/tmp/kit/certifi-2026.10.23-py3-none-any.whl (from -r /Users/runner/work/_temp/composer-home/tmp/kit/requirements.txt (line 2))
+2026-11-09T11:32:26.0956140Z Processing /Users/runner/work/_temp/composer-home/tmp/kit/claim_seal-0.2.0-py3-none-any.whl (from -r /Users/runner/work/_temp/composer-home/tmp/kit/requirements.txt (line 3))
+2026-11-09T11:32:26.0984440Z Installing collected packages: lensmith-composer, claim-seal, certifi
+2026-11-09T11:32:26.2668060Z Successfully installed certifi-2026.10.23 claim-seal-0.2.0 lensmith-composer-0.2.0
+2026-11-09T11:32:26.5568360Z 
+2026-11-09T11:32:26.5621050Z Step 7 of 8 (0:07 elapsed): checking the install and making it the current version
+2026-11-09T11:32:26.6263340Z 
+2026-11-09T11:32:26.6324550Z Step 8 of 8 (0:07 elapsed): Composer's own setup: the questions, and then your first start
+2026-11-09T11:32:26.8847190Z Composer 0.2.0 setup. App folder: /Users/runner/work/_temp/composer-home
+2026-11-09T11:32:26.8847580Z 
+2026-11-09T11:32:26.8847660Z Done. Your choices:
+2026-11-09T11:32:26.8847890Z   provider   none, no key
+2026-11-09T11:32:26.8848130Z   checker    the same model checks the claims
+2026-11-09T11:32:26.8848370Z   parser     built-in
+2026-11-09T11:32:26.8848590Z   narration  off (text-only)
+2026-11-09T11:32:26.8848800Z   schedule   off
+2026-11-09T11:32:26.8848960Z   port       8765
+2026-11-09T11:32:26.8849060Z 
+2026-11-09T11:32:26.8850960Z Check it:   /Users/runner/work/_temp/composer-home/bin/composer doctor
+2026-11-09T11:32:26.8851620Z 
+2026-11-09T11:32:26.8851890Z To get this every day, pick one:
+2026-11-09T11:32:26.8862580Z   1. This computer: turn on the daily brief with `/Users/runner/work/_temp/composer-home/bin/composer setup --reconfigure schedule`. It runs only while `composer up` runs and this computer is awake, and you read it on this computer.
+2026-11-09T11:32:26.8874720Z   2. Your own server with a domain: always on, and you can read it from anywhere. How: https://github.com/lensmith-ai/composer/blob/main/docs/deploy-vps.md
+2026-11-09T11:32:26.8886400Z   3. No setup: sign up for the daily brief by email at https://lensmith.ai
+2026-11-09T11:32:26.9361710Z 
+2026-11-09T11:32:26.9424490Z Installed Composer 0.2.0 in /Users/runner/work/_temp/composer-home (0:07 elapsed).
+2026-11-09T11:32:26.9478610Z   The install log is /Users/runner/work/_temp/composer-home/cache/install.log (paste it if you ask for help; it holds no key).
+2026-11-09T11:32:26.9792540Z   Shortcut: added 3 lines to /Users/runner/.bash_profile (an alias named lensmith, marked with # >>> lensmith). To undo: delete those 3 lines, or run lensmith composer uninstall
+2026-11-09T11:32:26.9793180Z 
+2026-11-09T11:32:26.9795700Z Optional extras, any time: lensmith composer setup --reconfigure parser | provider (model) | checker | narration | schedule | port
+2026-11-09T11:32:26.9800520Z   parser = cleaner article text, provider = your key and model, checker = the model that checks each claim,
+2026-11-09T11:32:26.9801170Z   narration = a spoken voice (Kokoro), schedule = a daily brief, port = the port Composer uses.
+2026-11-09T11:32:26.9807080Z   Each one asks only about that part and changes nothing else. None of them is needed to start.
+2026-11-09T11:32:26.9808720Z 
+2026-11-09T11:32:26.9812100Z Start it now:  /Users/runner/work/_temp/composer-home/bin/lensmith composer
+2026-11-09T11:32:26.9814760Z Next time:     lensmith composer     (in a NEW Terminal window; this one does not know it yet)
+2026-11-09T11:32:26.9941780Z Optional extras, any time: lensmith composer setup --reconfigure parser | provider (model) | checker | narration | schedule | port
+2026-11-09T11:32:26.9944120Z   parser = cleaner article text, provider = your key and model, checker = the model that checks each claim,
+2026-11-09T11:32:26.9945740Z   narration = a spoken voice (Kokoro), schedule = a daily brief, port = the port Composer uses.
+2026-11-09T11:32:26.9947110Z   Each one asks only about that part and changes nothing else. None of them is needed to start.
+2026-11-09T11:32:27.0141110Z ##[group]Run set -o pipefail
+2026-11-09T11:32:27.0141390Z [36;1mset -o pipefail[0m
+2026-11-09T11:32:27.0141580Z [36;1mcd "$RUNNER_TEMP/kit"[0m
+2026-11-09T11:32:27.0142020Z [36;1mif [ "$WHICH_PATH" = bare ]; then export COMPOSER_PYTHON_PATH_ONLY=1 PATH=/usr/bin:/bin:/usr/sbin:/sbin; fi[0m
+2026-11-09T11:32:27.0142730Z [36;1mCOMPOSER_FILES_DIR="$PWD" sh install.sh --home "$H" --no-open --no-start --path 2>&1 | tee "$RUNNER_TEMP/rerun.txt"[0m
+2026-11-09T11:32:27.0143320Z [36;1mgrep -q "is already installed in" "$RUNNER_TEMP/rerun.txt"[0m
+2026-11-09T11:32:27.0180750Z shell: /bin/bash -e {0}
+2026-11-09T11:32:27.0180970Z env:
+2026-11-09T11:32:27.0181280Z   CASE: python.org framework Python with group-writable venv templates, own folder
+2026-11-09T11:32:27.0181630Z   TEMPLATES: group-writable
+2026-11-09T11:32:27.0181840Z   WHICH_HOME: own
+2026-11-09T11:32:27.0182000Z   WHICH_PATH: inherit
+2026-11-09T11:32:27.0182370Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:27.0182820Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/arm64/lib/pkgconfig
+2026-11-09T11:32:27.0183380Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:27.0183810Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:27.0184310Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:27.0184690Z   H: /Users/runner/work/_temp/composer-home
+2026-11-09T11:32:27.0185150Z ##[endgroup]
+2026-11-09T11:32:27.0741610Z Lensmith Composer 0.2.0: one-command install
+2026-11-09T11:32:27.0742280Z 
+2026-11-09T11:32:27.0742700Z   What happens: 8 steps, about 1 to 3 minutes on a normal connection.
+2026-11-09T11:32:27.0744310Z   Everything goes in /Users/runner/work/_temp/composer-home. No sudo. At the end it makes a short command, lensmith: a link in ~/.local/bin if that
+2026-11-09T11:32:27.0746600Z   is yours and on your PATH, or (asked first) 3 lines in your shell profile. It tells you what it changed.
+2026-11-09T11:32:27.0748890Z   Besides /Users/runner/work/_temp/composer-home it writes only a log file and a temporary folder in /var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/ (the folder is removed again).
+2026-11-09T11:32:27.0751130Z   Every download is checked against a SHA-256 pinned in this release; a source that is down is skipped.
+2026-11-09T11:32:27.0913220Z   No terminal to ask on and no ANTHROPIC_API_KEY set: installing in demo mode (add a key later: composer setup --reconfigure provider).
+2026-11-09T11:32:27.0977970Z 
+2026-11-09T11:32:27.0978600Z Step 1 of 8 (0:00 elapsed): getting the installer kit (Composer 0.2.0's release source, about 1 MB, checked by SHA-256)
+2026-11-09T11:32:27.1313190Z   using your file /Users/runner/work/_temp/kit/lensmith_composer-0.2.0.tar.gz (its SHA-256 matches the pin)
+2026-11-09T11:32:27.2113270Z   kit ready
+2026-11-09T11:32:27.2446450Z Lensmith Composer 0.2.0 setup
+2026-11-09T11:32:27.2449550Z 
+2026-11-09T11:32:27.2534910Z Step 2 of 8 (0:00 elapsed): checking this computer and the app folder (nothing is written yet)
+2026-11-09T11:32:27.6880430Z 
+2026-11-09T11:32:27.6941740Z Step 3 of 8 (0:00 elapsed): looking for Python 3.10 or newer (Composer runs on it)
+2026-11-09T11:32:27.6943290Z   found Python 3.12.10 at /Library/Frameworks/Python.framework/Versions/3.12/bin/python3
+2026-11-09T11:32:28.1724000Z Composer 0.2.0 setup. App folder: /Users/runner/work/_temp/composer-home
+2026-11-09T11:32:28.1724690Z Composer is already set up here; your key, sources, lenses and briefs are kept.
+2026-11-09T11:32:28.1725300Z Change one part with --reconfigure provider|checker|sources|parser|narration|schedule|port.
+2026-11-09T11:32:28.1725890Z preflight: every check passed; nothing was written
+2026-11-09T11:32:28.5824530Z 
+2026-11-09T11:32:28.5948540Z Step 4 of 8 (0:01 elapsed): using Python 3.12.10 (nothing to download)
+2026-11-09T11:32:28.7765200Z 
+2026-11-09T11:32:28.7848010Z Step 5 of 8 (0:01 elapsed): Composer 0.2.0 is already installed in /Users/runner/work/_temp/composer-home/app/0.2.0
+2026-11-09T11:32:28.7849970Z 
+2026-11-09T11:32:28.7884600Z Step 6 of 8 (0:01 elapsed): nothing to install
+2026-11-09T11:32:28.7885620Z 
+2026-11-09T11:32:28.7936220Z Step 7 of 8 (0:01 elapsed): checking the install and making it the current version
+2026-11-09T11:32:28.8752960Z 
+2026-11-09T11:32:28.8814020Z Step 8 of 8 (0:01 elapsed): Composer's own setup: the questions, and then your first start
+2026-11-09T11:32:29.1709290Z Composer 0.2.0 setup. App folder: /Users/runner/work/_temp/composer-home
+2026-11-09T11:32:29.1711720Z Composer is already set up here; your key, sources, lenses and briefs are kept.
+2026-11-09T11:32:29.1713990Z Change one part with --reconfigure provider|checker|sources|parser|narration|schedule|port.
+2026-11-09T11:32:29.1716300Z 
+2026-11-09T11:32:29.1716810Z Done. Your choices:
+2026-11-09T11:32:29.1717880Z   provider   none, no key
+2026-11-09T11:32:29.1718690Z   checker    the same model checks the claims
+2026-11-09T11:32:29.1719530Z   parser     built-in
+2026-11-09T11:32:29.1720130Z   narration  off (text-only)
+2026-11-09T11:32:29.1721040Z   schedule   off
+2026-11-09T11:32:29.1721610Z   port       8765
+2026-11-09T11:32:29.1721790Z 
+2026-11-09T11:32:29.1722360Z Check it:   /Users/runner/work/_temp/composer-home/bin/composer doctor
+2026-11-09T11:32:29.1722740Z 
+2026-11-09T11:32:29.1722840Z To get this every day, pick one:
+2026-11-09T11:32:29.1723720Z   1. This computer: turn on the daily brief with `/Users/runner/work/_temp/composer-home/bin/composer setup --reconfigure schedule`. It runs only while `composer up` runs and this computer is awake, and you read it on this computer.
+2026-11-09T11:32:29.1727280Z   2. Your own server with a domain: always on, and you can read it from anywhere. How: https://github.com/lensmith-ai/composer/blob/main/docs/deploy-vps.md
+2026-11-09T11:32:29.1728670Z   3. No setup: sign up for the daily brief by email at https://lensmith.ai
+2026-11-09T11:32:29.2490660Z 
+2026-11-09T11:32:29.2549870Z Installed Composer 0.2.0 in /Users/runner/work/_temp/composer-home (0:02 elapsed).
+2026-11-09T11:32:29.2622800Z   The install log is /Users/runner/work/_temp/composer-home/cache/install.log (paste it if you ask for help; it holds no key).
+2026-11-09T11:32:29.2855580Z   Shortcut: the lensmith lines for this install are already in /Users/runner/.bash_profile
+2026-11-09T11:32:29.2856250Z 
+2026-11-09T11:32:29.2859750Z Optional extras, any time: lensmith composer setup --reconfigure parser | provider (model) | checker | narration | schedule | port
+2026-11-09T11:32:29.2861790Z   parser = cleaner article text, provider = your key and model, checker = the model that checks each claim,
+2026-11-09T11:32:29.2863410Z   narration = a spoken voice (Kokoro), schedule = a daily brief, port = the port Composer uses.
+2026-11-09T11:32:29.2864940Z   Each one asks only about that part and changes nothing else. None of them is needed to start.
+2026-11-09T11:32:29.2865920Z 
+2026-11-09T11:32:29.2866820Z Start it now:  /Users/runner/work/_temp/composer-home/bin/lensmith composer
+2026-11-09T11:32:29.2867450Z Next time:     lensmith composer     (in a NEW Terminal window; this one does not know it yet)
+2026-11-09T11:32:29.3176520Z ##[group]Run set -o pipefail
+2026-11-09T11:32:29.3177030Z [36;1mset -o pipefail[0m
+2026-11-09T11:32:29.3177210Z [36;1mcd "$RUNNER_TEMP/kit"[0m
+2026-11-09T11:32:29.3177780Z [36;1mif [ "$WHICH_PATH" = bare ]; then export COMPOSER_PYTHON_PATH_ONLY=1 PATH=/usr/bin:/bin:/usr/sbin:/sbin; fi[0m
+2026-11-09T11:32:29.3178540Z [36;1mv=$(sed -n 's/^version = "\([0-9][0-9A-Za-z.+_-]*\)"$/\1/p' "$GITHUB_WORKSPACE/pyproject.toml" | head -n 1)[0m
+2026-11-09T11:32:29.3178980Z [36;1mmv "$H/app/current" "$RUNNER_TEMP/current.moved"[0m
+2026-11-09T11:32:29.3179450Z [36;1m: > "$H/app/.making-$v"[0m
+2026-11-09T11:32:29.3179740Z [36;1mfind "$H/app/$v" -type d -exec chmod 555 {} +[0m
+2026-11-09T11:32:29.3180380Z [36;1mCOMPOSER_FILES_DIR="$PWD" sh install.sh --home "$H" --no-open --no-start --path 2>&1 | tee "$RUNNER_TEMP/rerun2.txt"[0m
+2026-11-09T11:32:29.3181340Z [36;1mgrep -q "an earlier setup stopped in the middle of making" "$RUNNER_TEMP/rerun2.txt"[0m
+2026-11-09T11:32:29.3182000Z [36;1mtest -L "$H/app/current"[0m
+2026-11-09T11:32:29.3243400Z shell: /bin/bash -e {0}
+2026-11-09T11:32:29.3244180Z env:
+2026-11-09T11:32:29.3244910Z   CASE: python.org framework Python with group-writable venv templates, own folder
+2026-11-09T11:32:29.3246150Z   TEMPLATES: group-writable
+2026-11-09T11:32:29.3246750Z   WHICH_HOME: own
+2026-11-09T11:32:29.3247480Z   WHICH_PATH: inherit
+2026-11-09T11:32:29.3248380Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:29.3249890Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/arm64/lib/pkgconfig
+2026-11-09T11:32:29.3251490Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:29.3252700Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:29.3254070Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:29.3254980Z   H: /Users/runner/work/_temp/composer-home
+2026-11-09T11:32:29.3255920Z ##[endgroup]
+2026-11-09T11:32:29.4648710Z Lensmith Composer 0.2.0: one-command install
+2026-11-09T11:32:29.4652750Z 
+2026-11-09T11:32:29.4699040Z   What happens: 8 steps, about 1 to 3 minutes on a normal connection.
+2026-11-09T11:32:29.4707740Z   Everything goes in /Users/runner/work/_temp/composer-home. No sudo. At the end it makes a short command, lensmith: a link in ~/.local/bin if that
+2026-11-09T11:32:29.4715610Z   is yours and on your PATH, or (asked first) 3 lines in your shell profile. It tells you what it changed.
+2026-11-09T11:32:29.4737370Z   Besides /Users/runner/work/_temp/composer-home it writes only a log file and a temporary folder in /var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/ (the folder is removed again).
+2026-11-09T11:32:29.4758370Z   Every download is checked against a SHA-256 pinned in this release; a source that is down is skipped.
+2026-11-09T11:32:29.4929950Z   No terminal to ask on and no ANTHROPIC_API_KEY set: installing in demo mode (add a key later: composer setup --reconfigure provider).
+2026-11-09T11:32:29.5077090Z 
+2026-11-09T11:32:29.5081160Z Step 1 of 8 (0:00 elapsed): getting the installer kit (Composer 0.2.0's release source, about 1 MB, checked by SHA-256)
+2026-11-09T11:32:29.5499670Z   using your file /Users/runner/work/_temp/kit/lensmith_composer-0.2.0.tar.gz (its SHA-256 matches the pin)
+2026-11-09T11:32:29.6251830Z   kit ready
+2026-11-09T11:32:29.6591330Z Lensmith Composer 0.2.0 setup
+2026-11-09T11:32:29.6594470Z 
+2026-11-09T11:32:29.6650960Z Step 2 of 8 (0:00 elapsed): checking this computer and the app folder (nothing is written yet)
+2026-11-09T11:32:30.0228400Z   an earlier setup stopped in the middle of making /Users/runner/work/_temp/composer-home/app/0.2.0; removing that half-made folder first
+2026-11-09T11:32:30.2748100Z 
+2026-11-09T11:32:30.2839060Z Step 3 of 8 (0:01 elapsed): looking for Python 3.10 or newer (Composer runs on it)
+2026-11-09T11:32:30.2840400Z   found Python 3.12.10 at /Library/Frameworks/Python.framework/Versions/3.12/bin/python3
+2026-11-09T11:32:30.5399740Z Composer 0.2.0 setup. App folder: /Users/runner/work/_temp/composer-home
+2026-11-09T11:32:30.5401160Z Composer is already set up here; your key, sources, lenses and briefs are kept.
+2026-11-09T11:32:30.5402470Z Change one part with --reconfigure provider|checker|sources|parser|narration|schedule|port.
+2026-11-09T11:32:30.5403600Z preflight: every check passed; nothing was written
+2026-11-09T11:32:30.9846880Z 
+2026-11-09T11:32:30.9991210Z Step 4 of 8 (0:01 elapsed): using Python 3.12.10 (nothing to download)
+2026-11-09T11:32:31.0078330Z 
+2026-11-09T11:32:31.0204530Z Step 5 of 8 (0:02 elapsed): making a private environment with Python 3.12.10 (Composer's own folder, so nothing else on this computer is touched)
+2026-11-09T11:32:33.4724960Z 
+2026-11-09T11:32:33.4786560Z Step 6 of 8 (0:04 elapsed): installing Composer 0.2.0, certifi and claim-seal into it (each checked by SHA-256)
+2026-11-09T11:32:33.5940040Z   three files, each checked by SHA-256: Composer 0.2.0, certifi 2026.10.23 (the list of trusted certificate authorities), claim-seal 0.2.0 (the claim checker)
+2026-11-09T11:32:33.6176380Z   using your file /Users/runner/work/_temp/kit/lensmith_composer-0.2.0-py3-none-any.whl (its SHA-256 matches the pin)
+2026-11-09T11:32:33.6376850Z   using your file /Users/runner/work/_temp/kit/certifi-2026.10.23-py3-none-any.whl (its SHA-256 matches the pin)
+2026-11-09T11:32:33.6544440Z   using your file /Users/runner/work/_temp/kit/claim_seal-0.2.0-py3-none-any.whl (its SHA-256 matches the pin)
+2026-11-09T11:32:33.6782340Z   installing from the checked files (pip also checks each file's SHA-256; no index is asked)
+2026-11-09T11:32:35.2034690Z Looking in links: /Users/runner/work/_temp/composer-home/tmp/kit
+2026-11-09T11:32:35.2119390Z Processing /Users/runner/work/_temp/composer-home/tmp/kit/lensmith_composer-0.2.0-py3-none-any.whl (from -r /Users/runner/work/_temp/composer-home/tmp/kit/requirements.txt (line 1))
+2026-11-09T11:32:35.2219390Z Processing /Users/runner/work/_temp/composer-home/tmp/kit/certifi-2026.10.23-py3-none-any.whl (from -r /Users/runner/work/_temp/composer-home/tmp/kit/requirements.txt (line 2))
+2026-11-09T11:32:35.2254140Z Processing /Users/runner/work/_temp/composer-home/tmp/kit/claim_seal-0.2.0-py3-none-any.whl (from -r /Users/runner/work/_temp/composer-home/tmp/kit/requirements.txt (line 3))
+2026-11-09T11:32:35.2293010Z Installing collected packages: lensmith-composer, claim-seal, certifi
+2026-11-09T11:32:35.6602710Z Successfully installed certifi-2026.10.23 claim-seal-0.2.0 lensmith-composer-0.2.0
+2026-11-09T11:32:36.0208960Z 
+2026-11-09T11:32:36.0275420Z Step 7 of 8 (0:07 elapsed): checking the install and making it the current version
+2026-11-09T11:32:36.0918600Z 
+2026-11-09T11:32:36.0970120Z Step 8 of 8 (0:07 elapsed): Composer's own setup: the questions, and then your first start
+2026-11-09T11:32:36.3801810Z Composer 0.2.0 setup. App folder: /Users/runner/work/_temp/composer-home
+2026-11-09T11:32:36.3803330Z Composer is already set up here; your key, sources, lenses and briefs are kept.
+2026-11-09T11:32:36.3804940Z Change one part with --reconfigure provider|checker|sources|parser|narration|schedule|port.
+2026-11-09T11:32:36.3805780Z 
+2026-11-09T11:32:36.3806180Z Done. Your choices:
+2026-11-09T11:32:36.3807010Z   provider   none, no key
+2026-11-09T11:32:36.3807870Z   checker    the same model checks the claims
+2026-11-09T11:32:36.3808660Z   parser     built-in
+2026-11-09T11:32:36.3809380Z   narration  off (text-only)
+2026-11-09T11:32:36.3809990Z   schedule   off
+2026-11-09T11:32:36.3810610Z   port       8765
+2026-11-09T11:32:36.3811020Z 
+2026-11-09T11:32:36.3811680Z Check it:   /Users/runner/work/_temp/composer-home/bin/composer doctor
+2026-11-09T11:32:36.3812300Z 
+2026-11-09T11:32:36.3812790Z To get this every day, pick one:
+2026-11-09T11:32:36.3814880Z   1. This computer: turn on the daily brief with `/Users/runner/work/_temp/composer-home/bin/composer setup --reconfigure schedule`. It runs only while `composer up` runs and this computer is awake, and you read it on this computer.
+2026-11-09T11:32:36.3819280Z   2. Your own server with a domain: always on, and you can read it from anywhere. How: https://github.com/lensmith-ai/composer/blob/main/docs/deploy-vps.md
+2026-11-09T11:32:36.3821170Z   3. No setup: sign up for the daily brief by email at https://lensmith.ai
+2026-11-09T11:32:36.4264870Z 
+2026-11-09T11:32:36.4319620Z Installed Composer 0.2.0 in /Users/runner/work/_temp/composer-home (0:07 elapsed).
+2026-11-09T11:32:36.4379560Z   The install log is /Users/runner/work/_temp/composer-home/cache/install.log (paste it if you ask for help; it holds no key).
+2026-11-09T11:32:36.4567310Z   Shortcut: the lensmith lines for this install are already in /Users/runner/.bash_profile
+2026-11-09T11:32:36.4569690Z 
+2026-11-09T11:32:36.4572760Z Optional extras, any time: lensmith composer setup --reconfigure parser | provider (model) | checker | narration | schedule | port
+2026-11-09T11:32:36.4575100Z   parser = cleaner article text, provider = your key and model, checker = the model that checks each claim,
+2026-11-09T11:32:36.4577860Z   narration = a spoken voice (Kokoro), schedule = a daily brief, port = the port Composer uses.
+2026-11-09T11:32:36.4580690Z   Each one asks only about that part and changes nothing else. None of them is needed to start.
+2026-11-09T11:32:36.4581680Z 
+2026-11-09T11:32:36.4582390Z Start it now:  /Users/runner/work/_temp/composer-home/bin/lensmith composer
+2026-11-09T11:32:36.4583940Z Next time:     lensmith composer     (in a NEW Terminal window; this one does not know it yet)
+2026-11-09T11:32:36.4927580Z ##[group]Run v=$(sed -n 's/^version = "\([0-9][0-9A-Za-z.+_-]*\)"$/\1/p' pyproject.toml | head -n 1)
+2026-11-09T11:32:36.4929270Z [36;1mv=$(sed -n 's/^version = "\([0-9][0-9A-Za-z.+_-]*\)"$/\1/p' pyproject.toml | head -n 1)[0m
+2026-11-09T11:32:36.4930280Z [36;1msaid=$("$H/bin/lensmith" composer --version)[0m
+2026-11-09T11:32:36.4931130Z [36;1mecho "$said"[0m
+2026-11-09T11:32:36.4931710Z [36;1mtest "$said" = "composer $v"[0m
+2026-11-09T11:32:36.4932680Z [36;1m"$H/bin/lensmith" composer doctor | tee "$RUNNER_TEMP/doctor.txt"[0m
+2026-11-09T11:32:36.4933790Z [36;1mgrep -q ", 0 failed" "$RUNNER_TEMP/doctor.txt"[0m
+2026-11-09T11:32:36.4936000Z [36;1mecho "MACOS-INSTALL-PROOF: ok | $CASE | $said | $(grep 'passed, 0 failed' "$RUNNER_TEMP/doctor.txt") | $(uname -sm) macOS $(sw_vers -productVersion) | $("$H"/app/current/venv/bin/python -c 'import sys; print("Python " + sys.version.split()[0])')"[0m
+2026-11-09T11:32:36.5025790Z shell: /bin/bash -e {0}
+2026-11-09T11:32:36.5026630Z env:
+2026-11-09T11:32:36.5027510Z   CASE: python.org framework Python with group-writable venv templates, own folder
+2026-11-09T11:32:36.5028580Z   TEMPLATES: group-writable
+2026-11-09T11:32:36.5029170Z   WHICH_HOME: own
+2026-11-09T11:32:36.5029770Z   WHICH_PATH: inherit
+2026-11-09T11:32:36.5030550Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:36.5031850Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/arm64/lib/pkgconfig
+2026-11-09T11:32:36.5033100Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:36.5034180Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:36.5035400Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:36.5036300Z   H: /Users/runner/work/_temp/composer-home
+2026-11-09T11:32:36.5037090Z ##[endgroup]
+2026-11-09T11:32:36.9716250Z composer 0.2.0
+2026-11-09T11:32:37.5813310Z PASS python: 3.12.10 at /Users/runner/work/_temp/composer-home/app/0.2.0/venv/bin/python (private environment)
+2026-11-09T11:32:37.5814100Z PASS version: composer 0.2.0, data schema 1
+2026-11-09T11:32:37.5814650Z PASS manifest: 6 entries, every path inside /Users/runner/work/_temp/composer-home or reused read-only
+2026-11-09T11:32:37.5815360Z PASS trust: no other account can change the app folder or the data folder
+2026-11-09T11:32:37.5816000Z PASS data: /Users/runner/work/_temp/composer-home/data, generation g1, schema 1
+2026-11-09T11:32:37.5816550Z PASS permissions: only you can open: data 0700
+2026-11-09T11:32:37.5816930Z PASS settings: provider none
+2026-11-09T11:32:37.5817450Z SKIP key: no model provider chosen: the app shows the recorded brief; composing needs one
+2026-11-09T11:32:37.5818000Z PASS checker: same model as the writer (it checks its own brief)
+2026-11-09T11:32:37.5818610Z PASS sources: google-ai, deepmind, huggingface, microsoft-research, pytorch, arxiv-cs-ai
+2026-11-09T11:32:37.5819280Z SKIP narration: off: briefs are text-only, the page shows no player or voice picker
+2026-11-09T11:32:37.5819840Z PASS port: 8765 is free on 127.0.0.1 (Composer binds to this machine only)
+2026-11-09T11:32:37.5820340Z SKIP scheduler: no daily brief set
+2026-11-09T11:32:37.5820780Z SKIP daily seal re-check: not run yet; it runs once a day while `composer up` runs
+2026-11-09T11:32:37.5821430Z SKIP article parser: built-in parser (the optional trafilatura parser is not installed)
+2026-11-09T11:32:37.5825580Z PASS disk: 47012 MB free
+2026-11-09T11:32:37.5825910Z doctor: 11 passed, 0 failed, 5 skipped
+2026-11-09T11:32:37.6671780Z MACOS-INSTALL-PROOF: ok | python.org framework Python with group-writable venv templates, own folder | composer 0.2.0 | doctor: 11 passed, 0 failed, 5 skipped | Darwin arm64 macOS 15.8.2 | Python 3.12.10
+2026-11-09T11:32:37.6725930Z ##[group]Run for part in parser provider checker narration schedule port sources; do
+2026-11-09T11:32:37.6726570Z [36;1mfor part in parser provider checker narration schedule port sources; do[0m
+2026-11-09T11:32:37.6727400Z [36;1m  "$H/bin/lensmith" composer setup --reconfigure "$part" --yes --no-test-call < /dev/null > "$RUNNER_TEMP/reconf.txt" 2>&1 || { cat "$RUNNER_TEMP/reconf.txt"; exit 1; }[0m
+2026-11-09T11:32:37.6729570Z [36;1m  echo "reconfigure $part: ok"[0m
+2026-11-09T11:32:37.6730360Z [36;1mdone[0m
+2026-11-09T11:32:37.6732020Z [36;1m"$H/bin/lensmith" composer --help | grep -A1 "^Optional extras, any time"[0m
+2026-11-09T11:32:37.6847050Z shell: /bin/bash -e {0}
+2026-11-09T11:32:37.6847610Z env:
+2026-11-09T11:32:37.6848380Z   CASE: python.org framework Python with group-writable venv templates, own folder
+2026-11-09T11:32:37.6849340Z   TEMPLATES: group-writable
+2026-11-09T11:32:37.6849980Z   WHICH_HOME: own
+2026-11-09T11:32:37.6850420Z   WHICH_PATH: inherit
+2026-11-09T11:32:37.6851830Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:37.6853060Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/arm64/lib/pkgconfig
+2026-11-09T11:32:37.6854170Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:37.6855150Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:37.6856350Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:37.6857190Z   H: /Users/runner/work/_temp/composer-home
+2026-11-09T11:32:37.6857820Z ##[endgroup]
+2026-11-09T11:32:38.2239160Z reconfigure parser: ok
+2026-11-09T11:32:38.7147850Z reconfigure provider: ok
+2026-11-09T11:32:39.3153110Z reconfigure checker: ok
+2026-11-09T11:32:39.9341860Z reconfigure narration: ok
+2026-11-09T11:32:40.4500150Z reconfigure schedule: ok
+2026-11-09T11:32:40.8843000Z reconfigure port: ok
+2026-11-09T11:32:41.3144810Z reconfigure sources: ok
+2026-11-09T11:32:41.6748300Z Optional extras, any time: lensmith composer setup --reconfigure parser | provider (model) | checker | narration | schedule | port
+2026-11-09T11:32:41.6850150Z   parser = cleaner article text, provider = your key and model, checker = the model that checks each claim,
+2026-11-09T11:32:41.6922820Z ##[group]Run # (cat, not grep on three names: grep exits 2 when one of the profiles does not exist)
+2026-11-09T11:32:41.6932630Z [36;1m# (cat, not grep on three names: grep exits 2 when one of the profiles does not exist)[0m
+2026-11-09T11:32:41.6935070Z [36;1mcat "$HOME/.zshrc" "$HOME/.bash_profile" "$HOME/.profile" 2>/dev/null | grep -q "added by the Composer installer"[0m
+2026-11-09T11:32:41.6935600Z [36;1m"$H/bin/lensmith" composer uninstall[0m
+2026-11-09T11:32:41.6936230Z [36;1mif cat "$HOME/.zshrc" "$HOME/.bash_profile" "$HOME/.profile" 2>/dev/null | grep -q "added by the Composer installer"; then echo "the lensmith lines are still in a profile"; exit 1; fi[0m
+2026-11-09T11:32:41.6936850Z [36;1mtest ! -e "$H/bin/composer"[0m
+2026-11-09T11:32:41.6973480Z shell: /bin/bash -e {0}
+2026-11-09T11:32:41.6973680Z env:
+2026-11-09T11:32:41.6974040Z   CASE: python.org framework Python with group-writable venv templates, own folder
+2026-11-09T11:32:41.6985610Z   TEMPLATES: group-writable
+2026-11-09T11:32:41.6985840Z   WHICH_HOME: own
+2026-11-09T11:32:41.6986000Z   WHICH_PATH: inherit
+2026-11-09T11:32:41.6986280Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:41.6986690Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.12.10/arm64/lib/pkgconfig
+2026-11-09T11:32:41.6987600Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:41.6987980Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:41.6988350Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.12.10/arm64
+2026-11-09T11:32:41.6988670Z   H: /Users/runner/work/_temp/composer-home
+2026-11-09T11:32:41.6988880Z ##[endgroup]
+2026-11-09T11:32:42.3166760Z removed: bin, app, cache, tmp
+2026-11-09T11:32:42.3186650Z kept your data: /Users/runner/work/_temp/composer-home/data (remove it with `composer uninstall --delete-data`, or run setup again to pick it up)
+2026-11-09T11:32:42.3190170Z If you added an alias line to your shell profile yourself, remove it yourself (`lensmith composer uninstall` takes away the shortcut the installer added).
+2026-11-09T11:32:42.4166010Z removed the 3 lensmith lines from /Users/runner/.bash_profile
+2026-11-09T11:32:42.4356940Z Post job cleanup.
+2026-11-09T11:32:43.1815860Z Post job cleanup.
+2026-11-09T11:32:43.3425220Z Post job cleanup.
+2026-11-09T11:32:43.4593820Z [command]/opt/homebrew/bin/git version
+2026-11-09T11:32:43.4877390Z git version 2.56.0
+2026-11-09T11:32:43.4919110Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/5c67a7c5-658f-472a-9526-710159d989ab/.gitconfig'
+2026-11-09T11:32:43.4928210Z Temporarily overriding HOME='/Users/runner/work/_temp/5c67a7c5-658f-472a-9526-710159d989ab' before making global git config changes
+2026-11-09T11:32:43.4930270Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-09T11:32:43.4932450Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/composer/composer
+2026-11-09T11:32:43.5047260Z Removing SSH command configuration
+2026-11-09T11:32:43.5057320Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-09T11:32:43.5137160Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-09T11:32:43.6296640Z Removing HTTP extra header
+2026-11-09T11:32:43.6300470Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-09T11:32:43.6365550Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-09T11:32:43.7171870Z Removing includeIf entries pointing to credentials config files
+2026-11-09T11:32:43.7175920Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-09T11:32:43.7235460Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-09T11:32:43.8923340Z Cleaning up orphan processes

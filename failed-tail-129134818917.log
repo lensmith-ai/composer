@@ -1,0 +1,900 @@
+2026-11-09T11:32:47.5932860Z 127.0.0.1 GET /status/job-574842e1d9b5493f 200
+2026-11-09T11:32:47.5955170Z 127.0.0.1 GET /status/job-84acf7850d3c4d0b 200
+2026-11-09T11:32:48.0994910Z test_compose_has_two_route_slots_health_and_bounded_memo (test_job_routes.JobRouteTests.test_compose_has_two_route_slots_health_and_bounded_memo) ... ok
+2026-11-09T11:32:48.1099030Z 127.0.0.1 POST /compose 202
+2026-11-09T11:32:48.1147130Z 127.0.0.1 GET /status/job-abc81b906bc2446d 200
+2026-11-09T11:32:48.1193180Z 127.0.0.1 GET /status/job-abc81b906bc2446d 200
+2026-11-09T11:32:48.1245080Z 127.0.0.1 POST /save/job-abc81b906bc2446d 200
+2026-11-09T11:32:48.1268200Z 127.0.0.1 POST /delete/job-abc81b906bc2446d 200
+2026-11-09T11:32:48.1279370Z 127.0.0.1 GET /shelf 200
+2026-11-09T11:32:48.1291140Z 127.0.0.1 GET /latest 404
+2026-11-09T11:32:48.1309170Z 127.0.0.1 POST /restore/job-abc81b906bc2446d 200
+2026-11-09T11:32:48.1324980Z 127.0.0.1 GET /latest 200
+2026-11-09T11:32:48.6392860Z test_delete_restore_and_latest_pointer_are_real_routes (test_job_routes.JobRouteTests.test_delete_restore_and_latest_pointer_are_real_routes) ... ok
+2026-11-09T11:32:48.6529020Z 127.0.0.1 POST /compose 202
+2026-11-09T11:32:48.6590340Z 127.0.0.1 GET /status/job-520c52e3506544ef 200
+2026-11-09T11:32:48.6617840Z 127.0.0.1 GET /status/job-520c52e3506544ef 200
+2026-11-09T11:32:48.6630120Z 127.0.0.1 POST /retention 200
+2026-11-09T11:32:48.6648760Z 127.0.0.1 POST /retention 200
+2026-11-09T11:32:49.1710930Z test_retention_is_dry_by_default_and_apply_is_explicit_route (test_job_routes.JobRouteTests.test_retention_is_dry_by_default_and_apply_is_explicit_route) ... ok
+2026-11-09T11:32:49.1866990Z 127.0.0.1 POST /compose 202
+2026-11-09T11:32:49.1913770Z 127.0.0.1 GET /status/job-a2567299f6024bf8 200
+2026-11-09T11:32:49.1934150Z 127.0.0.1 GET /status/job-a2567299f6024bf8 200
+2026-11-09T11:32:49.1938700Z 127.0.0.1 POST /save/job-a2567299f6024bf8 400
+2026-11-09T11:32:49.1959900Z 127.0.0.1 POST /save/job-a2567299f6024bf8 200
+2026-11-09T11:32:49.1979200Z 127.0.0.1 POST /save/job-a2567299f6024bf8 200
+2026-11-09T11:32:49.1994740Z 127.0.0.1 GET /shelf 200
+2026-11-09T11:32:49.2010660Z 127.0.0.1 GET /latest 200
+2026-11-09T11:32:49.7061980Z test_save_refuses_mixed_payload_and_is_idempotent (test_job_routes.JobRouteTests.test_save_refuses_mixed_payload_and_is_idempotent) ... ok
+2026-11-09T11:32:49.7157790Z 127.0.0.1 POST /compose 202
+2026-11-09T11:32:49.7225230Z 127.0.0.1 GET /status/job-2b746eab89534a30 200
+2026-11-09T11:32:49.7268520Z 127.0.0.1 POST /compose 202
+2026-11-09T11:32:49.7314380Z 127.0.0.1 GET /status/job-80f73ebbcb6045b4 200
+2026-11-09T11:32:50.2358430Z test_status_routes_expose_compose_and_verification_failures (test_job_routes.JobRouteTests.test_status_routes_expose_compose_and_verification_failures) ... ok
+2026-11-09T11:32:50.2458240Z 127.0.0.1 POST /compose 202
+2026-11-09T11:32:50.2505960Z 127.0.0.1 GET /status/job-f8a7eebe149f4b54 200
+2026-11-09T11:32:50.2553390Z 127.0.0.1 GET /status/job-f8a7eebe149f4b54 200
+2026-11-09T11:32:50.7552270Z test_status_serves_live_contract_draft_then_verified (test_job_routes.JobRouteTests.test_status_serves_live_contract_draft_then_verified) ... ok
+2026-11-09T11:32:50.7698960Z 127.0.0.1 POST /update/migrate 200
+2026-11-09T11:32:50.7722680Z 127.0.0.1 POST /update/switch 200
+2026-11-09T11:32:50.7739130Z 127.0.0.1 POST /update/rollback 200
+2026-11-09T11:32:51.2796770Z test_update_switch_and_rollback_are_real_routes (test_job_routes.JobRouteTests.test_update_switch_and_rollback_are_real_routes) ... ok
+2026-11-09T11:32:51.2989050Z test_draft_is_visible_before_checker_finishes_and_is_bound_to_job_digest (test_job_store.JobStoreTests.test_draft_is_visible_before_checker_finishes_and_is_bound_to_job_digest) ... ok
+2026-11-09T11:32:51.3199500Z test_missing_or_mismatched_verdict_binding_is_refused (test_job_store.JobStoreTests.test_missing_or_mismatched_verdict_binding_is_refused) ... ok
+2026-11-09T11:32:51.3306400Z test_retention_expires_test_jobs_before_regular_unsaved_jobs (test_job_store.JobStoreTests.test_retention_expires_test_jobs_before_regular_unsaved_jobs) ... ok
+2026-11-09T11:32:51.3381790Z test_retention_is_dry_run_by_default_and_removes_expired_when_applied (test_job_store.JobStoreTests.test_retention_is_dry_run_by_default_and_removes_expired_when_applied) ... ok
+2026-11-09T11:32:51.3502110Z test_rollback_exports_post_switch_jobs_and_restores_g1_byte_for_byte (test_job_store.JobStoreTests.test_rollback_exports_post_switch_jobs_and_restores_g1_byte_for_byte) ... ok
+2026-11-09T11:32:51.3609530Z test_save_is_idempotent_and_shelf_marks_unreadable_saved_briefs (test_job_store.JobStoreTests.test_save_is_idempotent_and_shelf_marks_unreadable_saved_briefs) ... ok
+2026-11-09T11:32:51.3748810Z test_save_shelf_delete_restore_and_latest_pointer (test_job_store.JobStoreTests.test_save_shelf_delete_restore_and_latest_pointer) ... ok
+2026-11-09T11:32:51.3848860Z test_submit_persists_queued_job_and_capacity_returns_full (test_job_store.JobStoreTests.test_submit_persists_queued_job_and_capacity_returns_full) ... ok
+2026-11-09T11:32:51.4563380Z test_update_crash_recovery_is_stage_specific_and_preserves_g1_bytes (test_job_store.JobStoreTests.test_update_crash_recovery_is_stage_specific_and_preserves_g1_bytes) ... ok
+2026-11-09T11:32:51.7244400Z test_watchdog_fails_hung_job_and_releases_capacity (test_job_store.JobStoreTests.test_watchdog_fails_hung_job_and_releases_capacity) ... ok
+2026-11-09T11:32:56.9769530Z test_two_processes_editing_the_same_revision_cannot_fork_the_lens (test_lens_form.CrossProcessLensTests.test_two_processes_editing_the_same_revision_cannot_fork_the_lens) ... ok
+2026-11-09T11:32:57.4949890Z test_an_edit_is_the_same_lens_newest_revision_with_its_lineage (test_lens_form.LensFormRouteTests.test_an_edit_is_the_same_lens_newest_revision_with_its_lineage) ... ok
+2026-11-09T11:32:58.0174690Z test_the_form_is_checked (test_lens_form.LensFormRouteTests.test_the_form_is_checked) ... ok
+2026-11-09T11:32:58.5289140Z test_the_page_form_saves_a_lens_the_picker_and_the_edit_form_can_use (test_lens_form.LensFormRouteTests.test_the_page_form_saves_a_lens_the_picker_and_the_edit_form_can_use) ... ok
+2026-11-09T11:32:59.0481680Z test_two_edits_of_the_same_revision_cannot_fork_the_lens (test_lens_form.LensFormRouteTests.test_two_edits_of_the_same_revision_cannot_fork_the_lens) ... ok
+2026-11-09T11:32:59.0648210Z test_a_brief_under_a_saved_lens_shows_its_name_and_records_its_revision_level_and_register (test_lens_form.NamedLensBriefTests.test_a_brief_under_a_saved_lens_shows_its_name_and_records_its_revision_level_and_register) ... ok
+2026-11-09T11:32:59.0669010Z test_a_register_is_a_rule_too_and_absent_when_not_set (test_lens_form.ReadingLevelPromptTests.test_a_register_is_a_rule_too_and_absent_when_not_set) ... ok
+2026-11-09T11:32:59.0707700Z test_each_level_writes_its_own_rule_into_the_prompt (test_lens_form.ReadingLevelPromptTests.test_each_level_writes_its_own_rule_into_the_prompt) ... ok
+2026-11-09T11:32:59.0720200Z test_the_compose_request_level_reaches_the_model (test_lens_form.ReadingLevelPromptTests.test_the_compose_request_level_reaches_the_model) ... ok
+2026-11-09T11:32:59.0721390Z test_public_registry_has_three_available_lenses_with_declared_shapes (test_lenses.BuiltinLensTests.test_public_registry_has_three_available_lenses_with_declared_shapes) ... ok
+2026-11-09T11:32:59.0722410Z test_shape_check_rejects_wrong_item_count_and_unreadable_result (test_lenses.BuiltinLensTests.test_shape_check_rejects_wrong_item_count_and_unreadable_result) ... ok
+2026-11-09T11:32:59.0724560Z test_recipe_rejects_prompt_delimiters_and_unknown_reading_level (test_lenses.CustomLensStoreTests.test_recipe_rejects_prompt_delimiters_and_unknown_reading_level) ... ok
+2026-11-09T11:32:59.0743040Z test_save_and_edit_create_content_addressed_revisions (test_lenses.CustomLensStoreTests.test_save_and_edit_create_content_addressed_revisions) ... ok
+2026-11-09T11:32:59.1027420Z test_a_block_with_no_end_marker_is_left_whole (test_lensmith_command.LensmithCommandTests.test_a_block_with_no_end_marker_is_left_whole) ... ok
+2026-11-09T11:32:59.1326560Z test_a_failed_uninstall_removes_no_shortcut (test_lensmith_command.LensmithCommandTests.test_a_failed_uninstall_removes_no_shortcut) ... ok
+2026-11-09T11:32:59.1433230Z test_a_home_with_the_placeholder_text_or_shell_characters_is_one_quoted_word (test_lensmith_command.LensmithCommandTests.test_a_home_with_the_placeholder_text_or_shell_characters_is_one_quoted_word) ... ok
+2026-11-09T11:32:59.1600980Z test_a_link_to_another_install_is_not_removed (test_lensmith_command.LensmithCommandTests.test_a_link_to_another_install_is_not_removed) ... ok
+2026-11-09T11:32:59.1734440Z test_a_symlinked_profile_is_never_rewritten (test_lensmith_command.LensmithCommandTests.test_a_symlinked_profile_is_never_rewritten) ... ok
+2026-11-09T11:32:59.1852050Z test_alone_prints_three_lines_naming_lensmith_composer (test_lensmith_command.LensmithCommandTests.test_alone_prints_three_lines_naming_lensmith_composer) ... ok
+2026-11-09T11:32:59.1917790Z test_an_unknown_product_is_a_clear_error (test_lensmith_command.LensmithCommandTests.test_an_unknown_product_is_a_clear_error) ... ok
+2026-11-09T11:32:59.2123200Z test_lensmith_composer_starts_the_app_and_opens_the_browser (test_lensmith_command.LensmithCommandTests.test_lensmith_composer_starts_the_app_and_opens_the_browser) ... ok
+2026-11-09T11:32:59.2230900Z test_no_open_is_honoured (test_lensmith_command.LensmithCommandTests.test_no_open_is_honoured) ... ok
+2026-11-09T11:32:59.2240930Z test_setup_writes_lensmith_beside_composer_and_no_other_command (test_lensmith_command.LensmithCommandTests.test_setup_writes_lensmith_beside_composer_and_no_other_command) ... ok
+2026-11-09T11:32:59.2714300Z test_subcommands_map_to_composer (test_lensmith_command.LensmithCommandTests.test_subcommands_map_to_composer) ... ok
+2026-11-09T11:32:59.2979900Z test_the_block_of_another_install_is_left_alone (test_lensmith_command.LensmithCommandTests.test_the_block_of_another_install_is_left_alone) ... ok
+2026-11-09T11:32:59.3352270Z test_uninstall_help_or_another_home_removes_no_shortcut_because_this_install_is_still_there (test_lensmith_command.LensmithCommandTests.test_uninstall_help_or_another_home_removes_no_shortcut_because_this_install_is_still_there) ... ok
+2026-11-09T11:32:59.3948000Z test_uninstall_removes_only_the_shortcuts_it_can_prove_are_its_own (test_lensmith_command.LensmithCommandTests.test_uninstall_removes_only_the_shortcuts_it_can_prove_are_its_own) ... ok
+2026-11-09T11:32:59.4258210Z test_version (test_lensmith_command.LensmithCommandTests.test_version) ... ok
+2026-11-09T11:32:59.4524400Z test_your_own_section_with_a_similar_marker_is_not_touched (test_lensmith_command.LensmithCommandTests.test_your_own_section_with_a_similar_marker_is_not_touched) ... ok
+2026-11-09T11:32:59.5012990Z test_zdotdir_profile_is_cleaned_and_the_mode_is_kept (test_lensmith_command.LensmithCommandTests.test_zdotdir_profile_is_cleaned_and_the_mode_is_kept) ... ok
+2026-11-09T11:33:00.0815670Z test_an_unknown_part_is_refused_and_names_the_parts (test_lensmith_command.ReconfigureThroughLensmithTests.test_an_unknown_part_is_refused_and_names_the_parts) ... ok
+2026-11-09T11:33:00.9629830Z test_each_part_reconfigures_through_the_lensmith_launcher (test_lensmith_command.ReconfigureThroughLensmithTests.test_each_part_reconfigures_through_the_lensmith_launcher) ... ok
+2026-11-09T11:33:01.0662970Z test_help_prints_the_extras_lines_and_they_match_the_installer_and_the_readme (test_lensmith_command.ReconfigureThroughLensmithTests.test_help_prints_the_extras_lines_and_they_match_the_installer_and_the_readme) ... ok
+2026-11-09T11:33:01.0862170Z test_backup_out_folder_keeps_its_own_mode (test_lifecycle.BackupRestoreTests.test_backup_out_folder_keeps_its_own_mode) ... ok
+2026-11-09T11:33:01.0969790Z test_keep_prunes_only_scheduled_backups (test_lifecycle.BackupRestoreTests.test_keep_prunes_only_scheduled_backups) ... ok
+2026-11-09T11:33:01.1304380Z test_round_trip (test_lifecycle.BackupRestoreTests.test_round_trip) ... ok
+2026-11-09T11:33:01.1604160Z test_unsafe_archives_are_refused_and_nothing_changes (test_lifecycle.BackupRestoreTests.test_unsafe_archives_are_refused_and_nothing_changes) ... ok
+2026-11-09T11:33:01.1621620Z test_group_and_other_write_come_off_files_and_folders_and_links_are_left_alone (test_lifecycle.DropGroupOtherWriteTests.test_group_and_other_write_come_off_files_and_folders_and_links_are_left_alone) ... ok
+2026-11-09T11:33:01.1741290Z test_a_created_path_that_is_a_link_is_removed_as_a_link (test_lifecycle.UninstallTests.test_a_created_path_that_is_a_link_is_removed_as_a_link) ... ok
+2026-11-09T11:33:01.1856320Z test_a_linked_parent_cannot_lead_outside (test_lifecycle.UninstallTests.test_a_linked_parent_cannot_lead_outside) ... ok
+2026-11-09T11:33:01.2719070Z test_a_tampered_manifest_is_refused_with_nothing_removed (test_lifecycle.UninstallTests.test_a_tampered_manifest_is_refused_with_nothing_removed) ... ok
+2026-11-09T11:33:01.2865980Z test_delete_data_must_be_confirmed (test_lifecycle.UninstallTests.test_delete_data_must_be_confirmed) ... ok
+2026-11-09T11:33:01.3017320Z test_delete_data_refuses_data_that_is_not_this_installs (test_lifecycle.UninstallTests.test_delete_data_refuses_data_that_is_not_this_installs) ... ok
+2026-11-09T11:33:01.3277870Z test_keeps_data_without_delete_data_and_leaves_outside_unchanged (test_lifecycle.UninstallTests.test_keeps_data_without_delete_data_and_leaves_outside_unchanged) ... ok
+2026-11-09T11:33:01.3364570Z test_refused_while_the_app_runs (test_lifecycle.UninstallTests.test_refused_while_the_app_runs) ... ok
+2026-11-09T11:33:01.3643560Z test_a_failing_doctor_undoes_the_update (test_lifecycle.UpdateRollbackTests.test_a_failing_doctor_undoes_the_update) ... ok
+2026-11-09T11:33:01.3892990Z test_a_file_that_is_not_a_composer_release_is_refused_before_anything_is_made (test_lifecycle.UpdateRollbackTests.test_a_file_that_is_not_a_composer_release_is_refused_before_anything_is_made) ... ok
+2026-11-09T11:33:01.4263970Z test_a_new_version_that_does_not_start_is_never_switched_to (test_lifecycle.UpdateRollbackTests.test_a_new_version_that_does_not_start_is_never_switched_to) ... ok
+2026-11-09T11:33:01.4450840Z test_a_parser_that_does_not_install_leaves_the_old_version (test_lifecycle.UpdateRollbackTests.test_a_parser_that_does_not_install_leaves_the_old_version) ... ok
+2026-11-09T11:33:01.5664780Z test_an_update_stopped_at_any_step_is_undone_at_the_next_start (test_lifecycle.UpdateRollbackTests.test_an_update_stopped_at_any_step_is_undone_at_the_next_start) ... ok
+2026-11-09T11:33:01.6224580Z test_any_failure_after_the_switch_undoes_the_update (test_lifecycle.UpdateRollbackTests.test_any_failure_after_the_switch_undoes_the_update) ... ok
+2026-11-09T11:33:01.6643770Z test_rollback_after_an_interrupted_update_undoes_it (test_lifecycle.UpdateRollbackTests.test_rollback_after_an_interrupted_update_undoes_it) ... ok
+2026-11-09T11:33:01.7067580Z test_the_article_parser_setup_installed_is_installed_into_the_new_version (test_lifecycle.UpdateRollbackTests.test_the_article_parser_setup_installed_is_installed_into_the_new_version) ... ok
+2026-11-09T11:33:01.7352070Z test_the_container_path_migrates_on_start_and_rolls_back_data_only (test_lifecycle.UpdateRollbackTests.test_the_container_path_migrates_on_start_and_rolls_back_data_only) ... ok
+2026-11-09T11:33:01.7556160Z test_the_new_environment_is_made_in_its_final_folder (test_lifecycle.UpdateRollbackTests.test_the_new_environment_is_made_in_its_final_folder) ... ok
+2026-11-09T11:33:01.7779800Z test_update_needs_a_matching_checksum (test_lifecycle.UpdateRollbackTests.test_update_needs_a_matching_checksum) ... ok
+2026-11-09T11:33:01.8438310Z test_update_then_rollback_with_a_data_migration (test_lifecycle.UpdateRollbackTests.test_update_then_rollback_with_a_data_migration) ... ok
+2026-11-09T11:33:01.8459560Z test_a_file_with_another_hash_is_refused (test_make_installer.MakeInstallerTests.test_a_file_with_another_hash_is_refused) ... ok
+2026-11-09T11:33:01.8464350Z test_an_existing_non_empty_out_folder_is_refused (test_make_installer.MakeInstallerTests.test_an_existing_non_empty_out_folder_is_refused) ... ok
+2026-11-09T11:33:01.8465380Z test_setuptools_hash_is_one_the_release_tools_lock_lists (test_make_installer.MakeInstallerTests.test_setuptools_hash_is_one_the_release_tools_lock_lists) ... ok
+2026-11-09T11:33:01.8471210Z test_the_build_jobs_sums_must_agree_with_the_files (test_make_installer.MakeInstallerTests.test_the_build_jobs_sums_must_agree_with_the_files) ... ok
+2026-11-09T11:33:01.8560410Z test_the_names_it_makes_are_the_names_build_install_pins (test_make_installer.MakeInstallerTests.test_the_names_it_makes_are_the_names_build_install_pins) ... ok
+2026-11-09T11:33:01.8562350Z test_the_pinned_versions_are_the_ones_pyproject_pins (test_make_installer.MakeInstallerTests.test_the_pinned_versions_are_the_ones_pyproject_pins) ... ok
+2026-11-09T11:33:02.4039930Z test_ranges_and_only_allowed_names (test_narration.AudioRouteTests.test_ranges_and_only_allowed_names) ... ok
+2026-11-09T11:33:02.4137920Z test_a_mismatched_existing_kokoro_is_reported_and_left_alone (test_narration.DetectAndReuseTests.test_a_mismatched_existing_kokoro_is_reported_and_left_alone) ... ok
+2026-11-09T11:33:02.4155250Z test_check_files_matches_the_pinned_release_and_only_reads (test_narration.DetectAndReuseTests.test_check_files_matches_the_pinned_release_and_only_reads) ... ok
+2026-11-09T11:33:02.4199940Z test_detect_finds_pairs_and_names_what_it_cannot_use (test_narration.DetectAndReuseTests.test_detect_finds_pairs_and_names_what_it_cannot_use) ... ok
+2026-11-09T11:33:02.4327190Z test_existing_kokoro_is_reused_read_only_and_survives_uninstall (test_narration.DetectAndReuseTests.test_existing_kokoro_is_reused_read_only_and_survives_uninstall) ... ok
+2026-11-09T11:33:02.4328080Z test_licences_are_shown_before_the_question (test_narration.DetectAndReuseTests.test_licences_are_shown_before_the_question) ... ok
+2026-11-09T11:33:02.4406120Z test_licences_must_be_accepted (test_narration.DetectAndReuseTests.test_licences_must_be_accepted) ... ok
+2026-11-09T11:33:02.4483100Z test_nothing_found_means_text_only_and_no_download (test_narration.DetectAndReuseTests.test_nothing_found_means_text_only_and_no_download) ... ok
+2026-11-09T11:33:03.0399140Z test_a_brief_without_a_script (test_narration.FailureIsTextOnlyTests.test_a_brief_without_a_script) ... ok
+2026-11-09T11:33:03.5539790Z test_a_restart_during_narration_leaves_a_text_only_brief (test_narration.FailureIsTextOnlyTests.test_a_restart_during_narration_leaves_a_text_only_brief) ... ok
+2026-11-09T11:33:04.1642760Z test_engine_failure (test_narration.FailureIsTextOnlyTests.test_engine_failure) ... ok
+2026-11-09T11:33:04.7763610Z test_engine_says_ok_but_writes_nothing (test_narration.FailureIsTextOnlyTests.test_engine_says_ok_but_writes_nothing) ... ok
+2026-11-09T11:33:06.3688190Z test_the_real_runtime_missing_and_a_timeout (test_narration.FailureIsTextOnlyTests.test_the_real_runtime_missing_and_a_timeout) ... ok
+2026-11-09T11:33:06.8859230Z test_off_means_no_voices_no_player_and_no_voice_accepted (test_narration.NarrationOffTests.test_off_means_no_voices_no_player_and_no_voice_accepted) ... ok
+2026-11-09T11:33:06.8860010Z test_on_lists_the_working_voices (test_narration.NarrationOffTests.test_on_lists_the_working_voices) ... ok
+2026-11-09T11:33:06.8921640Z test_a_long_script_is_cut_the_same_for_the_page_and_the_engine (test_narration.TranscriptParityTests.test_a_long_script_is_cut_the_same_for_the_page_and_the_engine) ... ok
+2026-11-09T11:33:06.8925400Z test_the_page_reads_the_transcript_from_the_record_and_keeps_it_apart_from_the_player (test_narration.TranscriptParityTests.test_the_page_reads_the_transcript_from_the_record_and_keeps_it_apart_from_the_player) ... ok
+2026-11-09T11:33:07.4987250Z test_the_transcript_the_page_shows_is_the_text_that_was_rendered (test_narration.TranscriptParityTests.test_the_transcript_the_page_shows_is_the_text_that_was_rendered) ... ok
+2026-11-09T11:33:07.5124390Z test_compose_and_doctor_say_the_same (test_no_key.CommandLineTests.test_compose_and_doctor_say_the_same) ... ok
+2026-11-09T11:33:08.0214550Z test_compose_says_it_needs_a_key_and_starts_no_job (test_no_key.PageComposeTests.test_compose_says_it_needs_a_key_and_starts_no_job) ... ok
+2026-11-09T11:33:08.0279210Z test_narration_never_writes_through_a_linked_folder (test_owned_folders.NarrationTests.test_narration_never_writes_through_a_linked_folder) ... ok
+2026-11-09T11:33:09.4582130Z test_setup_sh_refuses_a_linked_owned_folder_before_any_write (test_owned_folders.SetupShTests.test_setup_sh_refuses_a_linked_owned_folder_before_any_write) ... ok
+2026-11-09T11:33:09.4761200Z test_a_clean_install_still_passes (test_owned_folders.SetupTests.test_a_clean_install_still_passes) ... ok
+2026-11-09T11:33:09.4762190Z test_setup_refuses_a_version_pointer_that_leaves_the_app_folder (test_owned_folders.SetupTests.test_setup_refuses_a_version_pointer_that_leaves_the_app_folder) ... ok
+2026-11-09T11:33:09.4954840Z test_setup_refuses_every_owned_folder_that_is_a_link (test_owned_folders.SetupTests.test_setup_refuses_every_owned_folder_that_is_a_link) ... ok
+2026-11-09T11:33:09.5044630Z test_rollback_refuses_a_linked_app_folder (test_owned_folders.UpdateTests.test_rollback_refuses_a_linked_app_folder) ... ok
+2026-11-09T11:33:09.5466170Z test_update_refuses_a_linked_version_environment_or_cache (test_owned_folders.UpdateTests.test_update_refuses_a_linked_version_environment_or_cache) ... ok
+2026-11-09T11:33:09.5564440Z test_update_through_a_linked_app_folder_removes_nothing_outside (test_owned_folders.UpdateTests.test_update_through_a_linked_app_folder_removes_nothing_outside) ... ok
+2026-11-09T11:33:09.5746610Z test_an_existing_version_folder_is_never_removed_by_update (test_owned_races.ExistingVersionTests.test_an_existing_version_folder_is_never_removed_by_update) ... ok
+2026-11-09T11:33:09.5759490Z test_without_folder_descriptors_narration_removes_nothing_by_path (test_owned_races.NarrationFallbackTests.test_without_folder_descriptors_narration_removes_nothing_by_path) ... ok
+2026-11-09T11:33:09.5843050Z test_bin_swapped_for_a_link_just_before_the_launcher_is_written (test_owned_races.SetupWriteRaceTests.test_bin_swapped_for_a_link_just_before_the_launcher_is_written) ... ok
+2026-11-09T11:33:09.6162290Z test_the_app_folder_swapped_for_a_link_just_before_a_failed_try_is_removed (test_owned_races.VersionRemovalRaceTests.test_the_app_folder_swapped_for_a_link_just_before_a_failed_try_is_removed) ... ok
+2026-11-09T11:33:09.6165390Z test_a_brief_without_a_script_gets_no_transcript_file (test_p1b_artifacts.ArtifactTests.test_a_brief_without_a_script_gets_no_transcript_file) ... ok
+2026-11-09T11:33:09.6166570Z test_receipt_and_plain_transcript_do_not_store_source_text_or_estimated_cost (test_p1b_artifacts.ArtifactTests.test_receipt_and_plain_transcript_do_not_store_source_text_or_estimated_cost) ... ok
+2026-11-09T11:33:09.6167700Z test_receipt_uses_provider_reported_usage_without_estimation (test_p1b_artifacts.CountedReceiptTests.test_receipt_uses_provider_reported_usage_without_estimation) ... ok
+2026-11-09T11:33:09.6168680Z test_missing_claim_evidence_is_not_claimed_as_verified (test_p1b_artifacts.SealTests.test_missing_claim_evidence_is_not_claimed_as_verified) ... ok
+2026-11-09T11:33:09.6169540Z test_reverify_delegates_only_to_the_seal_verifier (test_p1b_artifacts.SealTests.test_reverify_delegates_only_to_the_seal_verifier) ... ok
+2026-11-09T11:33:09.6204220Z 127.0.0.1 POST /compose 400
+2026-11-09T11:33:09.6209390Z 127.0.0.1 POST /compose 400
+2026-11-09T11:33:10.1241760Z test_background_compose_refuses_a_bad_reading_level_and_an_eleventh_insight (test_p1b_routes.P1bRouteTests.test_background_compose_refuses_a_bad_reading_level_and_an_eleventh_insight) ... ok
+2026-11-09T11:33:10.1350610Z 127.0.0.1 POST /compose 202
+2026-11-09T11:33:10.1444370Z 127.0.0.1 GET /data/live/job-c04461a1341f4a78/receipts.json 200
+2026-11-09T11:33:10.1450630Z 127.0.0.1 GET /data/live/job-c04461a1341f4a78/transcript.txt 200
+2026-11-09T11:33:10.6472520Z test_background_compose_takes_a_lens_id_and_reading_level_and_serves_its_receipts (test_p1b_routes.P1bRouteTests.test_background_compose_takes_a_lens_id_and_reading_level_and_serves_its_receipts) ... ok
+2026-11-09T11:33:10.6509490Z 127.0.0.1 POST /lens/save 201
+2026-11-09T11:33:10.6516200Z 127.0.0.1 POST /api/compose 200
+2026-11-09T11:33:11.1552410Z test_custom_lens_option_resolves_to_its_recipe_for_composition (test_p1b_routes.P1bRouteTests.test_custom_lens_option_resolves_to_its_recipe_for_composition) ... ok
+2026-11-09T11:33:11.1582760Z 127.0.0.1 POST /source/probe 403
+2026-11-09T11:33:11.1586250Z 127.0.0.1 POST /source/probe 403
+2026-11-09T11:33:11.1590300Z 127.0.0.1 POST /source/register 403
+2026-11-09T11:33:11.1593390Z 127.0.0.1 POST /source/register 403
+2026-11-09T11:33:11.1596800Z 127.0.0.1 POST /lens/save 403
+2026-11-09T11:33:11.1600320Z 127.0.0.1 POST /lens/save 403
+2026-11-09T11:33:11.6625220Z test_every_mutation_needs_the_anti_forgery_header_before_service_work (test_p1b_routes.P1bRouteTests.test_every_mutation_needs_the_anti_forgery_header_before_service_work) ... ok
+2026-11-09T11:33:11.6663390Z 127.0.0.1 POST /lens/save 201
+2026-11-09T11:33:11.6676600Z 127.0.0.1 POST /lens/save 201
+2026-11-09T11:33:12.1692960Z test_lens_edit_creates_a_new_revision_linked_to_the_saved_recipe (test_p1b_routes.P1bRouteTests.test_lens_edit_creates_a_new_revision_linked_to_the_saved_recipe) ... ok
+2026-11-09T11:33:12.1733400Z 127.0.0.1 POST /lens/save 201
+2026-11-09T11:33:12.6779670Z test_lens_save_uses_the_real_server_and_content_addressed_store (test_p1b_routes.P1bRouteTests.test_lens_save_uses_the_real_server_and_content_addressed_store) ... ok
+2026-11-09T11:33:12.6899140Z 127.0.0.1 GET /data/options.json 200
+2026-11-09T11:33:12.6919600Z 127.0.0.1 POST /source/probe 200
+2026-11-09T11:33:12.6959030Z 127.0.0.1 POST /source/register 201
+2026-11-09T11:33:12.6980890Z 127.0.0.1 GET /data/options.json 200
+2026-11-09T11:33:13.2027780Z test_options_probe_and_register_through_real_local_server (test_p1b_routes.P1bRouteTests.test_options_probe_and_register_through_real_local_server) ... ok
+2026-11-09T11:33:13.2029040Z test_html_index_source_can_select_the_optional_trafilatura_tier (test_p1b_sources.HtmlExtractionTests.test_html_index_source_can_select_the_optional_trafilatura_tier) ... ok
+2026-11-09T11:33:13.2030360Z test_native_tier_is_available_without_optional_dependency (test_p1b_sources.HtmlExtractionTests.test_native_tier_is_available_without_optional_dependency) ... ok
+2026-11-09T11:33:13.2032600Z test_unknown_tier_is_refused (test_p1b_sources.HtmlExtractionTests.test_unknown_tier_is_refused) ... ok
+2026-11-09T11:33:13.2039070Z test_bad_changed_overlay_keeps_last_known_good_registry_with_reason (test_p1b_sources.SourceServiceTests.test_bad_changed_overlay_keeps_last_known_good_registry_with_reason) ... ok
+2026-11-09T11:33:13.2041280Z test_packages_are_data_only_and_resolve_only_current_ids (test_p1b_sources.SourceServiceTests.test_packages_are_data_only_and_resolve_only_current_ids) ... ok
+2026-11-09T11:33:13.2047920Z test_probe_returns_safe_headlines_and_native_tier (test_p1b_sources.SourceServiceTests.test_probe_returns_safe_headlines_and_native_tier) ... ok
+2026-11-09T11:33:13.2062590Z test_register_reloads_without_restart_and_preserves_the_bundled_sources (test_p1b_sources.SourceServiceTests.test_register_reloads_without_restart_and_preserves_the_bundled_sources) ... ok
+2026-11-09T11:33:13.2090570Z test_a_package_is_only_a_suggestion (test_packages.PackageTests.test_a_package_is_only_a_suggestion) ... ok
+2026-11-09T11:33:13.2117770Z test_member_state_follows_the_registry (test_packages.PackageTests.test_member_state_follows_the_registry) ... ok
+2026-11-09T11:33:13.2141250Z test_the_bundled_package_reaches_the_page_options (test_packages.PackageTests.test_the_bundled_package_reaches_the_page_options) ... ok
+2026-11-09T11:33:13.2165620Z test_the_shape_is_checked (test_packages.PackageTests.test_the_shape_is_checked) ... ok
+2026-11-09T11:33:13.2196760Z test_your_own_packages_load_without_a_restart_and_a_bad_one_is_set_aside (test_packages.PackageTests.test_your_own_packages_load_without_a_restart_and_a_bad_one_is_set_aside) ... ok
+2026-11-09T11:33:13.2198080Z test_bundled_packages_name_only_bundled_sources (test_packages.PublicSourcesOnlyTests.test_bundled_packages_name_only_bundled_sources) ... ok
+2026-11-09T11:33:13.2199590Z test_a_link_that_cannot_be_read_as_an_address_is_skipped_not_fatal (test_page_index_offer.EligibleTests.test_a_link_that_cannot_be_read_as_an_address_is_skipped_not_fatal) ... ok
+2026-11-09T11:33:13.2200580Z test_a_page_on_its_own_port_follows_only_that_port (test_page_index_offer.EligibleTests.test_a_page_on_its_own_port_follows_only_that_port) ... ok
+2026-11-09T11:33:13.2201620Z test_a_trailing_dot_host_and_the_default_port_are_the_same_site_and_one_link (test_page_index_offer.EligibleTests.test_a_trailing_dot_host_and_the_default_port_are_the_same_site_and_one_link) ... ok
+2026-11-09T11:33:13.2203420Z test_an_article_that_leads_to_another_host_port_or_folder_is_not_read (test_page_index_offer.EligibleTests.test_an_article_that_leads_to_another_host_port_or_folder_is_not_read) ... ok
+2026-11-09T11:33:13.2209770Z test_same_host_other_port_and_unsafe_paths_are_not_followed (test_page_index_offer.EligibleTests.test_same_host_other_port_and_unsafe_paths_are_not_followed) ... ok
+2026-11-09T11:33:13.2210730Z test_a_host_spelled_with_a_trailing_dot_is_the_same_host (test_page_index_offer.IndexEntryTests.test_a_host_spelled_with_a_trailing_dot_is_the_same_host) ... ok
+2026-11-09T11:33:13.2212600Z test_a_path_that_could_name_a_folder_outside_the_prefix_is_refused (test_page_index_offer.IndexEntryTests.test_a_path_that_could_name_a_folder_outside_the_prefix_is_refused) ... ok
+2026-11-09T11:33:13.2214110Z test_only_a_page_file_name_is_dropped_a_dotted_folder_stays_the_scope (test_page_index_offer.IndexEntryTests.test_only_a_page_file_name_is_dropped_a_dotted_folder_stays_the_scope) ... ok
+2026-11-09T11:33:13.2215260Z test_the_front_page_is_refused_because_a_prefix_of_slash_would_allow_the_whole_host (test_page_index_offer.IndexEntryTests.test_the_front_page_is_refused_because_a_prefix_of_slash_would_allow_the_whole_host) ... ok
+2026-11-09T11:33:13.2216440Z test_the_host_is_the_pages_host_and_the_prefix_is_its_folder (test_page_index_offer.IndexEntryTests.test_the_host_is_the_pages_host_and_the_prefix_is_its_folder) ... ok
+2026-11-09T11:33:13.2218410Z test_unsafe_addresses_are_refused (test_page_index_offer.IndexEntryTests.test_unsafe_addresses_are_refused) ... ok
+2026-11-09T11:33:13.2242730Z test_a_bare_address_is_checked_as_https_and_offered (test_page_index_offer.OfferTests.test_a_bare_address_is_checked_as_https_and_offered) ... ok
+2026-11-09T11:33:13.2249700Z test_a_dot_segment_address_gets_no_offer (test_page_index_offer.OfferTests.test_a_dot_segment_address_gets_no_offer) ... ok
+2026-11-09T11:33:13.2256560Z test_a_page_answered_from_another_port_gets_no_offer (test_page_index_offer.OfferTests.test_a_page_answered_from_another_port_gets_no_offer) ... ok
+2026-11-09T11:33:13.2261840Z test_a_page_that_cannot_be_read_gets_no_offer (test_page_index_offer.OfferTests.test_a_page_that_cannot_be_read_gets_no_offer) ... ok
+2026-11-09T11:33:13.2268360Z test_a_page_that_redirects_to_another_site_gets_no_offer (test_page_index_offer.OfferTests.test_a_page_that_redirects_to_another_site_gets_no_offer) ... ok
+2026-11-09T11:33:13.2273750Z test_a_page_with_a_malformed_link_still_gets_its_offer (test_page_index_offer.OfferTests.test_a_page_with_a_malformed_link_still_gets_its_offer) ... ok
+2026-11-09T11:33:13.2283730Z test_a_page_with_links_whose_articles_cannot_be_read_is_offered_but_not_selectable (test_page_index_offer.OfferTests.test_a_page_with_links_whose_articles_cannot_be_read_is_offered_but_not_selectable) ... ok
+2026-11-09T11:33:13.2296680Z test_a_page_with_no_feed_is_offered_as_its_own_article_links_and_none_is_chosen (test_page_index_offer.OfferTests.test_a_page_with_no_feed_is_offered_as_its_own_article_links_and_none_is_chosen) ... ok
+2026-11-09T11:33:13.2299620Z test_a_page_with_no_links_under_its_folder_gets_no_offer_and_says_why (test_page_index_offer.OfferTests.test_a_page_with_no_links_under_its_folder_gets_no_offer_and_says_why) ... ok
+2026-11-09T11:33:13.2305620Z test_a_pasted_http_address_is_still_refused_with_the_plain_http_sentence (test_page_index_offer.OfferTests.test_a_pasted_http_address_is_still_refused_with_the_plain_http_sentence) ... ok
+2026-11-09T11:33:13.2311800Z test_links_are_read_against_the_page_that_answered_not_the_pasted_address (test_page_index_offer.OfferTests.test_links_are_read_against_the_page_that_answered_not_the_pasted_address) ... ok
+2026-11-09T11:33:13.2321540Z test_no_offer_when_a_feed_was_found_and_no_article_is_fetched (test_page_index_offer.OfferTests.test_no_offer_when_a_feed_was_found_and_no_article_is_fetched) ... ok
+2026-11-09T11:33:13.2323410Z test_the_address_is_refused_before_any_fetch_when_it_is_unsafe (test_page_index_offer.OfferTests.test_the_address_is_refused_before_any_fetch_when_it_is_unsafe) ... ok
+2026-11-09T11:33:13.2327920Z test_the_front_page_gets_no_offer_and_no_article_is_fetched (test_page_index_offer.OfferTests.test_the_front_page_gets_no_offer_and_no_article_is_fetched) ... ok
+2026-11-09T11:33:13.2347140Z test_the_offer_reads_through_the_same_reader_a_brief_uses (test_page_index_offer.OfferTests.test_the_offer_reads_through_the_same_reader_a_brief_uses) ... ok
+2026-11-09T11:33:13.2358210Z test_the_preview_has_its_own_small_request_budget (test_page_index_offer.OfferTests.test_the_preview_has_its_own_small_request_budget) ... ok
+2026-11-09T11:33:13.2382590Z test_the_preview_stops_at_its_own_request_limit_and_its_own_time_limit (test_page_index_offer.OfferTests.test_the_preview_stops_at_its_own_request_limit_and_its_own_time_limit) ... ok
+2026-11-09T11:33:13.2388500Z test_a_get_that_never_reaches_the_transport_is_unaffected_and_the_after_the_fact_check_remains (test_page_index_offer.RedirectTests.test_a_get_that_never_reaches_the_transport_is_unaffected_and_the_after_the_fact_check_remains) ... ok
+2026-11-09T11:33:13.2642990Z test_an_article_cannot_leave_its_scope_and_the_forbidden_targets_are_never_requested (test_page_index_offer.RedirectTests.test_an_article_cannot_leave_its_scope_and_the_forbidden_targets_are_never_requested) ... ok
+2026-11-09T11:33:13.3537580Z test_every_hop_counts_for_the_feed_check_and_the_probe_too (test_page_index_offer.RedirectTests.test_every_hop_counts_for_the_feed_check_and_the_probe_too) ... ok
+2026-11-09T11:33:13.4238650Z test_every_redirect_hop_counts_against_the_previews_request_budget (test_page_index_offer.RedirectTests.test_every_redirect_hop_counts_against_the_previews_request_budget) ... ok
+2026-11-09T11:33:13.4593270Z test_the_index_page_may_move_within_its_site_but_not_to_another (test_page_index_offer.RedirectTests.test_the_index_page_may_move_within_its_site_but_not_to_another) ... ok
+2026-11-09T11:33:13.5971000Z test_the_preview_the_registration_and_a_brief_all_hold_the_same_scope (test_page_index_offer.RedirectTests.test_the_preview_the_registration_and_a_brief_all_hold_the_same_scope) ... ok
+2026-11-09T11:33:13.6083550Z test_the_rules_are_scoped_to_their_block_and_nest (test_page_index_offer.RedirectTests.test_the_rules_are_scoped_to_their_block_and_nest) ... ok
+2026-11-09T11:33:13.6106530Z test_a_feed_candidate_is_still_an_rss_or_atom_source (test_page_index_offer.RegisterTests.test_a_feed_candidate_is_still_an_rss_or_atom_source) ... ok
+2026-11-09T11:33:13.6113890Z test_a_page_whose_articles_cannot_be_read_again_is_not_saved (test_page_index_offer.RegisterTests.test_a_page_whose_articles_cannot_be_read_again_is_not_saved) ... ok
+2026-11-09T11:33:13.6138210Z test_a_saved_source_reads_only_its_scope_when_a_brief_uses_it (test_page_index_offer.RegisterTests.test_a_saved_source_reads_only_its_scope_when_a_brief_uses_it) ... ok
+2026-11-09T11:33:13.6156540Z test_confirming_the_offer_saves_one_html_index_source_with_the_pages_scope (test_page_index_offer.RegisterTests.test_confirming_the_offer_saves_one_html_index_source_with_the_pages_scope) ... ok
+2026-11-09T11:33:13.6174470Z test_hidden_and_direction_characters_are_removed_from_the_name_and_the_note (test_page_index_offer.RegisterTests.test_hidden_and_direction_characters_are_removed_from_the_name_and_the_note) ... ok
+2026-11-09T11:33:13.6192630Z test_the_browser_cannot_widen_the_scope (test_page_index_offer.RegisterTests.test_the_browser_cannot_widen_the_scope) ... ok
+2026-11-09T11:33:13.6211020Z test_the_same_page_or_name_twice_is_refused (test_page_index_offer.RegisterTests.test_the_same_page_or_name_twice_is_refused) ... ok
+2026-11-09T11:33:13.6218180Z test_unsafe_pages_are_refused_and_nothing_is_saved_or_fetched (test_page_index_offer.RegisterTests.test_unsafe_pages_are_refused_and_nothing_is_saved_or_fetched) ... ok
+2026-11-09T11:33:14.1391360Z test_check_then_confirm_adds_a_live_source_the_picker_lists (test_page_index_offer.RouteTests.test_check_then_confirm_adds_a_live_source_the_picker_lists) ... ok
+2026-11-09T11:33:14.6616940Z test_the_check_of_an_unsafe_address_answers_400 (test_page_index_offer.RouteTests.test_the_check_of_an_unsafe_address_answers_400) ... ok
+2026-11-09T11:33:14.6630330Z test_every_raced_fetch_handles_its_rejection (test_page_leave.LeaveWhileLoadingTests.test_every_raced_fetch_handles_its_rejection) ... ok
+2026-11-09T11:33:14.6795300Z test_the_page_opens_the_store_job_ids_from_their_link (test_page_requests.BriefLinkTests.test_the_page_opens_the_store_job_ids_from_their_link) ... ok
+2026-11-09T11:33:14.6802040Z test_the_page_asks_for_no_liveness_route (test_page_requests.PageRouteTests.test_the_page_asks_for_no_liveness_route) ... ok
+2026-11-09T11:33:14.6926510Z test_a_brief_saved_from_the_page_is_still_saved_after_a_restart (test_page_requests.SaveHoldsTests.test_a_brief_saved_from_the_page_is_still_saved_after_a_restart) ... ok
+2026-11-09T11:33:14.6927670Z test_a_long_located_span_is_cut_and_a_digest_mismatch_shows_nothing (test_pipeline.ComposeTests.test_a_long_located_span_is_cut_and_a_digest_mismatch_shows_nothing) ... ok
+2026-11-09T11:33:14.6958820Z test_a_made_up_title_is_unresolved_and_never_judged (test_pipeline.ComposeTests.test_a_made_up_title_is_unresolved_and_never_judged) ... ok
+2026-11-09T11:33:14.6959670Z test_a_span_of_text_with_no_spaces_is_cut_to_the_character_cap (test_pipeline.ComposeTests.test_a_span_of_text_with_no_spaces_is_cut_to_the_character_cap) ... ok
+2026-11-09T11:33:14.6987850Z test_edition_holds_no_feed_text (test_pipeline.ComposeTests.test_edition_holds_no_feed_text) ... ok
+2026-11-09T11:33:14.7013690Z test_judge_failure_leaves_claims_unchecked_not_supported (test_pipeline.ComposeTests.test_judge_failure_leaves_claims_unchecked_not_supported) ... ok
+2026-11-09T11:33:14.7014530Z test_no_material_no_model_call (test_pipeline.ComposeTests.test_no_material_no_model_call) ... ok
+2026-11-09T11:33:14.7044120Z test_passages_are_the_located_words_cut_to_the_quote_cap_and_kept_out_of_every_shared_file (test_pipeline.ComposeTests.test_passages_are_the_located_words_cut_to_the_quote_cap_and_kept_out_of_every_shared_file) ... ok
+2026-11-09T11:33:14.7071270Z test_spans_point_into_our_words (test_pipeline.ComposeTests.test_spans_point_into_our_words) ... ok
+2026-11-09T11:33:14.7077570Z test_two_unusable_answers_stop_the_brief (test_pipeline.ComposeTests.test_two_unusable_answers_stop_the_brief) ... ok
+2026-11-09T11:33:14.7104230Z test_unusable_answer_is_retried_once (test_pipeline.ComposeTests.test_unusable_answer_is_retried_once) ... ok
+2026-11-09T11:33:14.7131100Z test_whole_brief_offline (test_pipeline.ComposeTests.test_whole_brief_offline) ... ok
+2026-11-09T11:33:14.7136600Z test_plain_lens_shape_retries_an_unreadable_brief_before_claim_checking (test_pipeline.DeclaredLensShapeTests.test_plain_lens_shape_retries_an_unreadable_brief_before_claim_checking) ... ok
+2026-11-09T11:33:14.7140140Z test_a_failed_source_is_named_not_hidden (test_pipeline.PromptTests.test_a_failed_source_is_named_not_hidden) ... ok
+2026-11-09T11:33:14.7146450Z test_big_sources_are_trimmed_to_the_budget (test_pipeline.PromptTests.test_big_sources_are_trimmed_to_the_budget) ... ok
+2026-11-09T11:33:14.7147020Z test_lens_rules (test_pipeline.PromptTests.test_lens_rules) ... ok
+2026-11-09T11:33:14.7147440Z test_parse_reply_and_shape (test_pipeline.PromptTests.test_parse_reply_and_shape) ... ok
+2026-11-09T11:33:14.7150550Z test_prompt_carries_lens_roster_and_delimited_sources (test_pipeline.PromptTests.test_prompt_carries_lens_roster_and_delimited_sources) ... ok
+2026-11-09T11:33:14.7151240Z test_single_source_label_is_added_once (test_pipeline.PromptTests.test_single_source_label_is_added_once) ... ok
+2026-11-09T11:33:14.7151840Z test_the_narration_script_is_required (test_pipeline.PromptTests.test_the_narration_script_is_required) ... ok
+2026-11-09T11:33:14.7155880Z test_endpoint_checks (test_providers.AnthropicTests.test_endpoint_checks) ... ok
+2026-11-09T11:33:14.7161620Z test_error_refusal_and_cutoff (test_providers.AnthropicTests.test_error_refusal_and_cutoff) ... ok
+2026-11-09T11:33:14.7165220Z test_key_is_never_kept_on_the_object (test_providers.AnthropicTests.test_key_is_never_kept_on_the_object) ... ok
+2026-11-09T11:33:14.7171220Z test_missing_key (test_providers.AnthropicTests.test_missing_key) ... ok
+2026-11-09T11:33:14.7175030Z test_refusal_fallback_is_on_for_models_that_take_it (test_providers.AnthropicTests.test_refusal_fallback_is_on_for_models_that_take_it) ... ok
+2026-11-09T11:33:14.7178360Z test_request_shape_and_reply (test_providers.AnthropicTests.test_request_shape_and_reply) ... ok
+2026-11-09T11:33:14.7181860Z test_counts_calls_tokens_and_failures (test_providers.CountedTests.test_counts_calls_tokens_and_failures) ... ok
+2026-11-09T11:33:14.7956610Z test_numbers_are_unique_when_calls_overlap (test_providers.CountedTests.test_numbers_are_unique_when_calls_overlap) ... ok
+2026-11-09T11:33:14.7957780Z test_default_is_anthropic_sonnet (test_providers.FromEnvTests.test_default_is_anthropic_sonnet) ... ok
+2026-11-09T11:33:14.7958490Z test_model_and_ceiling_from_env (test_providers.FromEnvTests.test_model_and_ceiling_from_env) ... ok
+2026-11-09T11:33:14.7959160Z test_openai_needs_base_url_and_model (test_providers.FromEnvTests.test_openai_needs_base_url_and_model) ... ok
+2026-11-09T11:33:14.7959870Z test_unknown_provider_and_bad_ceiling (test_providers.FromEnvTests.test_unknown_provider_and_bad_ceiling) ... ok
+2026-11-09T11:33:14.7962360Z test_bad_answer (test_providers.OpenAITests.test_bad_answer) ... ok
+2026-11-09T11:33:14.7965680Z test_chat_completions_shape (test_providers.OpenAITests.test_chat_completions_shape) ... ok
+2026-11-09T11:33:14.7991880Z test_a_quote_of_25_words_passes_and_26_does_not (test_quote_rule.FindTests.test_a_quote_of_25_words_passes_and_26_does_not) ... ok
+2026-11-09T11:33:14.8005530Z test_at_most_two_quotes_from_one_article (test_quote_rule.FindTests.test_at_most_two_quotes_from_one_article) ... ok
+2026-11-09T11:33:14.8030650Z test_copying_without_quotation_marks_is_quoting (test_quote_rule.FindTests.test_copying_without_quotation_marks_is_quoting) ... ok
+2026-11-09T11:33:14.8035310Z test_naming_the_title_is_a_citation_not_a_quote (test_quote_rule.FindTests.test_naming_the_title_is_a_citation_not_a_quote) ... ok
+2026-11-09T11:33:14.8059850Z test_never_the_opening_sentence (test_quote_rule.FindTests.test_never_the_opening_sentence) ... ok
+2026-11-09T11:33:14.8064200Z test_own_words_are_not_quotes (test_quote_rule.FindTests.test_own_words_are_not_quotes) ... ok
+2026-11-09T11:33:14.8076280Z test_quotes_from_two_articles_are_counted_apart (test_quote_rule.FindTests.test_quotes_from_two_articles_are_counted_apart) ... ok
+2026-11-09T11:33:14.8086350Z test_the_connection_and_transcript_are_checked_too (test_quote_rule.FindTests.test_the_connection_and_transcript_are_checked_too) ... ok
+2026-11-09T11:33:14.8094540Z test_the_fixture_is_what_the_tests_assume (test_quote_rule.FindTests.test_the_fixture_is_what_the_tests_assume) ... ok
+2026-11-09T11:33:14.8107230Z test_the_result_holds_no_article_text (test_quote_rule.FindTests.test_the_result_holds_no_article_text) ... ok
+2026-11-09T11:33:14.8116830Z test_the_same_words_quoted_again_are_one_quote (test_quote_rule.FindTests.test_the_same_words_quoted_again_are_one_quote) ... ok
+2026-11-09T11:33:14.8120740Z test_the_note_reaches_the_receipt_without_text (test_quote_rule.ReceiptTests.test_the_note_reaches_the_receipt_without_text) ... ok
+2026-11-09T11:33:14.8133130Z test_a_breach_is_repaired_by_one_more_call (test_quote_rule.WriteStepTests.test_a_breach_is_repaired_by_one_more_call) ... ok
+2026-11-09T11:33:14.8142370Z test_a_clean_brief_makes_one_call_and_says_so (test_quote_rule.WriteStepTests.test_a_clean_brief_makes_one_call_and_says_so) ... ok
+2026-11-09T11:33:14.8154690Z test_a_transcript_that_copies_is_dropped_and_the_insights_stay (test_quote_rule.WriteStepTests.test_a_transcript_that_copies_is_dropped_and_the_insights_stay) ... ok
+2026-11-09T11:33:14.8164680Z test_an_unusable_repair_answer_also_drops (test_quote_rule.WriteStepTests.test_an_unusable_repair_answer_also_drops) ... ok
+2026-11-09T11:33:14.8178640Z test_if_the_repair_still_breaks_it_the_insight_is_dropped_with_a_note (test_quote_rule.WriteStepTests.test_if_the_repair_still_breaks_it_the_insight_is_dropped_with_a_note) ... ok
+2026-11-09T11:33:14.8186650Z test_the_prompt_asks_for_own_words_and_the_limits (test_quote_rule.WriteStepTests.test_the_prompt_asks_for_own_words_and_the_limits) ... ok
+2026-11-09T11:33:14.8202170Z test_when_every_insight_breaks_it_nothing_is_kept (test_quote_rule.WriteStepTests.test_when_every_insight_breaks_it_nothing_is_kept) ... ok
+2026-11-09T11:33:14.8251720Z test_failing_tests_are_read_from_the_log (test_rc.RCTests.test_failing_tests_are_read_from_the_log) ... ok
+2026-11-09T11:33:14.8262750Z test_rc_arguments (test_rc.RCTests.test_rc_arguments) ... ok
+2026-11-09T11:33:14.8270620Z test_stamp_writes_both_version_lines (test_rc.RCTests.test_stamp_writes_both_version_lines) ... ok
+2026-11-09T11:33:14.8296230Z test_sums_are_the_same_format_as_sha256sum_and_the_build (test_rc.RCTests.test_sums_are_the_same_format_as_sha256sum_and_the_build) ... ok
+2026-11-09T11:33:14.8302650Z test_version_and_refusals (test_rc.RCTests.test_version_and_refusals) ... usage: python -m unittest [-h] --version VERSION --rc N=COMMIT --out OUT
+2026-11-09T11:33:14.8303250Z                           [--stamp-version] [--keep-going]
+2026-11-09T11:33:14.8303660Z python -m unittest: error: --version is a release version such as 0.2.0, without rc
+2026-11-09T11:33:14.8304580Z usage: python -m unittest [-h] --version VERSION --rc N=COMMIT --out OUT
+2026-11-09T11:33:14.8304960Z                           [--stamp-version] [--keep-going]
+2026-11-09T11:33:14.8305300Z python -m unittest: error: each --rc number may appear once
+2026-11-09T11:33:14.8311900Z ok
+2026-11-09T11:33:14.8334570Z test_the_sdist_carries_what_setup_needs (test_rc.SourceReleaseTests.test_the_sdist_carries_what_setup_needs) ... ok
+2026-11-09T11:33:14.8369550Z test_bundled_sources_are_the_six_public_feeds (test_registry.BundledTests.test_bundled_sources_are_the_six_public_feeds) ... ok
+2026-11-09T11:33:14.8371700Z test_example_file_is_valid (test_registry.BundledTests.test_example_file_is_valid) ... ok
+2026-11-09T11:33:14.8376780Z test_no_bundled_source_comes_from_a_publisher_that_opted_out (test_registry.BundledTests.test_no_bundled_source_comes_from_a_publisher_that_opted_out) ... ok
+2026-11-09T11:33:14.8380510Z test_good_entry (test_registry.EntryTests.test_good_entry) ... ok
+2026-11-09T11:33:14.8383400Z test_html_index_needs_discovery (test_registry.EntryTests.test_html_index_needs_discovery) ... ok
+2026-11-09T11:33:14.8385180Z test_refusals (test_registry.EntryTests.test_refusals) ... ok
+2026-11-09T11:33:14.8386400Z test_add_then_load_merges_and_overrides (test_registry.LocalFileTests.test_add_then_load_merges_and_overrides) ... ok
+2026-11-09T11:33:14.8387240Z test_env_and_cwd_default (test_registry.LocalFileTests.test_env_and_cwd_default) ... ok
+2026-11-09T11:33:14.8388270Z test_unknown_source_and_bad_file (test_registry.LocalFileTests.test_unknown_source_and_bad_file) ... ok
+2026-11-09T11:33:14.8389180Z test_optional_narration_parts_are_listed_with_licences (test_release.BuildScriptTests.test_optional_narration_parts_are_listed_with_licences) ... ok
+2026-11-09T11:33:14.8390060Z test_release_tools_are_hash_locked (test_release.BuildScriptTests.test_release_tools_are_hash_locked) ... ok
+2026-11-09T11:33:14.8397250Z test_sbom_rows_are_marked_excluded (test_release.BuildScriptTests.test_sbom_rows_are_marked_excluded) ... ok
+2026-11-09T11:33:14.8402590Z test_tag_must_match_pyproject_version (test_release.BuildScriptTests.test_tag_must_match_pyproject_version) ... ok
+2026-11-09T11:33:14.8439890Z test_missing_section_is_refused (test_release.ChangelogTests.test_missing_section_is_refused) ... ok
+2026-11-09T11:33:14.8457490Z test_repository_changelog_has_unreleased_0_2_0_and_0_1_0 (test_release.ChangelogTests.test_repository_changelog_has_unreleased_0_2_0_and_0_1_0) ... ok
+2026-11-09T11:33:14.8461930Z test_section_is_this_version_only (test_release.ChangelogTests.test_section_is_this_version_only) ... ok
+2026-11-09T11:33:14.8463650Z test_tests_text_says_counts_and_skip_reasons (test_release.ChangelogTests.test_tests_text_says_counts_and_skip_reasons) ... ok
+2026-11-09T11:33:14.8469430Z test_the_package_version_has_a_changelog_section (test_release.ChangelogTests.test_the_package_version_has_a_changelog_section) ... ok
+2026-11-09T11:33:14.8488320Z test_all_supported_writes_a_sealed_note (test_release.ReleaseNoteTests.test_all_supported_writes_a_sealed_note) ... ok
+2026-11-09T11:33:14.8510290Z test_one_unsupported_line_stops_the_release (test_release.ReleaseNoteTests.test_one_unsupported_line_stops_the_release) ... ok
+2026-11-09T11:33:14.8536980Z test_red_test_results_are_refused (test_release.ReleaseNoteTests.test_red_test_results_are_refused) ... ok
+2026-11-09T11:33:14.8552320Z test_unknown_source_title_stops_the_release (test_release.ReleaseNoteTests.test_unknown_source_title_stops_the_release) ... ok
+2026-11-09T11:33:14.8709630Z test_the_checked_out_commit_wins_over_github_sha (test_release.TestResultsCommitTests.test_the_checked_out_commit_wins_over_github_sha) ... ok
+2026-11-09T11:33:14.8820630Z test_a_manual_run_never_reads_its_own_ref_name_outside_the_tag_check (test_release_workflow_gates.ReleaseGateTests.test_a_manual_run_never_reads_its_own_ref_name_outside_the_tag_check) ... ok
+2026-11-09T11:33:14.8825020Z test_attestations_name_the_files_they_belong_to (test_release_workflow_gates.ReleaseGateTests.test_attestations_name_the_files_they_belong_to) ... ok
+2026-11-09T11:33:14.8832290Z test_every_checkout_outside_verify_tag_is_the_verified_commit (test_release_workflow_gates.ReleaseGateTests.test_every_checkout_outside_verify_tag_is_the_verified_commit) ... ok
+2026-11-09T11:33:14.8836100Z test_every_job_waits_for_the_signed_tag_check (test_release_workflow_gates.ReleaseGateTests.test_every_job_waits_for_the_signed_tag_check) ... ok
+2026-11-09T11:33:14.8845240Z test_every_push_and_every_version_tag_waits_for_every_gate (test_release_workflow_gates.ReleaseGateTests.test_every_push_and_every_version_tag_waits_for_every_gate) ... ok
+2026-11-09T11:33:14.8846410Z test_only_the_promote_job_tags_the_version_and_it_needs_the_attested_image (test_release_workflow_gates.ReleaseGateTests.test_only_the_promote_job_tags_the_version_and_it_needs_the_attested_image) ... ok
+2026-11-09T11:33:14.8847540Z test_the_image_gets_its_release_tag_only_after_the_tag_is_rechecked (test_release_workflow_gates.ReleaseGateTests.test_the_image_gets_its_release_tag_only_after_the_tag_is_rechecked) ... ok
+2026-11-09T11:33:14.8850690Z test_the_image_job_pushes_only_a_candidate_tag (test_release_workflow_gates.ReleaseGateTests.test_the_image_job_pushes_only_a_candidate_tag) ... ok
+2026-11-09T11:33:14.8854460Z test_the_installer_is_on_main_only_after_the_release_is_public (test_release_workflow_gates.ReleaseGateTests.test_the_installer_is_on_main_only_after_the_release_is_public) ... ok
+2026-11-09T11:33:14.8857590Z test_the_release_itself_is_last (test_release_workflow_gates.ReleaseGateTests.test_the_release_itself_is_last) ... ok
+2026-11-09T11:33:14.8933550Z test_the_signers_file_is_one_ssh_key_for_git (test_release_workflow_gates.ReleaseGateTests.test_the_signers_file_is_one_ssh_key_for_git) ... ok
+2026-11-09T11:33:14.8937580Z test_the_tag_check_verifies_the_signature_against_the_key_on_main (test_release_workflow_gates.ReleaseGateTests.test_the_tag_check_verifies_the_signature_against_the_key_on_main) ... ok
+2026-11-09T11:33:14.8943550Z test_write_permissions_are_held_only_where_they_are_used (test_release_workflow_gates.ReleaseGateTests.test_write_permissions_are_held_only_where_they_are_used) ... ok
+2026-11-09T11:33:14.8954940Z test_a_fragment_as_the_model_never_reaches_the_receipt (test_reply_metadata.KeyFragmentTests.test_a_fragment_as_the_model_never_reaches_the_receipt) ... ok
+2026-11-09T11:33:14.8963340Z test_a_fragment_in_the_text_is_refused (test_reply_metadata.KeyFragmentTests.test_a_fragment_in_the_text_is_refused) ... ok
+2026-11-09T11:33:14.8967970Z test_short_overlaps_and_the_public_prefix_are_not_a_key (test_reply_metadata.KeyFragmentTests.test_short_overlaps_and_the_public_prefix_are_not_a_key) ... ok
+2026-11-09T11:33:14.8973490Z test_a_count_made_of_the_key_digits_is_not_recorded (test_reply_metadata.PrefixAndCountTests.test_a_count_made_of_the_key_digits_is_not_recorded) ... ok
+2026-11-09T11:33:14.8980730Z test_a_custom_key_shaped_like_a_published_one_is_protected_from_its_start (test_reply_metadata.PrefixAndCountTests.test_a_custom_key_shaped_like_a_published_one_is_protected_from_its_start) ... ok
+2026-11-09T11:33:14.8985140Z test_ordinary_counts_are_kept (test_reply_metadata.PrefixAndCountTests.test_ordinary_counts_are_kept) ... ok
+2026-11-09T11:33:14.8991040Z test_a_reflected_key_in_model_never_reaches_the_served_receipt (test_reply_metadata.ReplyMetadataTests.test_a_reflected_key_in_model_never_reaches_the_served_receipt) ... ok
+2026-11-09T11:33:14.8994800Z test_a_reply_whose_text_holds_the_key_is_refused (test_reply_metadata.ReplyMetadataTests.test_a_reply_whose_text_holds_the_key_is_refused) ... ok
+2026-11-09T11:33:14.8998740Z test_an_honest_model_id_is_still_recorded (test_reply_metadata.ReplyMetadataTests.test_an_honest_model_id_is_still_recorded) ... ok
+2026-11-09T11:33:14.9005030Z test_usage_that_is_not_a_count_is_unknown_not_recorded (test_reply_metadata.ReplyMetadataTests.test_usage_that_is_not_a_count_is_unknown_not_recorded) ... ok
+2026-11-09T11:33:15.2224680Z test_a_backup_reads_each_file_once (test_review_fixes.BackupAndRestoreFixTests.test_a_backup_reads_each_file_once) ... ok
+2026-11-09T11:33:15.7383460Z test_an_interrupted_restore_puts_the_old_data_back (test_review_fixes.BackupAndRestoreFixTests.test_an_interrupted_restore_puts_the_old_data_back) ... ok
+2026-11-09T11:33:15.8460110Z test_restore_and_update_wait_for_the_app (test_review_fixes.BackupAndRestoreFixTests.test_restore_and_update_wait_for_the_app) ... ok
+2026-11-09T11:33:15.8478270Z test_a_data_folder_inside_the_app_folder_must_be_data (test_review_fixes.DataIsNeverRemovableTests.test_a_data_folder_inside_the_app_folder_must_be_data) ... ok
+2026-11-09T11:33:15.9067590Z test_a_data_spelling_in_another_case_is_refused (test_review_fixes.DataIsNeverRemovableTests.test_a_data_spelling_in_another_case_is_refused) ... ok
+2026-11-09T11:33:15.9155470Z test_the_recorded_data_path_is_protected_without_the_variable (test_review_fixes.DataIsNeverRemovableTests.test_the_recorded_data_path_is_protected_without_the_variable) ... ok
+2026-11-09T11:33:15.9171810Z test_a_failed_download_leaves_no_partial_file (test_review_fixes.LateReviewFixTests.test_a_failed_download_leaves_no_partial_file) ... ok
+2026-11-09T11:33:15.9334290Z test_an_archive_without_its_schema_file_is_refused (test_review_fixes.LateReviewFixTests.test_an_archive_without_its_schema_file_is_refused) ... ok
+2026-11-09T11:33:16.0559890Z test_native_setup_ignores_composer_data_from_the_shell (test_review_fixes.LateReviewFixTests.test_native_setup_ignores_composer_data_from_the_shell) ... ok
+2026-11-09T11:33:16.0563630Z test_no_key_reaches_a_child_process (test_review_fixes.LateReviewFixTests.test_no_key_reaches_a_child_process) ... ok
+2026-11-09T11:33:16.9645690Z test_setup_sh_never_changes_an_installed_version (test_review_fixes.LateReviewFixTests.test_setup_sh_never_changes_an_installed_version) ... ok
+2026-11-09T11:33:17.6406140Z test_setup_sh_runs_every_check_before_writing (test_review_fixes.LateReviewFixTests.test_setup_sh_runs_every_check_before_writing) ... ok
+2026-11-09T11:33:17.6606170Z test_uninstall_removes_only_what_setup_creates (test_review_fixes.LateReviewFixTests.test_uninstall_removes_only_what_setup_creates) ... ok
+2026-11-09T11:33:17.6647580Z test_a_failed_runtime_install_leaves_nothing_that_looks_installed (test_review_fixes.NarrationAndSecretsFixTests.test_a_failed_runtime_install_leaves_nothing_that_looks_installed) ... ok
+2026-11-09T11:33:17.7913730Z test_a_loose_key_file_is_refused_not_silently_rewritten (test_review_fixes.NarrationAndSecretsFixTests.test_a_loose_key_file_is_refused_not_silently_rewritten) ... ok
+2026-11-09T11:33:17.8167360Z test_the_worker_lowers_its_own_priority (test_review_fixes.NarrationAndSecretsFixTests.test_the_worker_lowers_its_own_priority) ... ok
+2026-11-09T11:33:18.5180950Z test_an_absurd_range_is_answered_not_crashed (test_review_fixes.ServerFixTests.test_an_absurd_range_is_answered_not_crashed) ... ok
+2026-11-09T11:33:18.5202150Z test_the_loopback_exemption_is_only_the_health_check (test_review_fixes.ServerFixTests.test_the_loopback_exemption_is_only_the_health_check) ... ok
+2026-11-09T11:33:18.7819660Z test_a_moved_install_is_refused_before_any_write (test_review_fixes.SetupShFixTests.test_a_moved_install_is_refused_before_any_write) ... ok
+2026-11-09T11:33:19.0556210Z test_an_unreadable_folder_is_refused (test_review_fixes.SetupShFixTests.test_an_unreadable_folder_is_refused) ... ok
+2026-11-09T11:33:19.1077130Z test_a_release_named_dotdot_is_refused (test_review_fixes.UpdateFixTests.test_a_release_named_dotdot_is_refused) ... ok
+2026-11-09T11:33:19.1083770Z test_index_has_title_note_links_and_a_centred_phone (test_security.DemoPageLayoutTests.test_index_has_title_note_links_and_a_centred_phone) ... ok
+2026-11-09T11:33:19.1096900Z test_replay_button_respects_reduced_motion (test_security.DemoPageLayoutTests.test_replay_button_respects_reduced_motion) ... ok
+2026-11-09T11:33:19.1097850Z test_window_loads_the_standalone_check_first (test_security.DemoPageLayoutTests.test_window_loads_the_standalone_check_first) ... ok
+2026-11-09T11:33:19.1098690Z test_a_key_at_the_length_cut_leaves_no_prefix (test_security.KeyEchoTests.test_a_key_at_the_length_cut_leaves_no_prefix) ... ok
+2026-11-09T11:33:19.1099440Z test_an_echoed_key_is_not_repeated (test_security.KeyEchoTests.test_an_echoed_key_is_not_repeated) ... ok
+2026-11-09T11:33:19.1324080Z test_a_feed_description_of_unclosed_tags_is_quick (test_security.LinearScanTests.test_a_feed_description_of_unclosed_tags_is_quick) ... ok
+2026-11-09T11:33:19.1356170Z test_extract_still_reads_title_and_text (test_security.LinearScanTests.test_extract_still_reads_title_and_text) ... ok
+2026-11-09T11:33:19.7229790Z test_hostile_markup_is_scanned_in_linear_time (test_security.LinearScanTests.test_hostile_markup_is_scanned_in_linear_time) ... ok
+2026-11-09T11:33:19.7231610Z test_meta_description_and_links_are_read_in_any_attribute_order (test_security.LinearScanTests.test_meta_description_and_links_are_read_in_any_attribute_order) ... ok
+2026-11-09T11:33:19.7234500Z test_page_script_checks_the_scheme (test_security.LinkSchemeTests.test_page_script_checks_the_scheme) ... ok
+2026-11-09T11:33:19.7245060Z test_window_prints_only_web_links (test_security.LinkSchemeTests.test_window_prints_only_web_links) ... ok
+2026-11-09T11:33:21.7368290Z test_a_connection_to_this_machine_is_refused_before_anything_is_sent (test_security.PublicAddressTests.test_a_connection_to_this_machine_is_refused_before_anything_is_sent) ... ok
+2026-11-09T11:33:21.7369250Z test_ipv4_compatible_forms_are_not_public (test_security.PublicAddressTests.test_ipv4_compatible_forms_are_not_public) ... ok
+2026-11-09T11:33:22.7394310Z test_one_private_answer_refuses_the_name_and_nothing_connects (test_security.PublicAddressTests.test_one_private_answer_refuses_the_name_and_nothing_connects) ... ok
+2026-11-09T11:33:22.7397180Z test_only_public_addresses_pass (test_security.PublicAddressTests.test_only_public_addresses_pass) ... ok
+2026-11-09T11:33:22.7398150Z test_plain_http_and_redirects_off_https_are_refused (test_security.PublicAddressTests.test_plain_http_and_redirects_off_https_are_refused) ... ok
+2026-11-09T11:33:23.7475370Z test_proxy_settings_are_ignored (test_security.PublicAddressTests.test_proxy_settings_are_ignored) ... ok
+2026-11-09T11:33:23.7476450Z test_sources_on_this_machine_or_a_private_address_are_refused (test_security.PublicAddressTests.test_sources_on_this_machine_or_a_private_address_are_refused) ... ok
+2026-11-09T11:33:23.7477330Z test_the_opt_in_lets_a_private_address_through (test_security.PublicAddressTests.test_the_opt_in_lets_a_private_address_through) ... ok
+2026-11-09T11:33:24.2515900Z test_beyond_this_machine_the_pass_phrase_guards_and_json_is_still_required (test_security.ServeCrossSiteTests.test_beyond_this_machine_the_pass_phrase_guards_and_json_is_still_required) ... ok
+2026-11-09T11:33:24.7586950Z test_cross_site_and_rebinding_requests_are_refused (test_security.ServeCrossSiteTests.test_cross_site_and_rebinding_requests_are_refused) ... ok
+2026-11-09T11:33:25.2663230Z test_host_must_be_exactly_one_local_authority (test_security.ServeCrossSiteTests.test_host_must_be_exactly_one_local_authority) ... ok
+2026-11-09T11:33:25.7805540Z test_the_page_own_request_still_works (test_security.ServeCrossSiteTests.test_the_page_own_request_still_works) ... ok
+2026-11-09T11:33:25.7887270Z test_the_page_sends_json_to_its_own_origin (test_security.ServeCrossSiteTests.test_the_page_sends_json_to_its_own_origin) ... ok
+2026-11-09T11:33:25.7892170Z test_source_markers_in_feed_text_are_broken (test_security.SourceMarkerTests.test_source_markers_in_feed_text_are_broken) ... ok
+2026-11-09T11:33:25.7923610Z test_dependencies_are_pinned_by_commit_and_hash (test_security.SupplyChainTests.test_dependencies_are_pinned_by_commit_and_hash) ... ok
+2026-11-09T11:33:25.7926430Z test_a_body_over_the_ceiling_is_read_no_further (test_security.TotalTimeTests.test_a_body_over_the_ceiling_is_read_no_further) ... ok
+2026-11-09T11:33:25.7927160Z test_a_body_shorter_than_its_length_is_refused (test_security.TotalTimeTests.test_a_body_shorter_than_its_length_is_refused) ... ok
+2026-11-09T11:33:26.8613940Z test_a_server_that_never_answers_the_handshake_is_cut_at_the_total_limit (test_security.TotalTimeTests.test_a_server_that_never_answers_the_handshake_is_cut_at_the_total_limit) ... ok
+2026-11-09T11:33:27.3931070Z test_a_slow_body_stops_at_the_total_limit (test_security.TotalTimeTests.test_a_slow_body_stops_at_the_total_limit) ... ok
+2026-11-09T11:33:28.2469430Z test_name_lookup_and_connect_attempts_share_the_total_limit (test_security.TotalTimeTests.test_name_lookup_and_connect_attempts_share_the_total_limit) ... ok
+2026-11-09T11:33:28.2569680Z test_truncated_gzip_and_unknown_encodings_are_refused (test_security.TotalTimeTests.test_truncated_gzip_and_unknown_encodings_are_refused) ... ok
+2026-11-09T11:33:28.2599150Z test_a_utf16_feed_without_entities_still_parses (test_security.XmlEntityTests.test_a_utf16_feed_without_entities_still_parses) ... ok
+2026-11-09T11:33:28.2600150Z test_utf16_entity_declarations_are_refused (test_security.XmlEntityTests.test_utf16_entity_declarations_are_refused) ... ok
+2026-11-09T11:33:28.2720680Z test_compose_unknown_source (test_server_cli.CliTests.test_compose_unknown_source) ... ok
+2026-11-09T11:33:28.2743160Z test_compose_without_a_key_fails_cleanly_and_reads_nothing (test_server_cli.CliTests.test_compose_without_a_key_fails_cleanly_and_reads_nothing) ... ok
+2026-11-09T11:33:28.2788900Z test_demo_and_page (test_server_cli.CliTests.test_demo_and_page) ... ok
+2026-11-09T11:33:28.2858480Z test_sources_add_and_list (test_server_cli.CliTests.test_sources_add_and_list) ... ok
+2026-11-09T11:33:28.2884850Z test_bad_requests_are_refused_before_any_fetch (test_server_cli.ServerTests.test_bad_requests_are_refused_before_any_fetch) ... ok
+2026-11-09T11:33:28.2905670Z test_good_request (test_server_cli.ServerTests.test_good_request) ... ok
+2026-11-09T11:33:28.2927310Z test_no_key_is_reported_before_any_fetch (test_server_cli.ServerTests.test_no_key_is_reported_before_any_fetch) ... ok
+2026-11-09T11:33:28.2927960Z test_non_local_bind_needs_a_pass_phrase (test_server_cli.ServerTests.test_non_local_bind_needs_a_pass_phrase) ... ok
+2026-11-09T11:33:28.2946350Z test_one_brief_at_a_time (test_server_cli.ServerTests.test_one_brief_at_a_time) ... ok
+2026-11-09T11:33:28.2966540Z test_page_starts_with_the_recorded_brief (test_server_cli.ServerTests.test_page_starts_with_the_recorded_brief) ... ok
+2026-11-09T11:33:28.2986020Z test_pass_phrase (test_server_cli.ServerTests.test_pass_phrase) ... ok
+2026-11-09T11:33:28.2987670Z test_a_listed_id_or_a_typed_one (test_setup_models.ModelListTests.test_a_listed_id_or_a_typed_one) ... ok
+2026-11-09T11:33:28.2988350Z test_an_answers_file_takes_any_model_id (test_setup_models.ModelListTests.test_an_answers_file_takes_any_model_id) ... ok
+2026-11-09T11:33:28.2989380Z test_an_openai_compatible_endpoint_lists_nothing_and_says_to_type_the_id (test_setup_models.ModelListTests.test_an_openai_compatible_endpoint_lists_nothing_and_says_to_type_the_id) ... ok
+2026-11-09T11:33:28.2995570Z test_editing_the_data_file_changes_the_list (test_setup_models.ModelListTests.test_editing_the_data_file_changes_the_list) ... ok
+2026-11-09T11:33:28.2996510Z test_the_checker_gets_the_same_list (test_setup_models.ModelListTests.test_the_checker_gets_the_same_list) ... ok
+2026-11-09T11:33:28.2997540Z test_the_list_comes_from_the_data_file_and_enter_takes_the_default (test_setup_models.ModelListTests.test_the_list_comes_from_the_data_file_and_enter_takes_the_default) ... ok
+2026-11-09T11:33:28.3087650Z test_setup_with_a_test_call_given_to_the_library_runs_it_once_per_key (test_setup_models.SkipTests.test_setup_with_a_test_call_given_to_the_library_runs_it_once_per_key) ... ok
+2026-11-09T11:33:28.3152300Z test_the_flag_and_test_mode_skip_it_and_otherwise_it_runs (test_setup_models.SkipTests.test_the_flag_and_test_mode_skip_it_and_otherwise_it_runs) ... ok
+2026-11-09T11:33:28.3154000Z test_a_successful_reply_cannot_put_the_key_in_the_sentence (test_setup_models.TestCallTests.test_a_successful_reply_cannot_put_the_key_in_the_sentence) ... ok
+2026-11-09T11:33:28.3154700Z test_a_working_key_and_model (test_setup_models.TestCallTests.test_a_working_key_and_model) ... ok
+2026-11-09T11:33:28.3156790Z test_each_failure_says_which (test_setup_models.TestCallTests.test_each_failure_says_which) ... ok
+2026-11-09T11:33:28.3160860Z test_keep_going_after_a_failure (test_setup_models.TestCallTests.test_keep_going_after_a_failure) ... ok
+2026-11-09T11:33:28.3161400Z test_no_key_no_call (test_setup_models.TestCallTests.test_no_key_no_call) ... ok
+2026-11-09T11:33:28.3162500Z test_setup_says_so_and_offers_to_enter_them_again (test_setup_models.TestCallTests.test_setup_says_so_and_offers_to_enter_them_again) ... ok
+2026-11-09T11:33:30.4948720Z test_a_holding_name_handed_in_by_the_caller_does_not_carry_a_key_to_pip (test_setup_sh_keys.SetupShKeysTests.test_a_holding_name_handed_in_by_the_caller_does_not_carry_a_key_to_pip) ... ok
+2026-11-09T11:33:31.0876490Z test_only_composer_setup_gets_the_keys (test_setup_sh_keys.SetupShKeysTests.test_only_composer_setup_gets_the_keys) ... ok
+2026-11-09T11:33:31.6225850Z test_a_failed_download_shows_the_real_error_retries_and_names_the_ways_forward (test_setup_sh_messages.SetupShMessageTests.test_a_failed_download_shows_the_real_error_retries_and_names_the_ways_forward) ... ok
+2026-11-09T11:33:32.2818830Z test_a_failure_in_the_middle_leaves_nothing_even_when_the_venv_came_out_group_writable (test_setup_sh_messages.SetupShMessageTests.test_a_failure_in_the_middle_leaves_nothing_even_when_the_venv_came_out_group_writable) ... ok
+2026-11-09T11:33:33.1274120Z test_a_half_made_version_folder_that_setup_marked_is_removed_and_the_rerun_succeeds (test_setup_sh_messages.SetupShMessageTests.test_a_half_made_version_folder_that_setup_marked_is_removed_and_the_rerun_succeeds) ... ok
+2026-11-09T11:33:33.1276770Z test_a_local_claim_seal_source_keeps_its_real_file_name_so_pip_can_read_it (test_setup_sh_messages.SetupShMessageTests.test_a_local_claim_seal_source_keeps_its_real_file_name_so_pip_can_read_it) ... ok
+2026-11-09T11:33:33.3628220Z test_a_python_without_venv_is_named_as_such (test_setup_sh_messages.SetupShMessageTests.test_a_python_without_venv_is_named_as_such) ... ok
+2026-11-09T11:33:33.9742220Z test_a_second_try_that_works_carries_on (test_setup_sh_messages.SetupShMessageTests.test_a_second_try_that_works_carries_on) ... ok
+2026-11-09T11:33:34.6308360Z test_a_usable_python_means_no_download_and_the_step_says_so (test_setup_sh_messages.SetupShMessageTests.test_a_usable_python_means_no_download_and_the_step_says_so) ... ok
+2026-11-09T11:33:34.6309790Z test_a_venv_with_group_writable_template_files_is_fixed_not_refused (test_setup_sh_messages.SetupShMessageTests.test_a_venv_with_group_writable_template_files_is_fixed_not_refused)
+2026-11-09T11:33:35.3799940Z python.org's Python copies group-writable template files (Activate.ps1) into every venv; the trust contract ... ok
+2026-11-09T11:33:35.6894350Z test_a_version_folder_setup_did_not_mark_is_left_alone (test_setup_sh_messages.SetupShMessageTests.test_a_version_folder_setup_did_not_mark_is_left_alone) ... ok
+2026-11-09T11:33:36.2929160Z test_ctrl_c_during_a_download_cleans_up_in_a_shell_that_skips_the_exit_trap (test_setup_sh_messages.SetupShMessageTests.test_ctrl_c_during_a_download_cleans_up_in_a_shell_that_skips_the_exit_trap) ... ok
+2026-11-09T11:33:36.7787500Z test_download_steps_progress_timeout_and_no_quiet (test_setup_sh_messages.SetupShMessageTests.test_download_steps_progress_timeout_and_no_quiet) ... ok
+2026-11-09T11:33:36.7788880Z test_every_python_the_installer_starts_leaves_the_current_folder_out_of_its_import_path (test_setup_sh_messages.SetupShMessageTests.test_every_python_the_installer_starts_leaves_the_current_folder_out_of_its_import_path)
+2026-11-09T11:33:36.7795460Z A planted venv.py or pip/ in the folder the command is run from must not run: python -I, every time. ... ok
+2026-11-09T11:33:36.9964280Z test_no_python_at_all (test_setup_sh_messages.SetupShMessageTests.test_no_python_at_all) ... ok
+2026-11-09T11:33:37.7120260Z test_pip_failure_shows_the_error_names_the_fix_and_cleans_up (test_setup_sh_messages.SetupShMessageTests.test_pip_failure_shows_the_error_names_the_fix_and_cleans_up) ... ok
+2026-11-09T11:33:37.9273780Z test_says_why_before_it_asks_to_download (test_setup_sh_messages.SetupShMessageTests.test_says_why_before_it_asks_to_download) ... ok
+2026-11-09T11:33:37.9274630Z test_the_group_writable_venv_test_has_teeth_without_the_fix (test_setup_sh_messages.SetupShMessageTests.test_the_group_writable_venv_test_has_teeth_without_the_fix)
+2026-11-09T11:33:38.4911910Z The same run with the chmod lines taken out of a copy of setup.sh fails: the test above can tell. ... ok
+2026-11-09T11:33:39.0859290Z test_the_uv_download_is_tried_again_and_a_timeout_you_set_reaches_pip (test_setup_sh_messages.SetupShMessageTests.test_the_uv_download_is_tried_again_and_a_timeout_you_set_reaches_pip) ... ok
+2026-11-09T11:33:39.0863720Z test_the_wget_fallback_tries_once_because_the_retry_loop_is_the_scripts_own (test_setup_sh_messages.SetupShMessageTests.test_the_wget_fallback_tries_once_because_the_retry_loop_is_the_scripts_own) ... ok
+2026-11-09T11:33:39.7311430Z test_whole_install_path_steps_pip_progress_and_handover (test_setup_sh_messages.SetupShMessageTests.test_whole_install_path_steps_pip_progress_and_handover) ... ok
+2026-11-09T11:33:40.2872550Z test_your_own_timeout_is_kept (test_setup_sh_messages.SetupShMessageTests.test_your_own_timeout_is_kept) ... ok
+2026-11-09T11:33:40.2913970Z test_a_record_that_will_not_parse_is_listed_as_unreadable (test_shelf_index.ShelfIndexContentTests.test_a_record_that_will_not_parse_is_listed_as_unreadable) ... ok
+2026-11-09T11:33:40.3019640Z test_no_private_fields_in_the_index (test_shelf_index.ShelfIndexContentTests.test_no_private_fields_in_the_index) ... ok
+2026-11-09T11:33:40.4206610Z test_the_index_is_replaced_whole_and_reads_parse_during_changes (test_shelf_index.ShelfIndexContentTests.test_the_index_is_replaced_whole_and_reads_parse_during_changes) ... ok
+2026-11-09T11:33:40.4246690Z 127.0.0.1 POST /compose 202
+2026-11-09T11:33:40.4268130Z 127.0.0.1 GET /data/index.json 200
+2026-11-09T11:33:40.4294520Z 127.0.0.1 GET /data/index.json 200
+2026-11-09T11:33:40.9350840Z test_a_running_compose_is_listed_for_the_rejoin_note_then_done (test_shelf_index.ShelfIndexRouteTests.test_a_running_compose_is_listed_for_the_rejoin_note_then_done) ... ok
+2026-11-09T11:33:40.9501410Z 127.0.0.1 POST /compose 202
+2026-11-09T11:33:40.9599640Z 127.0.0.1 GET /data/index.json 200
+2026-11-09T11:33:40.9618840Z 127.0.0.1 GET /data/index.json 200
+2026-11-09T11:33:41.4654990Z test_audio_is_reported_only_when_the_file_is_there (test_shelf_index.ShelfIndexRouteTests.test_audio_is_reported_only_when_the_file_is_there) ... ok
+2026-11-09T11:33:41.4697380Z 127.0.0.1 POST /compose 202
+2026-11-09T11:33:41.4732860Z 127.0.0.1 GET /data/index.json 200
+2026-11-09T11:33:41.4752160Z 127.0.0.1 GET /data/index.json 200
+2026-11-09T11:33:41.9827780Z test_retention_rewrites_the_index (test_shelf_index.ShelfIndexRouteTests.test_retention_rewrites_the_index) ... ok
+2026-11-09T11:33:41.9925290Z 127.0.0.1 POST /compose 202
+2026-11-09T11:33:42.0049360Z 127.0.0.1 POST /save/job-27b30d1417064b0c 200
+2026-11-09T11:33:42.0055490Z 127.0.0.1 GET /data/index.json 200
+2026-11-09T11:33:42.0061510Z 127.0.0.1 GET /data/index.json 200
+2026-11-09T11:33:42.0078640Z 127.0.0.1 POST /delete/job-27b30d1417064b0c 200
+2026-11-09T11:33:42.0084290Z 127.0.0.1 GET /data/index.json 200
+2026-11-09T11:33:42.0101800Z 127.0.0.1 POST /restore/job-27b30d1417064b0c 200
+2026-11-09T11:33:42.0107030Z 127.0.0.1 GET /data/index.json 200
+2026-11-09T11:33:42.0125420Z 127.0.0.1 POST /compose 200
+2026-11-09T11:33:42.0130170Z 127.0.0.1 GET /data/index.json 200
+2026-11-09T11:33:42.5226860Z test_save_delete_restore_and_page_buttons_each_rewrite_the_index (test_shelf_index.ShelfIndexRouteTests.test_save_delete_restore_and_page_buttons_each_rewrite_the_index) ... ok
+2026-11-09T11:33:42.5321770Z 127.0.0.1 POST /compose 202
+2026-11-09T11:33:43.0352800Z 127.0.0.1 GET /data/index.json 200
+2026-11-09T11:33:43.0368460Z 127.0.0.1 GET /data/index.json 200
+2026-11-09T11:33:44.0452400Z test_the_index_is_rebuilt_at_start (test_shelf_index.ShelfIndexRouteTests.test_the_index_is_rebuilt_at_start) ... ok
+2026-11-09T11:33:44.0520790Z 127.0.0.1 GET /data/index.json 200
+2026-11-09T11:33:44.0534840Z 127.0.0.1 GET /data/options.json 200
+2026-11-09T11:33:44.5561600Z test_the_index_is_served_on_a_fresh_store_with_the_data_headers (test_shelf_index.ShelfIndexRouteTests.test_the_index_is_served_on_a_fresh_store_with_the_data_headers) ... ok
+2026-11-09T11:33:44.5762650Z 127.0.0.1 POST /compose 202
+2026-11-09T11:33:44.5863710Z 127.0.0.1 POST /compose 200
+2026-11-09T11:33:44.5875950Z 127.0.0.1 GET /data/index.json 200
+2026-11-09T11:33:44.5876340Z 127.0.0.1 POST /compose 400
+2026-11-09T11:33:44.5876640Z 127.0.0.1 POST /compose 400
+2026-11-09T11:33:44.5876940Z 127.0.0.1 POST /compose 400
+2026-11-09T11:33:44.5877210Z 127.0.0.1 POST /compose 400
+2026-11-09T11:33:44.5877480Z 127.0.0.1 POST /compose 404
+2026-11-09T11:33:45.0849350Z test_the_page_save_button_saves_and_the_drawer_entry_appears (test_shelf_index.ShelfIndexRouteTests.test_the_page_save_button_saves_and_the_drawer_entry_appears) ... ok
+2026-11-09T11:33:45.0997230Z 127.0.0.1 POST /compose 202
+2026-11-09T11:33:45.1088500Z 127.0.0.1 GET /status/job-de0e88140b964705 200
+2026-11-09T11:33:45.6056980Z test_a_check_that_did_not_pass_does_not_end_on_done (test_stage_lines.JobLinesTests.test_a_check_that_did_not_pass_does_not_end_on_done) ... ok
+2026-11-09T11:33:45.6157810Z 127.0.0.1 POST /compose 202
+2026-11-09T11:33:45.6205940Z 127.0.0.1 GET /status/job-15a47cd4565b4a57 200
+2026-11-09T11:33:45.7061130Z 127.0.0.1 GET /status/job-15a47cd4565b4a57 200
+2026-11-09T11:33:45.7067900Z 127.0.0.1 GET /status/job-15a47cd4565b4a57 200
+2026-11-09T11:33:46.2101680Z test_a_finished_job_takes_no_more_lines (test_stage_lines.JobLinesTests.test_a_finished_job_takes_no_more_lines) ... ok
+2026-11-09T11:33:46.2271610Z 127.0.0.1 POST /compose 202
+2026-11-09T11:33:46.2274000Z 127.0.0.1 GET /status/job-5efdedef7b21461e 200
+2026-11-09T11:33:46.2873720Z 127.0.0.1 GET /status/job-5efdedef7b21461e 200
+2026-11-09T11:33:46.7972830Z test_status_carries_the_run_as_text_lines_and_keeps_phase_records (test_stage_lines.JobLinesTests.test_status_carries_the_run_as_text_lines_and_keeps_phase_records) ... ok
+2026-11-09T11:33:46.7978040Z test_a_failure_keeps_its_own_words_even_when_the_label_has_a_dot (test_stage_lines.LabelTests.test_a_failure_keeps_its_own_words_even_when_the_label_has_a_dot) ... ok
+2026-11-09T11:33:46.7983450Z test_a_label_that_starts_another_label_does_not_take_its_lines_in_either_order (test_stage_lines.LabelTests.test_a_label_that_starts_another_label_does_not_take_its_lines_in_either_order) ... ok
+2026-11-09T11:33:46.7989770Z test_two_sources_with_one_label_each_get_their_own_lines_in_order (test_stage_lines.LabelTests.test_two_sources_with_one_label_each_get_their_own_lines_in_order) ... ok
+2026-11-09T11:33:46.7994290Z test_a_source_that_failed_is_a_note_not_a_scan (test_stage_lines.LineMakerTests.test_a_source_that_failed_is_a_note_not_a_scan) ... ok
+2026-11-09T11:33:46.7998320Z test_every_pipeline_event_becomes_one_text_line (test_stage_lines.LineMakerTests.test_every_pipeline_event_becomes_one_text_line) ... ok
+2026-11-09T11:33:46.8002230Z test_lines_reach_the_six_stages_in_order (test_stage_lines.LineMakerTests.test_lines_reach_the_six_stages_in_order) ... ok
+2026-11-09T11:33:46.8005940Z test_other_events_pass_through_as_notes (test_stage_lines.LineMakerTests.test_other_events_pass_through_as_notes) ... ok
+2026-11-09T11:33:46.8011020Z test_the_entry_animation_reaches_every_stage_from_the_lines (test_stage_lines.PageReaderTests.test_the_entry_animation_reaches_every_stage_from_the_lines) ... ok
+2026-11-09T11:33:46.8040060Z test_the_loom_reader_takes_the_lines_it_draws_from (test_stage_lines.PageReaderTests.test_the_loom_reader_takes_the_lines_it_draws_from) ... ok
+2026-11-09T11:33:46.8052390Z test_every_bundled_source_reads_a_local_feed (test_stranger_harness.BrowserFixtureTests.test_every_bundled_source_reads_a_local_feed) ... ok
+2026-11-09T11:33:46.8066820Z test_every_console_error_counts_and_none_is_set_aside (test_stranger_harness.StrangerHarnessTests.test_every_console_error_counts_and_none_is_set_aside) ... ok
+2026-11-09T11:33:46.8074190Z test_no_early_exit_grep_reads_a_tar_listing_under_pipefail (test_stranger_harness.StrangerHarnessTests.test_no_early_exit_grep_reads_a_tar_listing_under_pipefail) ... ok
+2026-11-09T11:33:46.8091020Z test_the_brief_link_is_opened_before_the_brief_is_moved_to_the_trash (test_stranger_harness.StrangerHarnessTests.test_the_brief_link_is_opened_before_the_brief_is_moved_to_the_trash) ... ok
+2026-11-09T11:33:46.8094450Z test_the_clean_machine_gets_every_file_its_sha256sums_names (test_stranger_harness.StrangerHarnessTests.test_the_clean_machine_gets_every_file_its_sha256sums_names) ... ok
+2026-11-09T11:33:46.8097450Z test_the_expected_default_sources_match_the_bundled_file (test_stranger_harness.StrangerHarnessTests.test_the_expected_default_sources_match_the_bundled_file) ... ok
+2026-11-09T11:33:46.8100370Z test_the_flow_lets_a_page_finish_loading_before_it_leaves (test_stranger_harness.StrangerHarnessTests.test_the_flow_lets_a_page_finish_loading_before_it_leaves) ... ok
+2026-11-09T11:33:46.8103220Z test_update_and_rollback_get_the_local_feed_settings (test_stranger_harness.StrangerHarnessTests.test_update_and_rollback_get_the_local_feed_settings) ... ok
+2026-11-09T11:33:46.8106160Z test_webkit_takes_no_screenshot_before_page_health_is_counted (test_stranger_harness.StrangerHarnessTests.test_webkit_takes_no_screenshot_before_page_health_is_counted) ... ok
+2026-11-09T11:33:46.8119090Z test_a_wrong_sum_in_the_txt_still_refuses_and_none_at_all_names_both (test_terminal.ChecksumListNameTests.test_a_wrong_sum_in_the_txt_still_refuses_and_none_at_all_names_both) ... ok
+2026-11-09T11:33:46.8134320Z test_plain_name_wins_and_says_nothing (test_terminal.ChecksumListNameTests.test_plain_name_wins_and_says_nothing) ... ok
+2026-11-09T11:33:46.8147570Z test_sha256sums_txt_beside_the_wheel_is_read_with_a_note (test_terminal.ChecksumListNameTests.test_sha256sums_txt_beside_the_wheel_is_read_with_a_note) ... ok
+2026-11-09T11:33:46.8165340Z test_the_txt_is_not_a_second_chance_when_the_plain_list_does_not_name_the_file (test_terminal.ChecksumListNameTests.test_the_txt_is_not_a_second_chance_when_the_plain_list_does_not_name_the_file) ... ok
+2026-11-09T11:33:46.8221750Z test_known_terminals_get_an_osc8_link_around_the_same_visible_text (test_terminal.OpenLineTests.test_known_terminals_get_an_osc8_link_around_the_same_visible_text) ... ok
+2026-11-09T11:33:46.8226420Z test_macos_terminal_gets_the_plain_address (test_terminal.OpenLineTests.test_macos_terminal_gets_the_plain_address) ... ok
+2026-11-09T11:33:46.8227460Z test_opt_out_and_dumb_terminals (test_terminal.OpenLineTests.test_opt_out_and_dumb_terminals) ... ok
+2026-11-09T11:33:46.8228660Z test_plain_address_on_its_own_line_when_not_a_terminal (test_terminal.OpenLineTests.test_plain_address_on_its_own_line_when_not_a_terminal) ... ok
+2026-11-09T11:33:46.8229400Z test_which_address_is_printed (test_terminal.OpenLineTests.test_which_address_is_printed) ... ok
+2026-11-09T11:33:46.8230100Z test_a_broken_output_never_changes_the_result_or_the_error (test_terminal.ProgressSafetyTests.test_a_broken_output_never_changes_the_result_or_the_error) ... ok
+2026-11-09T11:33:46.8231490Z test_control_bytes_in_a_name_or_an_error_never_reach_the_terminal (test_terminal.ProgressSafetyTests.test_control_bytes_in_a_name_or_an_error_never_reach_the_terminal) ... ok
+2026-11-09T11:33:46.8232700Z test_text_direction_overrides_in_a_name_cannot_reorder_a_progress_line (test_terminal.ProgressSafetyTests.test_text_direction_overrides_in_a_name_cannot_reorder_a_progress_line) ... ok
+2026-11-09T11:33:46.8233510Z test_numbered_steps_and_source_lines (test_terminal.ProgressTests.test_numbered_steps_and_source_lines) ... ok
+2026-11-09T11:33:46.8234330Z test_with_progress_prints_and_still_calls_the_callers_log_and_reraises_a_failure (test_terminal.ProgressTests.test_with_progress_prints_and_still_calls_the_callers_log_and_reraises_a_failure) ... ok
+2026-11-09T11:33:46.8242190Z test_serve_prints_progress_too (test_terminal.WiringTests.test_serve_prints_progress_too) ... ok
+2026-11-09T11:33:46.8384450Z test_up_prints_progress_for_a_brief_started_from_the_page (test_terminal.WiringTests.test_up_prints_progress_for_a_brief_started_from_the_page) ... /Users/runner/work/composer/composer/composer/cli.py:514: ResourceWarning: unclosed file <_io.TextIOWrapper name=7 mode='r+' encoding='UTF-8'>
+2026-11-09T11:33:46.8385410Z   return args.func(args)
+2026-11-09T11:33:46.8385690Z ResourceWarning: Enable tracemalloc to get the object allocation traceback
+2026-11-09T11:33:46.8395850Z ok
+2026-11-09T11:33:46.8426850Z test_every_locked_package_has_a_row_with_its_version_and_licence (test_third_party.ThirdPartyListTests.test_every_locked_package_has_a_row_with_its_version_and_licence) ... ok
+2026-11-09T11:33:46.8441890Z test_every_pyproject_pin_has_a_row (test_third_party.ThirdPartyListTests.test_every_pyproject_pin_has_a_row) ... ok
+2026-11-09T11:33:46.8444150Z test_the_check_fails_when_a_package_is_left_out (test_third_party.ThirdPartyListTests.test_the_check_fails_when_a_package_is_left_out) ... ok
+2026-11-09T11:33:46.8446670Z test_the_gpl_parts_are_named_as_gpl (test_third_party.ThirdPartyListTests.test_the_gpl_parts_are_named_as_gpl) ... ok
+2026-11-09T11:33:46.9502800Z test_no_system_roots_and_no_certifi_fails_verification (test_tls.RootsTests.test_no_system_roots_and_no_certifi_fails_verification) ... ok
+2026-11-09T11:33:46.9591490Z test_no_system_roots_uses_certifi_and_succeeds (test_tls.RootsTests.test_no_system_roots_uses_certifi_and_succeeds) ... ERROR
+2026-11-09T11:33:46.9628220Z test_ssl_cert_file_is_the_persons_choice_and_certifi_is_not_added (test_tls.RootsTests.test_ssl_cert_file_is_the_persons_choice_and_certifi_is_not_added) ... ERROR
+2026-11-09T11:33:46.9690320Z test_system_roots_present_certifi_is_not_added (test_tls.RootsTests.test_system_roots_present_certifi_is_not_added) ... ok
+2026-11-09T11:33:46.9752090Z test_the_provider_and_feed_openers_use_the_same_rule (test_tls.RootsTests.test_the_provider_and_feed_openers_use_the_same_rule) ... ERROR
+2026-11-09T11:33:46.9824550Z test_the_real_certifi_is_installed_and_has_authorities (test_tls.RootsTests.test_the_real_certifi_is_installed_and_has_authorities) ... ok
+2026-11-09T11:33:47.4809870Z test_empty_default_paths_read_as_no_roots (test_tls.SystemRootsTests.test_empty_default_paths_read_as_no_roots) ... ok
+2026-11-09T11:33:47.4911990Z test_the_compose_route_still_refuses_a_topic (test_topic_field.TopicFieldTests.test_the_compose_route_still_refuses_a_topic) ... ok
+2026-11-09T11:33:47.4969010Z test_the_page_has_no_topic_field (test_topic_field.TopicFieldTests.test_the_page_has_no_topic_field) ... ok
+2026-11-09T11:33:47.5086700Z test_a_data_folder_open_to_others_is_refused_before_the_lock (test_trust_admission.AdmissionTests.test_a_data_folder_open_to_others_is_refused_before_the_lock) ... ok
+2026-11-09T11:33:47.5238430Z test_a_journal_that_names_a_folder_elsewhere_is_refused_before_anything_is_removed (test_trust_admission.AdmissionTests.test_a_journal_that_names_a_folder_elsewhere_is_refused_before_anything_is_removed) ... ok
+2026-11-09T11:33:47.5365210Z test_a_real_unfinished_restore_is_still_recovered (test_trust_admission.AdmissionTests.test_a_real_unfinished_restore_is_still_recovered) ... ok
+2026-11-09T11:33:47.5462950Z test_admission_comes_before_the_lock_and_before_recovery_even_with_no_current_data (test_trust_admission.AdmissionTests.test_admission_comes_before_the_lock_and_before_recovery_even_with_no_current_data) ... ok
+2026-11-09T11:33:47.5464660Z test_a_replaced_install_cannot_make_update_remove_a_protected_folder (test_trust_admission.AnotherAccountTests.test_a_replaced_install_cannot_make_update_remove_a_protected_folder) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 501'
+2026-11-09T11:33:47.5467500Z test_only_the_three_places_inside_the_data_folder_pass (test_trust_admission.TheJournalRuleTests.test_only_the_three_places_inside_the_data_folder_pass) ... ok
+2026-11-09T11:33:47.6361520Z test_setup_sh_refuses_before_any_write (test_trust_contract.SetupShTrustTests.test_setup_sh_refuses_before_any_write) ... ok
+2026-11-09T11:33:47.6379550Z test_a_folder_owned_by_another_account_is_refused (test_trust_contract.TrustContractTests.test_a_folder_owned_by_another_account_is_refused) ... ok
+2026-11-09T11:33:47.6466270Z test_a_private_folder_passes (test_trust_contract.TrustContractTests.test_a_private_folder_passes) ... ok
+2026-11-09T11:33:47.6489330Z test_setup_refuses_a_folder_others_can_write_above_it (test_trust_contract.TrustContractTests.test_setup_refuses_a_folder_others_can_write_above_it) ... ok
+2026-11-09T11:33:47.6500700Z test_setup_refuses_an_app_folder_others_can_write (test_trust_contract.TrustContractTests.test_setup_refuses_an_app_folder_others_can_write) ... ok
+2026-11-09T11:33:47.6510740Z test_the_system_temporary_folder_is_refused_where_it_is_shared (test_trust_contract.TrustContractTests.test_the_system_temporary_folder_is_refused_where_it_is_shared) ... ok
+2026-11-09T11:33:47.6602080Z test_update_rollback_and_narration_refuse_once_a_folder_above_is_opened_up (test_trust_contract.TrustContractTests.test_update_rollback_and_narration_refuse_once_a_folder_above_is_opened_up) ... ok
+2026-11-09T11:33:47.6917530Z test_the_new_version_folder_is_private_and_the_app_still_passes_its_own_check (test_trust_contract.UpdateUnderAPermissiveUmaskTests.test_the_new_version_folder_is_private_and_the_app_still_passes_its_own_check) ... ok
+2026-11-09T11:33:47.6919070Z test_another_account_cannot_redirect_the_narration_check_through_an_open_tmp (test_trust_descendants.AnotherAccountTests.test_another_account_cannot_redirect_the_narration_check_through_an_open_tmp) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 501'
+2026-11-09T11:33:47.7027350Z test_a_handed_cache_folder_open_to_others_stops_a_program_before_it_starts (test_trust_descendants.DescendantTests.test_a_handed_cache_folder_open_to_others_stops_a_program_before_it_starts) ... ok
+2026-11-09T11:33:47.7888250Z test_an_install_with_any_folder_open_to_others_is_refused (test_trust_descendants.DescendantTests.test_an_install_with_any_folder_open_to_others_is_refused) ... ok
+2026-11-09T11:33:47.7999500Z test_owned_dir_and_child_check_every_folder_on_the_way (test_trust_descendants.DescendantTests.test_owned_dir_and_child_check_every_folder_on_the_way) ... ok
+2026-11-09T11:33:48.0825490Z test_setup_refuses_an_existing_install_with_an_open_folder (test_trust_descendants.DescendantTests.test_setup_refuses_an_existing_install_with_an_open_folder) ... ok
+2026-11-09T11:33:48.0943320Z test_trusted_files_open_to_others_are_refused (test_trust_descendants.DescendantTests.test_trusted_files_open_to_others_are_refused) ... ok
+2026-11-09T11:33:48.1052640Z test_update_rollback_narration_and_the_parser_refuse_an_open_tmp (test_trust_descendants.DescendantTests.test_update_rollback_narration_and_the_parser_refuse_an_open_tmp) ... ok
+2026-11-09T11:33:48.1053640Z test_composer_never_makes_group_writable_files_whatever_the_umask (test_trust_descendants.TheRuleTests.test_composer_never_makes_group_writable_files_whatever_the_umask) ... ok
+2026-11-09T11:33:48.1054300Z test_the_rule (test_trust_descendants.TheRuleTests.test_the_rule) ... ok
+2026-11-09T11:33:48.1055260Z test_an_app_folder_planted_by_another_account_gets_no_scratch_folder (test_trust_doctor_narration_tmp.AnotherAccountTests.test_an_app_folder_planted_by_another_account_gets_no_scratch_folder) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 501'
+2026-11-09T11:33:48.1127640Z test_an_app_folder_made_after_the_trust_row_is_checked_before_narration_writes (test_trust_doctor_narration_tmp.SameAccountTests.test_an_app_folder_made_after_the_trust_row_is_checked_before_narration_writes) ... ok
+2026-11-09T11:33:48.1197460Z test_narration_still_runs_when_no_app_folder_appears (test_trust_doctor_narration_tmp.SameAccountTests.test_narration_still_runs_when_no_app_folder_appears) ... ok
+2026-11-09T11:33:48.1198680Z test_a_replaced_install_cannot_make_doctor_send_your_key_elsewhere (test_trust_doctor_online.AnotherAccountTests.test_a_replaced_install_cannot_make_doctor_send_your_key_elsewhere) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 501'
+2026-11-09T11:33:48.1324770Z test_a_trusted_install_still_runs_the_online_checks (test_trust_doctor_online.SameAccountTests.test_a_trusted_install_still_runs_the_online_checks) ... ok
+2026-11-09T11:33:48.1422040Z test_doctor_online_sends_nothing_when_the_trust_check_fails (test_trust_doctor_online.SameAccountTests.test_doctor_online_sends_nothing_when_the_trust_check_fails) ... ok
+2026-11-09T11:33:48.1533410Z test_doctor_reads_no_settings_and_no_key_file_after_the_refusal (test_trust_doctor_online.SameAccountTests.test_doctor_reads_no_settings_and_no_key_file_after_the_refusal) ... ok
+2026-11-09T11:33:48.1551890Z test_make_dirs_sets_the_mode_even_when_mkdir_gives_more (test_trust_explicit_modes.ExplicitModeTests.test_make_dirs_sets_the_mode_even_when_mkdir_gives_more) ... ok
+2026-11-09T11:33:48.1553750Z test_nothing_composer_makes_is_open_to_others_under_a_default_acl (test_trust_explicit_modes.ExplicitModeTests.test_nothing_composer_makes_is_open_to_others_under_a_default_acl) ... skipped 'libacl is not installed here'
+2026-11-09T11:33:48.1879500Z test_nothing_composer_makes_is_open_to_others_under_an_open_umask (test_trust_explicit_modes.ExplicitModeTests.test_nothing_composer_makes_is_open_to_others_under_an_open_umask) ... ok
+2026-11-09T11:33:48.1880520Z test_a_disk_without_permission_bits_gets_advice_that_can_work (test_trust_messages.AdviceRuleTests.test_a_disk_without_permission_bits_gets_advice_that_can_work) ... ok
+2026-11-09T11:33:48.1881430Z test_a_posix_disk_keeps_the_chmod_advice_and_names_the_folder (test_trust_messages.AdviceRuleTests.test_a_posix_disk_keeps_the_chmod_advice_and_names_the_folder) ... ok
+2026-11-09T11:33:48.1882450Z test_the_mount_table_names_the_filesystem_of_the_longest_mount_point (test_trust_messages.AdviceRuleTests.test_the_mount_table_names_the_filesystem_of_the_longest_mount_point) ... ok
+2026-11-09T11:33:48.1961210Z test_a_data_folder_refusal_says_data_folder_and_keeps_the_umask_fix (test_trust_messages.FolderNameTests.test_a_data_folder_refusal_says_data_folder_and_keeps_the_umask_fix) ... ok
+2026-11-09T11:33:48.3337880Z test_default_setup_and_setup_sh_name_the_option_to_use (test_trust_messages.LinkedHomeTests.test_default_setup_and_setup_sh_name_the_option_to_use) ... ok
+2026-11-09T11:33:48.3353110Z test_the_refusal_says_how_to_pass_the_real_path (test_trust_messages.LinkedHomeTests.test_the_refusal_says_how_to_pass_the_real_path) ... ok
+2026-11-09T11:33:48.3354390Z test_a_data_folder_on_a_fat_disk_is_refused_with_advice_that_can_work (test_trust_messages.RealFatDiskTests.test_a_data_folder_on_a_fat_disk_is_refused_with_advice_that_can_work) ... skipped 'a real FAT disk needs root, mkfs.vfat and unshare (a private mount namespace)'
+2026-11-09T11:33:48.3464110Z test_backup_out_in_a_shared_folder_names_out (test_trust_out_messages.OutMessageTests.test_backup_out_in_a_shared_folder_names_out) ... ok
+2026-11-09T11:33:48.3561030Z test_backup_out_swapped_for_a_link_after_its_check_names_out (test_trust_out_messages.OutMessageTests.test_backup_out_swapped_for_a_link_after_its_check_names_out) ... ok
+2026-11-09T11:33:48.3586790Z test_serve_out_in_a_shared_folder_names_out (test_trust_out_messages.OutMessageTests.test_serve_out_in_a_shared_folder_names_out) ... ok
+2026-11-09T11:33:48.3615420Z test_serve_out_through_a_link_names_out_and_the_real_path (test_trust_out_messages.OutMessageTests.test_serve_out_through_a_link_names_out_and_the_real_path) ... ok
+2026-11-09T11:33:48.3616590Z test_a_planted_link_beside_the_hop_target_gets_no_write (test_trust_serve_out_path.AnotherAccountTests.test_a_planted_link_beside_the_hop_target_gets_no_write) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 501'
+2026-11-09T11:33:48.3641260Z note: Composer needs a model key to write a brief. Run ./setup.sh --reconfigure provider.. The page will show the recorded brief; Compose will fail until a key is set.
+2026-11-09T11:33:48.3671970Z test_a_relative_out_is_made_absolute_once (test_trust_serve_out_path.SameAccountTests.test_a_relative_out_is_made_absolute_once) ... ok
+2026-11-09T11:33:48.3701060Z note: Composer needs a model key to write a brief. Run ./setup.sh --reconfigure provider.. The page will show the recorded brief; Compose will fail until a key is set.
+2026-11-09T11:33:48.3736700Z test_serve_writes_where_it_checked_not_through_a_link_and_dot_dot (test_trust_serve_out_path.SameAccountTests.test_serve_writes_where_it_checked_not_through_a_link_and_dot_dot) ... ok
+2026-11-09T11:33:48.3738140Z test_another_account_cannot_choose_where_setup_writes_its_data (test_trust_setup_data.AnotherAccountTests.test_another_account_cannot_choose_where_setup_writes_its_data) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 501'
+2026-11-09T11:33:48.3739760Z test_another_account_cannot_plant_inside_a_data_folder_setup_admitted (test_trust_setup_data.AnotherAccountTests.test_another_account_cannot_plant_inside_a_data_folder_setup_admitted) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 501'
+2026-11-09T11:33:48.3768130Z test_setup_takes_data_as_written_and_never_resolves_it (test_trust_setup_data.GivenPathTests.test_setup_takes_data_as_written_and_never_resolves_it) ... ok
+2026-11-09T11:33:48.3781900Z test_a_data_folder_under_a_folder_others_can_write_is_refused_before_any_write (test_trust_setup_data.SetupDataTests.test_a_data_folder_under_a_folder_others_can_write_is_refused_before_any_write) ... ok
+2026-11-09T11:33:48.3792500Z test_a_folder_shared_by_every_account_is_refused (test_trust_setup_data.SetupDataTests.test_a_folder_shared_by_every_account_is_refused) ... ok
+2026-11-09T11:33:48.3874810Z test_a_good_data_folder_outside_still_works_and_is_private (test_trust_setup_data.SetupDataTests.test_a_good_data_folder_outside_still_works_and_is_private) ... ok
+2026-11-09T11:33:48.3890750Z test_a_link_on_the_way_to_the_data_folder_is_refused_and_its_target_is_untouched (test_trust_setup_data.SetupDataTests.test_a_link_on_the_way_to_the_data_folder_is_refused_and_its_target_is_untouched) ... ok
+2026-11-09T11:33:48.3983210Z test_an_existing_data_folder_with_something_open_to_others_is_refused (test_trust_setup_data.SetupDataTests.test_an_existing_data_folder_with_something_open_to_others_is_refused) ... ok
+2026-11-09T11:33:48.3994600Z test_the_data_folder_mode_is_never_set_through_a_link (test_trust_setup_data.SetupDataTests.test_the_data_folder_mode_is_never_set_through_a_link) ... ok
+2026-11-09T11:33:48.3996210Z test_another_account_cannot_redirect_the_launcher_through_a_hidden_hop (test_trust_symlink_hops.AnotherAccountTests.test_another_account_cannot_redirect_the_launcher_through_a_hidden_hop) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 501'
+2026-11-09T11:33:48.4017340Z test_a_link_on_the_way_is_refused_and_the_real_path_is_named (test_trust_symlink_hops.SymlinkHopTests.test_a_link_on_the_way_is_refused_and_the_real_path_is_named) ... ok
+2026-11-09T11:33:48.4043620Z test_a_safe_link_is_refused_too_and_a_real_path_passes (test_trust_symlink_hops.SymlinkHopTests.test_a_safe_link_is_refused_too_and_a_real_path_passes) ... ok
+2026-11-09T11:33:48.4245000Z test_setup_sh_refuses_a_link_on_the_way_before_any_write (test_trust_symlink_hops.SymlinkHopTests.test_setup_sh_refuses_a_link_on_the_way_before_any_write) ... ok
+2026-11-09T11:33:48.4256390Z test_writable_folders_on_the_real_path_are_still_refused (test_trust_symlink_hops.SymlinkHopTests.test_writable_folders_on_the_real_path_are_still_refused) ... ok
+2026-11-09T11:33:48.4257720Z test_a_replaced_install_cannot_make_backup_write_elsewhere (test_trust_uninstall_backup.AnotherAccountTests.test_a_replaced_install_cannot_make_backup_write_elsewhere) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 501'
+2026-11-09T11:33:48.4259380Z test_a_replaced_install_cannot_make_uninstall_create_a_file_elsewhere (test_trust_uninstall_backup.AnotherAccountTests.test_a_replaced_install_cannot_make_uninstall_create_a_file_elsewhere) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 501'
+2026-11-09T11:33:48.4260940Z test_a_swap_after_the_manifest_check_cannot_make_uninstall_remove_elsewhere (test_trust_uninstall_backup.AnotherAccountTests.test_a_swap_after_the_manifest_check_cannot_make_uninstall_remove_elsewhere) ... skipped 'needs root to run a child process as a second account (uid 65534); this runs as uid 501'
+2026-11-09T11:33:48.4350520Z test_backup_never_writes_through_a_linked_backups_folder (test_trust_uninstall_backup.SameAccountTests.test_backup_never_writes_through_a_linked_backups_folder) ... ok
+2026-11-09T11:33:48.4451940Z test_backup_out_must_be_a_folder_no_other_account_can_change (test_trust_uninstall_backup.SameAccountTests.test_backup_out_must_be_a_folder_no_other_account_can_change) ... ok
+2026-11-09T11:33:48.4546810Z test_doctor_reports_the_trust_check_and_then_writes_and_starts_nothing (test_trust_uninstall_backup.SameAccountTests.test_doctor_reports_the_trust_check_and_then_writes_and_starts_nothing) ... ok
+2026-11-09T11:33:48.4569730Z test_serve_admits_its_data_folder_before_the_store_writes (test_trust_uninstall_backup.SameAccountTests.test_serve_admits_its_data_folder_before_the_store_writes) ... composer: refused: /Users/runner/.composer-tests/composer-home-p61p20iu/home/shared can be written by other accounts (mode 0777). Fix: chmod go-w /Users/runner/.composer-tests/composer-home-p61p20iu/home/shared, or put the brief folder somewhere else: --out <a folder of your own>. The brief folder and every folder above it must belong to you or root and be writable only by you or root, so no other account can change what Composer runs or keeps there
+2026-11-09T11:33:48.4573510Z ok
+2026-11-09T11:33:48.4660550Z test_the_run_lock_is_never_opened_through_a_link (test_trust_uninstall_backup.SameAccountTests.test_the_run_lock_is_never_opened_through_a_link) ... ok
+2026-11-09T11:33:48.4752390Z test_uninstall_and_backup_are_admitted_before_the_lock_or_any_write (test_trust_uninstall_backup.SameAccountTests.test_uninstall_and_backup_are_admitted_before_the_lock_or_any_write) ... ok
+2026-11-09T11:33:48.4883400Z test_uninstall_removes_inside_the_app_folder_it_opened (test_trust_uninstall_backup.SameAccountTests.test_uninstall_removes_inside_the_app_folder_it_opened) ... ok
+2026-11-09T11:33:48.5149520Z test_every_launcher_takes_the_write_bits_away_before_it_starts_anything (test_umask_launch.LauncherUmaskTests.test_every_launcher_takes_the_write_bits_away_before_it_starts_anything) ... ok
+2026-11-09T11:33:48.9088660Z test_python_started_by_the_launcher_under_umask_002_leaves_the_folder_acceptable (test_umask_launch.LauncherUmaskTests.test_python_started_by_the_launcher_under_umask_002_leaves_the_folder_acceptable) ... ok
+2026-11-09T11:33:49.2359570Z test_setup_sh_runs_nothing_under_a_group_writable_umask (test_umask_launch.SetupShUmaskTests.test_setup_sh_runs_nothing_under_a_group_writable_umask) ... ok
+2026-11-09T11:33:49.2360500Z test_binding_does_not_ask_the_resolver_for_the_fully_qualified_name (test_up.NoReverseLookupTests.test_binding_does_not_ask_the_resolver_for_the_fully_qualified_name)
+2026-11-09T11:33:49.2362780Z socket.getfqdn blocked `composer up` on a macOS runner; the server must not call it (found by CI there). ... ok
+2026-11-09T11:33:49.2386700Z test_bind_and_origin_rules (test_up.ProxyModeTests.test_bind_and_origin_rules) ... ok
+2026-11-09T11:33:49.2409750Z test_change_requests_need_the_public_origin (test_up.ProxyModeTests.test_change_requests_need_the_public_origin) ... ok
+2026-11-09T11:33:49.2437250Z test_only_the_proxy_network_and_the_public_host (test_up.ProxyModeTests.test_only_the_proxy_network_and_the_public_host) ... ok
+2026-11-09T11:33:49.5229330Z test_up_serves_the_app_and_health_and_runs_once (test_up.UpTests.test_up_serves_the_app_and_health_and_runs_once) ... ok
+2026-11-09T11:33:49.6254600Z test_up_without_setup_says_what_to_do (test_up.UpTests.test_up_without_setup_says_what_to_do) ... ok
+2026-11-09T11:34:01.4672210Z test_a_failed_update_leaves_the_old_version_current_and_working (test_update_native.NativeUpdateTests.test_a_failed_update_leaves_the_old_version_current_and_working) ... ok
+2026-11-09T11:34:07.9881440Z test_an_interrupted_update_on_a_broken_environment_still_rolls_back_and_uninstalls (test_update_native.NativeUpdateTests.test_an_interrupted_update_on_a_broken_environment_still_rolls_back_and_uninstalls) ... ok
+2026-11-09T11:34:22.4015010Z test_install_update_rollback_update_uninstall_setup_again_delete_data (test_update_native.NativeUpdateTests.test_install_update_rollback_update_uninstall_setup_again_delete_data) ... ok
+2026-11-09T11:34:30.3169930Z test_uninstall_and_delete_data_work_when_no_environment_starts (test_update_native.NativeUpdateTests.test_uninstall_and_delete_data_work_when_no_environment_starts) ... ok
+2026-11-09T11:34:30.3183220Z test_a_source_missing_from_the_sheet_is_refused (test_window.WindowTests.test_a_source_missing_from_the_sheet_is_refused) ... ok
+2026-11-09T11:34:30.3188450Z test_an_undetermined_relation_reads_cites (test_window.WindowTests.test_an_undetermined_relation_reads_cites) ... ok
+2026-11-09T11:34:30.3194440Z test_cited_phrases_are_our_words_with_links_and_fingerprints (test_window.WindowTests.test_cited_phrases_are_our_words_with_links_and_fingerprints) ... ok
+2026-11-09T11:34:30.3263570Z test_committed_site_matches_a_fresh_build (test_window.WindowTests.test_committed_site_matches_a_fresh_build) ... ok
+2026-11-09T11:34:30.3298230Z test_pages_load_only_their_own_files (test_window.WindowTests.test_pages_load_only_their_own_files) ... ok
+2026-11-09T11:34:30.3365790Z test_scripts_and_styles_make_no_request_and_carry_no_comments (test_window.WindowTests.test_scripts_and_styles_make_no_request_and_carry_no_comments) ... ok
+2026-11-09T11:34:30.3373000Z test_six_spools_keep_their_names_apart (test_window.WindowTests.test_six_spools_keep_their_names_apart) ... ok
+2026-11-09T11:34:30.3381190Z test_text_is_escaped (test_window.WindowTests.test_text_is_escaped) ... ok
+2026-11-09T11:34:30.3386980Z test_the_landing_page_says_what_the_recording_is (test_window.WindowTests.test_the_landing_page_says_what_the_recording_is) ... ok
+2026-11-09T11:34:30.3392060Z test_window_tells_the_recorded_run (test_window.WindowTests.test_window_tells_the_recorded_run) ... ok
+2026-11-09T11:34:30.3418400Z test_a_hard_linked_mp3_is_replaced_not_written_through (test_worker_fresh_audio.FreshAudioTests.test_a_hard_linked_mp3_is_replaced_not_written_through) ... ok
+2026-11-09T11:34:30.3437440Z test_a_hard_linked_wav_is_replaced_not_written_through (test_worker_fresh_audio.FreshAudioTests.test_a_hard_linked_wav_is_replaced_not_written_through) ... ok
+2026-11-09T11:34:30.3449620Z test_a_planted_temporary_name_is_never_reused (test_worker_fresh_audio.FreshAudioTests.test_a_planted_temporary_name_is_never_reused) ... ok
+2026-11-09T11:34:30.3450110Z 
+2026-11-09T11:34:30.3450220Z ======================================================================
+2026-11-09T11:34:30.3450700Z ERROR: test_no_system_roots_uses_certifi_and_succeeds (test_tls.RootsTests.test_no_system_roots_uses_certifi_and_succeeds)
+2026-11-09T11:34:30.3451250Z ----------------------------------------------------------------------
+2026-11-09T11:34:30.3452650Z Traceback (most recent call last):
+2026-11-09T11:34:30.3457150Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 1331, in do_open
+2026-11-09T11:34:30.3457660Z     h.request(req.get_method(), req.selector, req.data, headers,
+2026-11-09T11:34:30.3457950Z     ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3458230Z               encode_chunked=req.has_header('Transfer-encoding'))
+2026-11-09T11:34:30.3458500Z               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3458970Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1386, in request
+2026-11-09T11:34:30.3459440Z     self._send_request(method, url, body, headers, encode_chunked)
+2026-11-09T11:34:30.3459740Z     ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3460210Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1432, in _send_request
+2026-11-09T11:34:30.3460680Z     self.endheaders(body, encode_chunked=encode_chunked)
+2026-11-09T11:34:30.3460950Z     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3461390Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1381, in endheaders
+2026-11-09T11:34:30.3461870Z     self._send_output(message_body, encode_chunked=encode_chunked)
+2026-11-09T11:34:30.3462170Z     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3462630Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1141, in _send_output
+2026-11-09T11:34:30.3463040Z     self.send(msg)
+2026-11-09T11:34:30.3463180Z     ~~~~~~~~~^^^^^
+2026-11-09T11:34:30.3463540Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1085, in send
+2026-11-09T11:34:30.3463920Z     self.connect()
+2026-11-09T11:34:30.3464060Z     ~~~~~~~~~~~~^^
+2026-11-09T11:34:30.3464440Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1527, in connect
+2026-11-09T11:34:30.3464950Z     self.sock = self._context.wrap_socket(self.sock,
+2026-11-09T11:34:30.3465230Z                 ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+2026-11-09T11:34:30.3465480Z                                           server_hostname=server_hostname)
+2026-11-09T11:34:30.3465750Z                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3466200Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 469, in wrap_socket
+2026-11-09T11:34:30.3466600Z     return self.sslsocket_class._create(
+2026-11-09T11:34:30.3466800Z            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+2026-11-09T11:34:30.3466980Z         sock=sock,
+2026-11-09T11:34:30.3467120Z         ^^^^^^^^^^
+2026-11-09T11:34:30.3467250Z     ...<5 lines>...
+2026-11-09T11:34:30.3467440Z         session=session
+2026-11-09T11:34:30.3467590Z         ^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3467730Z     )
+2026-11-09T11:34:30.3467860Z     ^
+2026-11-09T11:34:30.3468210Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1087, in _create
+2026-11-09T11:34:30.3468580Z     self.do_handshake()
+2026-11-09T11:34:30.3468740Z     ~~~~~~~~~~~~~~~~~^^
+2026-11-09T11:34:30.3469270Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1383, in do_handshake
+2026-11-09T11:34:30.3469670Z     self._sslobj.do_handshake()
+2026-11-09T11:34:30.3469850Z     ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+2026-11-09T11:34:30.3470300Z ssl.SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unsuitable certificate purpose (_ssl.c:1032)
+2026-11-09T11:34:30.3470720Z 
+2026-11-09T11:34:30.3470860Z During handling of the above exception, another exception occurred:
+2026-11-09T11:34:30.3471080Z 
+2026-11-09T11:34:30.3471160Z Traceback (most recent call last):
+2026-11-09T11:34:30.3471620Z   File "/Users/runner/work/composer/composer/tests/test_tls.py", line 96, in test_no_system_roots_uses_certifi_and_succeeds
+2026-11-09T11:34:30.3472150Z     with tls.urlopen(self.url, timeout=10) as resp:
+2026-11-09T11:34:30.3472390Z          ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3472730Z   File "/Users/runner/work/composer/composer/composer/tls.py", line 71, in urlopen
+2026-11-09T11:34:30.3473150Z     return urllib.request.urlopen(url, timeout=timeout, context=ssl_context())
+2026-11-09T11:34:30.3473510Z            ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3473970Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 189, in urlopen
+2026-11-09T11:34:30.3474380Z     return opener.open(url, data, timeout)
+2026-11-09T11:34:30.3474600Z            ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3475010Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 489, in open
+2026-11-09T11:34:30.3475430Z     response = self._open(req, data)
+2026-11-09T11:34:30.3475830Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 506, in _open
+2026-11-09T11:34:30.3476300Z     result = self._call_chain(self.handle_open, protocol, protocol +
+2026-11-09T11:34:30.3476580Z                               '_open', req)
+2026-11-09T11:34:30.3477010Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 466, in _call_chain
+2026-11-09T11:34:30.3477420Z     result = func(*args)
+2026-11-09T11:34:30.3477820Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 1379, in https_open
+2026-11-09T11:34:30.3478280Z     return self.do_open(http.client.HTTPSConnection, req,
+2026-11-09T11:34:30.3478550Z            ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3478770Z                         context=self._context)
+2026-11-09T11:34:30.3478990Z                         ^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3479420Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 1334, in do_open
+2026-11-09T11:34:30.3486440Z     raise URLError(err)
+2026-11-09T11:34:30.3486980Z urllib.error.URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unsuitable certificate purpose (_ssl.c:1032)>
+2026-11-09T11:34:30.3487490Z 
+2026-11-09T11:34:30.3487610Z ======================================================================
+2026-11-09T11:34:30.3488160Z ERROR: test_ssl_cert_file_is_the_persons_choice_and_certifi_is_not_added (test_tls.RootsTests.test_ssl_cert_file_is_the_persons_choice_and_certifi_is_not_added)
+2026-11-09T11:34:30.3488740Z ----------------------------------------------------------------------
+2026-11-09T11:34:30.3489040Z Traceback (most recent call last):
+2026-11-09T11:34:30.3489540Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 1331, in do_open
+2026-11-09T11:34:30.3490120Z     h.request(req.get_method(), req.selector, req.data, headers,
+2026-11-09T11:34:30.3490410Z     ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3490700Z               encode_chunked=req.has_header('Transfer-encoding'))
+2026-11-09T11:34:30.3490970Z               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3491750Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1386, in request
+2026-11-09T11:34:30.3492220Z     self._send_request(method, url, body, headers, encode_chunked)
+2026-11-09T11:34:30.3492520Z     ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3492980Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1432, in _send_request
+2026-11-09T11:34:30.3493430Z     self.endheaders(body, encode_chunked=encode_chunked)
+2026-11-09T11:34:30.3493690Z     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3494470Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1381, in endheaders
+2026-11-09T11:34:30.3494940Z     self._send_output(message_body, encode_chunked=encode_chunked)
+2026-11-09T11:34:30.3495230Z     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3495720Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1141, in _send_output
+2026-11-09T11:34:30.3496130Z     self.send(msg)
+2026-11-09T11:34:30.3496270Z     ~~~~~~~~~^^^^^
+2026-11-09T11:34:30.3496620Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1085, in send
+2026-11-09T11:34:30.3496990Z     self.connect()
+2026-11-09T11:34:30.3497130Z     ~~~~~~~~~~~~^^
+2026-11-09T11:34:30.3497480Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1527, in connect
+2026-11-09T11:34:30.3498010Z     self.sock = self._context.wrap_socket(self.sock,
+2026-11-09T11:34:30.3498330Z                 ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+2026-11-09T11:34:30.3498580Z                                           server_hostname=server_hostname)
+2026-11-09T11:34:30.3498860Z                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3499300Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 469, in wrap_socket
+2026-11-09T11:34:30.3499700Z     return self.sslsocket_class._create(
+2026-11-09T11:34:30.3499900Z            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+2026-11-09T11:34:30.3500080Z         sock=sock,
+2026-11-09T11:34:30.3500210Z         ^^^^^^^^^^
+2026-11-09T11:34:30.3500350Z     ...<5 lines>...
+2026-11-09T11:34:30.3500490Z         session=session
+2026-11-09T11:34:30.3500630Z         ^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3500770Z     )
+2026-11-09T11:34:30.3500890Z     ^
+2026-11-09T11:34:30.3501230Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1087, in _create
+2026-11-09T11:34:30.3501610Z     self.do_handshake()
+2026-11-09T11:34:30.3501750Z     ~~~~~~~~~~~~~~~~~^^
+2026-11-09T11:34:30.3502110Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1383, in do_handshake
+2026-11-09T11:34:30.3502540Z     self._sslobj.do_handshake()
+2026-11-09T11:34:30.3502720Z     ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+2026-11-09T11:34:30.3503160Z ssl.SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unsuitable certificate purpose (_ssl.c:1032)
+2026-11-09T11:34:30.3503580Z 
+2026-11-09T11:34:30.3503720Z During handling of the above exception, another exception occurred:
+2026-11-09T11:34:30.3503940Z 
+2026-11-09T11:34:30.3504010Z Traceback (most recent call last):
+2026-11-09T11:34:30.3504530Z   File "/Users/runner/work/composer/composer/tests/test_tls.py", line 112, in test_ssl_cert_file_is_the_persons_choice_and_certifi_is_not_added
+2026-11-09T11:34:30.3505020Z     with tls.urlopen(self.url, timeout=10) as resp:
+2026-11-09T11:34:30.3505280Z          ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3505680Z   File "/Users/runner/work/composer/composer/composer/tls.py", line 71, in urlopen
+2026-11-09T11:34:30.3506100Z     return urllib.request.urlopen(url, timeout=timeout, context=ssl_context())
+2026-11-09T11:34:30.3506640Z            ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3507130Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 189, in urlopen
+2026-11-09T11:34:30.3507540Z     return opener.open(url, data, timeout)
+2026-11-09T11:34:30.3507750Z            ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3508140Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 489, in open
+2026-11-09T11:34:30.3508540Z     response = self._open(req, data)
+2026-11-09T11:34:30.3508950Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 506, in _open
+2026-11-09T11:34:30.3509500Z     result = self._call_chain(self.handle_open, protocol, protocol +
+2026-11-09T11:34:30.3509780Z                               '_open', req)
+2026-11-09T11:34:30.3510210Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 466, in _call_chain
+2026-11-09T11:34:30.3510620Z     result = func(*args)
+2026-11-09T11:34:30.3512000Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 1379, in https_open
+2026-11-09T11:34:30.3512980Z     return self.do_open(http.client.HTTPSConnection, req,
+2026-11-09T11:34:30.3513340Z            ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3513570Z                         context=self._context)
+2026-11-09T11:34:30.3513790Z                         ^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3514310Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 1334, in do_open
+2026-11-09T11:34:30.3514730Z     raise URLError(err)
+2026-11-09T11:34:30.3515230Z urllib.error.URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unsuitable certificate purpose (_ssl.c:1032)>
+2026-11-09T11:34:30.3515670Z 
+2026-11-09T11:34:30.3515770Z ======================================================================
+2026-11-09T11:34:30.3516330Z ERROR: test_the_provider_and_feed_openers_use_the_same_rule (test_tls.RootsTests.test_the_provider_and_feed_openers_use_the_same_rule)
+2026-11-09T11:34:30.3516850Z ----------------------------------------------------------------------
+2026-11-09T11:34:30.3517120Z Traceback (most recent call last):
+2026-11-09T11:34:30.3517550Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 1331, in do_open
+2026-11-09T11:34:30.3518020Z     h.request(req.get_method(), req.selector, req.data, headers,
+2026-11-09T11:34:30.3518300Z     ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3518570Z               encode_chunked=req.has_header('Transfer-encoding'))
+2026-11-09T11:34:30.3518840Z               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3519270Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1386, in request
+2026-11-09T11:34:30.3519730Z     self._send_request(method, url, body, headers, encode_chunked)
+2026-11-09T11:34:30.3520030Z     ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3520490Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1432, in _send_request
+2026-11-09T11:34:30.3520950Z     self.endheaders(body, encode_chunked=encode_chunked)
+2026-11-09T11:34:30.3521210Z     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3521650Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1381, in endheaders
+2026-11-09T11:34:30.3522120Z     self._send_output(message_body, encode_chunked=encode_chunked)
+2026-11-09T11:34:30.3522420Z     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3522890Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1141, in _send_output
+2026-11-09T11:34:30.3523290Z     self.send(msg)
+2026-11-09T11:34:30.3523420Z     ~~~~~~~~~^^^^^
+2026-11-09T11:34:30.3524170Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1085, in send
+2026-11-09T11:34:30.3524610Z     self.connect()
+2026-11-09T11:34:30.3524740Z     ~~~~~~~~~~~~^^
+2026-11-09T11:34:30.3525290Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/client.py", line 1527, in connect
+2026-11-09T11:34:30.3525950Z     self.sock = self._context.wrap_socket(self.sock,
+2026-11-09T11:34:30.3526210Z                 ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+2026-11-09T11:34:30.3526470Z                                           server_hostname=server_hostname)
+2026-11-09T11:34:30.3526930Z                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3527410Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 469, in wrap_socket
+2026-11-09T11:34:30.3527810Z     return self.sslsocket_class._create(
+2026-11-09T11:34:30.3528010Z            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+2026-11-09T11:34:30.3528200Z         sock=sock,
+2026-11-09T11:34:30.3528330Z         ^^^^^^^^^^
+2026-11-09T11:34:30.3528470Z     ...<5 lines>...
+2026-11-09T11:34:30.3528620Z         session=session
+2026-11-09T11:34:30.3528760Z         ^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3528910Z     )
+2026-11-09T11:34:30.3529020Z     ^
+2026-11-09T11:34:30.3529350Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1087, in _create
+2026-11-09T11:34:30.3529730Z     self.do_handshake()
+2026-11-09T11:34:30.3529880Z     ~~~~~~~~~~~~~~~~~^^
+2026-11-09T11:34:30.3530240Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/ssl.py", line 1383, in do_handshake
+2026-11-09T11:34:30.3530630Z     self._sslobj.do_handshake()
+2026-11-09T11:34:30.3530810Z     ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+2026-11-09T11:34:30.3531260Z ssl.SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unsuitable certificate purpose (_ssl.c:1032)
+2026-11-09T11:34:30.3531660Z 
+2026-11-09T11:34:30.3531810Z During handling of the above exception, another exception occurred:
+2026-11-09T11:34:30.3532030Z 
+2026-11-09T11:34:30.3532100Z Traceback (most recent call last):
+2026-11-09T11:34:30.3532580Z   File "/Users/runner/work/composer/composer/tests/test_tls.py", line 119, in test_the_provider_and_feed_openers_use_the_same_rule
+2026-11-09T11:34:30.3533150Z     with providers._OPENER.open(self.url, timeout=10) as resp:  # same opener the model calls use
+2026-11-09T11:34:30.3533520Z          ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3533970Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 489, in open
+2026-11-09T11:34:30.3534390Z     response = self._open(req, data)
+2026-11-09T11:34:30.3534790Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 506, in _open
+2026-11-09T11:34:30.3535260Z     result = self._call_chain(self.handle_open, protocol, protocol +
+2026-11-09T11:34:30.3535550Z                               '_open', req)
+2026-11-09T11:34:30.3535990Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 466, in _call_chain
+2026-11-09T11:34:30.3536400Z     result = func(*args)
+2026-11-09T11:34:30.3536700Z   File "/Users/runner/work/composer/composer/composer/tls.py", line 66, in https_open
+2026-11-09T11:34:30.3537130Z     return self.do_open(http.client.HTTPSConnection, req, context=ssl_context())
+2026-11-09T11:34:30.3537480Z            ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-09T11:34:30.3537940Z   File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 1334, in do_open
+2026-11-09T11:34:30.3538360Z     raise URLError(err)
+2026-11-09T11:34:30.3538820Z urllib.error.URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unsuitable certificate purpose (_ssl.c:1032)>
+2026-11-09T11:34:30.3539230Z 
+2026-11-09T11:34:30.3539520Z ----------------------------------------------------------------------
+2026-11-09T11:34:30.3539780Z Ran 828 tests in 156.129s
+2026-11-09T11:34:30.3539890Z 
+2026-11-09T11:34:30.3539960Z FAILED (errors=3, skipped=15)
+2026-11-09T11:34:30.3834600Z ##[error]Process completed with exit code 1.
+2026-11-09T11:34:30.3962830Z Post job cleanup.
+2026-11-09T11:34:30.5591350Z [command]/opt/homebrew/bin/git version
+2026-11-09T11:34:30.5683140Z git version 2.56.0
+2026-11-09T11:34:30.5699420Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/3110cef0-62d9-493a-8b74-bb3479948dd1/.gitconfig'
+2026-11-09T11:34:30.5706000Z Temporarily overriding HOME='/Users/runner/work/_temp/3110cef0-62d9-493a-8b74-bb3479948dd1' before making global git config changes
+2026-11-09T11:34:30.5706880Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-09T11:34:30.5709150Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/composer/composer
+2026-11-09T11:34:30.5788710Z Removing SSH command configuration
+2026-11-09T11:34:30.5793020Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-09T11:34:30.5848220Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-09T11:34:30.6598630Z Removing HTTP extra header
+2026-11-09T11:34:30.6603030Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-09T11:34:30.6658170Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-09T11:34:30.7340100Z Removing includeIf entries pointing to credentials config files
+2026-11-09T11:34:30.7343760Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-09T11:34:30.7399580Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-09T11:34:30.8133200Z Cleaning up orphan processes
