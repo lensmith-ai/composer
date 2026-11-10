@@ -8,6 +8,7 @@ import json
 import os
 import socket
 import tempfile
+import time
 import threading
 import unittest
 from http.server import ThreadingHTTPServer
@@ -55,6 +56,17 @@ def harbor_site():
 
 
 class DiscoveryTests(unittest.TestCase):
+    def test_advertised_feeds_handles_long_attribute_name_promptly(self):
+        page = '<link ' + 'a' * 15000 + '>'
+        started = time.monotonic()
+        self.assertEqual(discovery.advertised_feeds('https://example.org/', page), [])
+        self.assertLess(time.monotonic() - started, 0.5)
+
+    def test_advertised_feeds_preserves_quoted_links_and_last_duplicate(self):
+        page = """<link REL='alternate' type="application/rss+xml" href='/first' href='/feed?a=1&amp;b=2' title='News &amp; more'>"""
+        self.assertEqual(discovery.advertised_feeds('https://example.org/blog/', page),
+                         [('https://example.org/feed?a=1&b=2', 'News & more')])
+
     def test_a_page_address_gives_its_advertised_feeds_with_comments_last_and_none_chosen(self):
         get = harbor_site()
         result = discovery.discover("https://example.org/harbor", get=get)

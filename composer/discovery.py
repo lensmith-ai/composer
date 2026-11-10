@@ -66,7 +66,8 @@ RULE = ("Addresses that returned the same items are shown once, on the row with 
         "that looks like a comments feed is listed last.")
 
 _LINK_TAG = re.compile(r"<link\b[^<>]*>", re.I)
-_ATTR = re.compile(r"""([a-zA-Z-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')""")
+# Start only at the beginning of a name: retrying every suffix makes a long name quadratic.
+_ATTR = re.compile(r"""(?<![a-zA-Z-])([a-zA-Z-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')""")
 _COMMENTS = re.compile(r"comment", re.I)
 # A link that looks like a feed or a feed list: "rss" in the path, a whole /feed or /feeds segment, atom as a segment
 # or an extension. (Not "feedback": the whole segment must be feed or feeds.)
