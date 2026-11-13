@@ -7,6 +7,23 @@ Each release note is written from this file and checked against it by claim-seal
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-13
+
+Two small fixes. In plain words:
+
+### Fixed
+
+- Adding a web page as a source no longer stalls on a hostile page. A page with one very long link tag (a long run of
+  letters with no `=`) made the feed finder retry from every position, so it could spin for a very long time. It now
+  reads such a tag in one pass, and pages with normal link tags are read exactly as before.
+- The closing note of `composer setup` no longer promises an emailed brief that is not live. Its third line now says the
+  emailed brief is coming soon and points to the waitlist at lensmith.ai, the same wording as the README.
+
+### Changed
+
+- The 0.2.0 note below said you could get the daily brief by email from lensmith.ai with no setup. That was premature:
+  no mail is sent yet. The emailed brief is coming soon.
+
 ## [0.2.0] - 2026-11-09
 
 The full app, on your computer or your own server. In plain words:
@@ -199,6 +216,7 @@ The full app, on your computer or your own server. In plain words:
 
 - Fixes from an adversarial security review and a second opinion before publication; see SECURITY.md.
 
-[Unreleased]: https://github.com/lensmith-ai/composer/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/lensmith-ai/composer/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/lensmith-ai/composer/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/lensmith-ai/composer/releases/tag/v0.2.0
 [0.1.0]: https://github.com/lensmith-ai/composer/commit/4c2ba010aa280df12180dda8fa105e1b80d5deb6

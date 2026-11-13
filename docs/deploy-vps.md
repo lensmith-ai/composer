@@ -137,12 +137,12 @@ Until the first release is published, build the image on the server from the fil
 docker compose build composer
 ```
 
-**Or use the published image:** set `COMPOSER_VERSION=0.2.0` in `.env` and pull the published image instead,
+**Or use the published image:** set `COMPOSER_VERSION=0.2.1` in `.env` and pull the published image instead,
 with `docker compose pull`. You can check where it came from before you run it, with the
 [GitHub CLI](https://cli.github.com/):
 
 ```sh
-gh attestation verify oci://ghcr.io/lensmith-ai/composer:0.2.0 --repo lensmith-ai/composer \
+gh attestation verify oci://ghcr.io/lensmith-ai/composer:0.2.1 --repo lensmith-ai/composer \
   --signer-workflow lensmith-ai/composer/.github/workflows/release.yml
 ```
 

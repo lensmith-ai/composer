@@ -10,7 +10,7 @@ name: composer
 services:
   composer:
     # Until the first release is published, `docker compose build` builds this image from this folder.
-    image: ghcr.io/lensmith-ai/composer:${COMPOSER_VERSION:-0.2.0}
+    image: ghcr.io/lensmith-ai/composer:${COMPOSER_VERSION:-0.2.1}
     build:
       context: .
       # `narration` builds the opt-in image with the narration runtime (docs/deploy-vps.md, Narration).

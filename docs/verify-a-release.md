@@ -13,9 +13,9 @@ With the [GitHub CLI](https://cli.github.com/), in the folder where you download
 
 ```sh
 sha256sum -c SHA256SUMS          # on a Mac: shasum -a 256 -c SHA256SUMS
-gh attestation verify lensmith_composer-0.2.0-py3-none-any.whl --repo lensmith-ai/composer \
+gh attestation verify lensmith_composer-0.2.1-py3-none-any.whl --repo lensmith-ai/composer \
   --signer-workflow lensmith-ai/composer/.github/workflows/release.yml
-gh attestation verify oci://ghcr.io/lensmith-ai/composer:0.2.0 --repo lensmith-ai/composer \
+gh attestation verify oci://ghcr.io/lensmith-ai/composer:0.2.1 --repo lensmith-ai/composer \
   --signer-workflow lensmith-ai/composer/.github/workflows/release.yml
 ```
 
@@ -28,7 +28,7 @@ written in this repository before they are attached (they are there so the insta
 
 ```sh
 git clone https://github.com/lensmith-ai/composer && cd composer
-git -c gpg.ssh.allowedSignersFile=.github/allowed_signers tag -v v0.2.0
+git -c gpg.ssh.allowedSignersFile=.github/allowed_signers tag -v v0.2.1
 ```
 
 It should report a good signature from the key in `.github/allowed_signers`. That is the signing key GitHub lists on the

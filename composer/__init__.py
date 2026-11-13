@@ -8,4 +8,4 @@ The checking step is claim-seal (https://github.com/lensmith-ai/claim-seal), use
 dependency.
 """
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
