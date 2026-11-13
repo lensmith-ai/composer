@@ -860,4 +860,4 @@ def every_day_lines(home: Path, schedule: dict) -> list[str]:
             laptop,
             "  2. Your own server with a domain: always on, and you can read it from anywhere. "
             f"How: {DEPLOY_GUIDE}",
-            f"  3. No setup: sign up for the daily brief by email at {EMAIL_SIGNUP}"]
+            f"  3. No setup (coming soon): a daily brief by email, with nothing to install. Watch {EMAIL_SIGNUP} for the waitlist"]

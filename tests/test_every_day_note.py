@@ -1,5 +1,5 @@
 """Setup's closing note and the README name the three ways to get a brief every day: this computer (only while it
-is awake), your own server with a domain (always on, read anywhere), or the emailed brief (no setup)."""
+is awake), your own server with a domain (always on, read anywhere), or the emailed brief (no setup, coming soon)."""
 import unittest
 from pathlib import Path
 
@@ -50,6 +50,9 @@ class SetupClosingNoteTests(unittest.TestCase):
         self.assertIn("docs/deploy-vps.md", tail[2])
         self.assertIn("No setup", tail[3])
         self.assertIn("lensmith.ai", tail[3])
+        # The emailed brief is not live yet: the line must say so and must not invite anyone to sign up.
+        self.assertIn("coming soon", tail[3])
+        self.assertNotIn("sign up", tail[3].lower())
 
     def test_with_the_daily_brief_on_it_says_so_instead_of_how_to_turn_it_on(self):
         with fake_home() as home:
