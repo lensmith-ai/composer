@@ -52,4 +52,4 @@ Pick one of three:
    runs only while `composer up` runs and that computer is awake, and you read it on that computer.
 2. **Your own server with a domain.** Always on, and you can read it from anywhere, on any device. The container
    image, Caddy for HTTPS and one login: [docs/deploy-vps.md](deploy-vps.md).
-3. **No setup (coming soon).** A daily brief by email, with nothing to install. Watch [lensmith.ai](https://lensmith.ai) for the waitlist.
+3. **No setup (coming soon).** A daily brief by email from [lensmith.ai](https://lensmith.ai), with nothing to install. It is not live yet.

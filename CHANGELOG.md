@@ -17,7 +17,7 @@ Two small fixes. In plain words:
   letters with no `=`) made the feed finder retry from every position, so it could spin for a very long time. It now
   reads such a tag in one pass, and pages with normal link tags are read exactly as before.
 - The closing note of `composer setup` no longer promises an emailed brief that is not live. Its third line now says the
-  emailed brief is coming soon and points to the waitlist at lensmith.ai, the same wording as the README.
+  emailed brief from lensmith.ai is coming soon and not live yet, the same wording as the README.
 
 ### Changed
 

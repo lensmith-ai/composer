@@ -99,7 +99,7 @@ A brief with the default settings makes 7 model calls: 1 to write, 5 to check th
 
 1. **Your laptop.** Turn on the daily brief in setup. It runs while `composer up` runs and the computer is awake.
 2. **Your own server with a domain.** Always on, readable anywhere. [docs/deploy-vps.md](docs/deploy-vps.md) walks through it, with a trial on your own computer first.
-3. **No setup (coming soon).** A daily brief by email, with nothing to install. Watch [lensmith.ai](https://lensmith.ai) for the waitlist.
+3. **No setup (coming soon).** A daily brief by email from [lensmith.ai](https://lensmith.ai), with nothing to install. It is not live yet.
 
 There is also a static demo with no key and no server, and `composer serve`, a plain page. See [docs/ways-to-run.md](docs/ways-to-run.md).
 

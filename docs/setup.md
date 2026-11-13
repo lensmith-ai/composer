@@ -85,7 +85,7 @@ Setup's last lines name three ways:
 1. **This computer**: turn on the daily brief (setup asks; later, `composer setup --reconfigure schedule`). It
    runs only while `composer up` runs and the computer is awake, and you read it on that computer.
 2. **Your own server with a domain**: always on, and you can read it from anywhere. See [deploy-vps.md](deploy-vps.md).
-3. **No setup (coming soon)**: a daily brief by email, with nothing to install. Watch [lensmith.ai](https://lensmith.ai) for the waitlist.
+3. **No setup (coming soon)**: a daily brief by email from [lensmith.ai](https://lensmith.ai), with nothing to install. It is not live yet.
 
 ## With no questions: an answers file
 
