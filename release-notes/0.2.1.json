@@ -1,0 +1,34 @@
+{
+ "about": "The release note draft for 0.2.1. Every line is checked by claim-seal against this version's changelog section on the maintainer's own computer before the tag (scripts/seal-release-note.sh); the result is committed as 0.2.1.sealed.json and the release workflow only re-verifies it offline (scripts/release/release_note.py).",
+ "version": "0.2.1",
+ "lede": "Composer 0.2.1 is two small fixes.",
+ "items": [
+  {
+   "insight": "Adding a web page as a source no longer stalls on a hostile page that has one very long link tag.",
+   "sources": [
+    {
+     "id": "changelog",
+     "ref": "Changelog 0.2.1, Fixed 1"
+    }
+   ]
+  },
+  {
+   "insight": "The closing note of composer setup no longer promises an emailed brief that is not live; it now says the emailed brief from lensmith.ai is coming soon and not live yet.",
+   "sources": [
+    {
+     "id": "changelog",
+     "ref": "Changelog 0.2.1, Fixed 2"
+    }
+   ]
+  },
+  {
+   "insight": "The 0.2.0 note said you could get the daily brief by email from lensmith.ai with no setup. That was premature: no mail is sent yet.",
+   "sources": [
+    {
+     "id": "changelog",
+     "ref": "Changelog 0.2.1, Changed 1"
+    }
+   ]
+  }
+ ]
+}

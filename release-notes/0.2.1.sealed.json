@@ -1,0 +1,415 @@
+{
+ "schema": "composer-release-note-seal/v1",
+ "version": "0.2.1",
+ "sealed_on": "2026-11-13",
+ "judge": "claude-cli:sonnet",
+ "replayed": false,
+ "draft_sha256": "182cdd168af1abd99b0008eb464710bfcf79e891d1a7199e65e2afb195ed3196",
+ "changelog_section_sha256": "7e2bdc17d8bf518c9448924a28509940b576977636f7dbe8aa6ac9d316b49c05",
+ "result": {
+  "status": "ok",
+  "brief": {
+   "items": [
+    {
+     "insight": "Adding a web page as a source no longer stalls on a hostile page that has one very long link tag.",
+     "sources": [
+      {
+       "id": "changelog",
+       "ref": "Changelog 0.2.1, Fixed 1",
+       "url": "https://github.com/lensmith-ai/composer/blob/v0.2.1/CHANGELOG.md",
+       "resolved_title": "Changelog 0.2.1, Fixed 1"
+      }
+     ],
+     "verification": {
+      "verdict": "supported",
+      "why": "Changelog says adding a web page 'no longer stalls on a hostile page' with one very long link tag, now read in one pass.",
+      "citations": [
+       {
+        "source": "changelog",
+        "ref": "Changelog 0.2.1, Fixed 1",
+        "resolution": "exact",
+        "match_score": null,
+        "url": "https://github.com/lensmith-ai/composer/blob/v0.2.1/CHANGELOG.md",
+        "matched_title": "Changelog 0.2.1, Fixed 1",
+        "bears": "The changelog entry reports the fix for stalling on a page with one very long link tag, naming the cause and the one-pass fix, which matches the claim.",
+        "span": {
+         "field": "insight",
+         "start": 0,
+         "end": 97,
+         "quote": "Adding a web page as a source no longer stalls on a hostile page that has one very long link tag.",
+         "coordinate_system": "unicode-code-point-v1",
+         "producer": "model-exact-quote-v1",
+         "sentence_relation": "says"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "insight": "The closing note of composer setup no longer promises an emailed brief that is not live; it now says the emailed brief from lensmith.ai is coming soon and not live yet.",
+     "sources": [
+      {
+       "id": "changelog",
+       "ref": "Changelog 0.2.1, Fixed 2",
+       "url": "https://github.com/lensmith-ai/composer/blob/v0.2.1/CHANGELOG.md",
+       "resolved_title": "Changelog 0.2.1, Fixed 2"
+      }
+     ],
+     "verification": {
+      "verdict": "supported",
+      "why": "Source states the closing note \"no longer promises an emailed brief that is not live\" and its third line says it is coming soon and not live yet.",
+      "citations": [
+       {
+        "source": "changelog",
+        "ref": "Changelog 0.2.1, Fixed 2",
+        "resolution": "exact",
+        "match_score": null,
+        "url": "https://github.com/lensmith-ai/composer/blob/v0.2.1/CHANGELOG.md",
+        "matched_title": "Changelog 0.2.1, Fixed 2",
+        "bears": "The changelog entry describes this exact fix: the setup note stops promising the brief and now says it is coming soon and not yet live, matching the claim.",
+        "span": {
+         "field": "insight",
+         "start": 89,
+         "end": 167,
+         "quote": "it now says the emailed brief from lensmith.ai is coming soon and not live yet",
+         "coordinate_system": "unicode-code-point-v1",
+         "producer": "model-exact-quote-v1",
+         "sentence_relation": "says"
+        }
+       }
+      ]
+     }
+    },
+    {
+     "insight": "The 0.2.0 note said you could get the daily brief by email from lensmith.ai with no setup. That was premature: no mail is sent yet.",
+     "sources": [
+      {
+       "id": "changelog",
+       "ref": "Changelog 0.2.1, Changed 1",
+       "url": "https://github.com/lensmith-ai/composer/blob/v0.2.1/CHANGELOG.md",
+       "resolved_title": "Changelog 0.2.1, Changed 1"
+      }
+     ],
+     "verification": {
+      "verdict": "supported",
+      "why": "Source states the 0.2.0 note said email brief with no setup, \"That was premature: no mail is sent yet.\"",
+      "citations": [
+       {
+        "source": "changelog",
+        "ref": "Changelog 0.2.1, Changed 1",
+        "resolution": "exact",
+        "match_score": null,
+        "url": "https://github.com/lensmith-ai/composer/blob/v0.2.1/CHANGELOG.md",
+        "matched_title": "Changelog 0.2.1, Changed 1",
+        "bears": "The changelog entry repeats the claim nearly word for word, retracting the earlier email promise and confirming that no mail is being sent yet.",
+        "span": {
+         "field": "insight",
+         "start": 91,
+         "end": 131,
+         "quote": "That was premature: no mail is sent yet.",
+         "coordinate_system": "unicode-code-point-v1",
+         "producer": "model-exact-quote-v1",
+         "sentence_relation": "says"
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "verification": {
+   "resolution": {
+    "citations": 3,
+    "exact": 3,
+    "fuzzy": 0,
+    "unresolved": 0
+   },
+   "model": "claude-cli:sonnet",
+   "status": "ok",
+   "claims_checked": 3,
+   "claims_total": 3,
+   "wall_s": 16.513,
+   "attempts": 3,
+   "sharding": {
+    "pool_size": 2,
+    "deadline_s": 120.0,
+    "rejected": [],
+    "shards": [
+     {
+      "claim": 0,
+      "status": "ok",
+      "reason": null,
+      "attempts": 1,
+      "queue_wait_s": 0.004,
+      "wall_s": 10.887,
+      "model_executed": "claude-cli:sonnet",
+      "prompt_sha256_8": "178feb64",
+      "error": null
+     },
+     {
+      "claim": 1,
+      "status": "ok",
+      "reason": null,
+      "attempts": 1,
+      "queue_wait_s": 0.005,
+      "wall_s": 8.202,
+      "model_executed": "claude-cli:sonnet",
+      "prompt_sha256_8": "548e22d8",
+      "error": null
+     },
+     {
+      "claim": 2,
+      "status": "ok",
+      "reason": null,
+      "attempts": 1,
+      "queue_wait_s": 8.207,
+      "wall_s": 8.306,
+      "model_executed": "claude-cli:sonnet",
+      "prompt_sha256_8": "fd648aee",
+      "error": null
+     }
+    ]
+   },
+   "spans": {
+    "status": "ok",
+    "eligible": 3,
+    "produced": 3,
+    "dropped": 0,
+    "not_proposed": 0,
+    "dropped_by_reason": {},
+    "contract": "citation-span/v1",
+    "model_executed": "claude-cli:sonnet"
+   },
+   "verdicts": {
+    "supported": 3,
+    "partial": 0,
+    "unsupported": 0,
+    "unresolved": 0,
+    "unchecked": 0
+   }
+  },
+  "claim_evidence": {
+   "contract": "claim-evidence/v1",
+   "outcomes": [
+    {
+     "claim_ref": {
+      "kind": "item",
+      "item_index": 0,
+      "analysis_index": null,
+      "field": "insight",
+      "claim_sha256": "00a3b6eeb5192155ea41df0ed684cef9a75117f0ff99876a7363bad7c8638519"
+     },
+     "citation_index": 0,
+     "source": "changelog",
+     "response_id": "changelog-0.2.1-1",
+     "retrieved_at": null,
+     "support_state": "supported",
+     "state_reason": "EVIDENCE-SPANS-LOCATED",
+     "evidence": "present",
+     "relation": "says",
+     "relation_coarse": "stated",
+     "relation_is_judgement": true,
+     "relation_source": "judge",
+     "corroboration": 1,
+     "strength": 95,
+     "evidence_spans": [
+      {
+       "normalizer": "norm/v1",
+       "coordinate_system": "normalized-codepoint",
+       "start": 0,
+       "end": 257,
+       "sha256": "d87735e4488c299c071ee9c628c7397d03e396bfd238bb869b65f713151a731a",
+       "response_sha256": "583604d483ea1d4238354645c4e21ac77440113b65d2408514f12c311a06c558"
+      }
+     ],
+     "span_counts": {
+      "proposed": 1,
+      "located": 1
+     },
+     "display_policy": {
+      "text_retained": false,
+      "text_displayable": false
+     }
+    },
+    {
+     "claim_ref": {
+      "kind": "item",
+      "item_index": 1,
+      "analysis_index": null,
+      "field": "insight",
+      "claim_sha256": "106be3fe3a7f4a7dfd1a023e84adf536030e25acdfced2294785c0ecd31e1a34"
+     },
+     "citation_index": 0,
+     "source": "changelog",
+     "response_id": "changelog-0.2.1-2",
+     "retrieved_at": null,
+     "support_state": "supported",
+     "state_reason": "EVIDENCE-SPANS-LOCATED",
+     "evidence": "present",
+     "relation": "says",
+     "relation_coarse": "stated",
+     "relation_is_judgement": true,
+     "relation_source": "judge",
+     "corroboration": 1,
+     "strength": 97,
+     "evidence_spans": [
+      {
+       "normalizer": "norm/v1",
+       "coordinate_system": "normalized-codepoint",
+       "start": 0,
+       "end": 179,
+       "sha256": "9661a6be7b63b5c1278b9fcd600f5cec2e65dbe7ddff55cf4efa8cb0928d518a",
+       "response_sha256": "cabdbecaf36c0ef3117dd646b9687d13b39a2b9607158cec7f3f9bff1120cdfd"
+      }
+     ],
+     "span_counts": {
+      "proposed": 1,
+      "located": 1
+     },
+     "display_policy": {
+      "text_retained": false,
+      "text_displayable": false
+     }
+    },
+    {
+     "claim_ref": {
+      "kind": "item",
+      "item_index": 2,
+      "analysis_index": null,
+      "field": "insight",
+      "claim_sha256": "e7c7e2cadbbaf5a124106cae1b0537daa8b3ce8cbe584ed0a06106723f9f9cd9"
+     },
+     "citation_index": 0,
+     "source": "changelog",
+     "response_id": "changelog-0.2.1-3",
+     "retrieved_at": null,
+     "support_state": "supported",
+     "state_reason": "EVIDENCE-SPANS-LOCATED",
+     "evidence": "present",
+     "relation": "says",
+     "relation_coarse": "stated",
+     "relation_is_judgement": true,
+     "relation_source": "judge",
+     "corroboration": 1,
+     "strength": 98,
+     "evidence_spans": [
+      {
+       "normalizer": "norm/v1",
+       "coordinate_system": "normalized-codepoint",
+       "start": 0,
+       "end": 137,
+       "sha256": "8cb0aa351f2a8ce5a26758c59487f4ef0aabd1ee427432e2a6b76c4f4146e846",
+       "response_sha256": "db224ec605422b122f8443bf8dd908a28dc5c434badb4c311e6fdfaa76a25a34"
+      }
+     ],
+     "span_counts": {
+      "proposed": 1,
+      "located": 1
+     },
+     "display_policy": {
+      "text_retained": false,
+      "text_displayable": false
+     }
+    }
+   ],
+   "verification": {
+    "capture_time_result": "verified",
+    "rule_ids": [
+     "EVIDENCE-SPANS-LOCATED"
+    ],
+    "seal": {
+     "algorithm": "sha256-digest-chain/v1",
+     "key_id": null,
+     "value": "50f18f7c157282f446ec350626bf4cd02fad7a998fe617c56eee1f88a237a226"
+    }
+   }
+  },
+  "lineage": {
+   "sources": [
+    {
+     "response_id": "changelog-0.2.1-1",
+     "source": "changelog",
+     "key": "Changelog 0.2.1, Fixed 1",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.1/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "583604d483ea1d4238354645c4e21ac77440113b65d2408514f12c311a06c558",
+     "byte_length": 318,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "583604d483ea1d4238354645c4e21ac77440113b65d2408514f12c311a06c558",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.1-2",
+     "source": "changelog",
+     "key": "Changelog 0.2.1, Fixed 2",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.1/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "cabdbecaf36c0ef3117dd646b9687d13b39a2b9607158cec7f3f9bff1120cdfd",
+     "byte_length": 212,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "cabdbecaf36c0ef3117dd646b9687d13b39a2b9607158cec7f3f9bff1120cdfd",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    },
+    {
+     "response_id": "changelog-0.2.1-3",
+     "source": "changelog",
+     "key": "Changelog 0.2.1, Changed 1",
+     "url": "https://github.com/lensmith-ai/composer/blob/v0.2.1/CHANGELOG.md",
+     "retrieved_at": null,
+     "raw_sha256": "db224ec605422b122f8443bf8dd908a28dc5c434badb4c311e6fdfaa76a25a34",
+     "byte_length": 171,
+     "normalizer_id": "norm/v1",
+     "normalizer_sha256": "238f22890422bef83066ba383b70ba24f8926b72bff2c5238401b81fca4a9b94",
+     "coordinate_system": "normalized-codepoint",
+     "normalized_sha256": "db224ec605422b122f8443bf8dd908a28dc5c434badb4c311e6fdfaa76a25a34",
+     "raw_artifact": null,
+     "capture_check": "ok"
+    }
+   ]
+  },
+  "attribution": [
+   {
+    "item": 1,
+    "citation_index": 0,
+    "attribution_verb": null,
+    "attribution_strength": null,
+    "relation": "says",
+    "flag": null,
+    "message": null,
+    "field": "insight",
+    "source": "changelog",
+    "sentence": "Adding a web page as a source no longer stalls on a hostile page that has one very long link tag."
+   },
+   {
+    "item": 2,
+    "citation_index": 0,
+    "attribution_verb": "says",
+    "attribution_strength": "strong",
+    "relation": "says",
+    "flag": null,
+    "message": null,
+    "field": "insight",
+    "source": "changelog",
+    "sentence": "The closing note of composer setup no longer promises an emailed brief that is not live; it now says the emailed brief from lensmith.ai is coming soon and not live yet."
+   },
+   {
+    "item": 3,
+    "citation_index": 0,
+    "attribution_verb": null,
+    "attribution_strength": null,
+    "relation": "says",
+    "flag": null,
+    "message": null,
+    "field": "insight",
+    "source": "changelog",
+    "sentence": "That was premature: no mail is sent yet."
+   }
+  ]
+ }
+}
