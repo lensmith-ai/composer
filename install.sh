@@ -42,20 +42,20 @@ set -eu
 umask 077
 
 # ---- pinned values (made by scripts/install/build_install.py from the release; do not edit)
-PIN_VERSION=0.2.0
+PIN_VERSION=0.2.1
 PIN_MIRROR_URL=https://lensmith.ai/composer/mirror
-PIN_RELEASE_BASE=https://github.com/lensmith-ai/composer/releases/download/v0.2.0
-PIN_KIT=lensmith_composer-0.2.0.tar.gz
-PIN_KIT_SHA=a7cf7197c79f2791ccf1a5e376016055f3adb011f9bdf31c018a3604c55b2989
+PIN_RELEASE_BASE=https://github.com/lensmith-ai/composer/releases/download/v0.2.1
+PIN_KIT=lensmith_composer-0.2.1.tar.gz
+PIN_KIT_SHA=694444e3a82aa60b96ea04b9be525fc02725514915b3678dfe098acd7474f63f
 PIN_KIT_PYPI_URL=
-PIN_COMPOSER_WHEEL=lensmith_composer-0.2.0-py3-none-any.whl
-PIN_COMPOSER_WHEEL_SHA=96f5d2224792f07887e190740a348db5b314d3bc9adce0489ab18f7d04e13838
+PIN_COMPOSER_WHEEL=lensmith_composer-0.2.1-py3-none-any.whl
+PIN_COMPOSER_WHEEL_SHA=df145b0eeed64267e90d450a14f3e3e89003556b85bf13104bc18332dda32da0
 PIN_CERTIFI_VERSION=2026.10.23
 PIN_CERTIFI_WHEEL=certifi-2026.10.23-py3-none-any.whl
 PIN_CERTIFI_WHEEL_SHA=e9b54de76e530bb6cf0ccd036787103acb58fd42ba930ea8bf948ddbaa2f61d1
 PIN_CLAIMSEAL_VERSION=0.2.0
 PIN_CLAIMSEAL_WHEEL=claim_seal-0.2.0-py3-none-any.whl
-PIN_CLAIMSEAL_WHEEL_SHA=f6a473df8fb5bae36c36f2623d17a41b7862bf10c383ff66cd7b358b9aec6867
+PIN_CLAIMSEAL_WHEEL_SHA=ebca445a16758041af588aa2b933655ef1e87c03480357150a46ee755e93a5e4
 PIN_CLAIMSEAL_PYPI_WHEEL=
 PIN_CLAIMSEAL_PYPI_SHA=
 PIN_SETUPTOOLS_VERSION=84.2.1
