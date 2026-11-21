@@ -1,5 +1,5 @@
 # Tools the release workflow uses to build and describe the release. Not needed to run Composer.
 # Edit this file, then regenerate release-tools.txt (command at the top of that file).
 build==1.6.1
-cyclonedx-bom==7.5.0
+cyclonedx-bom==8.0.1
 setuptools==84.2.1
